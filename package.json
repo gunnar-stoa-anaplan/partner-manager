@@ -1,0 +1,39 @@
+{
+    "$schema": "https://json.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite"
+    },
+    "devDependencies": {
+        "@popperjs/core": "^2.11.6",
+        "axios": "^1.8.2",
+        "bootstrap": "^5.2.3",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^1.2.0",
+        "sass": "^1.56.1",
+        "vite": "^6.2.4"
+    },
+    "dependencies": {
+        "@fullcalendar/core": "^6.1.18",
+        "@fullcalendar/daygrid": "^6.1.18",
+        "@fullcalendar/interaction": "^6.1.18",
+        "@fullcalendar/list": "^6.1.18",
+        "@fullcalendar/timegrid": "^6.1.18",
+        "@highlightjs/cdn-assets": "^11.11.1",
+        "@rollup/rollup-darwin-arm64": "^4.57.1",
+        "@rollup/rollup-linux-arm64-gnu": "^4.57.1",
+        "apexcharts": "^5.2.0",
+        "bootstrap": "^5.3.7",
+        "easy-pie-chart": "^2.1.7",
+        "jquery": "^3.7.1",
+        "jsvectormap": "^1.7.0",
+        "masonry-layout": "^4.2.2",
+        "node-waves": "^0.7.6",
+        "peity": "^3.3.0",
+        "sortablejs": "^1.15.6",
+        "three": "0.121.1",
+        "vanta": "^0.5.24"
+    }
+}
