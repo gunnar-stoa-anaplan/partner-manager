@@ -115,7 +115,7 @@
                 </div>
 
                 <div class="mt-3">
-                    {{ $imports->links() }}
+                    {{ $imports->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         </div>

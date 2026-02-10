@@ -25,6 +25,7 @@ class OpportunitySnapshot extends Model
         'type',
         'lead_source',
         'revenue_type',
+        'product_area',
         'probability',
         'owner',
     ];

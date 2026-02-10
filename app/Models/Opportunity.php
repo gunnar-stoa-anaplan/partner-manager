@@ -24,6 +24,7 @@ class Opportunity extends Model
         'description',
         'lead_source',
         'revenue_type',
+        'product_area',
         'probability',
         'owner',
         'excel_data',

@@ -14,7 +14,8 @@ class PartnerController extends Controller
     public function index()
     {
         $partners = Partner::with('user')->orderBy('name')->get();
-        return view('partner.index', compact('partners'));
+        $users = User::orderBy('name')->get();
+        return view('partner.index', compact('partners', 'users'));
     }
 
     /**
@@ -55,6 +56,7 @@ class PartnerController extends Controller
             'projects', 'contacts', 'opportunities', 'leads', 'fundings', 'resources',
             'blueprintAssignments.blueprint',
             'blueprintAssignments.enrollments.progress',
+            'enablementSessions',
         ])->findOrFail($id);
 
         // Check if the authenticated user has access to this partner
@@ -68,25 +70,36 @@ class PartnerController extends Controller
         $totalLeads = $partner->leads->count();
         $totalAcv = $partner->projects->sum('acv');
 
-        // ── Progress Metrics ──
-        $avgProjectCompletion = $partner->projects->count() > 0
-            ? round($partner->projects->avg('percent_complete'), 1) : 0;
-
-        $leadAcceptanceRate = $totalLeads > 0
-            ? round($partner->leads->where('status', 'accepted')->count() / $totalLeads * 100, 1) : 0;
+        // ── Business Metrics ──
+        $totalAmount = $partner->opportunities->sum('amount');
+        $sourcedAmount = $partner->opportunities->where('revenue_type', 'sourced')->sum('amount');
+        $influencedAmount = $partner->opportunities->where('revenue_type', 'influenced')->sum('amount');
+        $sourcedRevenuePct = $totalAmount > 0 ? round($sourcedAmount / $totalAmount * 100, 1) : 0;
+        $influencedRevenuePct = $totalAmount > 0 ? round($influencedAmount / $totalAmount * 100, 1) : 0;
 
         $assignmentsWithEnrollments = $partner->blueprintAssignments->filter(fn($a) => $a->enrollments->count() > 0);
         $avgBlueprintCompletion = $assignmentsWithEnrollments->count() > 0
             ? round($assignmentsWithEnrollments->avg(fn($a) => $a->completionPercentage()), 1) : 0;
 
-        $totalFunding = $partner->fundings->sum('amount');
-
         $enrolledContactIds = $partner->blueprintAssignments->flatMap(fn($a) => $a->enrollments->pluck('contact_id'))->unique();
         $contactEngagement = $totalContacts > 0
             ? round($enrolledContactIds->count() / $totalContacts * 100, 1) : 0;
 
+        // Pipeline Growth YoY
+        $currentPipeline = $totalAmount;
+        $yearAgoMonth = now()->subYear()->format('Y-m');
+        $yearAgoPipeline = \DB::table('opportunity_snapshots')
+            ->join('imports', 'opportunity_snapshots.import_id', '=', 'imports.id')
+            ->join('opportunities', 'opportunity_snapshots.opportunity_id', '=', 'opportunities.id')
+            ->where('opportunities.partner_id', $partner->id)
+            ->whereRaw('DATE_FORMAT(imports.started_at, "%Y-%m") = ?', [$yearAgoMonth])
+            ->sum('opportunity_snapshots.amount');
+        $pipelineGrowthYoY = $yearAgoPipeline > 0
+            ? round(($currentPipeline - $yearAgoPipeline) / $yearAgoPipeline * 100, 1)
+            : ($currentPipeline > 0 ? 100 : 0);
+
         // ── Chart Data ──
-        // Historical opportunity snapshots (opportunity count vs NNACV)
+        // Historical opportunity snapshots (sourced/influenced NNACV + count)
         $endDate = now();
         $startDate = now()->subWeeks(52);
 
@@ -105,14 +118,14 @@ class PartnerController extends Controller
             ->orderBy(\DB::raw('DATE_FORMAT(imports.started_at, "%Y-%m")'))
             ->get();
 
-        // Project status distribution
-        $projectStatuses = $partner->projects->groupBy('status')->map->count();
-
         // Blueprint completion by product area + role (multi-series radar chart)
-        $roleLabels = ['delivery' => 'Delivery', 'gtm' => 'GTM', 'pre_sales' => 'Pre-Sales'];
-        $productAreas = $partner->blueprintAssignments
-            ->map(fn($a) => $a->blueprint->product_area ?? 'Other')
-            ->unique()->sort()->values()->all();
+        $roleLabels = ['delivery' => 'Delivery', 'gtm' => 'Sales', 'pre_sales' => 'Pre-Sales'];
+        $productAreas = \App\Models\Blueprint::distinct()
+            ->pluck('product_area')
+            ->filter()
+            ->sort()
+            ->values()
+            ->all();
 
         $blueprintByArea = [];
         foreach ($roleLabels as $roleKey => $roleLabel) {
@@ -130,15 +143,55 @@ class PartnerController extends Controller
         }
         $blueprintAreas = $productAreas;
 
-        // Lead sources
-        $leadSources = $partner->leads->groupBy('source')->map->count();
+        // Project Risk per product area
+        // Risk = completed delivery blueprint assignments / opportunities in that product area
+        $opportunitiesByArea = $partner->opportunities
+            ->whereNotNull('product_area')
+            ->groupBy('product_area')
+            ->map->count();
+
+        $deliveryAssignments = $partner->blueprintAssignments->where('role', 'delivery');
+        $completedDeliveryByArea = $deliveryAssignments
+            ->filter(fn($a) => $a->status === 'completed')
+            ->groupBy(fn($a) => $a->blueprint->product_area ?? 'Other')
+            ->map->count();
+
+        $allAreas = $opportunitiesByArea->keys()
+            ->merge($completedDeliveryByArea->keys())
+            ->unique()
+            ->filter()
+            ->sort()
+            ->values();
+
+        $projectRisk = $allAreas->mapWithKeys(function($area) use ($opportunitiesByArea, $completedDeliveryByArea) {
+            $oppCount = $opportunitiesByArea->get($area, 0);
+            $deliveryCount = $completedDeliveryByArea->get($area, 0);
+            $ratio = $oppCount > 0 ? round($deliveryCount / $oppCount, 2) : ($deliveryCount > 0 ? 2.0 : 0);
+            return [$area => $ratio];
+        });
+
+        // Pipeline Progression funnel (NNACV by sales stage)
+        $stageOrder = [
+            'Prospecting', 'Qualification', 'Needs Analysis',
+            'Value Proposition', 'Proposal/Price Quote',
+            'Negotiation/Review', 'Closed Won',
+        ];
+        $pipelineFunnel = collect($stageOrder)->mapWithKeys(function($stage) use ($partner) {
+            return [$stage => round($partner->opportunities->where('stage', $stage)->sum('amount'), 2)];
+        });
+
+        // Enablement Engagement (sessions by status)
+        $enablementByStatus = $partner->enablementSessions
+            ->groupBy('status')
+            ->map->count();
 
         return view('partner.show', compact(
             'partner',
             'activeProjects', 'totalContacts', 'totalLeads', 'totalAcv',
-            'avgProjectCompletion', 'leadAcceptanceRate', 'avgBlueprintCompletion',
-            'totalFunding', 'contactEngagement',
-            'opportunityHistory', 'projectStatuses', 'blueprintByArea', 'blueprintAreas', 'leadSources'
+            'sourcedRevenuePct', 'influencedRevenuePct', 'avgBlueprintCompletion',
+            'pipelineGrowthYoY', 'contactEngagement',
+            'opportunityHistory', 'enablementByStatus', 'blueprintByArea', 'blueprintAreas',
+            'projectRisk', 'pipelineFunnel'
         ));
     }
 

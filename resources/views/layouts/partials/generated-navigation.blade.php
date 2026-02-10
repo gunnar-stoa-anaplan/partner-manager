@@ -186,6 +186,19 @@
         </a>
     </li>
 
+    {{-- Administration - Admin Only --}}
+    @if(Auth::user()->role === 'admin')
+    <li class="nav-title"><span>Administration</span></li>
+
+    <li>
+        <a href="{{ route('partner-goals.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#target"></use>
+            </svg>
+            <span class="nav-link-text">Partner Goals</span>
+        </a>
+    </li>
+
     <li>
         <a href="{{ route('blueprints.catalog') }}">
             <svg class="sa-icon">
@@ -195,9 +208,14 @@
         </a>
     </li>
 
-    {{-- Program Administration - Admin Only --}}
-    @if(Auth::user()->role === 'admin')
-    <li class="nav-title"><span>Program Administration</span></li>
+    <li>
+        <a href="{{ route('partners.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#link"></use>
+            </svg>
+            <span class="nav-link-text">Partner Assignments</span>
+        </a>
+    </li>
 
     <li class="nav-item">
         <a href="#" title="Lead Assignment" data-filter-tags>
@@ -225,26 +243,47 @@
         </ul>
     </li>
 
-    {{-- Administration --}}
-    <li class="nav-title"><span>Administration</span></li>
+    <li>
+        <a href="{{ route('users.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#users"></use>
+            </svg>
+            <span class="nav-link-text">User Management</span>
+        </a>
+    </li>
+
+    {{-- Program Administration --}}
+    <li class="nav-title"><span>Program Administration</span></li>
 
     <li>
-        <a href="{{ route('partners.index') }}">
+        <a href="{{ route('enablement-events.index') }}">
             <svg class="sa-icon">
-                <use href="/icons/sprite.svg#link"></use>
+                <use href="/icons/sprite.svg#award"></use>
             </svg>
-            <span class="nav-link-text">Partner Assignments</span>
+            <span class="nav-link-text">Enablement Events</span>
         </a>
     </li>
 
     <li>
-        <a href="{{ route('objectives.index') }}">
+        <a href="{{ route('enablement-calendar') }}">
             <svg class="sa-icon">
-                <use href="/icons/sprite.svg#target"></use>
+                <use href="/icons/sprite.svg#calendar"></use>
             </svg>
-            <span class="nav-link-text">Objectives</span>
+            <span class="nav-link-text">Enablement Calendar</span>
         </a>
     </li>
+
+    <li>
+        <a href="{{ route('blueprints.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#layers"></use>
+            </svg>
+            <span class="nav-link-text">Blueprints</span>
+        </a>
+    </li>
+
+    {{-- System --}}
+    <li class="nav-title"><span>System</span></li>
 
     <li>
         <a href="{{ route('configuration.index') }}">
@@ -264,41 +303,6 @@
         </a>
     </li>
 
-    <li>
-        <a href="{{ route('users.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#users"></use>
-            </svg>
-            <span class="nav-link-text">User Management</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('blueprints.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#layers"></use>
-            </svg>
-            <span class="nav-link-text">Blueprints</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('enablement-events.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#award"></use>
-            </svg>
-            <span class="nav-link-text">Enablement Events</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('enablement-calendar') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#calendar"></use>
-            </svg>
-            <span class="nav-link-text">Enablement Calendar</span>
-        </a>
-    </li>
     @endif
     @endauth
 </ul>

@@ -109,6 +109,59 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Geo Filter --}}
+            <div class="card shadow-0 mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Filter by Geo</h5>
+                    <button class="btn btn-xs btn-link p-0" id="toggleAllGeos">All</button>
+                </div>
+                <div class="card-body">
+                    <div id="geo-filters">
+                        @foreach(\App\Models\EnablementSession::GEOGRAPHIES as $geoKey => $geoLabel)
+                            <div class="form-check">
+                                <input class="form-check-input geo-filter" type="checkbox"
+                                       value="{{ $geoKey }}" id="geo-filter-{{ $geoKey }}" checked>
+                                <label class="form-check-label" for="geo-filter-{{ $geoKey }}">
+                                    {{ $geoLabel }}
+                                </label>
+                            </div>
+                        @endforeach
+                        <div class="form-check">
+                            <input class="form-check-input geo-filter" type="checkbox"
+                                   value="_none" id="geo-filter-_none" checked>
+                            <label class="form-check-label text-muted" for="geo-filter-_none">
+                                <em>No Geo Set</em>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Geo Selection Modal (shown when drag-dropping events onto calendar) --}}
+    <div class="modal fade" id="geoSelectModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Geography</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-2">Which geography is this session for?</p>
+                    <select class="form-select" id="geoSelectValue">
+                        <option value="">-- None --</option>
+                        @foreach(\App\Models\EnablementSession::GEOGRAPHIES as $geoKey => $geoLabel)
+                            <option value="{{ $geoKey }}">{{ $geoLabel }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="geoSelectConfirm">Schedule Session</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -122,6 +175,7 @@
             mode: 'admin',
             eventTypes: @json(\App\Models\EnablementEvent::TYPES),
             typeColors: @json(\App\Models\EnablementEvent::TYPE_COLORS),
+            geographies: @json(\App\Models\EnablementSession::GEOGRAPHIES),
             apiBaseUrl: '{{ url("/api") }}',
             csrfToken: '{{ csrf_token() }}',
             sessionDetailBaseUrl: '{{ url("/enablement-sessions") }}',

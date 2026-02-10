@@ -28,16 +28,18 @@ class OpportunityFactory extends Factory
             ]),
             'account_name' => $this->faker->company(),
             'partner_id' => Partner::factory(),
-            'stage' => $this->faker->randomElement([
-                'Prospecting',
-                'Qualification',
-                'Needs Analysis',
-                'Value Proposition',
-                'Proposal/Price Quote',
-                'Negotiation/Review',
-                'Closed Won',
-                'Closed Lost',
-            ]),
+            'stage' => $this->faker->randomElement(
+                // Weighted toward early stages to produce a funnel distribution
+                array_merge(
+                    array_fill(0, 8, 'Prospecting'),
+                    array_fill(0, 6, 'Qualification'),
+                    array_fill(0, 4, 'Needs Analysis'),
+                    array_fill(0, 3, 'Value Proposition'),
+                    array_fill(0, 2, 'Proposal/Price Quote'),
+                    array_fill(0, 1, 'Negotiation/Review'),
+                    array_fill(0, 1, 'Closed Won'),
+                )
+            ),
             'amount' => $this->faker->randomFloat(2, 10000, 500000),
             'close_date' => $closeDate,
             'fiscal_quarter' => $fiscalPeriod['fiscal_quarter'],
@@ -45,6 +47,7 @@ class OpportunityFactory extends Factory
             'type' => $this->faker->randomElement(['New Business', 'Existing Customer - Upgrade', 'Existing Customer - Replacement']),
             'description' => $this->faker->sentence(),
             'lead_source' => $this->faker->randomElement(['Partner Referral', 'Web', 'Event', 'Cold Call', 'LinkedIn']),
+            'product_area' => $this->faker->randomElement(\App\Models\Blueprint::PRODUCT_AREAS),
             'probability' => $this->faker->randomElement([10, 25, 50, 75, 90, 100]),
             'owner' => $this->faker->name(),
             'excel_data' => [],

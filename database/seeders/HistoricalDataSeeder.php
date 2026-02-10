@@ -350,6 +350,8 @@ class HistoricalDataSeeder extends Seeder
                 'fiscal_year' => $opp->fiscal_year,
                 'type' => $opp->type,
                 'lead_source' => $opp->lead_source,
+                'revenue_type' => $opp->revenue_type,
+                'product_area' => $opp->product_area,
                 'probability' => $opp->probability,
                 'owner' => $opp->owner,
                 'created_at' => $now,

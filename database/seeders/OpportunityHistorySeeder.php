@@ -38,6 +38,14 @@ class OpportunityHistorySeeder extends Seeder
         'Managed Services', 'Training & Enablement', 'Integration',
     ];
 
+    private array $productAreaWeights = [
+        'Finance' => 30,
+        'Supply Chain' => 25,
+        'Sales' => 20,
+        'Workforce' => 15,
+        'Platform' => 10,
+    ];
+
     /**
      * Partner-specific profiles controlling opportunity volume and value.
      * [min_opps, max_opps, min_amount_influenced, max_amount_influenced, avg_close_weeks, sourced_chance_pct]
@@ -49,10 +57,10 @@ class OpportunityHistorySeeder extends Seeder
     private function getPartnerProfile(string $partnerName): array
     {
         return match (true) {
-            str_contains($partnerName, 'Accenture') => [18, 24, 80000, 450000, 14, 25],
-            str_contains($partnerName, 'Deloitte') => [15, 20, 60000, 380000, 16, 22],
-            str_contains($partnerName, 'PwC')      => [14, 18, 50000, 320000, 15, 25],
-            default                                 => [8, 12, 15000, 180000, 12, 20],
+            str_contains($partnerName, 'Accenture') => [28, 38, 80000, 450000, 14, 25],
+            str_contains($partnerName, 'Deloitte') => [22, 30, 60000, 380000, 16, 22],
+            str_contains($partnerName, 'PwC')      => [20, 26, 50000, 320000, 15, 25],
+            default                                 => [12, 18, 15000, 180000, 12, 20],
         };
     }
 
@@ -100,11 +108,17 @@ class OpportunityHistorySeeder extends Seeder
                 if ($isSourced) $sourcedRemaining--;
                 $revenueType = $isSourced ? 'sourced' : 'influenced';
 
-                // Stagger when opportunities are introduced (spread across weeks)
-                $introWeek = rand(0, max(0, $weeksToSimulate - $avgCloseWeeks - 4));
+                // Assign a target final stage using weighted funnel distribution:
+                // many opps stay in early stages, fewer reach later stages.
+                $targetStageIdx = $this->randomTargetStage();
 
-                // Starting stage: earlier introductions start earlier in pipeline
-                $startStageIdx = ($introWeek < 10) ? rand(0, 2) : rand(0, 1);
+                // Stagger intro weeks: opps targeting later stages start earlier
+                // (they need more time to reach their target); early-stage opps start late.
+                $weeksNeeded = $targetStageIdx * rand(4, 8);
+                $latestIntro = max(0, $weeksToSimulate - $weeksNeeded - 2);
+                $introWeek = rand(max(0, $latestIntro - 10), min($latestIntro, $weeksToSimulate - 1));
+
+                $startStageIdx = 0;
 
                 $partnerOpps[] = [
                     'partner_id' => $partner->id,
@@ -113,10 +127,12 @@ class OpportunityHistorySeeder extends Seeder
                     'amount' => round(rand($minAmt * 100, $maxAmt * 100) / 100, 2),
                     'type' => $type,
                     'revenue_type' => $revenueType,
+                    'product_area' => $this->randomProductArea(),
                     'intro_week' => $introWeek,
                     'current_stage_index' => $startStageIdx,
+                    'target_stage_index' => $targetStageIdx,
                     'weeks_in_stage' => 0,
-                    'weeks_to_advance' => rand(3, 6),
+                    'weeks_to_advance' => rand(4, 8),
                     'close_date' => $startDate->copy()->addWeeks($introWeek + $avgCloseWeeks + rand(-3, 5)),
                     'lead_source' => $isSourced
                         ? 'Partner Referral'
@@ -184,6 +200,7 @@ class OpportunityHistorySeeder extends Seeder
                             'type' => $opp['type'],
                             'lead_source' => $opp['lead_source'],
                             'revenue_type' => $opp['revenue_type'],
+                            'product_area' => $opp['product_area'],
                             'probability' => $this->getProbabilityForStage($this->stageProgression[$opp['current_stage_index']]),
                             'owner' => $opp['owner'],
                             'import_id' => $import->id,
@@ -192,12 +209,15 @@ class OpportunityHistorySeeder extends Seeder
                         $weekNewOpps++;
                     }
 
-                    // Evolve stage
+                    // Evolve stage — capped at target stage for funnel distribution
                     $opp['weeks_in_stage']++;
-                    if ($opp['weeks_in_stage'] >= $opp['weeks_to_advance'] && $opp['current_stage_index'] < count($this->stageProgression) - 1) {
+                    if ($opp['weeks_in_stage'] >= $opp['weeks_to_advance']
+                        && $opp['current_stage_index'] < $opp['target_stage_index']
+                        && $opp['current_stage_index'] < count($this->stageProgression) - 1) {
+
                         $opp['current_stage_index']++;
                         $opp['weeks_in_stage'] = 0;
-                        $opp['weeks_to_advance'] = rand(3, 6);
+                        $opp['weeks_to_advance'] = rand(4, 8);
 
                         $newStage = $this->stageProgression[$opp['current_stage_index']];
 
@@ -236,6 +256,7 @@ class OpportunityHistorySeeder extends Seeder
                         'type' => $opp['type'],
                         'lead_source' => $opp['lead_source'],
                         'revenue_type' => $opp['revenue_type'],
+                        'product_area' => $opp['product_area'],
                         'probability' => $this->getProbabilityForStage($currentStage),
                         'owner' => $opp['owner'],
                         'created_at' => now(),
@@ -285,6 +306,37 @@ class OpportunityHistorySeeder extends Seeder
         return $val >= 1000000
             ? number_format($val / 1000000, 1) . 'M'
             : number_format($val / 1000, 0) . 'k';
+    }
+
+    /**
+     * Return a target stage index with funnel-shaped weights:
+     * many opps stay early, fewer reach later stages.
+     *
+     * Index 0 = Prospecting, 1 = Qualification, ... 6 = Closed Won
+     */
+    private function randomTargetStage(): int
+    {
+        // Weights: Prospecting 30%, Qualification 20%, Needs Analysis 15%,
+        // Value Proposition 12%, Proposal 10%, Negotiation 5%, Closed Won 8%
+        $weights = [30, 20, 15, 12, 10, 5, 8];
+        $rand = rand(1, array_sum($weights));
+        $cumulative = 0;
+        foreach ($weights as $idx => $w) {
+            $cumulative += $w;
+            if ($rand <= $cumulative) return $idx;
+        }
+        return 0;
+    }
+
+    private function randomProductArea(): string
+    {
+        $rand = rand(1, 100);
+        $cumulative = 0;
+        foreach ($this->productAreaWeights as $area => $weight) {
+            $cumulative += $weight;
+            if ($rand <= $cumulative) return $area;
+        }
+        return 'Finance';
     }
 
     private function getProbabilityForStage(string $stage): int

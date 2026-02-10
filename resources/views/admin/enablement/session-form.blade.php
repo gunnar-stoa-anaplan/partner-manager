@@ -106,8 +106,12 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label" for="geography">Geography</label>
-                                <input type="text" class="form-control" id="geography" name="geography"
-                                       value="{{ old('geography', $session->geography ?? '') }}" placeholder="e.g. EMEA, NA, APAC">
+                                <select class="form-select" id="geography" name="geography">
+                                    <option value="">-- None --</option>
+                                    @foreach(\App\Models\EnablementSession::GEOGRAPHIES as $geoKey => $geoLabel)
+                                        <option value="{{ $geoKey }}" {{ old('geography', $session->geography ?? '') === $geoKey ? 'selected' : '' }}>{{ $geoLabel }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label" for="region">Region</label>

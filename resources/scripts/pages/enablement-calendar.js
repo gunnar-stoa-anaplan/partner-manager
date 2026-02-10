@@ -76,6 +76,34 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // ─── Geo Filter (Admin) ──────────────────────────────────────
+    var activeGeos = Object.keys(config.geographies || {}).concat(['_none']);
+
+    var toggleAllGeosBtn = document.getElementById('toggleAllGeos');
+    if (toggleAllGeosBtn) {
+        toggleAllGeosBtn.addEventListener('click', function () {
+            var checkboxes = document.querySelectorAll('.geo-filter');
+            var allChecked = Array.from(checkboxes).every(function (cb) { return cb.checked; });
+            checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
+            updateActiveGeos();
+            calendar.refetchEvents();
+        });
+    }
+
+    document.querySelectorAll('.geo-filter').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+            updateActiveGeos();
+            calendar.refetchEvents();
+        });
+    });
+
+    function updateActiveGeos() {
+        activeGeos = [];
+        document.querySelectorAll('.geo-filter:checked').forEach(function (cb) {
+            activeGeos.push(cb.value);
+        });
+    }
+
     // ─── Admin: Initialize Draggable Published Events ───────────
     if (mode === 'admin') {
         var draggableContainer = document.getElementById('draggable-events');
@@ -156,7 +184,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     var filtered = data.filter(function (ev) {
-                        return activeTypes.indexOf(ev.extendedProps.type) !== -1;
+                        if (activeTypes.indexOf(ev.extendedProps.type) === -1) return false;
+                        if (mode === 'admin' && activeGeos.length > 0) {
+                            var geo = ev.extendedProps.geography || '_none';
+                            if (activeGeos.indexOf(geo) === -1) return false;
+                        }
+                        return true;
                     });
                     successCallback(filtered);
                     if (mode === 'psm') {
@@ -189,9 +222,28 @@ document.addEventListener('DOMContentLoaded', function () {
         },
     };
 
-    // ─── Admin: Drag-Drop Handlers ──────────────────────────────
-    if (mode === 'admin') {
-        calendarOptions.eventReceive = function (info) {
+    // ─── Admin: Geo Selection Modal Helper ──────────────────────
+    var geoSelectModalEl = document.getElementById('geoSelectModal');
+    var geoSelectModal = geoSelectModalEl ? new bootstrap.Modal(geoSelectModalEl) : null;
+    var pendingEventInfo = null;
+
+    function showGeoSelectAndCreate(info) {
+        pendingEventInfo = info;
+        var geoSelect = document.getElementById('geoSelectValue');
+        if (geoSelect) geoSelect.value = '';
+        if (geoSelectModal) geoSelectModal.show();
+    }
+
+    var geoConfirmBtn = document.getElementById('geoSelectConfirm');
+    if (geoConfirmBtn) {
+        geoConfirmBtn.addEventListener('click', function () {
+            if (!pendingEventInfo) return;
+            var info = pendingEventInfo;
+            pendingEventInfo = null;
+
+            var selectedGeo = document.getElementById('geoSelectValue').value || null;
+            if (geoSelectModal) geoSelectModal.hide();
+
             var props = info.event.extendedProps;
             var startStr = info.event.start.toISOString();
             var endStr = info.event.end ? info.event.end.toISOString() : null;
@@ -208,6 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     start_at: startStr,
                     end_at: endStr,
                     all_day: info.event.allDay,
+                    geography: selectedGeo,
                 }),
             })
             .then(function (r) {
@@ -223,6 +276,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 info.event.remove();
                 showToast('Failed to create session.', 'error');
             });
+        });
+    }
+
+    // Cancel geo modal -> remove the placeholder event
+    if (geoSelectModalEl) {
+        geoSelectModalEl.addEventListener('hidden.bs.modal', function () {
+            if (pendingEventInfo) {
+                pendingEventInfo.event.remove();
+                pendingEventInfo = null;
+            }
+        });
+    }
+
+    // ─── Admin: Drag-Drop Handlers ──────────────────────────────
+    if (mode === 'admin') {
+        calendarOptions.eventReceive = function (info) {
+            showGeoSelectAndCreate(info);
         };
 
         calendarOptions.eventDrop = function (info) {

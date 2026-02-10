@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\EnablementController;
 use App\Http\Controllers\EnablementEventController;
 use App\Http\Controllers\BlueprintController;
 use App\Http\Controllers\BlueprintAssignmentController;
+use App\Http\Controllers\PartnerGoalController;
 use App\Http\Controllers\RoutingController;
 
 /*
@@ -236,6 +237,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/assigned', [LeadController::class, 'assigned'])->name('assigned');
         Route::get('/rejected', [LeadController::class, 'rejected'])->name('rejected');
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Partner Goals (PSM + Admin)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/partner-goals', [PartnerGoalController::class, 'index'])->name('partner-goals.index');
+    Route::put('/partner-goals', [PartnerGoalController::class, 'update'])->name('partner-goals.update');
 
     /*
     |--------------------------------------------------------------------------

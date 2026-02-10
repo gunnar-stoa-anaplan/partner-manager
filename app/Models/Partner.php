@@ -126,6 +126,11 @@ class Partner extends Model
         return $this->hasMany(OpportunitySnapshot::class);
     }
 
+    public function goals()
+    {
+        return $this->hasMany(PartnerGoal::class);
+    }
+
     /**
      * Get historical resource certification counts over time
      *
@@ -189,6 +194,7 @@ class Partner extends Model
             $partner->fundings()->delete();
             $partner->opportunities()->delete();
             $partner->resources()->delete();
+            $partner->goals()->delete();
         });
     }
 }

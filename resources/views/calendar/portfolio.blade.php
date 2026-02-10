@@ -79,6 +79,9 @@
             projects: [],
             eventTypes: @json(\App\Models\PartnerEvent::TYPES),
             typeColors: @json(\App\Models\PartnerEvent::TYPE_COLORS),
+            enablementTypes: @json(\App\Models\EnablementEvent::TYPES),
+            enablementTypeColors: @json(\App\Models\EnablementEvent::TYPE_COLORS),
+            enablementCalendarUrl: '{{ route('enablement.calendar') }}',
             apiBaseUrl: '{{ url("/api") }}',
             csrfToken: '{{ csrf_token() }}',
         };

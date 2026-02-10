@@ -70,6 +70,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // Type filter checkboxes
     const typeFiltersEl = document.getElementById('type-filters');
     if (typeFiltersEl) {
+        // Partner Event types
+        const partnerHeader = document.createElement('div');
+        partnerHeader.className = 'text-muted small fw-bold mb-1';
+        partnerHeader.textContent = 'Partner Events';
+        typeFiltersEl.appendChild(partnerHeader);
+
         Object.entries(config.eventTypes).forEach(([key, label]) => {
             const color = config.typeColors[key] || '#868e96';
             const div = document.createElement('div');
@@ -83,6 +89,32 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
             typeFiltersEl.appendChild(div);
         });
+
+        // Enablement Event types (if config provides them)
+        if (config.enablementTypes) {
+            const divider = document.createElement('hr');
+            divider.className = 'my-2';
+            typeFiltersEl.appendChild(divider);
+
+            const enablementHeader = document.createElement('div');
+            enablementHeader.className = 'text-muted small fw-bold mb-1';
+            enablementHeader.textContent = 'Enablement Events';
+            typeFiltersEl.appendChild(enablementHeader);
+
+            Object.entries(config.enablementTypes).forEach(([key, label]) => {
+                const color = (config.enablementTypeColors || {})[key] || '#868e96';
+                const div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML = `
+                    <input class="form-check-input type-filter" type="checkbox" value="en_${key}" id="type-filter-en_${key}" checked>
+                    <label class="form-check-label" for="type-filter-en_${key}">
+                        <span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:${color}"></span>
+                        ${label}
+                    </label>
+                `;
+                typeFiltersEl.appendChild(div);
+            });
+        }
     }
 
     // ─── Initialize Calendar ───────────────────────────────────
@@ -152,8 +184,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             Promise.all([partnerEventsP, enablementP, allEnablementP])
                 .then(([partnerEvents, registeredSessions, allSessions]) => {
+                    // In portfolio mode, show all published enablement sessions
+                    // In partner mode, show only sessions the partner is registered for
+                    const sessionsToShow = config.mode === 'portfolio' ? allSessions : registeredSessions;
+
                     // Tag enablement sessions so they're distinguishable
-                    const enablementEvents = registeredSessions.map(s => ({
+                    const enablementEvents = sessionsToShow.map(s => ({
                         ...s,
                         editable: false,
                         extendedProps: {
@@ -541,7 +577,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (checked.length === total || checked.length === 0) return; // show all
         calendar.getEvents().forEach(event => {
             const type = event.extendedProps.type;
-            event.setProp('display', checked.includes(type) ? 'auto' : 'none');
+            const isEnablement = event.extendedProps.is_enablement;
+            const filterKey = isEnablement ? `en_${type}` : type;
+            event.setProp('display', checked.includes(filterKey) ? 'auto' : 'none');
         });
     }
 

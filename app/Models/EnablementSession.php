@@ -47,6 +47,14 @@ class EnablementSession extends Model
         'cancelled' => 'Cancelled',
     ];
 
+    const GEOGRAPHIES = [
+        'EMEA' => 'EMEA',
+        'NA' => 'North America',
+        'APAC' => 'Asia Pacific',
+        'LATAM' => 'Latin America',
+        'Global' => 'Global',
+    ];
+
     // ─── Relationships ─────────────────────────────────────────
 
     public function event(): BelongsTo
