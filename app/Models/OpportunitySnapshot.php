@@ -24,6 +24,7 @@ class OpportunitySnapshot extends Model
         'fiscal_year',
         'type',
         'lead_source',
+        'revenue_type',
         'probability',
         'owner',
     ];

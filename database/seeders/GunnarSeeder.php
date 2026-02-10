@@ -11,7 +11,18 @@ class GunnarSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('Creating Gunnar user and assigned partners...');
+        $this->command->info('Creating admin and Gunnar users...');
+
+        // Create Admin user
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin',
+                'password' => bcrypt('password'),
+                'role' => 'admin',
+            ]
+        );
+        $this->command->info("✓ Created/Updated Admin user (admin@example.com / password)");
 
         // Create Gunnar Stoa as PSM user
         $gunnar = User::updateOrCreate(

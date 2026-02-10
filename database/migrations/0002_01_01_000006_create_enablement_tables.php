@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('slug')->unique();
-            $table->enum('type', ['workshop', 'training', 'certification_exam', 'webinar', 'bootcamp', 'onboarding', 'hackathon', 'conference', 'other']);
+            $table->enum('type', ['workshop', 'academy', 'certification_exam', 'webinar', 'bootcamp', 'onboarding', 'hackathon', 'connect', 'other']);
             $table->string('category')->nullable();
             $table->text('description')->nullable();
             $table->text('objectives')->nullable();

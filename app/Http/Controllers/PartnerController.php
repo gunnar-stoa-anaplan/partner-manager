@@ -51,15 +51,95 @@ class PartnerController extends Controller
      */
     public function show(string $id)
     {
-        $partner = Partner::with(['projects', 'contacts', 'opportunities', 'leads', 'fundings', 'resources'])
-            ->findOrFail($id);
+        $partner = Partner::with([
+            'projects', 'contacts', 'opportunities', 'leads', 'fundings', 'resources',
+            'blueprintAssignments.blueprint',
+            'blueprintAssignments.enrollments.progress',
+        ])->findOrFail($id);
 
         // Check if the authenticated user has access to this partner
         if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
             abort(403, 'Unauthorized access to this partner.');
         }
 
-        return view('partner.show', compact('partner'));
+        // ── KPI Metrics ──
+        $activeProjects = $partner->projects->whereNotIn('status', ['Completed'])->count();
+        $totalContacts = $partner->contacts->count();
+        $totalLeads = $partner->leads->count();
+        $totalAcv = $partner->projects->sum('acv');
+
+        // ── Progress Metrics ──
+        $avgProjectCompletion = $partner->projects->count() > 0
+            ? round($partner->projects->avg('percent_complete'), 1) : 0;
+
+        $leadAcceptanceRate = $totalLeads > 0
+            ? round($partner->leads->where('status', 'accepted')->count() / $totalLeads * 100, 1) : 0;
+
+        $assignmentsWithEnrollments = $partner->blueprintAssignments->filter(fn($a) => $a->enrollments->count() > 0);
+        $avgBlueprintCompletion = $assignmentsWithEnrollments->count() > 0
+            ? round($assignmentsWithEnrollments->avg(fn($a) => $a->completionPercentage()), 1) : 0;
+
+        $totalFunding = $partner->fundings->sum('amount');
+
+        $enrolledContactIds = $partner->blueprintAssignments->flatMap(fn($a) => $a->enrollments->pluck('contact_id'))->unique();
+        $contactEngagement = $totalContacts > 0
+            ? round($enrolledContactIds->count() / $totalContacts * 100, 1) : 0;
+
+        // ── Chart Data ──
+        // Historical opportunity snapshots (opportunity count vs NNACV)
+        $endDate = now();
+        $startDate = now()->subWeeks(52);
+
+        $opportunityHistory = \DB::table('opportunity_snapshots')
+            ->join('imports', 'opportunity_snapshots.import_id', '=', 'imports.id')
+            ->join('opportunities', 'opportunity_snapshots.opportunity_id', '=', 'opportunities.id')
+            ->where('opportunities.partner_id', $partner->id)
+            ->whereBetween('imports.started_at', [$startDate, $endDate])
+            ->select(
+                \DB::raw('DATE_FORMAT(imports.started_at, "%Y-%m") as snapshot_month'),
+                \DB::raw('SUM(CASE WHEN opportunity_snapshots.revenue_type = "sourced" THEN opportunity_snapshots.amount ELSE 0 END) as sourced_amount'),
+                \DB::raw('SUM(CASE WHEN opportunity_snapshots.revenue_type = "influenced" THEN opportunity_snapshots.amount ELSE 0 END) as influenced_amount'),
+                \DB::raw('COUNT(DISTINCT opportunity_snapshots.opportunity_id) as opportunity_count')
+            )
+            ->groupBy(\DB::raw('DATE_FORMAT(imports.started_at, "%Y-%m")'))
+            ->orderBy(\DB::raw('DATE_FORMAT(imports.started_at, "%Y-%m")'))
+            ->get();
+
+        // Project status distribution
+        $projectStatuses = $partner->projects->groupBy('status')->map->count();
+
+        // Blueprint completion by product area + role (multi-series radar chart)
+        $roleLabels = ['delivery' => 'Delivery', 'gtm' => 'GTM', 'pre_sales' => 'Pre-Sales'];
+        $productAreas = $partner->blueprintAssignments
+            ->map(fn($a) => $a->blueprint->product_area ?? 'Other')
+            ->unique()->sort()->values()->all();
+
+        $blueprintByArea = [];
+        foreach ($roleLabels as $roleKey => $roleLabel) {
+            $roleAssignments = $partner->blueprintAssignments->where('role', $roleKey);
+            if ($roleAssignments->isEmpty()) continue;
+
+            $data = [];
+            foreach ($productAreas as $area) {
+                $areaAssignments = $roleAssignments->filter(fn($a) => ($a->blueprint->product_area ?? 'Other') === $area);
+                $data[] = $areaAssignments->isNotEmpty()
+                    ? round($areaAssignments->avg(fn($a) => $a->completionPercentage()), 1)
+                    : 0;
+            }
+            $blueprintByArea[] = ['name' => $roleLabel, 'data' => $data];
+        }
+        $blueprintAreas = $productAreas;
+
+        // Lead sources
+        $leadSources = $partner->leads->groupBy('source')->map->count();
+
+        return view('partner.show', compact(
+            'partner',
+            'activeProjects', 'totalContacts', 'totalLeads', 'totalAcv',
+            'avgProjectCompletion', 'leadAcceptanceRate', 'avgBlueprintCompletion',
+            'totalFunding', 'contactEngagement',
+            'opportunityHistory', 'projectStatuses', 'blueprintByArea', 'blueprintAreas', 'leadSources'
+        ));
     }
 
     /**
@@ -135,6 +215,25 @@ class PartnerController extends Controller
             'blueprintCompletion',
             'allPartners'
         ));
+    }
+
+    /**
+     * Show the blueprint progress summary for the specified partner.
+     */
+    public function blueprints(string $id)
+    {
+        $partner = Partner::with([
+            'blueprintAssignments.blueprint',
+            'blueprintAssignments.enrollments.contact',
+            'blueprintAssignments.enrollments.progress',
+            'blueprintAssignments.assignedBy',
+        ])->findOrFail($id);
+
+        if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
+            abort(403, 'Unauthorized access to this partner.');
+        }
+
+        return view('partner.blueprints', compact('partner'));
     }
 
     /**

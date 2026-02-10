@@ -18,6 +18,8 @@ use App\Http\Controllers\Api\FilterDataController;
 use App\Http\Controllers\Api\PartnerEventController;
 use App\Http\Controllers\Api\EnablementController;
 use App\Http\Controllers\EnablementEventController;
+use App\Http\Controllers\BlueprintController;
+use App\Http\Controllers\BlueprintAssignmentController;
 use App\Http\Controllers\RoutingController;
 
 /*
@@ -157,6 +159,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/enablement/partners/{id}/sessions', [EnablementController::class, 'partnerSessions'])->name('enablement.partner-sessions');
         Route::delete('/enablement/registrations/{id}', [EnablementController::class, 'removeNomination'])->name('enablement.remove-nomination');
         Route::get('/enablement/my-nominations', [EnablementController::class, 'myNominations'])->name('enablement.my-nominations');
+
+        // Blueprint Progress API
+        Route::post('/blueprint-progress/toggle', [BlueprintAssignmentController::class, 'toggleProgress'])->name('blueprint-progress.toggle');
     });
 
     /*
@@ -168,6 +173,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/partners/{id}', [PartnerController::class, 'show'])->name('partners.show');
     Route::get('/partners/{id}/summary', [PartnerController::class, 'summary'])->name('partners.summary');
     Route::get('/partners/{id}/insights', [PartnerController::class, 'insights'])->name('partners.insights');
+    Route::get('/partners/{id}/blueprints', [PartnerController::class, 'blueprints'])->name('partners.blueprints');
     Route::get('/full-summary', [PartnerController::class, 'fullSummary'])->name('partners.full-summary');
     Route::get('/full-insights', [PartnerController::class, 'fullInsights'])->name('partners.full-insights');
 
@@ -208,6 +214,20 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Enablement Blueprints (PSM)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/enablement-blueprints', [BlueprintAssignmentController::class, 'catalog'])->name('blueprints.catalog');
+    Route::get('/enablement-blueprints/{blueprint}', [BlueprintAssignmentController::class, 'blueprintDetail'])->name('blueprints.detail');
+    Route::post('/enablement-blueprints/{blueprint}/assign', [BlueprintAssignmentController::class, 'assign'])->name('blueprints.assign');
+    Route::delete('/blueprint-assignments/{assignment}', [BlueprintAssignmentController::class, 'removeAssignment'])->name('blueprint-assignments.destroy');
+    Route::get('/blueprint-assignments/{assignment}', [BlueprintAssignmentController::class, 'partnerProgress'])->name('blueprint-assignments.show');
+    Route::post('/blueprint-assignments/{assignment}/enroll', [BlueprintAssignmentController::class, 'enrollContact'])->name('blueprint-assignments.enroll');
+    Route::delete('/blueprint-enrollments/{enrollment}', [BlueprintAssignmentController::class, 'removeEnrollment'])->name('blueprint-enrollments.destroy');
+    Route::get('/blueprint-enrollments/{enrollment}', [BlueprintAssignmentController::class, 'contactProgress'])->name('blueprint-enrollments.show');
+
+    /*
+    |--------------------------------------------------------------------------
     | Leads
     |--------------------------------------------------------------------------
     */
@@ -234,7 +254,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/configuration', [ConfigurationController::class, 'index'])->name('configuration.index');
         Route::put('/configuration', [ConfigurationController::class, 'update'])->name('configuration.update');
 
-        Route::view('/blueprints', 'admin.blueprints')->name('admin.blueprints');
+        // Blueprint CRUD
+        Route::resource('blueprints', BlueprintController::class);
+        Route::post('/blueprints/{blueprint}/outcomes', [BlueprintController::class, 'addOutcome'])->name('blueprints.outcomes.store');
+        Route::put('/blueprint-outcomes/{outcome}', [BlueprintController::class, 'updateOutcome'])->name('blueprint-outcomes.update');
+        Route::delete('/blueprint-outcomes/{outcome}', [BlueprintController::class, 'destroyOutcome'])->name('blueprint-outcomes.destroy');
+        Route::post('/blueprint-outcomes/{outcome}/items', [BlueprintController::class, 'addContentItem'])->name('blueprint-outcomes.items.store');
+        Route::put('/blueprint-content-items/{item}', [BlueprintController::class, 'updateContentItem'])->name('blueprint-content-items.update');
+        Route::delete('/blueprint-content-items/{item}', [BlueprintController::class, 'destroyContentItem'])->name('blueprint-content-items.destroy');
 
         // Enablement Events CRUD
         Route::resource('enablement-events', EnablementEventController::class);

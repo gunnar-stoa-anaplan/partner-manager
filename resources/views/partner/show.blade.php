@@ -4,297 +4,25 @@
 @section('page-title')
     <div class="d-flex align-items-end mb-4">
         <div>
-            @include('layouts.partials/app-pagetitle', ['pageTitle'=> $partner->name, 'pageSubTitle1' => 'Insights', 'pageSubTitle2'=> 'Dashboards'])
+            @include('layouts.partials/app-pagetitle', ['pageTitle'=> $partner->name, 'pageSubTitle1' => 'Partner Profile', 'pageSubTitle2'=> 'Dashboards'])
         </div>
         <div class="ms-auto d-none d-sm-flex align-items-center gap-2">
+            <a href="{{ route('partners.blueprints', $partner->id) }}" class="btn btn-outline-warning">
+                <i class="fal fa-layers me-1"></i> Blueprints
+            </a>
             <a href="{{ route('partners.enablement', $partner->id) }}" class="btn btn-outline-info">
                 <i class="fal fa-award me-1"></i> Enablement
             </a>
             <a href="{{ route('partners.calendar', $partner->id) }}" class="btn btn-outline-primary">
                 <i class="fal fa-calendar me-1"></i> Calendar
             </a>
-            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
-                    data-bs-target="#buildCampaignModal">Build Campaign
-            </button>
-        </div>
-    </div>
-
-    <!-- Build Campaign Modal -->
-    <div class="modal fade" id="buildCampaignModal" tabindex="-1" aria-labelledby="buildCampaignModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Build New Subscription Campaign</h5>
-                    <button type="button" class="btn btn-system btn-system-light ms-auto" data-bs-dismiss="modal"
-                            aria-label="Close">
-                        <svg class="sa-icon sa-icon-2x">
-                            <use href="/icons/sprite.svg#x"></use>
-                        </svg>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="campaignForm">
-                        <!-- Campaign Basics Section -->
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h6 class="mb-0">Campaign Basics</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="campaignName" class="form-label">Campaign Name <span
-                                                class="text-danger">*</span></label>
-                                        <input type="text" class="form-control form-control-lg" id="campaignName"
-                                               placeholder="Enter campaign name" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="campaignType" class="form-label">Campaign Type <span
-                                                class="text-danger">*</span></label>
-                                        <select class="form-select form-select-lg" id="campaignType" required>
-                                            <option selected disabled value="">Select type...</option>
-                                            <option value="acquisition">New Customer Acquisition</option>
-                                            <option value="retention">Customer Retention</option>
-                                            <option value="winback">Win-back Campaign</option>
-                                            <option value="upgrade">Subscription Upgrade</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="startDate" class="form-label">Start Date <span
-                                                class="text-danger">*</span></label>
-                                        <input type="date" class="form-control form-control-lg" id="startDate" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="endDate" class="form-label">End Date</label>
-                                        <input type="date" class="form-control form-control-lg" id="endDate">
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="campaignDescription" class="form-label">Description</label>
-                                    <textarea class="form-control" id="campaignDescription" rows="2"
-                                              placeholder="Brief description of campaign goals..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Audience & Offer Section -->
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h6 class="mb-0">Audience & Offer</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-4">
-                                    <label for="targetAudience" class="form-label">Target Audience <span
-                                            class="text-danger">*</span></label>
-                                    <select class="form-select form-select-lg" id="targetAudience" required>
-                                        <option selected disabled value="">Select audience...</option>
-                                        <option value="all">All Subscribers</option>
-                                        <option value="active">Active Subscribers</option>
-                                        <option value="inactive">Inactive Subscribers</option>
-                                        <option value="expired">Recently Expired</option>
-                                        <option value="custom">Custom Segment</option>
-                                    </select>
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="form-label">Offer Type <span class="text-danger">*</span></label>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <div class="form-check card p-3 offer-card">
-                                                <input class="form-check-input" type="radio" name="offerType"
-                                                       id="offerDiscount" value="discount" checked>
-                                                <label class="form-check-label" for="offerDiscount">
-                                                    <i class="bi bi-percent text-primary me-2"></i>
-                                                    <strong>Discount</strong>
-                                                    <p class="text-muted small mb-0">Percentage or fixed amount
-                                                        discount</p>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <div class="form-check card p-3 offer-card">
-                                                <input class="form-check-input" type="radio" name="offerType"
-                                                       id="offerFreeTrial" value="freeTrial">
-                                                <label class="form-check-label" for="offerFreeTrial">
-                                                    <i class="bi bi-clock-history text-success me-2"></i>
-                                                    <strong>Free Trial</strong>
-                                                    <p class="text-muted small mb-0">Temporary free access period</p>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <div class="form-check card p-3 offer-card">
-                                                <input class="form-check-input" type="radio" name="offerType"
-                                                       id="offerUpgrade" value="upgrade">
-                                                <label class="form-check-label" for="offerUpgrade">
-                                                    <i class="bi bi-arrow-up-circle text-warning me-2"></i>
-                                                    <strong>Upgrade Promotion</strong>
-                                                    <p class="text-muted small mb-0">Special pricing for upgrades</p>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <div class="form-check card p-3 offer-card">
-                                                <input class="form-check-input" type="radio" name="offerType"
-                                                       id="offerBundle" value="bundle">
-                                                <label class="form-check-label" for="offerBundle">
-                                                    <i class="bi bi-box-seam text-info me-2"></i>
-                                                    <strong>Bundle Offer</strong>
-                                                    <p class="text-muted small mb-0">Combined products/services</p>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3" id="discountSection">
-                                    <label for="discountAmount" class="form-label">Discount Amount</label>
-                                    <div class="d-flex align-items-center">
-                                        <input type="range" class="form-range flex-grow-1 me-3" min="5" max="50"
-                                               step="5" id="discountAmount" value="15">
-                                        <span class="badge bg-primary fs-6" id="discountAmountValue">15%</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Channels & Budget Section -->
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h6 class="mb-0">Channels & Budget</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-4">
-                                    <label class="form-label">Campaign Channels <span
-                                            class="text-danger">*</span></label>
-                                    <div class="row">
-                                        <div class="col-md-3 col-6 mb-3">
-                                            <div class="form-check card p-2 channel-card">
-                                                <input class="form-check-input" type="checkbox" value="email"
-                                                       id="channelEmail" checked>
-                                                <label class="form-check-label d-flex flex-column align-items-center"
-                                                       for="channelEmail">
-                                                    <i class="bi bi-envelope-fill text-danger fs-4 mb-1"></i>
-                                                    <span>Email</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3 col-6 mb-3">
-                                            <div class="form-check card p-2 channel-card">
-                                                <input class="form-check-input" type="checkbox" value="sms"
-                                                       id="channelSMS">
-                                                <label class="form-check-label d-flex flex-column align-items-center"
-                                                       for="channelSMS">
-                                                    <i class="bi bi-chat-left-text-fill text-success fs-4 mb-1"></i>
-                                                    <span>SMS</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3 col-6 mb-3">
-                                            <div class="form-check card p-2 channel-card">
-                                                <input class="form-check-input" type="checkbox" value="push"
-                                                       id="channelPush">
-                                                <label class="form-check-label d-flex flex-column align-items-center"
-                                                       for="channelPush">
-                                                    <i class="bi bi-bell-fill text-warning fs-4 mb-1"></i>
-                                                    <span>Push</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3 col-6 mb-3">
-                                            <div class="form-check card p-2 channel-card">
-                                                <input class="form-check-input" type="checkbox" value="inapp"
-                                                       id="channelInApp">
-                                                <label class="form-check-label d-flex flex-column align-items-center"
-                                                       for="channelInApp">
-                                                    <i class="bi bi-phone-fill text-info fs-4 mb-1"></i>
-                                                    <span>In-App</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Budget Allocation</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-primary text-white">$</span>
-                                            <input type="number" class="form-control form-control-lg"
-                                                   id="campaignBudget" placeholder="0.00">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Priority</label>
-                                        <select class="form-select form-select-lg">
-                                            <option>Low</option>
-                                            <option selected>Medium</option>
-                                            <option>High</option>
-                                            <option>Urgent</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Goals Section -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">Performance Goals</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <label for="kpiConversions" class="form-label">Conversion Target</label>
-                                        <div class="input-group">
-                                            <input type="number" class="form-control" id="kpiConversions"
-                                                   placeholder="#">
-                                            <span class="input-group-text">subscribers</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label for="kpiRevenue" class="form-label">Revenue Target</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" id="kpiRevenue"
-                                                   placeholder="0.00">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label for="kpiROI" class="form-label">ROI Target</label>
-                                        <div class="input-group">
-                                            <input type="number" class="form-control" id="kpiROI" placeholder="0">
-                                            <span class="input-group-text">%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-lg me-1"></i>Cancel
-                    </button>
-                    <button type="button" class="btn btn-outline-primary" id="saveDraftBtn">
-                        <i class="bi bi-file-earmark me-1"></i>Save Draft
-                    </button>
-                    <button type="button" class="btn btn-success" id="launchCampaignBtn">
-                        <i class="bi bi-rocket-takeoff me-1"></i>Launch Campaign
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 @endsection
 
 @section('content')
     <div class="row sortable-off">
-        <!-- Active Subscriptions -->
+        {{-- Active Projects --}}
         <div class="col-xs-12 col-sm-6 col-xl-3 mb-g">
             <div class="card">
                 <div class="row">
@@ -302,15 +30,14 @@
                         <div class="p-3">
                             <p class="p-0 mb-3 text-muted text-truncate">Active Projects</p>
                             <span class="h5 text-nowrap">
-                                12,580
-                                <sup class="text-success">+4.2%</sup>
+                                {{ number_format($activeProjects) }}
+                                <small class="text-muted fw-400">/ {{ $partner->projects->count() }}</small>
                             </span>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="d-flex h-100 align-items-center justify-content-end pe-3">
-                            <div
-                                class="width-5 height-5 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                            <div class="width-5 height-5 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
                                 <i class="fad fa-check-circle h4 text-primary m-0"></i>
                             </div>
                         </div>
@@ -318,71 +45,65 @@
                 </div>
             </div>
         </div>
-        <!-- New Subscriptions -->
+        {{-- Contacts --}}
         <div class="col-xs-12 col-sm-6 col-xl-3 mb-g">
             <div class="card">
                 <div class="row">
                     <div class="col-6">
                         <div class="p-3">
-                            <p class="p-0 mb-3 text-muted text-truncate">New Opportunities</p>
+                            <p class="p-0 mb-3 text-muted text-truncate">Contacts</p>
                             <span class="h5 text-nowrap">
-                                1,145
-                                <sup class="text-success">+7.8%</sup>
+                                {{ number_format($totalContacts) }}
                             </span>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="d-flex h-100 align-items-center justify-content-end pe-3">
-                            <div
-                                class="width-5 height-5 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                                <i class="fad fa-user-plus h4 text-primary m-0"></i>
+                            <div class="width-5 height-5 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="fad fa-users h4 text-primary m-0"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Cancellations -->
+        {{-- Leads --}}
         <div class="col-xs-12 col-sm-6 col-xl-3 mb-g">
             <div class="card">
                 <div class="row">
                     <div class="col-6">
                         <div class="p-3">
-                            <p class="p-0 mb-3 text-muted text-truncate">Cancellations</p>
+                            <p class="p-0 mb-3 text-muted text-truncate">Leads</p>
                             <span class="h5 text-nowrap">
-                                326
-                                <sup class="text-danger">-1.5%</sup>
+                                {{ number_format($totalLeads) }}
                             </span>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="d-flex h-100 align-items-center justify-content-end pe-3">
-                            <div
-                                class="width-5 height-5 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                                <i class="fad fa-user-times h4 text-primary m-0"></i>
+                            <div class="width-5 height-5 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="fad fa-bullseye h4 text-primary m-0"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- MRR (Monthly Recurring Revenue) -->
+        {{-- Total ACV --}}
         <div class="col-xs-12 col-sm-6 col-xl-3 mb-g">
             <div class="card">
                 <div class="row">
                     <div class="col-6">
                         <div class="p-3">
-                            <p class="p-0 mb-3 text-muted text-truncate">Monthly Recurring Revenue</p>
+                            <p class="p-0 mb-3 text-muted text-truncate">Total ACV</p>
                             <span class="h5 text-nowrap">
-                                $42,860.00
-                                <sup class="text-success">+6.1%</sup>
+                                ${{ number_format($totalAcv, 0) }}
                             </span>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="d-flex h-100 align-items-center justify-content-end pe-3">
-                            <div
-                                class="width-5 height-5 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                            <div class="width-5 height-5 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
                                 <i class="fad fa-chart-line h4 text-primary m-0"></i>
                             </div>
                         </div>
@@ -391,66 +112,41 @@
             </div>
         </div>
     </div>
+
     <div class="row">
+        {{-- Business Feed: Partner Metrics + Opportunity History --}}
         <div class="col-lg-12">
             <div class="panel panel-icon panel-locked" id="panel-1">
                 <div class="panel-hdr">
-                    <h2> Business <span class="fw-light"><i>Feed</i></span>
-                    </h2>
+                    <h2> Business <span class="fw-light"><i>Feed</i></span></h2>
                 </div>
                 <div class="panel-container border-faded border-start-0 border-end-0 border-bottom-0">
                     <div class="panel-content p-0">
                         <div class="row row-grid g-0">
                             <div class="col-sm-4 p-3" style="background: var(--app-nav-item-active-bg);">
+                                @php
+                                    $metrics = [
+                                        ['label' => 'Project Delivery', 'value' => $avgProjectCompletion, 'color' => 'primary-700'],
+                                        ['label' => 'Lead Acceptance', 'value' => $leadAcceptanceRate, 'color' => 'primary-700'],
+                                        ['label' => 'Blueprint Progress', 'value' => $avgBlueprintCompletion, 'color' => 'primary-700'],
+                                        ['label' => 'Contact Engagement', 'value' => $contactEngagement, 'color' => $contactEngagement > 80 ? 'success-500' : ($contactEngagement > 40 ? 'primary-700' : 'warning-500')],
+                                    ];
+                                @endphp
+                                @foreach($metrics as $metric)
+                                    <div class="d-flex mt-3">
+                                        <span class="h6 m-0 fw-300">{{ $metric['label'] }}</span>
+                                        <span class="h6 d-inline-block ms-auto">{{ $metric['value'] }}%</span>
+                                    </div>
+                                    <div class="progress progress mb-4 border shadow-inset-3">
+                                        <div aria-label="{{ $metric['value'] }}%" aria-valuemax="100" aria-valuemin="0"
+                                             aria-valuenow="{{ $metric['value'] }}"
+                                             class="progress-bar bg-{{ $metric['color'] }} progress-bar-striped"
+                                             role="progressbar" style="width: {{ $metric['value'] }}%;"></div>
+                                    </div>
+                                @endforeach
                                 <div class="d-flex mt-3">
-                                    <span class="h6 m-0 fw-300">Close Rate</span>
-                                    <span class="h6 d-inline-block ms-auto">65%</span>
-                                </div>
-                                <div class="progress progress mb-4 border shadow-inset-3">
-                                    <div aria-label="65%" aria-labelledby="Close Rate" aria-valuemax="100"
-                                         aria-valuemin="0" aria-valuenow="65"
-                                         class="progress-bar bg-primary-700 progress-bar-striped" role="progressbar"
-                                         style="width: 65%;"></div>
-                                </div>
-                                <div class="d-flex">
-                                    <span class="h6 m-0 fw-300">Growth Rate</span>
-                                    <span class="h6 d-inline-block ms-auto">50%</span>
-                                </div>
-                                <div class="progress progress mb-4 border shadow-inset-3">
-                                    <div aria-label="50%" aria-labelledby="Growth Rate" aria-valuemax="100"
-                                         aria-valuemin="0" aria-valuenow="50"
-                                         class="progress-bar bg-primary-700 progress-bar-striped" role="progressbar"
-                                         style="width: 50%;"></div>
-                                </div>
-                                <div class="d-flex">
-                                    <span class="h6 m-0 fw-300">Retention Rate</span>
-                                    <span class="h6 d-inline-block ms-auto">75%</span>
-                                </div>
-                                <div class="progress progress mb-4 border shadow-inset-3">
-                                    <div aria-label="75%" aria-labelledby="Retention Rate" aria-valuemax="100"
-                                         aria-valuemin="0" aria-valuenow="75"
-                                         class="progress-bar bg-primary-700 progress-bar-striped" role="progressbar"
-                                         style="width: 75%;"></div>
-                                </div>
-                                <div class="d-flex">
-                                    <span class="h6 m-0 fw-300">Engagement Rate</span>
-                                    <span class="h6 d-inline-block ms-auto">84%</span>
-                                </div>
-                                <div class="progress progress mb-4 border shadow-inset-3">
-                                    <div aria-label="84%" aria-labelledby="Engagement Rate" aria-valuemax="100"
-                                         aria-valuemin="0" aria-valuenow="84"
-                                         class="progress-bar bg-primary-700 progress-bar-striped" role="progressbar"
-                                         style="width: 84%;"></div>
-                                </div>
-                                <div class="d-flex">
-                                    <span class="h6 m-0 fw-300">Marketing Budget</span>
-                                    <span class="h6 d-inline-block ms-auto">97%</span>
-                                </div>
-                                <div class="progress progress mb-4 border shadow-inset-3">
-                                    <div aria-label="97%" aria-labelledby="Marketing Budget" aria-valuemax="100"
-                                         aria-valuemin="0" aria-valuenow="97"
-                                         class="progress-bar bg-danger-500 progress-bar-striped" role="progressbar"
-                                         style="width: 97%;"></div>
+                                    <span class="h6 m-0 fw-300">Total Funding</span>
+                                    <span class="h6 d-inline-block ms-auto">${{ number_format($totalFunding, 0) }}</span>
                                 </div>
                             </div>
                             <div class="col-sm-8 p-3 bg-subtlelight-fade">
@@ -461,41 +157,44 @@
                 </div>
             </div>
         </div>
+
+        {{-- Blueprint Completion Radar --}}
         <div class="col-lg-4">
             <div class="panel panel-icon panel-locked" id="panel-2">
                 <div class="panel-hdr">
-                    <h2> Blueprint <span class="fw-light"><i>Completion</i></span>
-                    </h2>
+                    <h2> Blueprint <span class="fw-light"><i>Completion</i></span></h2>
                 </div>
                 <div class="panel-container">
                     <div class="panel-content">
-                        <div id="enablement-activity-chart" style="height: 350px;"></div>
+                        <div id="blueprint-radar-chart" style="height: 350px;"></div>
                     </div>
                 </div>
             </div>
         </div>
+
+        {{-- Lead Sources --}}
         <div class="col-lg-4">
             <div class="panel panel-icon" id="panel-3">
                 <div class="panel-hdr">
-                    <h2> Data <span class="fw-light"><i>Stream</i></span>
-                    </h2>
+                    <h2> Lead <span class="fw-light"><i>Sources</i></span></h2>
                 </div>
                 <div class="panel-container">
                     <div class="panel-content">
-                        <div id="data-stream-chart" style="height: 350px;"></div>
+                        <div id="lead-sources-chart" style="height: 350px;"></div>
                     </div>
                 </div>
             </div>
         </div>
+
+        {{-- Project Status --}}
         <div class="col-lg-4">
             <div class="panel panel-icon" id="panel-4">
                 <div class="panel-hdr">
-                    <h2> Product Area <span class="fw-light"><i>Distribution</i></span>
-                    </h2>
+                    <h2> Project <span class="fw-light"><i>Status</i></span></h2>
                 </div>
                 <div class="panel-container">
                     <div class="panel-content">
-                        <div id="product-area-distribution-chart" style="height: 350px;"></div>
+                        <div id="project-status-chart" style="height: 350px;"></div>
                     </div>
                 </div>
             </div>
@@ -504,5 +203,198 @@
 @endsection
 
 @section('scripts')
-    @vite(['resources/scripts/pages/accountdashboard.js'])
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ── Sourced + Influenced NNACV (stacked area) vs Opportunity Count (line) ──
+    var opportunityHistory = @json($opportunityHistory);
+    if (opportunityHistory.length > 0) {
+        // Resolve SmartAdmin theme colors (fallback to defaults if colorMap not ready)
+        var cm = window.colorMap || {};
+        var bv = (cm.bootstrapVars && cm.bootstrapVars.bodyColor) || null;
+        var pr = (cm.primary && cm.primary[400]) || null;
+        var pr6 = (cm.primary && cm.primary[600]) || null;
+        var su = (cm.success && cm.success[400]) || null;
+
+        var bodyColorHex = bv ? bv.hex : '#6c757d';
+        var bodyColor01 = bv ? bv.rgba(0.1) : 'rgba(108,117,125,0.1)';
+        var bodyColor07 = bv ? bv.rgba(0.7) : 'rgba(108,117,125,0.7)';
+        var bodyColor08 = bv ? bv.rgba(0.8) : 'rgba(108,117,125,0.8)';
+        var primaryHex = pr ? pr.hex : '#886ab5';
+        var primary6Hex = pr6 ? pr6.hex : '#7454a5';
+        var successHex = su ? su.hex : '#1dc9b7';
+
+        new ApexCharts(document.querySelector('#opportunity-chart'), {
+            series: [
+                {
+                    name: 'Sourced',
+                    type: 'area',
+                    data: opportunityHistory.map(function(h) { return parseFloat(h.sourced_amount); })
+                },
+                {
+                    name: 'Influenced',
+                    type: 'area',
+                    data: opportunityHistory.map(function(h) { return parseFloat(h.influenced_amount); })
+                },
+                {
+                    name: 'Opportunity Count',
+                    type: 'line',
+                    data: opportunityHistory.map(function(h) { return h.opportunity_count; })
+                }
+            ],
+            chart: {
+                height: 335,
+                type: 'line',
+                zoom: { enabled: false },
+                stacked: true,
+                toolbar: { show: false },
+                fontFamily: 'inherit',
+                parentHeightOffset: 0
+            },
+            colors: [primaryHex, successHex, bodyColor08],
+            stroke: {
+                width: [1, 1, 2],
+                curve: 'smooth',
+                dashArray: [0, 0, 0]
+            },
+            fill: {
+                type: ['solid', 'solid', 'solid'],
+                opacity: [0.25, 0.15, 1]
+            },
+            markers: {
+                size: [0, 0, 3],
+                colors: [primaryHex, successHex, bodyColor07],
+                strokeColors: [primaryHex, successHex, bodyColor07],
+                strokeWidth: 2,
+                hover: { sizeOffset: 2 }
+            },
+            xaxis: {
+                categories: opportunityHistory.map(function(h) { return h.snapshot_month; }),
+                labels: {
+                    style: { colors: bodyColorHex, fontSize: '12px' }
+                },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: [
+                {
+                    seriesName: 'Sourced',
+                    tickAmount: 6,
+                    labels: {
+                        style: { colors: bodyColorHex, fontSize: '12px' },
+                        formatter: function(val) {
+                            if (val >= 1000000) return '$' + (val / 1000000).toFixed(1) + 'M';
+                            if (val >= 1000) return '$' + (val / 1000).toFixed(0) + 'k';
+                            return '$' + val;
+                        }
+                    }
+                },
+                {
+                    seriesName: 'Sourced',
+                    show: false
+                },
+                {
+                    seriesName: 'Opportunity Count',
+                    opposite: true,
+                    tickAmount: 6,
+                    labels: {
+                        style: { colors: bodyColorHex, fontSize: '12px' },
+                        formatter: function(val) { return Math.round(val).toLocaleString(); }
+                    }
+                }
+            ],
+            legend: {
+                show: true,
+                position: 'top',
+                horizontalAlign: 'center',
+                fontSize: '14px',
+                fontFamily: 'inherit',
+                labels: { colors: bodyColorHex },
+                markers: { width: 18, height: 6, radius: 2 },
+                itemMargin: { horizontal: 12, vertical: 0 }
+            },
+            grid: {
+                borderColor: bodyColor01,
+                strokeDashArray: 3,
+                yaxis: { lines: { show: true } },
+                xaxis: { lines: { show: false } }
+            },
+            dataLabels: { enabled: false },
+            tooltip: {
+                shared: true,
+                intersect: false,
+                theme: 'dark',
+                y: [
+                    { formatter: function(val) { return '$' + val.toLocaleString(); } },
+                    { formatter: function(val) { return '$' + val.toLocaleString(); } },
+                    { formatter: function(val) { return val.toLocaleString(); } }
+                ]
+            }
+        }).render();
+    } else {
+        document.querySelector('#opportunity-chart').innerHTML = '<div class="text-center text-muted py-5"><i class="fal fa-chart-area fa-2x mb-2 opacity-50"></i><p>No opportunity history yet</p></div>';
+    }
+
+    // ── Blueprint Completion Radar (per-role series) ──
+    var blueprintSeries = @json($blueprintByArea);
+    var blueprintLabels = @json($blueprintAreas);
+    if (blueprintSeries.length > 0 && blueprintLabels.length > 0) {
+        new ApexCharts(document.querySelector('#blueprint-radar-chart'), {
+            chart: { type: 'radar', height: 350, toolbar: { show: false }, fontFamily: 'inherit' },
+            series: blueprintSeries,
+            labels: blueprintLabels,
+            yaxis: { max: 100, show: false, tickAmount: 4 },
+            colors: ['#00BCD4', '#fd7e14', '#886ab5'],
+            markers: { size: 3, strokeWidth: 1 },
+            fill: { opacity: [0.15, 0.15, 0.15] },
+            stroke: { width: 2 },
+            legend: { show: true, position: 'bottom', fontSize: '13px', labels: { colors: '#6c757d' }, markers: { width: 10, height: 10, radius: 2 } },
+            plotOptions: { radar: { polygons: { strokeDashArray: 3, connectorColors: 'rgba(108,117,125,0.15)', fill: { colors: ['rgba(108,117,125,0.03)', 'transparent'] } } } },
+            tooltip: { y: { formatter: function(val) { return val + '%'; } } }
+        }).render();
+    } else {
+        document.querySelector('#blueprint-radar-chart').innerHTML = '<div class="text-center text-muted py-5"><i class="fal fa-layer-group fa-2x mb-2 opacity-50"></i><p>No blueprints assigned</p></div>';
+    }
+
+    // ── Lead Sources Pie ──
+    var leadSources = @json($leadSources);
+    var sourceLabels = Object.keys(leadSources);
+    var sourceValues = Object.values(leadSources);
+    if (sourceLabels.length > 0) {
+        new ApexCharts(document.querySelector('#lead-sources-chart'), {
+            chart: { type: 'donut', height: 350 },
+            series: sourceValues,
+            labels: sourceLabels.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+            colors: ['#886ab5', '#fd7e14', '#00BCD4', '#28a745', '#dc3545', '#6c757d'],
+            legend: { position: 'bottom' },
+            plotOptions: { pie: { donut: { size: '55%' } } },
+            dataLabels: { enabled: true }
+        }).render();
+    } else {
+        document.querySelector('#lead-sources-chart').innerHTML = '<div class="text-center text-muted py-5"><i class="fal fa-bullseye fa-2x mb-2 opacity-50"></i><p>No leads yet</p></div>';
+    }
+
+    // ── Project Status Pie ──
+    var projectStatuses = @json($projectStatuses);
+    var statusLabels = Object.keys(projectStatuses);
+    var statusValues = Object.values(projectStatuses);
+    var statusColors = {
+        'Completed': '#28a745', 'In Progress': '#886ab5', 'Draft': '#6c757d',
+        'On Hold': '#fd7e14', 'planning': '#17a2b8', 'active': '#886ab5'
+    };
+    if (statusLabels.length > 0) {
+        new ApexCharts(document.querySelector('#project-status-chart'), {
+            chart: { type: 'donut', height: 350 },
+            series: statusValues,
+            labels: statusLabels,
+            colors: statusLabels.map(s => statusColors[s] || '#868e96'),
+            legend: { position: 'bottom' },
+            plotOptions: { pie: { donut: { size: '55%' } } },
+            dataLabels: { enabled: true }
+        }).render();
+    } else {
+        document.querySelector('#project-status-chart').innerHTML = '<div class="text-center text-muted py-5"><i class="fal fa-clipboard fa-2x mb-2 opacity-50"></i><p>No projects yet</p></div>';
+    }
+});
+</script>
 @endsection

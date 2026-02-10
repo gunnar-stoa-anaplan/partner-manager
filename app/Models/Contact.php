@@ -39,4 +39,9 @@ class Contact extends Model
     {
         return $this->hasMany(EnablementRegistration::class);
     }
+
+    public function blueprintEnrollments()
+    {
+        return $this->hasMany(BlueprintEnrollment::class);
+    }
 }

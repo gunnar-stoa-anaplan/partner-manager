@@ -77,6 +77,11 @@
                     <span class="nav-link-text">Calendar</span>
                 </a>
             </li>
+            <li>
+                <a href="{{ route('partners.blueprints', session('selected_partner_id')) }}">
+                    <span class="nav-link-text">Blueprints</span>
+                </a>
+            </li>
         </ul>
     </li>
 
@@ -181,6 +186,15 @@
         </a>
     </li>
 
+    <li>
+        <a href="{{ route('blueprints.catalog') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#layers"></use>
+            </svg>
+            <span class="nav-link-text">Enablement Blueprints</span>
+        </a>
+    </li>
+
     {{-- Program Administration - Admin Only --}}
     @if(Auth::user()->role === 'admin')
     <li class="nav-title"><span>Program Administration</span></li>
@@ -260,7 +274,7 @@
     </li>
 
     <li>
-        <a href="{{ route('admin.blueprints') }}">
+        <a href="{{ route('blueprints.index') }}">
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#layers"></use>
             </svg>

@@ -39,13 +39,13 @@ class EnablementEvent extends Model
 
     const TYPES = [
         'workshop' => 'Workshop',
-        'training' => 'Training',
+        'academy' => 'Academy',
         'certification_exam' => 'Certification Exam',
         'webinar' => 'Webinar',
         'bootcamp' => 'Bootcamp',
         'onboarding' => 'Onboarding',
         'hackathon' => 'Hackathon',
-        'conference' => 'Conference',
+        'connect' => 'Connect',
         'other' => 'Other',
     ];
 
@@ -56,12 +56,11 @@ class EnablementEvent extends Model
     ];
 
     const CATEGORIES = [
-        'Technical',
+        'Delivery',
         'Sales',
         'Pre-Sales',
-        'Solution Architecture',
-        'Implementation',
-        'General',
+        'Platform',
+        'Awareness',
     ];
 
     const PRODUCT_AREAS = [
@@ -82,13 +81,13 @@ class EnablementEvent extends Model
 
     const TYPE_COLORS = [
         'workshop' => '#7B1FA2',
-        'training' => '#2196F3',
+        'academy' => '#2196F3',
         'certification_exam' => '#fd7e14',
         'webinar' => '#00BCD4',
         'bootcamp' => '#dc3545',
         'onboarding' => '#20c997',
         'hackathon' => '#886ab5',
-        'conference' => '#1B5E20',
+        'connect' => '#1B5E20',
         'other' => '#868e96',
     ];
 

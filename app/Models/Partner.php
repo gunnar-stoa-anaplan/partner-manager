@@ -78,6 +78,11 @@ class Partner extends Model
         return $this->hasMany(EnablementRegistration::class);
     }
 
+    public function blueprintAssignments()
+    {
+        return $this->hasMany(PartnerBlueprintAssignment::class);
+    }
+
     public function enablementSessions()
     {
         return $this->belongsToMany(EnablementSession::class, 'partner_enablement_session')
