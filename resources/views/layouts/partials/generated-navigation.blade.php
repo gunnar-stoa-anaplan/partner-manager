@@ -1,7 +1,5 @@
 <ul id="js-nav-menu" class="nav-menu">
 
-    <li class="nav-title"><span>Partner Manager</span></li>
-
     <li>
         <a href="{{ route('welcome') }}">
             <svg class="sa-icon">
@@ -46,6 +44,83 @@
             </svg>
             <span class="nav-link-text">Partner Coach</span>
         </a>
+    </li>
+
+    <li class="nav-title"><span>Engage</span></li>
+
+    <li class="nav-item">
+        <a href="#" title="Project Health" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#clipboard"></use>
+            </svg>
+            <span class="nav-link-text">Project Health</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('projects.index') }}">
+                    <span class="nav-link-text">Projects</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('projects.risks') }}">
+                    <span class="nav-link-text">Risks</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+
+    <li class="nav-item">
+        <a href="#" title="Field Engagements" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#calendar"></use>
+            </svg>
+            <span class="nav-link-text">Field Engagements</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('calendar.portfolio') }}">
+                    <span class="nav-link-text">Partner Calendar</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('enablement.calendar') }}">
+                    <span class="nav-link-text">Enablement Calendar</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+
+    <li class="nav-item">
+        <a href="#" title="Field Enablement" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#users"></use>
+            </svg>
+            <span class="nav-link-text">Field Enablement</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('influence_map') }}">
+                    <span class="nav-link-text">Influence Map</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('field.breadth') }}">
+                    <span class="nav-link-text">Breadth</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('field.depth') }}">
+                    <span class="nav-link-text">Depth</span>
+                </a>
+            </li>
+            @if(session('selected_partner_id'))
+            <li>
+                <a href="{{ route('field.key-influencers') }}">
+                    <span class="nav-link-text">Key Influencers</span>
+                </a>
+            </li>
+            @endif
+        </ul>
     </li>
 
     @if(session('selected_partner_id'))
@@ -110,41 +185,6 @@
             </li>
         </ul>
     </li>
-
-    <li>
-        <a href="{{ route('projects.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#clipboard"></use>
-            </svg>
-            <span class="nav-link-text">Project Delivery</span>
-        </a>
-    </li>
-
-    <li class="nav-item">
-        <a href="#" title="Field Enablement" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#users"></use>
-            </svg>
-            <span class="nav-link-text">Field Enablement</span>
-        </a>
-        <ul>
-            <li>
-                <a href="{{ route('field.key-influencers') }}">
-                    <span class="nav-link-text">Key Influencers</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('field.breadth') }}">
-                    <span class="nav-link-text">Breadth</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('field.depth') }}">
-                    <span class="nav-link-text">Depth</span>
-                </a>
-            </li>
-        </ul>
-    </li>
     @endif
 
     {{-- Dashboards --}}
@@ -168,27 +208,18 @@
         </a>
     </li>
 
-    <li>
-        <a href="{{ route('calendar.portfolio') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#calendar"></use>
-            </svg>
-            <span class="nav-link-text">Partner Calendar</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('enablement.calendar') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#award"></use>
-            </svg>
-            <span class="nav-link-text">Enablement Calendar</span>
-        </a>
-    </li>
-
     {{-- Administration - Admin Only --}}
     @if(Auth::user()->role === 'admin')
     <li class="nav-title"><span>Administration</span></li>
+
+    <li>
+        <a href="{{ route('admin.dashboard') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#monitor"></use>
+            </svg>
+            <span class="nav-link-text">Admin Dashboard</span>
+        </a>
+    </li>
 
     <li>
         <a href="{{ route('partner-goals.index') }}">
@@ -300,6 +331,25 @@
                 <use href="/icons/sprite.svg#upload"></use>
             </svg>
             <span class="nav-link-text">Data Imports</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ route('salesforce-credentials.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#cloud"></use>
+            </svg>
+            <span class="nav-link-text">Salesforce Credentials</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="/pulse" target="_blank">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#activity"></use>
+            </svg>
+            <span class="nav-link-text">System Pulse</span>
+            <span class="dl-ref badge badge-info">live</span>
         </a>
     </li>
 

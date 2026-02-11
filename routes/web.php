@@ -21,6 +21,7 @@ use App\Http\Controllers\EnablementEventController;
 use App\Http\Controllers\BlueprintController;
 use App\Http\Controllers\BlueprintAssignmentController;
 use App\Http\Controllers\PartnerGoalController;
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\RoutingController;
 
 /*
@@ -64,7 +65,7 @@ Route::middleware(['auth'])->group(function () {
     */
     Route::view('partner_profile', 'partner_profile')->name('partner_profile');
     Route::view('relationship_overview', 'relationship_overview')->name('relationship_overview');
-    Route::view('influence_map', 'influence_map')->name('influence_map');
+    Route::get('/influence-map', [FieldEnablementController::class, 'influenceMap'])->name('influence_map');
     Route::get('/calendar', function () {
         $partners = \App\Models\Partner::where('user_id', auth()->id())
             ->select('id', 'name')
@@ -99,6 +100,7 @@ Route::middleware(['auth'])->group(function () {
     | Project Delivery
     |--------------------------------------------------------------------------
     */
+    Route::get('/projects/risks', [ProjectController::class, 'risks'])->name('projects.risks');
     Route::resource('projects', ProjectController::class);
 
     /*
@@ -252,6 +254,7 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['admin'])->group(function () {
+        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
         Route::get('partner-assignments', [PartnerController::class, 'index'])->name('partners.index');
         Route::resource('partners', PartnerController::class);
         Route::resource('objectives', ObjectiveController::class);
