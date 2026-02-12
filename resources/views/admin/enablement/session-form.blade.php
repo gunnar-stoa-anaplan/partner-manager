@@ -6,12 +6,15 @@
 @section('page-title')
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> $session ? 'Edit Session' : 'Add Session',
-        'pageSubTitle1' => $event->title,
+        'pageSubTitle1' => 'Partner Enablement', 'pageSubTitle1Url' => route('enablement.calendar'),
+        'pageSubTitle2' => $event->title, 'pageSubTitle2Url' => route('enablement-events.show', $event->id),
         'pageSubText' => $session ? 'Update session details' : 'Schedule a new delivery session'
     ])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Configure the session details — date, time, location, instructor, capacity, and geography. Each session is a single delivery of a catalog event. Set the capacity and logistics here, then manage registrations from the session detail page.</p>
+
     <div class="row">
         <div class="col-xl-8 offset-xl-2">
             <div class="card shadow-0 mb-g">

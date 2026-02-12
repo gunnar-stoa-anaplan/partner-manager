@@ -5,6 +5,7 @@
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">The Admin Dashboard gives you a system-wide view of program health — partner counts, user activity, import status, enablement utilization, and pipeline coverage. Use it to quickly assess whether the platform is being used effectively and to spot operational issues before they become problems.</p>
 
     {{-- ════════════════════════════════════════════════════════════════
          Section 1: Summary Cards (2 rows of 4)

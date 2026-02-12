@@ -16,8 +16,10 @@ class Opportunity extends Model
         'account_name',
         'partner_id',
         'stage',
+        'previous_stage',
         'amount',
         'close_date',
+        'previous_close_date',
         'fiscal_quarter',
         'fiscal_year',
         'type',
@@ -29,11 +31,14 @@ class Opportunity extends Model
         'owner',
         'excel_data',
         'import_id',
+        'first_seen_at',
     ];
 
     protected $casts = [
         'excel_data' => 'array',
         'close_date' => 'date',
+        'previous_close_date' => 'date',
+        'first_seen_at' => 'datetime',
         'amount' => 'decimal:2',
         'probability' => 'decimal:2',
     ];

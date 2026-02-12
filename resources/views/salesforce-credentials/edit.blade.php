@@ -1,10 +1,12 @@
 @extends('layouts.vertical', ['pageTitle' => 'Edit Salesforce Credentials'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Edit Salesforce Credentials', 'pageSubTitle1' => 'System'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Edit Salesforce Credentials', 'pageSubTitle1' => 'System', 'pageSubTitle1Url' => route('admin.dashboard')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Update the Salesforce Connected App credentials used for data synchronization. Modify the client ID, secret, or endpoint URLs as needed. Use the test connection button to verify your changes work before saving.</p>
+
 <div class="row">
     <div class="col-xl-8">
         <div class="card shadow-0 mb-g">

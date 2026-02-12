@@ -4,10 +4,12 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $project->name, 'pageSubTitle1' => 'Project Delivery', 'pageSubText' => $project->partner->name ?? ''])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $project->name, 'pageSubTitle1' => 'Engage', 'pageSubTitle1Url' => route('welcome'), 'pageSubTitle2' => 'Project Health', 'pageSubTitle2Url' => route('projects.index'), 'pageSubText' => $project->partner->name ?? ''])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">This is the project detail view showing delivery status, milestones, and risk indicators. Use it to track project health, update milestone progress, log risks, and coordinate with the partner on upcoming deliverables. Changes made here are reflected in the partner's overall project health dashboard.</p>
+
     {{-- Project Info Card --}}
     <div class="row mb-g">
         <div class="col-lg-12">

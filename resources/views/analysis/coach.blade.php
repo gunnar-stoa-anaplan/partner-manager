@@ -58,10 +58,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Partner Coach', 'pageSubTitle1' => 'Recommendations', 'pageSubTitle2'=> 'Analysis'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Partner Coach', 'pageSubTitle1' => 'Analysis', 'pageSubTitle1Url' => route('analysis.index')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Partner Coach gives you an AI-powered briefing on your portfolio — surfacing the partners most at risk, the ones with the strongest momentum, and the actions most likely to move the needle this week. Use the coaching cards to quickly orient yourself each morning and focus your energy where it will have the greatest impact.</p>
 
 @php
     $userName = Auth::user()->name;

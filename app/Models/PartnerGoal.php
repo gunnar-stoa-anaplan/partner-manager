@@ -30,4 +30,9 @@ class PartnerGoal extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
+    public function dimensions()
+    {
+        return $this->hasMany(PartnerGoalDimension::class);
+    }
 }

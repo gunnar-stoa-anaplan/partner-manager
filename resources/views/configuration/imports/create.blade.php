@@ -1,10 +1,12 @@
 @extends('layouts.vertical', ['pageTitle' => 'New Import'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'New Import', 'pageSubTitle1' => 'Data Imports'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'New Import', 'pageSubTitle1' => 'System', 'pageSubTitle1Url' => route('admin.dashboard'), 'pageSubTitle2' => 'Data Imports', 'pageSubTitle2Url' => route('imports.index')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Upload an Excel file to import data into Partner Manager. Select the import type, choose your file, and the system will process it — extracting partners, opportunities, and other records based on the file format. Each import is logged so you can review results and troubleshoot any issues from the import history.</p>
+
 <div class="row">
     <div class="col-xl-8 offset-xl-2">
         <div class="card shadow-0 mb-g">

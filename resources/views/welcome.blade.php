@@ -32,14 +32,13 @@
                         <div class="col-lg-6">
                             <ul class="list-spaced">
                                 <li><strong>Connect to Salesforce</strong> – Make sure you create and validate your Salesforce credentials. Your partners will automatically show up here.</li>
-                                <li><strong>Select a Partner</strong> – Use the top-left dropdown menu to activate the partner-specific dashboard.</li>
+                                <li><strong>Select a Partner</strong> – Select My Parnters to view all of your partners.</li>
                                 <li>Navigate through the sidebar to access key metrics, business development leads, and project delivery details.</li>
                             </ul>
                         </div>
                         <div class="col-lg-6">
                             <ul class="list-spaced">
                                 <li>Each partner view includes project history, performance analytics, and field engagement tools.</li>
-                                <li>Use the Configuration section to manage Salesforce, Slack, and LinkedIn integrations.</li>
                                 <li>Breadcrumbs and tooltips are provided throughout the app to guide you.</li>
                             </ul>
                         </div>
@@ -63,7 +62,7 @@
                     </div>
                     <div class="flex-fill">
                         <span class="h5">Pro tip!</span>
-                        You can interact with an <strong>automated partner analyst</strong> that evaluates partner goals, objectives, and KPIs — and suggests strategic actions based on current performance data.
+                        Interact with an <strong>automated partner analyst</strong> that evaluates partner goals, objectives, and KPIs — and suggests strategic actions based on current performance data.
                     </div>
                 </div>
             </div>
@@ -161,15 +160,6 @@
                         Connect Salesforce, Slack, and LinkedIn. Assign goals and objectives per partner. Configure access and team roles.
                     </p>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer Message -->
-    <div class="row">
-        <div class="col-12">
-            <div class="mt-3 mb-5 text-center text-muted h5 fst-italic">
-                <i class="fal fa-check text-success me-1"></i> You're viewing the Welcome page. Once a partner is selected, dashboards and analytics will be available.
             </div>
         </div>
     </div>

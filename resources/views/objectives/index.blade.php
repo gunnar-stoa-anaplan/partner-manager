@@ -1,10 +1,12 @@
 @extends('layouts.vertical', ['pageTitle' => 'Objectives'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Objectives', 'pageSubTitle1' => 'Configuration'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Objectives', 'pageSubTitle1' => 'Administration', 'pageSubTitle1Url' => route('admin.dashboard')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Objectives define the strategic goals you set for your partner engagements. Create and manage objectives here, then assign them to specific partners to track progress. Use objectives to align your partner program with broader business outcomes and measure success over time.</p>
+
 <div class="row">
     <div class="col-xl-12">
         <div class="card shadow-0 mb-g">

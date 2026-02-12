@@ -1,10 +1,12 @@
 @extends('layouts.vertical', ['pageTitle' => 'User Management'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'User Management', 'pageSubTitle1' => 'Configuration'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'User Management', 'pageSubTitle1' => 'Administration', 'pageSubTitle1Url' => route('admin.dashboard')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">User Management lets you create, edit, and deactivate user accounts and assign roles — Admin, PSM, or Manager. Each user's role determines what they can see and do in the application. Use this view to onboard new team members, update permissions, and manage the team that runs your partner program.</p>
+
 <div class="row">
     <div class="col-xl-12">
         <div class="card shadow-0 mb-g">

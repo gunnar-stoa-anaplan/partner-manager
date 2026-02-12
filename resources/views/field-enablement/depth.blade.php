@@ -4,10 +4,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Field Depth', 'pageSubTitle1' => 'Field Enablement', 'pageSubText' => 'Contacts with deep project involvement (3+)'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Field Depth', 'pageSubTitle1' => 'Engage', 'pageSubTitle1Url' => route('welcome'), 'pageSubTitle2' => 'Field Enablement', 'pageSubTitle2Url' => route('influence_map'), 'pageSubText' => 'Contacts with deep project involvement (3+)'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Depth tracks how deeply your partners have invested in specific areas — looking at contacts with three or more project involvements. Use this view to understand which partners have battle-tested practitioners and which ones need more hands-on experience before they can take on complex engagements independently.</p>
     {{-- Summary Cards --}}
     <div class="row mb-g">
         <div class="col-sm-6 col-xl-3">

@@ -12,6 +12,7 @@ use App\Models\Resource;
 use App\Models\ResourceSnapshot;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Services\ChangeDetectionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -227,9 +228,15 @@ class ImportController extends Controller
                     ->first();
 
                 if ($opportunity) {
+                    $opportunityData['previous_stage'] = $opportunity->stage;
+                    $opportunityData['previous_close_date'] = $opportunity->close_date;
+                    if (!$opportunity->first_seen_at) {
+                        $opportunityData['first_seen_at'] = $opportunity->created_at;
+                    }
                     $opportunity->update($opportunityData);
                     $opportunitiesUpdated++;
                 } else {
+                    $opportunityData['first_seen_at'] = now();
                     Opportunity::create($opportunityData);
                     $opportunitiesCreated++;
                 }
@@ -243,6 +250,9 @@ class ImportController extends Controller
 
         // Create historical snapshots for all opportunities from this import
         $this->createOpportunitySnapshots($import);
+
+        // Detect and alert on changes
+        app(ChangeDetectionService::class)->detectChangesForImport($import);
 
         // Update import statistics
         $import->update([

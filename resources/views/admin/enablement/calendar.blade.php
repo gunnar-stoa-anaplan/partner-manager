@@ -20,10 +20,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Enablement Calendar', 'pageSubTitle1' => 'Administration', 'pageSubText' => 'Drag published events onto the calendar to schedule sessions'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Enablement Calendar', 'pageSubTitle1' => 'Partner Enablement', 'pageSubTitle1Url' => route('enablement.calendar'), 'pageSubText' => 'Drag published events onto the calendar to schedule sessions'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">The Enablement Calendar lets you schedule sessions by dragging published events from the sidebar onto the calendar. Each session gets its own date, time, and capacity settings. Use this view to plan your enablement delivery schedule and ensure sessions are spread out to avoid conflicts and maximize attendance.</p>
     <div class="row mb-4">
         {{-- Calendar --}}
         <div class="col-lg-9">

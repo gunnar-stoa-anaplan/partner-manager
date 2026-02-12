@@ -4,10 +4,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Partner Calendar', 'pageSubTitle1' => 'Events', 'pageSubText' => 'Events across all your partners'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Partner Calendar', 'pageSubTitle1' => 'Engage', 'pageSubTitle1Url' => route('welcome'), 'pageSubTitle2' => 'Field Engagements', 'pageSubText' => 'Events across all your partners'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">The Partner Calendar shows scheduled events, meetings, and milestones across all your partners in a single view. Use the calendar to plan your week, avoid scheduling conflicts, and ensure consistent engagement cadence across your portfolio. Click any event for details, or use the sidebar to filter by event type.</p>
     <div class="row mb-4">
         <div class="col-lg-8 col-xl-9">
             <div class="card">

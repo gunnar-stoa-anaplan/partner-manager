@@ -30,6 +30,8 @@
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Track this contact's individual progress through the assigned blueprint. Each outcome shows completion status for its content items — mark items as complete as the contact finishes them. Use this view to monitor readiness and identify which learning areas still need attention.</p>
+
     {{-- Summary Card --}}
     <div class="row mb-g">
         <div class="col-lg-12">

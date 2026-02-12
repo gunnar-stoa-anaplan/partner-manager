@@ -4,10 +4,12 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Enablement Calendar', 'pageSubTitle1' => 'Partner Enablement', 'pageSubText' => 'Browse upcoming enablement sessions and nominate your partners\' contacts'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Enablement Calendar', 'pageSubTitle1' => 'Partner Enablement', 'pageSubTitle1Url' => route('welcome'), 'pageSubText' => 'Browse upcoming enablement sessions and nominate your partners\' contacts'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Browse upcoming enablement sessions across all your partners. Use the calendar to find sessions by date, filter by event type or geography, and nominate partner contacts directly from the session details. This is your central hub for managing your partners' enablement participation.</p>
+
     <div class="row mb-4">
         {{-- Calendar --}}
         <div class="col-lg-9">

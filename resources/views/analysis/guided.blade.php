@@ -94,10 +94,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Guided Analysis', 'pageSubTitle1' => 'Portfolio Wizard', 'pageSubTitle2'=> 'Analysis'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Guided Analysis', 'pageSubTitle1' => 'Analysis', 'pageSubTitle1Url' => route('analysis.index')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Guided Analysis walks you through a step-by-step workflow to answer common partner management questions — from "which partners need the most attention?" to "where are my biggest growth opportunities?" Follow the wizard to select your question, set your parameters, and get a focused analysis with clear next-step recommendations.</p>
 
     <!-- Wizard Step Indicator -->
     <div class="card shadow-0 mb-g">

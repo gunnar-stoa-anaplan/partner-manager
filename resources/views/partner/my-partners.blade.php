@@ -1,10 +1,11 @@
 @extends('layouts.vertical', ['pageTitle' => 'My Partners'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'My Partners', 'pageSubTitle1' => 'Partner Manager'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'My Partners', 'pageSubTitle1' => 'Partner Manager', 'pageSubTitle1Url' => route('welcome')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">My Partners is your home base — showing all the partners assigned to you with their key metrics at a glance. Use the search bar to filter by name, industry, or region, then click any partner card to dive into their full profile. Select a partner to make it your active context for the partner-specific views throughout the application.</p>
 <div class="row">
     <div class="col-xl-12">
         <div class="border-faded bg-faded p-3 mb-g d-flex">

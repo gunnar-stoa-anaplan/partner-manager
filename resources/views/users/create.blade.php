@@ -1,10 +1,12 @@
 @extends('layouts.vertical', ['pageTitle' => 'Create User'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Create User', 'pageSubTitle1' => 'User Management'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Create User', 'pageSubTitle1' => 'Administration', 'pageSubTitle1Url' => route('admin.dashboard'), 'pageSubTitle2' => 'User Management', 'pageSubTitle2Url' => route('users.index')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Add a new user to Partner Manager. Set their name, email, password, and role. Admin users get full system access, PSMs can be assigned to manage specific partners, and Managers have team oversight capabilities. The user will be able to log in immediately after creation.</p>
+
 <div class="row">
     <div class="col-xl-8 offset-xl-2">
         <div class="card shadow-0 mb-g">

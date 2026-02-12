@@ -1,10 +1,11 @@
 @extends('layouts.vertical', ['pageTitle' => 'Data Imports'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Data Imports', 'pageSubTitle1' => 'Configuration'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Data Imports', 'pageSubTitle1' => 'System', 'pageSubTitle1Url' => route('admin.dashboard')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Data Imports lets you upload Excel files to bulk-update partners, opportunities, contacts, and certifications. Each import is logged with row counts, success and failure statistics, and error details — so you can track what changed and troubleshoot any issues. Click "New Import" to upload a file, or review the history below to see past imports.</p>
 <div class="row">
     <div class="col-xl-12">
         <div class="card shadow-0 mb-g">

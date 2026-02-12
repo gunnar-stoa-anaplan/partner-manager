@@ -13,6 +13,7 @@ class Import extends Model
 
     protected $fillable = [
         'type',
+        'source',
         'file_name',
         'file_path',
         'total_rows',
@@ -22,11 +23,16 @@ class Import extends Model
         'partners_updated',
         'opportunities_created',
         'opportunities_updated',
+        'projects_created',
+        'projects_updated',
+        'contacts_created',
+        'contacts_updated',
         'resources_created',
         'status',
         'error_log',
         'summary',
         'user_id',
+        'api_token_id',
         'started_at',
         'completed_at',
     ];

@@ -6,12 +6,15 @@
 @section('page-title')
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'Registrations',
-        'pageSubTitle1' => $session->display_title,
+        'pageSubTitle1' => 'Partner Enablement', 'pageSubTitle1Url' => route('enablement.calendar'),
+        'pageSubTitle2' => $session->display_title, 'pageSubTitle2Url' => route('enablement-events.show', $session->event->id),
         'pageSubText' => 'Manage attendee registrations for this session'
     ])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Manage attendee registrations for this session. Review who has been nominated, confirm or cancel registrations, and track attendance. Use this view to ensure the right contacts are enrolled and to monitor capacity before the session takes place.</p>
+
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show">
             {{ session('success') }}

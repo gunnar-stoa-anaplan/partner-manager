@@ -50,6 +50,8 @@ class OpportunityFactory extends Factory
             'product_area' => $this->faker->randomElement(\App\Models\Blueprint::PRODUCT_AREAS),
             'probability' => $this->faker->randomElement([10, 25, 50, 75, 90, 100]),
             'owner' => $this->faker->name(),
+            'revenue_type' => $this->faker->randomElement(['sourced', 'influenced', 'influenced', 'influenced']),
+            'origin' => $this->faker->randomElement(['partner_sourced', 'anaplan_sourced', 'joint']),
             'excel_data' => [],
             'import_id' => Import::factory(),
         ];

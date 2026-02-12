@@ -4,10 +4,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $partner->name, 'pageSubTitle1' => 'Calendar', 'pageSubText' => 'Events for ' . $partner->name])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $partner->name, 'pageSubTitle1' => 'Engage', 'pageSubTitle1Url' => route('welcome'), 'pageSubTitle2' => 'Field Engagements', 'pageSubTitle2Url' => route('calendar.portfolio'), 'pageSubText' => 'Events for ' . $partner->name])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">This calendar shows all scheduled events and milestones for this specific partner. Use it to track upcoming meetings, enablement sessions, QBRs, and key dates — ensuring you stay on top of the engagement rhythm and never miss a critical touchpoint.</p>
     <div class="row mb-4">
         <div class="col-lg-8 col-xl-9">
             <div class="card">

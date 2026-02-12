@@ -4,10 +4,12 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Create Blueprint', 'pageSubTitle1' => 'Enablement Blueprints', 'pageSubText' => 'Define a new partner enablement blueprint'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Create Blueprint', 'pageSubTitle1' => 'Administration', 'pageSubTitle1Url' => route('admin.dashboard'), 'pageSubTitle2' => 'Product Blueprints', 'pageSubTitle2Url' => route('blueprints.index'), 'pageSubText' => 'Define a new partner enablement blueprint'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Use this form to create a new enablement blueprint. Define the name, category, and role focus, then add outcomes and content items from the detail page after saving. Blueprints can be assigned to partners to track their enablement progress.</p>
+
     <div class="row">
         <div class="col-xl-8 offset-xl-2">
             <div class="card shadow-0 mb-g">

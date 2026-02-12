@@ -3,12 +3,14 @@
 @section('page-title')
     @include('layouts.partials/app-pagetitle', [
         'pageTitle' => 'Partner Goals',
-        'pageSubTitle1' => 'Administration',
+        'pageSubTitle1' => 'Partner Admin',
+        'pageSubTitle1Url' => route('admin.dashboard'),
         'pageSubText' => 'Set annual NNACV targets for your partners'
     ])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Partner Goals lets you set annual NNACV (Net New Annual Contract Value) targets for each partner — broken down by sourced and influenced revenue. These targets feed into the Goals & Targets view in the Plan section, where PSMs can track attainment throughout the fiscal year. Select a fiscal year and update the targets for each partner below.</p>
     <div class="row">
         <div class="col-lg-12">
             <div class="card shadow-0 mb-g">

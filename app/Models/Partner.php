@@ -131,6 +131,26 @@ class Partner extends Model
         return $this->hasMany(PartnerGoal::class);
     }
 
+    public function influencers()
+    {
+        return $this->hasMany(Contact::class)->where('contact_type', 'influencer');
+    }
+
+    public function resourceContacts()
+    {
+        return $this->hasMany(Contact::class)->where('contact_type', 'resource');
+    }
+
+    public function contactInteractions()
+    {
+        return $this->hasMany(ContactInteraction::class);
+    }
+
+    public function stageHistory()
+    {
+        return $this->hasMany(PartnerStageHistory::class);
+    }
+
     /**
      * Get historical resource certification counts over time
      *

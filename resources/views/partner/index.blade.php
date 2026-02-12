@@ -1,10 +1,11 @@
 @extends('layouts.vertical', ['pageTitle' => 'Partner Assignments'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Partner Assignments', 'pageSubTitle1' => 'Administration'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Partner Assignments', 'pageSubTitle1' => 'Partner Admin', 'pageSubTitle1Url' => route('admin.dashboard')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Partner Assignments maps each partner to their assigned PSM. Use this view to reassign partners between team members, balance workloads, and ensure every partner has a clear owner. Changes here immediately update what each PSM sees in their My Partners view.</p>
 <div class="row">
     <div class="col-xl-12">
         <div class="card shadow-0 mb-g">

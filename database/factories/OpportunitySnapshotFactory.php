@@ -38,6 +38,8 @@ class OpportunitySnapshotFactory extends Factory
             'fiscal_year' => $this->faker->numberBetween(2024, 2026),
             'type' => $this->faker->randomElement(['New Business', 'Existing Customer - Upgrade']),
             'lead_source' => $this->faker->randomElement(['Partner Referral', 'Web', 'Event']),
+            'revenue_type' => $this->faker->randomElement(['sourced', 'influenced', 'influenced', 'influenced']),
+            'product_area' => $this->faker->randomElement(['Finance', 'Supply Chain', 'Sales', 'Workforce', 'Platform']),
             'probability' => $this->faker->randomElement([10, 25, 50, 75, 90]),
             'owner' => $this->faker->name(),
         ];
@@ -61,6 +63,8 @@ class OpportunitySnapshotFactory extends Factory
             'fiscal_year' => $opportunity->fiscal_year,
             'type' => $opportunity->type,
             'lead_source' => $opportunity->lead_source,
+            'revenue_type' => $opportunity->revenue_type ?? 'influenced',
+            'product_area' => $opportunity->product_area,
             'probability' => $opportunity->probability,
             'owner' => $opportunity->owner,
         ]);

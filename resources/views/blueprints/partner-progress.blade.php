@@ -8,6 +8,8 @@
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">This view shows the partner's overall progress on the assigned blueprint. See which contacts are enrolled, their individual completion rates, and where the partner stands against the blueprint's outcomes. Use it to identify gaps and prioritize which contacts need follow-up to keep the partner on track.</p>
+
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show">
             {{ session('success') }}
@@ -27,7 +29,7 @@
                         <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#enrollContactModal">
                             <i class="fal fa-user-plus me-1"></i> Enroll Contacts
                         </button>
-                        <a href="{{ route('blueprints.detail', $assignment->blueprint) }}" class="btn btn-sm btn-outline-secondary">
+                        <a href="{{ route('blueprints.show', $assignment->blueprint) }}" class="btn btn-sm btn-outline-secondary">
                             <i class="fal fa-arrow-left me-1"></i> Back to Blueprint
                         </a>
                     </div>

@@ -6,11 +6,23 @@
     <nav class="app-breadcrumb" aria-label="breadcrumb">
         <ol class="breadcrumb ms-0 text-muted mb-0">
             @if (!empty($pageSubTitle1))
-                <li class="breadcrumb-item">{{ $pageSubTitle1 }}</li>
+                <li class="breadcrumb-item">
+                    @if (!empty($pageSubTitle1Url))
+                        <a href="{{ $pageSubTitle1Url }}">{{ $pageSubTitle1 }}</a>
+                    @else
+                        {{ $pageSubTitle1 }}
+                    @endif
+                </li>
             @endif
 
             @if (!empty($pageSubTitle2))
-                <li class="breadcrumb-item">{{ $pageSubTitle2 }}</li>
+                <li class="breadcrumb-item">
+                    @if (!empty($pageSubTitle2Url))
+                        <a href="{{ $pageSubTitle2Url }}">{{ $pageSubTitle2 }}</a>
+                    @else
+                        {{ $pageSubTitle2 }}
+                    @endif
+                </li>
             @endif
 
             <li class="breadcrumb-item active" aria-current="page">{{ $pageTitle }}</li>

@@ -4,10 +4,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Field Breadth', 'pageSubTitle1' => 'Field Enablement', 'pageSubText' => 'Contact reach across your partner portfolio'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Field Breadth', 'pageSubTitle1' => 'Engage', 'pageSubTitle1Url' => route('welcome'), 'pageSubTitle2' => 'Field Enablement', 'pageSubTitle2Url' => route('influence_map'), 'pageSubText' => 'Contact reach across your partner portfolio'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Breadth measures how widely your partners are engaged across accounts and product areas. Use this view to see which partners have broad contact networks and where whitespace opportunities exist — helping you prioritize co-selling motions and expansion plays that fill gaps in your go-to-market footprint.</p>
     {{-- Summary Cards --}}
     <div class="row mb-g">
         <div class="col-sm-6 col-xl-3">

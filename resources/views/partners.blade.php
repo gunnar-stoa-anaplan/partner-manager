@@ -5,7 +5,7 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'My Partners', 'pageSubTitle1' => 'Partner Manager'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'My Partners', 'pageSubTitle1' => 'Partner Manager', 'pageSubTitle1Url' => route('welcome')])
 @endsection
 
 @section('content')

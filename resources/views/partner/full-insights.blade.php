@@ -11,7 +11,7 @@
 @section('page-title')
     <div class="d-flex align-items-end mb-4">
         <div>
-            @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Full Business Insights', 'pageSubTitle1' => 'Partners', 'pageSubTitle2'=> 'Reports'])
+            @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Full Business Insights', 'pageSubTitle1' => 'Measure', 'pageSubTitle1Url' => route('measure.index')])
         </div>
         <div class="ms-auto d-none d-sm-flex align-items-center">
             <span class="badge bg-info fs-6 me-2">
@@ -23,6 +23,7 @@
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Full Insights goes beyond the numbers to surface patterns, anomalies, and opportunities across your portfolio. The analysis cards highlight where partners are outperforming or underperforming expectations, helping you prioritize interventions and celebrate wins with data-driven confidence.</p>
     <!-- Top KPI Cards -->
     <div class="row sortable-off">
         <div class="col-xs-12 col-sm-6 col-xl-3 mb-g">

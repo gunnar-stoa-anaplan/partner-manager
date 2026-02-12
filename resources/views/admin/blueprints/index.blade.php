@@ -4,10 +4,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Enablement Blueprints', 'pageSubTitle1' => 'Administration', 'pageSubText' => 'Manage partner readiness blueprints'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Enablement Blueprints', 'pageSubTitle1' => 'Administration', 'pageSubTitle1Url' => route('admin.dashboard'), 'pageSubText' => 'Manage partner readiness blueprints'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Product Blueprints define the enablement curriculum your partners need to complete for each product area. Each blueprint contains outcomes with specific content items — organized by role (GTM, Pre-Sales, Delivery). Create new blueprints here, or click into an existing one to manage its outcomes, content, and partner assignments.</p>
     <div class="row">
         <div class="col-lg-12">
             <div class="card shadow-0 mb-g">

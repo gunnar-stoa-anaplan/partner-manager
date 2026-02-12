@@ -93,6 +93,21 @@
     }
     .saved-filter-item:hover .btn-delete-filter { opacity: 1; }
 
+    /* All / None toggle links inside dropdown menus */
+    .filter-toggle-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.25rem 0.5rem;
+        margin-bottom: 0.35rem;
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+    .filter-toggle-row a {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
     /* Pipeline metric tiles */
     .pipeline-metric {
         text-align: center;
@@ -127,10 +142,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Custom Analysis', 'pageSubTitle1' => 'Partner Performance', 'pageSubTitle2'=> 'Reports'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Custom Analysis', 'pageSubTitle1' => 'Analysis', 'pageSubTitle1Url' => route('welcome')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Custom Analysis lets you build your own cross-partner comparisons using the metrics that matter to you. Select the dimensions you want to compare — pipeline, certifications, engagement, revenue — and the heatmap grid will highlight relative performance across your portfolio. Use the filters to narrow by region, tier, or product area, and export the results for leadership reviews.</p>
 
     <!-- Horizontal Filter Bar -->
     <div class="border-faded bg-faded p-3 mb-g rounded">
@@ -171,6 +187,10 @@
                     <span class="filter-count bg-primary text-white ms-1">{{ count($geographies) }}</span>
                 </button>
                 <div class="dropdown-menu" id="geo-dropdown-menu">
+                    <div class="filter-toggle-row">
+                        <a href="#" class="text-primary toggle-all" data-target=".geo-filter">All</a>
+                        <a href="#" class="text-secondary toggle-none" data-target=".geo-filter">None</a>
+                    </div>
                     @foreach($geographies as $geo)
                     <div class="form-check">
                         <input class="form-check-input geo-filter" type="checkbox" id="geo-{{ Str::slug($geo) }}" value="{{ $geo }}" checked>
@@ -190,6 +210,10 @@
                     <span class="filter-count bg-primary text-white ms-1">{{ count($regions) }}</span>
                 </button>
                 <div class="dropdown-menu" id="region-dropdown-menu">
+                    <div class="filter-toggle-row">
+                        <a href="#" class="text-primary toggle-all" data-target=".region-filter">All</a>
+                        <a href="#" class="text-secondary toggle-none" data-target=".region-filter">None</a>
+                    </div>
                     @foreach($regions as $region)
                     <div class="form-check">
                         <input class="form-check-input region-filter" type="checkbox" id="region-{{ Str::slug($region) }}" value="{{ $region }}" checked>
@@ -209,6 +233,10 @@
                     <span class="filter-count bg-primary text-white ms-1">{{ count($psms) }}</span>
                 </button>
                 <div class="dropdown-menu">
+                    <div class="filter-toggle-row">
+                        <a href="#" class="text-primary toggle-all" data-target=".psm-filter">All</a>
+                        <a href="#" class="text-secondary toggle-none" data-target=".psm-filter">None</a>
+                    </div>
                     @foreach($psms as $psm)
                     <div class="form-check">
                         <input class="form-check-input psm-filter" type="checkbox" id="psm-{{ $psm->id }}" value="{{ $psm->id }}" checked>
@@ -225,6 +253,10 @@
                     <span class="filter-count bg-primary text-white ms-1">5</span>
                 </button>
                 <div class="dropdown-menu">
+                    <div class="filter-toggle-row">
+                        <a href="#" class="text-primary toggle-all" data-target=".quarter-filter">All</a>
+                        <a href="#" class="text-secondary toggle-none" data-target=".quarter-filter">None</a>
+                    </div>
                     <div class="form-check">
                         <input class="form-check-input quarter-filter" type="checkbox" id="q-current" value="current" checked>
                         <label class="form-check-label" for="q-current">Current Quarter</label>
@@ -255,6 +287,10 @@
                     <span class="filter-count bg-primary text-white ms-1">4</span>
                 </button>
                 <div class="dropdown-menu">
+                    <div class="filter-toggle-row">
+                        <a href="#" class="text-primary toggle-all" data-target=".lob-filter">All</a>
+                        <a href="#" class="text-secondary toggle-none" data-target=".lob-filter">None</a>
+                    </div>
                     <div class="form-check">
                         <input class="form-check-input lob-filter" type="checkbox" id="lob-ifp" value="ifp" checked>
                         <label class="form-check-label" for="lob-ifp">IFP (Finance)</label>
@@ -281,6 +317,10 @@
                     <span class="filter-count bg-primary text-white ms-1">{{ count($partners) }}</span>
                 </button>
                 <div class="dropdown-menu" id="partner-dropdown-menu">
+                    <div class="filter-toggle-row">
+                        <a href="#" class="text-primary toggle-all" data-target=".partner-filter">All</a>
+                        <a href="#" class="text-secondary toggle-none" data-target=".partner-filter">None</a>
+                    </div>
                     @foreach($partners as $partner)
                     <div class="form-check">
                         <input class="form-check-input partner-filter" type="checkbox" id="partner-{{ $partner->id }}" value="{{ $partner->id }}" checked>
@@ -297,6 +337,10 @@
                     <span class="filter-count bg-primary text-white ms-1">6</span>
                 </button>
                 <div class="dropdown-menu">
+                    <div class="filter-toggle-row">
+                        <a href="#" class="text-primary toggle-all" data-target=".stage-filter">All</a>
+                        <a href="#" class="text-secondary toggle-none" data-target=".stage-filter">None</a>
+                    </div>
                     <div class="form-check">
                         <input class="form-check-input stage-filter" type="checkbox" id="stage-prospecting" value="prospecting" checked>
                         <label class="form-check-label" for="stage-prospecting">Prospecting</label>
@@ -331,6 +375,10 @@
                     <span class="filter-count bg-primary text-white ms-1">4</span>
                 </button>
                 <div class="dropdown-menu">
+                    <div class="filter-toggle-row">
+                        <a href="#" class="text-primary toggle-all" data-target=".approach-filter">All</a>
+                        <a href="#" class="text-secondary toggle-none" data-target=".approach-filter">None</a>
+                    </div>
                     <div class="form-check">
                         <input class="form-check-input approach-filter" type="checkbox" id="approach-partner" value="partner-led" checked>
                         <label class="form-check-label" for="approach-partner">Partner-Led</label>
@@ -947,6 +995,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     storeOriginalTableHTML();
+
+    // All / None toggle handlers for filter dropdowns
+    document.querySelectorAll('.toggle-all').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var target = this.getAttribute('data-target');
+            document.querySelectorAll(target).forEach(function(cb) { cb.checked = true; });
+        });
+    });
+    document.querySelectorAll('.toggle-none').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var target = this.getAttribute('data-target');
+            document.querySelectorAll(target).forEach(function(cb) { cb.checked = false; });
+        });
+    });
 
     function destroyAllSmartTables() {
         Object.keys(tableInstances).forEach(function(key) {

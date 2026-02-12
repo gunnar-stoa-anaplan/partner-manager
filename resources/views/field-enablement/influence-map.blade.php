@@ -4,10 +4,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Influence Map', 'pageSubTitle1' => 'Field Enablement', 'pageSubText' => 'Portfolio-wide influence and engagement dashboard'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Influence Map', 'pageSubTitle1' => 'Engage', 'pageSubTitle1Url' => route('welcome'), 'pageSubTitle2' => 'Field Enablement', 'pageSubText' => 'Portfolio-wide influence and engagement dashboard'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">The Influence Map gives you a portfolio-wide view of partner engagement and relationship strength. Use the summary cards and trend charts to identify which partners are highly active and which are disengaging — then drill into engagement history, role distribution, and interaction patterns to inform your outreach strategy.</p>
     {{-- Summary Cards --}}
     <div class="row mb-g">
         <div class="col-sm-6 col-xl-3">

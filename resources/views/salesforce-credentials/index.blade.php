@@ -1,10 +1,12 @@
 @extends('layouts.vertical', ['pageTitle' => 'Salesforce Credentials'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Salesforce Credentials', 'pageSubTitle1' => 'System'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Salesforce Credentials', 'pageSubTitle1' => 'System', 'pageSubTitle1Url' => route('admin.dashboard')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Salesforce Credentials configures the connection between Partner Manager and your Salesforce instance. Set the client ID, secret, and endpoint URLs here to enable data synchronization. The connection status shows whether Partner Manager can reach your Salesforce org — use the test button to verify before saving changes.</p>
+
 <div class="row">
     <div class="col-xl-8">
         <div class="card shadow-0 mb-g">

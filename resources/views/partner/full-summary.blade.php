@@ -3,7 +3,7 @@
 @section('page-title')
     <div class="d-flex align-items-end mb-4">
         <div>
-            @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Full Business Summary', 'pageSubTitle1' => 'Partners', 'pageSubTitle2'=> 'Reports'])
+            @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Full Business Summary', 'pageSubTitle1' => 'Measure', 'pageSubTitle1Url' => route('measure.index')])
         </div>
         <div class="ms-auto d-none d-sm-flex align-items-center">
             <span class="badge bg-info fs-6 me-2">
@@ -17,6 +17,7 @@
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Full Summary aggregates key business metrics across your entire partner portfolio — pipeline, revenue, certifications, and engagement — into a single consolidated view. Use this dashboard to spot portfolio-wide trends, compare partner performance at a glance, and identify where to focus your time and resources for maximum impact.</p>
     <!-- Aggregate Key Metrics -->
     <div class="row sortable-off">
         <div class="col-xs-12 col-sm-6 col-xl-3 mb-g">

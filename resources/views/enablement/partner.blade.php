@@ -28,6 +28,8 @@
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">This is the partner-specific enablement calendar showing sessions relevant to this partner. Browse upcoming sessions, nominate contacts for training, and track their registration status. Use the sidebar to filter by event type or nominate contacts directly from available sessions.</p>
+
     <div class="row mb-4">
         {{-- Calendar --}}
         <div class="col-lg-9">

@@ -4,10 +4,12 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Edit Event', 'pageSubTitle1' => 'Enablement Events', 'pageSubText' => 'Update enablement event details'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Edit Event', 'pageSubTitle1' => 'Partner Enablement', 'pageSubTitle1Url' => route('enablement.calendar'), 'pageSubTitle2' => 'Events', 'pageSubTitle2Url' => route('enablement-events.index'), 'pageSubText' => 'Update enablement event details'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Update this event's details, including type, category, target audience, and capacity. Changes apply to the catalog entry — existing scheduled sessions are not affected. To manage sessions or registrations, visit the event detail page after saving.</p>
+
     <div class="row">
         <div class="col-xl-8 offset-xl-2">
             <div class="card shadow-0 mb-g">

@@ -4,10 +4,12 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $blueprint->name, 'pageSubTitle1' => 'Enablement Blueprints', 'pageSubText' => \App\Models\Blueprint::CATEGORIES[$blueprint->category] ?? ''])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $blueprint->name, 'pageSubTitle1' => 'Administration', 'pageSubTitle1Url' => route('admin.dashboard'), 'pageSubTitle2' => 'Product Blueprints', 'pageSubTitle2Url' => route('blueprints.index'), 'pageSubText' => \App\Models\Blueprint::CATEGORIES[$blueprint->category] ?? ''])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">This is the blueprint detail view, showing the full structure of outcomes and content items. Use it to review the learning path, assign the blueprint to partners, and track how contacts are progressing through each outcome. From here you can also edit the blueprint or manage its content items.</p>
+
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show">
             {{ session('success') }}
@@ -79,83 +81,88 @@
     {{-- Outcomes with Content Items --}}
     <div class="row">
         <div class="col-lg-12">
-            @foreach($blueprint->outcomes as $outcome)
-                <div class="card shadow-0 mb-g">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <span class="badge bg-primary me-2">{{ $outcome->sort_order }}</span>
-                            {{ $outcome->title }}
+            <div class="accordion" id="outcomesAccordion">
+                @foreach($blueprint->outcomes as $outcome)
+                    <div class="accordion-item shadow-0 mb-g border rounded">
+                        <h2 class="accordion-header" id="outcomeHead{{ $outcome->id }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#outcomeBody{{ $outcome->id }}" aria-expanded="false" aria-controls="outcomeBody{{ $outcome->id }}">
+                                <span class="badge bg-primary me-2">{{ $outcome->sort_order }}</span>
+                                {{ $outcome->title }}
+                                <small class="text-muted ms-2">({{ $outcome->contentItems->count() }} items)</small>
+                            </button>
+                        </h2>
+                        <div id="outcomeBody{{ $outcome->id }}" class="accordion-collapse collapse" aria-labelledby="outcomeHead{{ $outcome->id }}" data-bs-parent="#outcomesAccordion">
+                            <div class="accordion-body p-0">
+                                @if($outcome->contentItems->count())
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 40%">Content</th>
+                                                    <th>Time</th>
+                                                    <th>Source</th>
+                                                    <th>Prerequisites</th>
+                                                    <th class="text-center" style="width:70px">
+                                                        <span class="d-inline-block" style="color: #fd7e14;" title="GTM (Sales)">GTM</span>
+                                                    </th>
+                                                    <th class="text-center" style="width:70px">
+                                                        <span class="d-inline-block" style="color: #886ab5;" title="Pre-Sales">Pre-S</span>
+                                                    </th>
+                                                    <th class="text-center" style="width:70px">
+                                                        <span class="d-inline-block" style="color: #00BCD4;" title="Delivery">Del</span>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($outcome->contentItems as $item)
+                                                    <tr>
+                                                        <td>
+                                                            @if($item->url)
+                                                                <a href="{{ $item->url }}" target="_blank" class="text-primary">
+                                                                    {{ $item->title }}
+                                                                    <i class="fal fa-external-link ms-1 small"></i>
+                                                                </a>
+                                                            @else
+                                                                {{ $item->title }}
+                                                            @endif
+                                                        </td>
+                                                        <td class="text-nowrap">{{ $item->duration_display ?? '-' }}</td>
+                                                        <td>{{ $item->source ?? '-' }}</td>
+                                                        <td><small class="text-muted">{{ $item->prerequisites ?? '-' }}</small></td>
+                                                        <td class="text-center">
+                                                            @if($item->gtm_applicable === 'required')
+                                                                <i class="fas fa-check-circle text-success"></i>
+                                                            @elseif($item->gtm_applicable === 'optional')
+                                                                <i class="fas fa-check-circle text-muted" title="Optional"></i>
+                                                            @endif
+                                                        </td>
+                                                        <td class="text-center">
+                                                            @if($item->pre_sales_applicable === 'required')
+                                                                <i class="fas fa-check-circle text-success"></i>
+                                                            @elseif($item->pre_sales_applicable === 'optional')
+                                                                <i class="fas fa-check-circle text-muted" title="Optional"></i>
+                                                            @endif
+                                                        </td>
+                                                        <td class="text-center">
+                                                            @if($item->delivery_applicable === 'required')
+                                                                <i class="fas fa-check-circle text-success"></i>
+                                                            @elseif($item->delivery_applicable === 'optional')
+                                                                <i class="fas fa-check-circle text-muted" title="Optional"></i>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div class="p-3 text-muted text-center">No content items for this outcome.</div>
+                                @endif
+                            </div>
                         </div>
                     </div>
-                    <div class="card-body p-0">
-                        @if($outcome->contentItems->count())
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-hover mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 40%">Content</th>
-                                            <th>Time</th>
-                                            <th>Source</th>
-                                            <th>Prerequisites</th>
-                                            <th class="text-center" style="width:70px">
-                                                <span class="d-inline-block" style="color: #fd7e14;" title="GTM (Sales)">GTM</span>
-                                            </th>
-                                            <th class="text-center" style="width:70px">
-                                                <span class="d-inline-block" style="color: #886ab5;" title="Pre-Sales">Pre-S</span>
-                                            </th>
-                                            <th class="text-center" style="width:70px">
-                                                <span class="d-inline-block" style="color: #00BCD4;" title="Delivery">Del</span>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($outcome->contentItems as $item)
-                                            <tr>
-                                                <td>
-                                                    @if($item->url)
-                                                        <a href="{{ $item->url }}" target="_blank" class="text-primary">
-                                                            {{ $item->title }}
-                                                            <i class="fal fa-external-link ms-1 small"></i>
-                                                        </a>
-                                                    @else
-                                                        {{ $item->title }}
-                                                    @endif
-                                                </td>
-                                                <td class="text-nowrap">{{ $item->duration_display ?? '-' }}</td>
-                                                <td>{{ $item->source ?? '-' }}</td>
-                                                <td><small class="text-muted">{{ $item->prerequisites ?? '-' }}</small></td>
-                                                <td class="text-center">
-                                                    @if($item->gtm_applicable === 'required')
-                                                        <i class="fas fa-check-circle text-success"></i>
-                                                    @elseif($item->gtm_applicable === 'optional')
-                                                        <i class="fas fa-check-circle text-muted" title="Optional"></i>
-                                                    @endif
-                                                </td>
-                                                <td class="text-center">
-                                                    @if($item->pre_sales_applicable === 'required')
-                                                        <i class="fas fa-check-circle text-success"></i>
-                                                    @elseif($item->pre_sales_applicable === 'optional')
-                                                        <i class="fas fa-check-circle text-muted" title="Optional"></i>
-                                                    @endif
-                                                </td>
-                                                <td class="text-center">
-                                                    @if($item->delivery_applicable === 'required')
-                                                        <i class="fas fa-check-circle text-success"></i>
-                                                    @elseif($item->delivery_applicable === 'optional')
-                                                        <i class="fas fa-check-circle text-muted" title="Optional"></i>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @else
-                            <div class="p-3 text-muted text-center">No content items for this outcome.</div>
-                        @endif
-                    </div>
-                </div>
-            @endforeach
+                @endforeach
+            </div>
         </div>
     </div>
 

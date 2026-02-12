@@ -1,10 +1,12 @@
 @extends('layouts.vertical', ['pageTitle' => 'Edit User'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Edit User', 'pageSubTitle1' => 'User Management'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Edit User', 'pageSubTitle1' => 'Administration', 'pageSubTitle1Url' => route('admin.dashboard'), 'pageSubTitle2' => 'User Management', 'pageSubTitle2Url' => route('users.index')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Update this user's name, email, role, and avatar. Role changes take effect immediately — Admin users get full system access, PSMs can manage assigned partners, and Managers have team oversight. Leave the password field blank to keep the current password.</p>
+
 <div class="row">
     <div class="col-xl-8 offset-xl-2">
         <div class="card shadow-0 mb-g">

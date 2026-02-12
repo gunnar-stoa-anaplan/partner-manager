@@ -1,10 +1,11 @@
 @extends('layouts.vertical', ['pageTitle' => 'Blueprint Progress'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $partner->name, 'pageSubTitle1' => 'Blueprint Progress', 'pageSubText' => 'Track enablement readiness across all assigned blueprints'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $partner->name, 'pageSubTitle1' => 'Blueprint Progress', 'pageSubTitle1Url' => route('partners.my'), 'pageSubText' => 'Track enablement readiness across all assigned blueprints'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Blueprint Progress tracks this partner's readiness across all assigned enablement blueprints. Each blueprint maps out the outcomes and content items that contacts need to complete — organized by role. Use this view to monitor completion rates, see which contacts are enrolled, and identify where additional enablement investment is needed.</p>
     @php
         $assignments = $partner->blueprintAssignments;
         $enrolledContactIds = $assignments->flatMap(fn($a) => $a->enrollments->pluck('contact_id'))->unique();
@@ -95,7 +96,7 @@
                             <a href="{{ route('blueprint-assignments.show', $assignment) }}" class="btn btn-sm btn-outline-primary">
                                 <i class="fal fa-chart-bar me-1"></i> Details
                             </a>
-                            <a href="{{ route('blueprints.detail', $assignment->blueprint) }}" class="btn btn-sm btn-outline-secondary">
+                            <a href="{{ route('blueprints.show', $assignment->blueprint) }}" class="btn btn-sm btn-outline-secondary">
                                 <i class="fal fa-eye me-1"></i> Blueprint
                             </a>
                         </div>
@@ -187,7 +188,7 @@
                         <div class="mb-3"><i class="fal fa-layer-group fa-3x text-muted opacity-50"></i></div>
                         <h5 class="text-muted">No blueprints assigned yet</h5>
                         <p class="text-muted mb-3">Assign enablement blueprints to {{ $partner->name }} to track their readiness progression.</p>
-                        <a href="{{ route('blueprints.catalog') }}" class="btn btn-primary btn-sm">
+                        <a href="{{ route('blueprints.index') }}" class="btn btn-primary btn-sm">
                             <i class="fal fa-layers me-1"></i> Browse Blueprints
                         </a>
                     </div>

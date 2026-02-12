@@ -4,10 +4,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $event->title, 'pageSubTitle1' => 'Enablement Events', 'pageSubText' => 'Event details, sessions, and registrations'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $event->title, 'pageSubTitle1' => 'Partner Enablement', 'pageSubTitle1Url' => route('enablement.calendar'), 'pageSubTitle2' => 'Events', 'pageSubTitle2Url' => route('enablement-events.index'), 'pageSubText' => 'Event details, sessions, and registrations'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">This event detail page shows everything about a single enablement offering — its description, target audience, and all scheduled sessions with their registration counts. Use it to manage sessions, view registered attendees, and track capacity utilization for this event.</p>
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show">
             {{ session('success') }}

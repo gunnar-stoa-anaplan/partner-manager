@@ -1,10 +1,12 @@
 @extends('layouts.vertical', ['pageTitle' => 'Add Salesforce Credentials'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Add Salesforce Credentials', 'pageSubTitle1' => 'System'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Add Salesforce Credentials', 'pageSubTitle1' => 'System', 'pageSubTitle1Url' => route('admin.dashboard')])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Set up the initial Salesforce connection by entering your Connected App credentials. Partner Manager uses JWT Bearer Flow to authenticate — ensure your Connected App is configured for JWT and the public key is uploaded to Salesforce before proceeding.</p>
+
 <div class="row">
     <div class="col-xl-8">
         <div class="card shadow-0 mb-g">

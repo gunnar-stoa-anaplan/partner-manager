@@ -4,10 +4,12 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Create Event', 'pageSubTitle1' => 'Enablement Events', 'pageSubText' => 'Define a new enablement event for the catalog'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Create Event', 'pageSubTitle1' => 'Partner Enablement', 'pageSubTitle1Url' => route('enablement.calendar'), 'pageSubTitle2' => 'Events', 'pageSubTitle2Url' => route('enablement-events.index'), 'pageSubText' => 'Define a new enablement event for the catalog'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Use this form to define a new enablement event for the catalog. Set the event type, product area, target audience, and capacity. Once created, you can schedule sessions for this event from the Calendar view and manage registrations from the event detail page.</p>
+
     <div class="row">
         <div class="col-xl-8 offset-xl-2">
             <div class="card shadow-0 mb-g">

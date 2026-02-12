@@ -1,10 +1,11 @@
 @extends('layouts.vertical', ['pageTitle' => 'Project Risks'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Project Risks', 'pageSubTitle1' => 'Project Health', 'pageSubText' => 'Risk analysis across active projects'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Project Risks', 'pageSubTitle1' => 'Engage', 'pageSubTitle1Url' => route('welcome'), 'pageSubTitle2' => 'Project Health', 'pageSubTitle2Url' => route('projects.index'), 'pageSubText' => 'Risk analysis across active projects'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">The Risks view surfaces project-level risks across your portfolio so you can prioritize where to focus. Each risk is categorized by severity and type, with the owning partner and project clearly identified. Use the filters to zero in on critical items, and track mitigation actions to ensure nothing escalates without a plan.</p>
 
     {{-- Summary Cards --}}
     <div class="row mb-g">

@@ -4,10 +4,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Enablement Events', 'pageSubTitle1' => 'Administration', 'pageSubText' => 'Create and manage partner enablement events catalog'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Enablement Events', 'pageSubTitle1' => 'Partner Enablement', 'pageSubTitle1Url' => route('enablement.calendar'), 'pageSubText' => 'Create and manage partner enablement events catalog'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">The Events Catalog is where you create and manage the enablement offerings available to your partners — workshops, academies, bootcamps, certifications, and more. Each event can have multiple sessions scheduled on the calendar. Use this view to build your catalog, then assign sessions to specific dates from the Calendar view.</p>
     <div class="row">
         <div class="col-lg-12">
             <div class="card shadow-0 mb-g">

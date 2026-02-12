@@ -17,6 +17,46 @@ class Contact extends Model
         'phone',
         'title',
         'avatar',
+        'contact_type',
+        'influencer_role',
+        'organization',
+        'notes',
+        'linkedin_url',
+        'linkedin_profile_id',
+        'linkedin_headline',
+        'linkedin_image_url',
+        'linkedin_synced_at',
+        'resource_role',
+    ];
+
+    protected $casts = [
+        'linkedin_synced_at' => 'datetime',
+    ];
+
+    const CONTACT_TYPES = [
+        'general' => 'General',
+        'influencer' => 'Influencer',
+        'enablement' => 'Enablement',
+        'resource' => 'Resource',
+    ];
+
+    const INFLUENCER_ROLES = [
+        'client_account_lead' => 'Client Account Lead',
+        'technical_account_lead' => 'Technical Account Lead',
+        'anaplan_specialist' => 'Anaplan Specialist',
+        'strategy_consultant' => 'Strategy Consultant',
+        'architect' => 'Architect',
+        'other' => 'Other',
+    ];
+
+    const RESOURCE_ROLES = [
+        'model_builder' => 'Model Builder',
+        'solution_architect' => 'Solution Architect',
+        'project_manager' => 'Project Manager',
+        'consultant' => 'Consultant',
+        'developer' => 'Developer',
+        'data_integration' => 'Data Integration Specialist',
+        'other' => 'Other',
     ];
 
     public function partner()
@@ -43,5 +83,36 @@ class Contact extends Model
     public function blueprintEnrollments()
     {
         return $this->hasMany(BlueprintEnrollment::class);
+    }
+
+    public function certifications()
+    {
+        return $this->hasMany(Certification::class);
+    }
+
+    public function interactions()
+    {
+        return $this->hasMany(ContactInteraction::class)->orderByDesc('interaction_date');
+    }
+
+    public function scopeInfluencers($query)
+    {
+        return $query->where('contact_type', 'influencer');
+    }
+
+    public function scopeResources($query)
+    {
+        return $query->where('contact_type', 'resource');
+    }
+
+    public function getFullNameAttribute(): string
+    {
+        return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    public function getLinkedInSearchUrl(): string
+    {
+        $query = urlencode("{$this->first_name} {$this->last_name}" . ($this->organization ? " {$this->organization}" : ''));
+        return "https://www.linkedin.com/search/results/people/?keywords={$query}";
     }
 }

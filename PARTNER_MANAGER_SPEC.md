@@ -1904,6 +1904,32 @@ All external data enters the system via manual CSV/XLS file uploads processed by
 - Loading states: Skeleton screens for chart areas
 - Badge color conventions: danger=critical/required, warning=warning/recommended, info=info/optional, success=completed/met, primary=in-progress
 
+### Development Feature: Navigation Section Toggles
+
+During development, admins can toggle visibility of individual navigation sections via the **Configuration** page (`/configuration`). This allows activating specific sections one at a time while building and testing views, without removing code.
+
+**Toggleable Sections (8):**
+
+| AppSetting Key | Section | Default |
+|---------------|---------|---------|
+| `nav_visible_analysis` | Analysis Tools (Custom Analysis, Guided Analysis, Partner Coach) | Visible |
+| `nav_visible_engage` | Engage (Project Health, Field Engagements, Field Enablement) | Visible |
+| `nav_visible_key_metrics` | Key Metrics (Partner Profile, Summary, Insights, Calendar, Blueprints) | Visible |
+| `nav_visible_business_dev` | Business Development (Sourced/Influenced Leads, Development Funding) | Visible |
+| `nav_visible_dashboards` | Dashboards (Full Summary, Full Insights) | Visible |
+| `nav_visible_administration` | Administration (Admin Dashboard, Partner Goals, Assignments, Leads, Users) | Visible |
+| `nav_visible_program_admin` | Program Administration (Enablement Events, Calendar, Blueprints) | Visible |
+| `nav_visible_system` | System (Configuration, Imports, Salesforce Credentials, Pulse) | Visible |
+
+**Implementation:**
+- Settings stored in `app_settings` table via `AppSetting` model (key/value store)
+- Defaults to visible (`'1'`) if no DB row exists — all sections show until explicitly toggled off
+- `View::composer` on `layouts.partials.generated-navigation` shares `$navSettings` array with the navigation partial
+- Navigation blade wraps each section with `@if(($navSettings['nav_visible_xxx'] ?? '1') === '1')`
+- Toggle UI on Configuration page uses Bootstrap switch inputs in a dedicated card
+- **Welcome** and **My Partners** links are always visible (not toggleable)
+- The System section toggle is intentionally self-referencing: turning it off hides Configuration from the sidebar, but the admin can still access `/configuration` directly via URL to re-enable it
+
 ---
 
 ## Revision History
@@ -1913,6 +1939,7 @@ All external data enters the system via manual CSV/XLS file uploads processed by
 | 2026-02-10 | Claude + Gunnar | Initial specification created |
 | 2026-02-10 | Claude + Gunnar | Major update: Added Partner Paths (gate-based progression), Prescriptive Task System, Solution Lifecycle, Partner Scorecard (6 dimensions), Origin Tracking, Tabbed Analytics (7 tabs), Path Reviews. Restructured from 13 to 17 sections. |
 | 2026-02-10 | Claude + Gunnar | Incorporated Gunnar's feedback: Added revenue goal math (ASP, pipeline velocity, required opps, pipeline multiple). Elevated Blueprints to dedicated section with PSM workflow, gap analysis, and enablement calendar cross-reference. Added Delivery Capability Risk Engine (pipeline vs. blueprint completion cross-referencing). Added Notification Template System (admin-managed templates with variable substitution for 15 event types). Added Partner role (future phase) with self-service portal and API access. Added Data Integration Roadmap (Salesforce batch sync, REST API, partner API). Updated gate requirements to include blueprint coverage and delivery capability checks. Expanded from 17 to 21 sections. |
+| 2026-02-10 | Claude + Gunnar | Added Navigation Section Toggles: development feature allowing admins to toggle visibility of 8 navigation sections via Configuration page. Uses AppSetting model with View::composer pattern. |
 
 ---
 

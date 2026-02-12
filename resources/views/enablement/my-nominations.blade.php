@@ -4,10 +4,12 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'My Nominations', 'pageSubTitle1' => 'Partner Enablement', 'pageSubText' => 'Track all contacts you\'ve nominated for enablement sessions'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'My Nominations', 'pageSubTitle1' => 'Partner Enablement', 'pageSubTitle1Url' => route('enablement.calendar'), 'pageSubText' => 'Track all contacts you\'ve nominated for enablement sessions'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Track all the contacts you've nominated for enablement sessions across your partners. See the current status of each nomination — pending, confirmed, or completed — and follow up on any that need attention. Use this view to stay on top of your partners' enablement participation.</p>
+
     <div class="row">
         <div class="col-lg-12">
             <div class="card shadow-0 mb-g">

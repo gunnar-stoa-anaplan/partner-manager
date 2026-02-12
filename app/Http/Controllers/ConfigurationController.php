@@ -29,4 +29,27 @@ class ConfigurationController extends Controller
 
         return redirect()->route('configuration.index')->with('success', 'Configuration updated successfully.');
     }
+
+    public function updateNavigation(Request $request)
+    {
+        $navKeys = [
+            'nav_visible_analysis',
+            'nav_visible_plan',
+            'nav_visible_engage',
+            'nav_visible_key_metrics',
+            'nav_visible_business_dev',
+            'nav_visible_measure',
+            'nav_visible_act',
+            'nav_visible_dashboards',
+            'nav_visible_administration',
+            'nav_visible_program_admin',
+            'nav_visible_system',
+        ];
+
+        foreach ($navKeys as $key) {
+            AppSetting::set($key, $request->input($key, '0'));
+        }
+
+        return redirect()->route('configuration.index')->with('success', 'Navigation visibility updated successfully.');
+    }
 }

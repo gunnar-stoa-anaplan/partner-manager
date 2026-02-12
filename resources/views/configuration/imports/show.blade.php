@@ -1,7 +1,7 @@
 @extends('layouts.vertical', ['pageTitle' => 'Import #' . $import->id])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Import #' . $import->id, 'pageSubTitle1' => 'Data Imports'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Import #' . $import->id, 'pageSubTitle1' => 'System', 'pageSubTitle1Url' => route('admin.dashboard'), 'pageSubTitle2' => 'Data Imports', 'pageSubTitle2Url' => route('imports.index')])
 @endsection
 
 @section('content')

@@ -5,6 +5,8 @@
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Your profile page shows your account details, role, and assigned partners. Use the edit button to update your name, email, avatar, or password. Your role and partner assignments are managed by an administrator.</p>
+
     <!-- Edit Profile Modal -->
     <div aria-hidden="true" aria-labelledby="editProfileModalLabel" class="modal fade"
          id="editProfileModal" tabindex="-1">

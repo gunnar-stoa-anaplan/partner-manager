@@ -4,10 +4,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Key Influencers', 'pageSubTitle1' => 'Field Enablement', 'pageSubText' => $partner->name])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Key Influencers', 'pageSubTitle1' => 'Engage', 'pageSubTitle1Url' => route('welcome'), 'pageSubTitle2' => 'Field Enablement', 'pageSubTitle2Url' => route('influence_map'), 'pageSubText' => $partner->name])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Key Influencers highlights the individual contacts within this partner organization who drive the most impact — whether through deal origination, delivery leadership, or executive sponsorship. Use this view to know who to engage for specific initiatives and to ensure your most valuable relationships stay active and well-supported.</p>
     {{-- Summary Cards --}}
     <div class="row mb-g">
         <div class="col-sm-6 col-xl-3">

@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\AppSetting;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Pulse\Facades\Pulse;
 
@@ -30,5 +32,12 @@ class AppServiceProvider extends ServiceProvider
             'extra' => $user->email,
             'avatar' => $user->avatar_url,
         ]);
+
+        View::composer('layouts.partials.generated-navigation', function ($view) {
+            $navSettings = AppSetting::where('key', 'like', 'nav_visible_%')
+                ->pluck('value', 'key')
+                ->toArray();
+            $view->with('navSettings', $navSettings);
+        });
     }
 }

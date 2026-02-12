@@ -20,9 +20,10 @@
             </svg>
         </button>
 
-        <form class="app-search" role="search"  autocomplete="off">
-            <input type="text" class="form-control" placeholder="Search for anything">
-        </form>
+        <div class="app-search position-relative" style="flex: 1; max-width: 400px;">
+            <input type="text" class="form-control" id="global-search-input" placeholder="Search partners, people..." autocomplete="off">
+            <div id="global-search-results" class="dropdown-menu w-100 shadow-lg" style="display:none; max-height: 400px; overflow-y: auto;"></div>
+        </div>
     </div>
 
     <!-- Settings -->
@@ -129,3 +130,68 @@
     </div>
     @endauth
 </header>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var searchInput = document.getElementById('global-search-input');
+    var resultsBox = document.getElementById('global-search-results');
+    if (!searchInput || !resultsBox) return;
+
+    var debounceTimer = null;
+    var searchUrl = @json(route('api.search'));
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        var q = this.value.trim();
+        if (q.length < 2) {
+            resultsBox.style.display = 'none';
+            return;
+        }
+        debounceTimer = setTimeout(function() {
+            fetch(searchUrl + '?q=' + encodeURIComponent(q), {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (!data.results || data.results.length === 0) {
+                    resultsBox.innerHTML = '<div class="px-3 py-3 text-muted text-center"><i class="fal fa-search me-1"></i>No results for &ldquo;' + q.replace(/</g, '&lt;') + '&rdquo;</div>';
+                    resultsBox.style.display = 'block';
+                    return;
+                }
+                var html = '';
+                data.results.forEach(function(r) {
+                    html += '<a href="' + r.url + '" class="dropdown-item d-flex align-items-center py-2 px-3">' +
+                        '<div class="width-3 height-3 rounded-circle bg-' + r.color + ' bg-opacity-10 d-flex align-items-center justify-content-center me-2 flex-shrink-0">' +
+                        '<i class="fal ' + r.icon + ' text-' + r.color + ' fs-sm"></i></div>' +
+                        '<div class="text-truncate"><div class="fw-500 text-truncate">' + r.label + '</div>' +
+                        '<div class="text-muted fs-nano text-truncate">' + r.sub + '</div></div></a>';
+                });
+                resultsBox.innerHTML = html;
+                resultsBox.style.display = 'block';
+            })
+            .catch(function() {
+                resultsBox.style.display = 'none';
+            });
+        }, 250);
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            resultsBox.style.display = 'none';
+            this.blur();
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !resultsBox.contains(e.target)) {
+            resultsBox.style.display = 'none';
+        }
+    });
+
+    searchInput.addEventListener('focus', function() {
+        if (this.value.trim().length >= 2 && resultsBox.innerHTML) {
+            resultsBox.style.display = 'block';
+        }
+    });
+});
+</script>

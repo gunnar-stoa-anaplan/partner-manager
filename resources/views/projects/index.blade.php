@@ -4,10 +4,11 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Projects', 'pageSubTitle1' => 'Partner Manager', 'pageSubText' => 'Client projects across your partner portfolio'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Projects', 'pageSubTitle1' => 'Engage', 'pageSubTitle1Url' => route('welcome'), 'pageSubTitle2' => 'Project Health', 'pageSubText' => 'Client projects across your partner portfolio'])
 @endsection
 
 @section('content')
+<p class="text-muted fst-italic mt-3 mb-4">Project Health gives you visibility into active customer implementations across your partner portfolio. Use this view to track project status, timelines, and risk levels — so you can intervene early when a delivery starts to slip. Click into a project for full details, or switch to the Risks view to focus on flagged items that need immediate attention.</p>
     {{-- Summary Cards --}}
     <div class="row mb-g">
         <div class="col-sm-6 col-xl-3">
