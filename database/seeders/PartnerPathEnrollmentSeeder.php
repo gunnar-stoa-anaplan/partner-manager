@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Partner;
 use App\Models\PartnerPath;
 use App\Models\PartnerPathEnrollment;
-use App\Models\PartnerPathStage;
 use App\Models\PartnerStageHistory;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -20,14 +19,16 @@ class PartnerPathEnrollmentSeeder extends Seeder
         $defaultPath = PartnerPath::where('is_default', true)->first()
             ?? PartnerPath::first();
 
-        if (!$defaultPath) {
+        if (! $defaultPath) {
             $this->command->warn('No partner paths found. Run PartnerPathSeeder first.');
+
             return;
         }
 
         $stages = $defaultPath->stages()->orderBy('sort_order')->get();
         if ($stages->isEmpty()) {
             $this->command->warn('No stages found for path. Run PartnerPathSeeder first.');
+
             return;
         }
 
@@ -55,9 +56,14 @@ class PartnerPathEnrollmentSeeder extends Seeder
                 ? $enrolledAt
                 : fake()->dateTimeBetween($enrolledAt, 'now');
 
-            $status = fake()->randomElement(['active', 'active', 'active', 'active', 'paused', 'completed']);
-            if ($stageIndex === $stages->count() - 1 && fake()->boolean(40)) {
-                $status = 'completed';
+            // Guarantee active status for the first 3 partners (Accenture, Deloitte, PwC)
+            if ($partner->id <= 3) {
+                $status = 'active';
+            } else {
+                $status = fake()->randomElement(['active', 'active', 'active', 'active', 'paused', 'completed']);
+                if ($stageIndex === $stages->count() - 1 && fake()->boolean(40)) {
+                    $status = 'completed';
+                }
             }
 
             $enrollment = PartnerPathEnrollment::create([

@@ -126,8 +126,8 @@
                 </div>
             </div>
             <div class="panel-container">
-                <div class="panel-content">
-                    <div id="role-radar-chart" style="height: 300px;"></div>
+                <div class="panel-content p-0">
+                    <div id="role-radar-chart" style="min-height: 380px;"></div>
                 </div>
             </div>
         </div>
@@ -435,7 +435,7 @@
 
     new ApexCharts(document.querySelector('#role-radar-chart'), {
         series: [{ name: 'Influencers', data: radarValues }],
-        chart: { type: 'radar', height: 280, fontFamily: 'inherit', toolbar: { show: false } },
+        chart: { type: 'radar', height: '100%', fontFamily: 'inherit', toolbar: { show: false } },
         colors: [primaryHex],
         fill: { opacity: 0.3 },
         stroke: { width: 2, colors: [primaryHex] },

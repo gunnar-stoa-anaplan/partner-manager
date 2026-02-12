@@ -10,14 +10,14 @@ return new class extends Migration
     {
         Schema::table('contacts', function (Blueprint $table) {
             // LinkedIn fields
-            $table->string('linkedin_url')->nullable()->after('notes');
-            $table->string('linkedin_profile_id')->nullable()->after('linkedin_url');
-            $table->string('linkedin_headline')->nullable()->after('linkedin_profile_id');
-            $table->string('linkedin_image_url')->nullable()->after('linkedin_headline');
-            $table->timestamp('linkedin_synced_at')->nullable()->after('linkedin_image_url');
+            $table->string('linkedin_url')->nullable();
+            $table->string('linkedin_profile_id')->nullable();
+            $table->string('linkedin_headline')->nullable();
+            $table->string('linkedin_image_url')->nullable();
+            $table->timestamp('linkedin_synced_at')->nullable();
 
             // Resource role (for contact_type = 'resource')
-            $table->string('resource_role')->nullable()->after('linkedin_synced_at');
+            $table->string('resource_role')->nullable();
         });
     }
 

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Account;
 use App\Models\Contact;
+use App\Models\Opportunity;
 use App\Models\Partner;
 use App\Models\Project;
 use Illuminate\Database\Seeder;
@@ -12,117 +13,80 @@ class ProjectSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('Creating projects for partners...');
+        $this->command->info('Creating projects from closed-won opportunities...');
 
-        // Check if accounts exist, if not create some
-        if (Account::count() === 0) {
-            $this->command->warn('No accounts found. Creating sample accounts...');
-            Account::factory()->count(10)->create();
-        }
-
-        // 1) Projects for the Accenture partner
-        $accenture = Partner::where('name', 'Accenture')->first();
-
-        if ($accenture) {
-            // Ensure Accenture has accounts
-            if ($accenture->accounts()->count() === 0) {
-                $accounts = Account::inRandomOrder()->take(5)->get();
-                $accenture->accounts()->attach($accounts->pluck('id'));
-            }
-
-            // Ensure Accenture has contacts
-            if ($accenture->contacts()->count() === 0) {
-                $this->command->info('Creating contacts for Accenture...');
-                Contact::factory()->count(10)->create([
-                    'partner_id' => $accenture->id,
-                ]);
-            }
-
-            $accounts = $accenture->accounts()->inRandomOrder()->take(5)->pluck('accounts.id')->all();
-
-            if (!empty($accounts)) {
-                foreach (range(1, 15) as $i) {
-                    $accountId = $accounts[$i % count($accounts)];
-                    $contacts = $accenture->contacts()->inRandomOrder()->take(10)->pluck('id')->all();
-
-                    $project = Project::create([
-                        'partner_id'       => $accenture->id,
-                        'account_id'       => $accountId,
-                        'name'             => fake()->catchPhrase() . ' Implementation',
-                        'start_date'       => now()->subDays(rand(0, 365)),
-                        'cal_id'           => $contacts[0] ?? null,
-                        'tal_id'           => $contacts[1] ?? null,
-                        'ae_id'            => $contacts[2] ?? null,
-                        'acv'              => fake()->randomFloat(2, 50000, 500000),
-                        'status'           => fake()->randomElement(['Draft', 'In Progress', 'Completed', 'On Hold']),
-                        'percent_complete' => fake()->numberBetween(0, 100),
-                        'total_sprints'    => fake()->numberBetween(4, 12),
-                        'current_sprint'   => fake()->numberBetween(1, 12),
-                        'delivery_team'    => json_encode(fake()->words(rand(3, 6))),
-                    ]);
-
-                    if (!empty($contacts)) {
-                        $project->contacts()->sync($contacts);
-                    }
-                }
-
-                $this->command->info("✓ Created 15 projects for Accenture");
-            }
-        }
-
-        // 2) Projects for all other partners
-        $otherPartners = Partner::where('name', '!=', 'Accenture')->get();
+        $partners = Partner::with(['accounts', 'contacts'])->get();
         $projectCount = 0;
 
-        foreach ($otherPartners as $partner) {
+        foreach ($partners as $partner) {
+            $closedWonOpps = Opportunity::where('partner_id', $partner->id)
+                ->where('stage', 'Closed Won')
+                ->get();
+
+            if ($closedWonOpps->isEmpty()) {
+                continue;
+            }
+
             // Ensure partner has accounts
-            if ($partner->accounts()->count() === 0) {
+            if ($partner->accounts->isEmpty()) {
                 $accounts = Account::inRandomOrder()->take(rand(1, 3))->get();
                 if ($accounts->isNotEmpty()) {
                     $partner->accounts()->attach($accounts->pluck('id'));
+                    $partner->load('accounts');
                 }
             }
 
             // Ensure partner has contacts
-            if ($partner->contacts()->count() === 0) {
+            if ($partner->contacts->isEmpty()) {
                 Contact::factory()->count(rand(2, 5))->create([
                     'partner_id' => $partner->id,
                 ]);
+                $partner->load('contacts');
             }
 
-            $partnerAccounts = $partner->accounts()->pluck('accounts.id');
+            $partnerAccounts = $partner->accounts->pluck('id');
+            $contacts = $partner->contacts->pluck('id')->all();
 
-            if ($partnerAccounts->isNotEmpty()) {
-                foreach (range(1, rand(1, 3)) as $i) {
-                    $accountId = $partnerAccounts->random();
-                    $contacts = $partner->contacts()->inRandomOrder()->take(5)->pluck('id')->all();
+            foreach ($closedWonOpps as $opp) {
+                $accountId = $partnerAccounts->isNotEmpty()
+                    ? $partnerAccounts->random()
+                    : (Account::inRandomOrder()->first()?->id ?? Account::factory()->create()->id);
 
-                    $project = Project::create([
-                        'partner_id'       => $partner->id,
-                        'account_id'       => $accountId,
-                        'name'             => fake()->catchPhrase() . ' Project',
-                        'start_date'       => now()->subDays(rand(0, 365)),
-                        'cal_id'           => $contacts[0] ?? null,
-                        'tal_id'           => $contacts[1] ?? null,
-                        'ae_id'            => $contacts[2] ?? null,
-                        'acv'              => fake()->randomFloat(2, 10000, 300000),
-                        'status'           => fake()->randomElement(['Draft', 'In Progress', 'Completed']),
-                        'percent_complete' => fake()->numberBetween(0, 100),
-                        'total_sprints'    => fake()->numberBetween(2, 8),
-                        'current_sprint'   => fake()->numberBetween(1, 8),
-                        'delivery_team'    => json_encode(fake()->words(rand(2, 4))),
-                    ]);
+                $startDate = $opp->close_date?->copy()->addDays(rand(7, 30));
+                $status = fake()->randomElement(['Draft', 'In Progress', 'In Progress', 'Completed', 'On Hold']);
+                $percentComplete = match ($status) {
+                    'Completed' => 100,
+                    'Draft' => 0,
+                    default => fake()->numberBetween(10, 90),
+                };
 
-                    if (!empty($contacts)) {
-                        $project->contacts()->sync($contacts);
-                    }
+                $project = Project::create([
+                    'partner_id' => $partner->id,
+                    'account_id' => $accountId,
+                    'opportunity_id' => $opp->id,
+                    'name' => $opp->opportunity_name,
+                    'start_date' => $startDate,
+                    'cal_id' => $contacts[0] ?? null,
+                    'tal_id' => $contacts[1] ?? null,
+                    'ae_id' => $contacts[2] ?? null,
+                    'acv' => $opp->amount,
+                    'status' => $status,
+                    'percent_complete' => $percentComplete,
+                    'total_sprints' => fake()->numberBetween(3, 12),
+                    'current_sprint' => fake()->numberBetween(1, 8),
+                    'delivery_team' => json_encode(fake()->words(rand(2, 5))),
+                ]);
 
-                    $projectCount++;
+                if (! empty($contacts)) {
+                    $project->contacts()->sync(
+                        collect($contacts)->random(min(count($contacts), rand(2, 5)))->all()
+                    );
                 }
+
+                $projectCount++;
             }
         }
 
-        $this->command->info("✓ Created {$projectCount} projects for other partners");
-        $this->command->info("Total projects: " . Project::count());
+        $this->command->info("Created {$projectCount} projects from closed-won opportunities.");
     }
 }

@@ -51,8 +51,8 @@
                 </div>
             </div>
             <div class="panel-container">
-                <div class="panel-content">
-                    <div id="overview-scorecard-radar" style="height: 300px;"></div>
+                <div class="panel-content p-0">
+                    <div id="overview-scorecard-radar" style="min-height: 500px;"></div>
                 </div>
             </div>
         </div>
@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var scValues = Object.values(scorecardData).map(function(v) { return parseFloat(v) || 0; });
     if (scLabels.length > 0 && scValues.some(function(v) { return v > 0; })) {
         new ApexCharts(document.querySelector('#overview-scorecard-radar'), {
-            chart: { type: 'radar', height: 300, toolbar: { show: false }, fontFamily: 'inherit' },
+            chart: { type: 'radar', height: '100%', toolbar: { show: false }, fontFamily: 'inherit' },
             series: [{ name: 'Score', data: scValues }],
             labels: scLabels,
             colors: ['#886ab5'],

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Opportunity extends Model
 {
@@ -54,7 +55,15 @@ class Opportunity extends Model
     }
 
     /**
-     * Get historical snapshots for this opportunity
+     * The project created from this opportunity.
+     */
+    public function project(): HasOne
+    {
+        return $this->hasOne(Project::class);
+    }
+
+    /**
+     * Get historical snapshots for this opportunity.
      */
     public function snapshots()
     {
@@ -64,8 +73,8 @@ class Opportunity extends Model
     /**
      * Get historical timeline showing how this opportunity changed over time
      *
-     * @param string|null $startDate Start date for time range
-     * @param string|null $endDate End date for time range
+     * @param  string|null  $startDate  Start date for time range
+     * @param  string|null  $endDate  End date for time range
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getHistory($startDate = null, $endDate = null)

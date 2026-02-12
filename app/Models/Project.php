@@ -12,6 +12,7 @@ class Project extends Model
     protected $fillable = [
         'account_id',
         'partner_id',
+        'opportunity_id',
         'name',
         'start_date',
         'end_date',
@@ -40,6 +41,14 @@ class Project extends Model
         'total_sprints' => 'integer',
         'current_sprint' => 'integer',
     ];
+
+    /**
+     * The opportunity this project was created from.
+     */
+    public function opportunity()
+    {
+        return $this->belongsTo(Opportunity::class);
+    }
 
     /**
      * The partner that owns this project.

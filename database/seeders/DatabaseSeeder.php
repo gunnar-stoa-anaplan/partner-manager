@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Contact;
+use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -21,7 +21,6 @@ class DatabaseSeeder extends Seeder
             GunnarSeeder::class,
             UserSeeder::class,
             AccountSeeder::class,
-            ProjectSeeder::class,
             PartnerSeeder::class,
             ContactSeeder::class,
             ObjectiveSeeder::class,
@@ -38,6 +37,7 @@ class DatabaseSeeder extends Seeder
 
             // === Phase 2: Business Data ===
             OpportunityHistorySeeder::class,   // 52 weeks of opportunities + snapshots for analytics
+            ProjectSeeder::class,              // projects from closed-won opportunities
             ResourceHistorySeeder::class,      // 52 weeks of resources + snapshots for analytics
             FundingSeeder::class,              // funding records
             PartnerEventSeeder::class,         // events with contact attendees

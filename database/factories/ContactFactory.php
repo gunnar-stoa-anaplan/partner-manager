@@ -9,6 +9,25 @@ use Illuminate\Support\Str;
 
 class ContactFactory extends Factory
 {
+    public const KNOWN_PARTNERS = [
+        'Accenture' => 'accenture.com',
+        'Deloitte' => 'deloitte.com',
+        'PwC' => 'pwc.com',
+        'KPMG' => 'kpmg.com',
+        'EY' => 'ey.com',
+        'Capgemini' => 'capgemini.com',
+        'Infosys' => 'infosys.com',
+        'Wipro' => 'wipro.com',
+        'TCS' => 'tcs.com',
+        'Cognizant' => 'cognizant.com',
+        'IBM' => 'ibm.com',
+        'HCL' => 'hcltech.com',
+        'Tech Mahindra' => 'techmahindra.com',
+        'McKinsey' => 'mckinsey.com',
+        'BCG' => 'bcg.com',
+        'Bain' => 'bain.com',
+    ];
+
     public function definition(): array
     {
         $techConsultingTitles = [
@@ -36,11 +55,11 @@ class ContactFactory extends Factory
         return [
             'partner_id' => Partner::inRandomOrder()->first()->id,
             'first_name' => $this->faker->firstName,
-            'last_name'  => $this->faker->lastName,
-            'email'      => $this->faker->unique()->safeEmail,
-            'phone'      => $this->faker->phoneNumber,
-            'title'      => $this->faker->randomElement($techConsultingTitles),
-            'avatar'     => 'img/demo/avatars/avatar-' . $this->faker->numberBetween(1, 18) . '.png',
+            'last_name' => $this->faker->lastName,
+            'email' => $this->faker->unique()->safeEmail,
+            'phone' => $this->faker->phoneNumber,
+            'title' => $this->faker->randomElement($techConsultingTitles),
+            'avatar' => 'img/demo/avatars/avatar-'.$this->faker->numberBetween(1, 18).'.png',
         ];
     }
 
@@ -53,15 +72,15 @@ class ContactFactory extends Factory
                     $domain = self::partnerDomain($partner->name);
                     $first = preg_replace('/[^a-z]/', '', strtolower(Str::ascii($contact->first_name)));
                     $last = preg_replace('/[^a-z]/', '', strtolower(Str::ascii($contact->last_name)));
-                    $email = $first . '.' . $last . '@' . $domain;
+                    $email = $first.'.'.$last.'@'.$domain;
 
                     // Ensure uniqueness
                     if (Contact::where('email', $email)->exists()) {
                         $i = 2;
-                        while (Contact::where('email', $first . '.' . $last . $i . '@' . $domain)->exists()) {
+                        while (Contact::where('email', $first.'.'.$last.$i.'@'.$domain)->exists()) {
                             $i++;
                         }
-                        $email = $first . '.' . $last . $i . '@' . $domain;
+                        $email = $first.'.'.$last.$i.'@'.$domain;
                     }
 
                     $contact->email = $email;
@@ -72,34 +91,6 @@ class ContactFactory extends Factory
 
     public static function partnerDomain(string $partnerName): string
     {
-        $known = [
-            'Accenture' => 'accenture.com',
-            'Deloitte' => 'deloitte.com',
-            'PwC' => 'pwc.com',
-            'KPMG' => 'kpmg.com',
-            'EY' => 'ey.com',
-            'Capgemini' => 'capgemini.com',
-            'Infosys' => 'infosys.com',
-            'Wipro' => 'wipro.com',
-            'TCS' => 'tcs.com',
-            'Cognizant' => 'cognizant.com',
-            'IBM' => 'ibm.com',
-            'HCL' => 'hcltech.com',
-            'Tech Mahindra' => 'techmahindra.com',
-            'McKinsey' => 'mckinsey.com',
-            'BCG' => 'bcg.com',
-            'Bain' => 'bain.com',
-        ];
-
-        if (isset($known[$partnerName])) {
-            return $known[$partnerName];
-        }
-
-        // Derive domain from company name: "Heidenreich LLC" → "heidenreich.com"
-        $name = preg_replace('/\b(LLC|Inc|Corp|Ltd|Group|Co|PLC|GmbH|SA|AG|BV)\b/i', '', $partnerName);
-        $name = trim($name, ' ,-.');
-        $slug = strtolower(preg_replace('/[^a-z0-9]+/i', '', $name));
-
-        return $slug . '.com';
+        return self::KNOWN_PARTNERS[$partnerName] ?? strtolower(preg_replace('/[^a-z0-9]+/i', '', $partnerName)).'.com';
     }
 }

@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Partner;
 use App\Models\User;
+use Database\Factories\ContactFactory;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 class PartnerSeeder extends Seeder
@@ -18,15 +19,27 @@ class PartnerSeeder extends Seeder
     public function run(): void
     {
         $users = User::all();
+        $existingNames = Partner::pluck('name')->toArray();
 
-        Partner::factory()
-            ->count(10)
-            ->make()
-            ->each(function ($partner) use ($users) {
-                $partner->user_id = $users->random()->id;
-                $partner->salesforce_id = '00Q' . Str::upper(Str::random(15));
-                $partner->save();
-            });
+        // Use known partner names from ContactFactory, skipping any already seeded (e.g. by GunnarSeeder)
+        $knownNames = array_keys(ContactFactory::KNOWN_PARTNERS);
+
+        $namesToCreate = collect($knownNames)
+            ->reject(fn (string $name) => in_array($name, $existingNames))
+            ->values();
+
+        foreach ($namesToCreate as $name) {
+            $geography = array_rand(self::$geoRegionMap);
+            $region = self::$geoRegionMap[$geography][array_rand(self::$geoRegionMap[$geography])];
+
+            Partner::factory()->create([
+                'name' => $name,
+                'user_id' => $users->random()->id,
+                'salesforce_id' => '00Q'.Str::upper(Str::random(15)),
+                'geography' => $geography,
+                'region' => $region,
+            ]);
+        }
 
         // Backfill any existing partners missing geography/region
         Partner::whereNull('geography')->orWhereNull('region')->each(function ($partner) {

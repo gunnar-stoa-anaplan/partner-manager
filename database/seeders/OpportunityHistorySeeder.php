@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Helpers\FiscalYearHelper;
 use App\Models\Import;
 use App\Models\Opportunity;
 use App\Models\OpportunitySnapshot;
@@ -59,8 +60,8 @@ class OpportunityHistorySeeder extends Seeder
         return match (true) {
             str_contains($partnerName, 'Accenture') => [28, 38, 80000, 450000, 14, 25],
             str_contains($partnerName, 'Deloitte') => [22, 30, 60000, 380000, 16, 22],
-            str_contains($partnerName, 'PwC')      => [20, 26, 50000, 320000, 15, 25],
-            default                                 => [12, 18, 15000, 180000, 12, 20],
+            str_contains($partnerName, 'PwC') => [20, 26, 50000, 320000, 15, 25],
+            default => [12, 18, 15000, 180000, 12, 20],
         };
     }
 
@@ -80,6 +81,7 @@ class OpportunityHistorySeeder extends Seeder
 
         if ($partners->isEmpty()) {
             $this->command->warn('No partners found. Run PartnerSeeder first.');
+
             return;
         }
 
@@ -102,15 +104,22 @@ class OpportunityHistorySeeder extends Seeder
                 $account = $this->accounts[array_rand($this->accounts)];
                 $type = $this->oppTypes[array_rand($this->oppTypes)];
 
-                // Assign sourced to the first N opportunities, rest are influenced
-                $influencedRemaining = $oppCount - $i - $sourcedRemaining;
-                $isSourced = $sourcedRemaining > 0 && ($influencedRemaining <= 0 || rand(1, $sourcedRemaining + $influencedRemaining) <= $sourcedRemaining);
-                if ($isSourced) $sourcedRemaining--;
+                // Guarantee the first Closed Won opp is sourced so goal attainment shows both types
+                if ($i === 0) {
+                    $isSourced = true;
+                    $sourcedRemaining--;
+                } else {
+                    $influencedRemaining = $oppCount - $i - $sourcedRemaining;
+                    $isSourced = $sourcedRemaining > 0 && ($influencedRemaining <= 0 || rand(1, $sourcedRemaining + $influencedRemaining) <= $sourcedRemaining);
+                    if ($isSourced) {
+                        $sourcedRemaining--;
+                    }
+                }
                 $revenueType = $isSourced ? 'sourced' : 'influenced';
 
-                // Assign a target final stage using weighted funnel distribution:
-                // many opps stay in early stages, fewer reach later stages.
-                $targetStageIdx = $this->randomTargetStage();
+                // Guarantee at least 2 Closed Won targets per partner, then use weighted funnel
+                $closedWonIdx = count($this->stageProgression) - 1;
+                $targetStageIdx = $i < 2 ? $closedWonIdx : $this->randomTargetStage();
 
                 // Stagger intro weeks: opps targeting later stages start earlier
                 // (they need more time to reach their target); early-stage opps start late.
@@ -119,6 +128,11 @@ class OpportunityHistorySeeder extends Seeder
                 $introWeek = rand(max(0, $latestIntro - 10), min($latestIntro, $weeksToSimulate - 1));
 
                 $startStageIdx = 0;
+
+                // Guaranteed Closed Won opps get close dates in current FY so goal attainment works
+                $closeDate = $i < 2
+                    ? now()->subDays(rand(1, 10))
+                    : $startDate->copy()->addWeeks($introWeek + $avgCloseWeeks + rand(-3, 5));
 
                 $partnerOpps[] = [
                     'partner_id' => $partner->id,
@@ -133,7 +147,7 @@ class OpportunityHistorySeeder extends Seeder
                     'target_stage_index' => $targetStageIdx,
                     'weeks_in_stage' => 0,
                     'weeks_to_advance' => rand(4, 8),
-                    'close_date' => $startDate->copy()->addWeeks($introWeek + $avgCloseWeeks + rand(-3, 5)),
+                    'close_date' => $closeDate,
                     'lead_source' => $isSourced
                         ? 'Partner Referral'
                         : fake()->randomElement(['Web', 'Event', 'Cold Call', 'LinkedIn']),
@@ -155,8 +169,8 @@ class OpportunityHistorySeeder extends Seeder
             // Create weekly import record
             $import = Import::create([
                 'type' => 'opportunities',
-                'file_name' => 'weekly_pipeline_' . $weekDate->format('Y_m_d') . '.xlsx',
-                'file_path' => 'imports/weekly_pipeline_' . $weekDate->format('Y_m_d') . '.xlsx',
+                'file_name' => 'weekly_pipeline_'.$weekDate->format('Y_m_d').'.xlsx',
+                'file_path' => 'imports/weekly_pipeline_'.$weekDate->format('Y_m_d').'.xlsx',
                 'status' => 'completed',
                 'user_id' => $admin->id,
                 'started_at' => $weekDate,
@@ -177,18 +191,23 @@ class OpportunityHistorySeeder extends Seeder
             foreach ($partnerOpportunities as $partnerId => &$opps) {
                 foreach ($opps as &$opp) {
                     // Skip if not yet introduced
-                    if ($week < $opp['intro_week']) continue;
+                    if ($week < $opp['intro_week']) {
+                        continue;
+                    }
 
                     // Skip if already closed
-                    if ($opp['closed']) continue;
+                    if ($opp['closed']) {
+                        continue;
+                    }
 
                     // Create the DB opportunity if first appearance
                     if ($opp['db_id'] === null) {
-                        $fiscalQuarter = 'Q' . ceil($opp['close_date']->month / 3);
-                        $fiscalYear = $opp['close_date']->year;
+                        $fiscal = FiscalYearHelper::calculateFiscalPeriod($opp['close_date']);
+                        $fiscalQuarter = $fiscal['fiscal_quarter'];
+                        $fiscalYear = $fiscal['fiscal_year'];
 
                         $dbOpp = Opportunity::create([
-                            'salesforce_id' => 'OPP-' . str_pad(++$totalOpportunities, 6, '0', STR_PAD_LEFT),
+                            'salesforce_id' => 'OPP-'.str_pad(++$totalOpportunities, 6, '0', STR_PAD_LEFT),
                             'opportunity_name' => $opp['opportunity_name'],
                             'account_name' => $opp['account_name'],
                             'partner_id' => $opp['partner_id'],
@@ -204,6 +223,8 @@ class OpportunityHistorySeeder extends Seeder
                             'probability' => $this->getProbabilityForStage($this->stageProgression[$opp['current_stage_index']]),
                             'owner' => $opp['owner'],
                             'import_id' => $import->id,
+                            'created_at' => $weekDate,
+                            'updated_at' => $weekDate,
                         ]);
                         $opp['db_id'] = $dbOpp->id;
                         $weekNewOpps++;
@@ -236,6 +257,7 @@ class OpportunityHistorySeeder extends Seeder
                             'probability' => $this->getProbabilityForStage($newStage),
                             'amount' => $opp['amount'],
                             'import_id' => $import->id,
+                            'updated_at' => $weekDate,
                         ]);
                     }
 
@@ -267,7 +289,7 @@ class OpportunityHistorySeeder extends Seeder
             unset($opps, $opp);
 
             // Batch insert snapshots
-            if (!empty($weekSnapshots)) {
+            if (! empty($weekSnapshots)) {
                 foreach (array_chunk($weekSnapshots, 500) as $chunk) {
                     DB::table('opportunity_snapshots')->insert($chunk);
                 }
@@ -284,7 +306,7 @@ class OpportunityHistorySeeder extends Seeder
         }
 
         $this->command->info('');
-        $this->command->info("Seeded {$totalOpportunities} opportunities across " . $partners->count() . " partners.");
+        $this->command->info("Seeded {$totalOpportunities} opportunities across ".$partners->count().' partners.');
         $this->command->info("Created {$totalSnapshots} snapshots over {$weeksToSimulate} weekly imports.");
 
         // Show per-partner breakdown with sourced/influenced split
@@ -298,14 +320,14 @@ class OpportunityHistorySeeder extends Seeder
             $ratio = $iAcv > 0 ? round($sAcv / $iAcv * 100, 1) : 0;
             $this->command->info("  {$partner->name}: {$sCount} sourced (\${$this->fmtK($sAcv)}) + {$iCount} influenced (\${$this->fmtK($iAcv)}) = {$ratio}% ratio");
         }
-        $this->command->info("  ... and " . max(0, $partners->count() - 5) . " more partners");
+        $this->command->info('  ... and '.max(0, $partners->count() - 5).' more partners');
     }
 
     private function fmtK(float $val): string
     {
         return $val >= 1000000
-            ? number_format($val / 1000000, 1) . 'M'
-            : number_format($val / 1000, 0) . 'k';
+            ? number_format($val / 1000000, 1).'M'
+            : number_format($val / 1000, 0).'k';
     }
 
     /**
@@ -323,8 +345,11 @@ class OpportunityHistorySeeder extends Seeder
         $cumulative = 0;
         foreach ($weights as $idx => $w) {
             $cumulative += $w;
-            if ($rand <= $cumulative) return $idx;
+            if ($rand <= $cumulative) {
+                return $idx;
+            }
         }
+
         return 0;
     }
 
@@ -334,8 +359,11 @@ class OpportunityHistorySeeder extends Seeder
         $cumulative = 0;
         foreach ($this->productAreaWeights as $area => $weight) {
             $cumulative += $weight;
-            if ($rand <= $cumulative) return $area;
+            if ($rand <= $cumulative) {
+                return $area;
+            }
         }
+
         return 'Finance';
     }
 

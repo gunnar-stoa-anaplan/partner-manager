@@ -581,28 +581,13 @@
     // ── Sourced + Influenced NNACV (stacked area) vs Opportunity Count (line) ──
     var opportunityHistory = @json($opportunityHistory);
     if (opportunityHistory.length > 0) {
-        function niceMax(dataMax, ticks) {
-            if (!dataMax || dataMax <= 0) return ticks;
-            var rawStep = dataMax / ticks;
-            var mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
-            var r = rawStep / mag;
-            var nice;
-            if (r <= 1) nice = 1;
-            else if (r <= 1.5) nice = 1.5;
-            else if (r <= 2) nice = 2;
-            else if (r <= 3) nice = 3;
-            else if (r <= 5) nice = 5;
-            else nice = 10;
-            return nice * mag * ticks;
-        }
-
         var maxStacked = Math.max.apply(null, opportunityHistory.map(function(h) {
             return parseFloat(h.sourced_amount) + parseFloat(h.influenced_amount);
         }));
-        var yAxisMax = niceMax(maxStacked * 1.05, 6) || 600000;
+        var yAxisMax = Math.ceil(maxStacked * 1.05) || 600000;
 
         var maxCount = Math.max.apply(null, opportunityHistory.map(function(h) { return h.opportunity_count; }));
-        var countAxisMax = niceMax(maxCount * 1.05, 6) || 30;
+        var countAxisMax = Math.ceil(maxCount * 1.05) || 30;
 
         new ApexCharts(document.querySelector('#pipeline-opportunity-chart'), {
             series: [
@@ -617,9 +602,9 @@
             markers: { size: [3, 3, 3], colors: [primaryHex, successHex, bodyColor07], strokeColors: [primaryHex, successHex, bodyColor07], strokeWidth: 2, hover: { sizeOffset: 2 } },
             xaxis: { categories: opportunityHistory.map(function(h) { return h.snapshot_month; }), labels: { style: { colors: bodyColorHex, fontSize: '12px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
             yaxis: [
-                { seriesName: 'Sourced', min: 0, max: yAxisMax, tickAmount: 6, labels: { style: { colors: bodyColorHex, fontSize: '12px' }, formatter: function(val) { if (val >= 1000000) return '$' + Math.round(val / 1000000) + 'M'; if (val >= 1000) return '$' + Math.round(val / 1000) + 'k'; return '$' + Math.round(val); } } },
+                { seriesName: 'Sourced', min: 0, max: yAxisMax, tickAmount: 5, labels: { style: { colors: bodyColorHex, fontSize: '12px' }, formatter: function(val) { if (val >= 1000000) return '$' + Math.round(val / 1000000) + 'M'; if (val >= 1000) return '$' + Math.round(val / 1000) + 'k'; return '$' + Math.round(val); } } },
                 { seriesName: 'Sourced', show: false },
-                { seriesName: 'Opportunity Count', opposite: true, min: 0, max: countAxisMax, tickAmount: 6, labels: { style: { colors: bodyColorHex, fontSize: '12px' }, formatter: function(val) { return Math.round(val).toLocaleString(); } } }
+                { seriesName: 'Opportunity Count', opposite: true, min: 0, max: countAxisMax, tickAmount: 5, labels: { style: { colors: bodyColorHex, fontSize: '12px' }, formatter: function(val) { return Math.round(val).toLocaleString(); } } }
             ],
             legend: { show: true, position: 'top', horizontalAlign: 'center', fontSize: '14px', fontFamily: 'inherit', labels: { colors: bodyColorHex }, markers: { width: 18, height: 6, radius: 2 }, itemMargin: { horizontal: 12, vertical: 0 } },
             grid: { borderColor: bodyColor01, strokeDashArray: 3, yaxis: { lines: { show: true } }, xaxis: { lines: { show: false } } },
