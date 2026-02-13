@@ -24,6 +24,13 @@ class PortalAuth
                 ->withErrors(['email' => 'Your portal access has been disabled.']);
         }
 
+        if (! $contact->portal_role) {
+            Auth::guard('portal')->logout();
+
+            return redirect()->route('portal.login')
+                ->withErrors(['email' => 'Your account has not been assigned a portal role. Contact your administrator.']);
+        }
+
         return $next($request);
     }
 }

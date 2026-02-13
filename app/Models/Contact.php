@@ -29,6 +29,7 @@ class Contact extends Authenticatable
         'linkedin_synced_at',
         'resource_role',
         'portal_access',
+        'portal_role',
     ];
 
     protected $hidden = [
@@ -68,6 +69,12 @@ class Contact extends Authenticatable
         'developer' => 'Developer',
         'data_integration' => 'Data Integration Specialist',
         'other' => 'Other',
+    ];
+
+    const PORTAL_ROLES = [
+        'admin' => 'Partner Admin',
+        'sales' => 'Partner Sales',
+        'delivery' => 'Partner Delivery',
     ];
 
     public function partner()
@@ -126,6 +133,31 @@ class Contact extends Authenticatable
     public function scopeResources($query)
     {
         return $query->where('contact_type', 'resource');
+    }
+
+    public function scopePortalUsers($query)
+    {
+        return $query->where('portal_access', true)->whereNotNull('portal_role');
+    }
+
+    public function isPortalAdmin(): bool
+    {
+        return $this->portal_role === 'admin';
+    }
+
+    public function isPortalSales(): bool
+    {
+        return $this->portal_role === 'sales';
+    }
+
+    public function isPortalDelivery(): bool
+    {
+        return $this->portal_role === 'delivery';
+    }
+
+    public function hasPortalRole(string|array $roles): bool
+    {
+        return in_array($this->portal_role, (array) $roles, true);
     }
 
     public function getFullNameAttribute(): string

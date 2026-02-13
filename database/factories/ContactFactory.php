@@ -89,6 +89,33 @@ class ContactFactory extends Factory
         });
     }
 
+    public function portalAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'portal_access' => true,
+            'portal_role' => 'admin',
+            'password' => 'password',
+        ]);
+    }
+
+    public function portalSales(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'portal_access' => true,
+            'portal_role' => 'sales',
+            'password' => 'password',
+        ]);
+    }
+
+    public function portalDelivery(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'portal_access' => true,
+            'portal_role' => 'delivery',
+            'password' => 'password',
+        ]);
+    }
+
     public static function partnerDomain(string $partnerName): string
     {
         return self::KNOWN_PARTNERS[$partnerName] ?? strtolower(preg_replace('/[^a-z0-9]+/i', '', $partnerName)).'.com';

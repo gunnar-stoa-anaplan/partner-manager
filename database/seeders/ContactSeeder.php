@@ -7,6 +7,7 @@ use App\Models\ContactInteraction;
 use App\Models\Partner;
 use App\Models\Project;
 use App\Models\User;
+use Database\Factories\ContactFactory;
 use Illuminate\Database\Seeder;
 
 class ContactSeeder extends Seeder
@@ -25,29 +26,80 @@ class ContactSeeder extends Seeder
         'qbr' => ['Q1 QBR', 'Q2 QBR', 'Q3 QBR', 'Q4 QBR'],
     ];
 
+    /**
+     * Fixed portal contacts created for every partner.
+     * These are deterministic so login credentials are consistent across seeds.
+     */
+    private const PORTAL_CONTACTS = [
+        [
+            'first_name' => 'Alex',
+            'last_name' => 'Morgan',
+            'title' => 'Partner Practice Lead',
+            'contact_type' => 'resource',
+            'resource_role' => 'solution_architect',
+            'portal_access' => true,
+            'portal_role' => 'admin',
+        ],
+        [
+            'first_name' => 'Jordan',
+            'last_name' => 'Lee',
+            'title' => 'Delivery Manager',
+            'contact_type' => 'resource',
+            'resource_role' => 'project_manager',
+            'portal_access' => true,
+            'portal_role' => 'delivery',
+        ],
+        [
+            'first_name' => 'Taylor',
+            'last_name' => 'Chen',
+            'title' => 'Client Account Lead',
+            'contact_type' => 'influencer',
+            'influencer_role' => 'client_account_lead',
+            'portal_access' => true,
+            'portal_role' => 'sales',
+        ],
+    ];
+
     public function run(): void
     {
         $partners = Partner::all();
         $users = User::all();
 
         foreach ($partners as $partner) {
-            // Create 10 contacts per partner with distributed contact_types
-            $contacts = Contact::factory(10)->create([
+            $domain = ContactFactory::partnerDomain($partner->name);
+
+            // 1. Create the 3 deterministic portal contacts
+            $portalContacts = collect();
+            foreach (self::PORTAL_CONTACTS as $template) {
+                $first = strtolower($template['first_name']);
+                $last = strtolower($template['last_name']);
+
+                $portalContacts->push(Contact::create([
+                    ...$template,
+                    'partner_id' => $partner->id,
+                    'email' => "{$first}.{$last}@{$domain}",
+                    'password' => 'password',
+                    'phone' => fake()->phoneNumber,
+                    'avatar' => 'img/demo/avatars/avatar-'.fake()->numberBetween(1, 18).'.png',
+                    'created_at' => fake()->dateTimeBetween('-6 months', '-1 week'),
+                ]));
+            }
+
+            // 2. Create 7 more contacts via factory (1 resource, 2 influencers, 4 general)
+            $factoryContacts = Contact::factory(7)->create([
                 'partner_id' => $partner->id,
             ]);
 
-            // Assign contact types: 3 resources, 3 influencers, 4 general
-            // Stagger created_at across past 6 months so trend charts show growth
-            $contacts->each(function ($contact, $index) {
+            $factoryContacts->each(function ($contact, $index) {
                 $backdatedAt = fake()->dateTimeBetween('-6 months', '-1 week');
 
-                if ($index < 3) {
+                if ($index === 0) {
                     $contact->update([
                         'contact_type' => 'resource',
                         'resource_role' => fake()->randomElement(array_keys(Contact::RESOURCE_ROLES)),
                         'created_at' => $backdatedAt,
                     ]);
-                } elseif ($index < 6) {
+                } elseif ($index < 3) {
                     $contact->update([
                         'contact_type' => 'influencer',
                         'influencer_role' => fake()->randomElement(array_keys(Contact::INFLUENCER_ROLES)),
@@ -56,8 +108,10 @@ class ContactSeeder extends Seeder
                 }
             });
 
-            // Attach contacts to random projects
-            $contacts->each(function ($contact) {
+            // 3. Merge all contacts and attach to projects
+            $allContacts = $portalContacts->merge($factoryContacts);
+
+            $allContacts->each(function ($contact) {
                 $projectIds = Project::inRandomOrder()
                     ->limit(rand(1, 3))
                     ->pluck('id')
@@ -66,8 +120,8 @@ class ContactSeeder extends Seeder
                 $contact->projects()->attach($projectIds);
             });
 
-            // Create interactions for influencer contacts
-            $influencers = $contacts->where('contact_type', 'influencer');
+            // 4. Create interactions for influencer contacts
+            $influencers = $allContacts->where('contact_type', 'influencer');
             $psm = $users->firstWhere('id', $partner->user_id) ?? $users->first();
 
             foreach ($influencers as $influencer) {

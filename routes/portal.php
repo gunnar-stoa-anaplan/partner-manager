@@ -1,8 +1,16 @@
 <?php
 
+use App\Http\Controllers\Portal\PortalBlueprintsController;
+use App\Http\Controllers\Portal\PortalCalendarController;
+use App\Http\Controllers\Portal\PortalCasesController;
+use App\Http\Controllers\Portal\PortalCertificationsController;
+use App\Http\Controllers\Portal\PortalContactsController;
 use App\Http\Controllers\Portal\PortalDashboardController;
 use App\Http\Controllers\Portal\PortalDealRegistrationController;
+use App\Http\Controllers\Portal\PortalEnablementController;
+use App\Http\Controllers\Portal\PortalGoalsController;
 use App\Http\Controllers\Portal\PortalLoginController;
+use App\Http\Controllers\Portal\PortalProjectsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,8 +35,34 @@ Route::middleware('portal')->group(function () {
     Route::post('/logout', [PortalLoginController::class, 'logout'])->name('logout');
     Route::get('/', [PortalDashboardController::class, 'index'])->name('dashboard');
 
-    // Deal Registrations
-    Route::get('/deal-registrations', [PortalDealRegistrationController::class, 'index'])->name('deal-registrations.index');
-    Route::get('/deal-registrations/create', [PortalDealRegistrationController::class, 'create'])->name('deal-registrations.create');
-    Route::post('/deal-registrations', [PortalDealRegistrationController::class, 'store'])->name('deal-registrations.store');
+    // All roles: enablement & blueprints
+    Route::get('/enablement', [PortalEnablementController::class, 'index'])->name('enablement.index');
+    Route::get('/blueprints', [PortalBlueprintsController::class, 'index'])->name('blueprints.index');
+    Route::get('/blueprints/{enrollment}', [PortalBlueprintsController::class, 'show'])->name('blueprints.show');
+
+    // Admin only: goals, certifications, calendar, team management
+    Route::middleware('portal.role:admin')->group(function () {
+        Route::get('/goals', [PortalGoalsController::class, 'index'])->name('goals.index');
+        Route::get('/certifications', [PortalCertificationsController::class, 'index'])->name('certifications.index');
+        Route::get('/calendar', [PortalCalendarController::class, 'index'])->name('calendar.index');
+        Route::get('/calendar/events', [PortalCalendarController::class, 'events'])->name('calendar.events');
+        Route::get('/contacts', [PortalContactsController::class, 'index'])->name('contacts.index');
+        Route::get('/contacts/create', [PortalContactsController::class, 'create'])->name('contacts.create');
+        Route::post('/contacts', [PortalContactsController::class, 'store'])->name('contacts.store');
+    });
+
+    // Admin + Sales: deal registrations
+    Route::middleware('portal.role:admin,sales')->group(function () {
+        Route::get('/deal-registrations', [PortalDealRegistrationController::class, 'index'])->name('deal-registrations.index');
+        Route::get('/deal-registrations/create', [PortalDealRegistrationController::class, 'create'])->name('deal-registrations.create');
+        Route::post('/deal-registrations', [PortalDealRegistrationController::class, 'store'])->name('deal-registrations.store');
+    });
+
+    // Admin + Delivery: projects & cases
+    Route::middleware('portal.role:admin,delivery')->group(function () {
+        Route::get('/projects', [PortalProjectsController::class, 'index'])->name('projects.index');
+        Route::get('/projects/{project}', [PortalProjectsController::class, 'show'])->name('projects.show');
+        Route::get('/cases', [PortalCasesController::class, 'index'])->name('cases.index');
+        Route::post('/cases', [PortalCasesController::class, 'store'])->name('cases.store');
+    });
 });

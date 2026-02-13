@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\IsAdmin::class,
             'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
             'portal' => \App\Http\Middleware\PortalAuth::class,
+            'portal.role' => \App\Http\Middleware\PortalRole::class,
         ]);
         $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,

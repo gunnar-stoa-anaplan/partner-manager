@@ -10,25 +10,88 @@
         body { background-color: #f8f9fa; }
         .portal-nav { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .portal-card { border: none; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .nav-link-portal { color: rgba(255,255,255,0.8); text-decoration: none; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.875rem; }
+        .nav-link-portal:hover, .nav-link-portal.active { color: #fff; background: rgba(255,255,255,0.15); }
     </style>
 </head>
 <body>
+    @php $portalUser = Auth::guard('portal')->user(); @endphp
+
     {{-- Portal Navigation --}}
     <nav class="navbar navbar-expand-lg portal-nav navbar-dark">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ route('portal.dashboard') }}">
                 Partner Portal
             </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#portalNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             @auth('portal')
-            <div class="d-flex align-items-center gap-3">
-                <a href="{{ route('portal.dashboard') }}" class="text-white text-decoration-none">Dashboard</a>
-                <a href="{{ route('portal.deal-registrations.index') }}" class="text-white text-decoration-none">Deal Registrations</a>
-                <span class="text-white-50">|</span>
-                <span class="text-white-50">{{ Auth::guard('portal')->user()->full_name }}</span>
-                <form action="{{ route('portal.logout') }}" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-outline-light">Logout</button>
-                </form>
+            <div class="collapse navbar-collapse" id="portalNav">
+                <ul class="navbar-nav me-auto gap-1">
+                    <li class="nav-item">
+                        <a href="{{ route('portal.dashboard') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.dashboard') ? 'active' : '' }}">Dashboard</a>
+                    </li>
+
+                    {{-- Admin only --}}
+                    @if($portalUser->isPortalAdmin())
+                    <li class="nav-item">
+                        <a href="{{ route('portal.goals.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.goals.*') ? 'active' : '' }}">Goals</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('portal.certifications.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.certifications.*') ? 'active' : '' }}">Certifications</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('portal.calendar.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.calendar.*') ? 'active' : '' }}">Calendar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('portal.contacts.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.contacts.*') ? 'active' : '' }}">Team</a>
+                    </li>
+                    @endif
+
+                    {{-- Admin + Sales --}}
+                    @if($portalUser->hasPortalRole(['admin', 'sales']))
+                    <li class="nav-item">
+                        <a href="{{ route('portal.deal-registrations.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.deal-registrations.*') ? 'active' : '' }}">Deal Registrations</a>
+                    </li>
+                    @endif
+
+                    {{-- Admin + Delivery --}}
+                    @if($portalUser->hasPortalRole(['admin', 'delivery']))
+                    <li class="nav-item">
+                        <a href="{{ route('portal.projects.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.projects.*') ? 'active' : '' }}">Projects</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('portal.cases.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.cases.*') ? 'active' : '' }}">Cases</a>
+                    </li>
+                    @endif
+
+                    {{-- All roles --}}
+                    <li class="nav-item">
+                        <a href="{{ route('portal.enablement.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.enablement.*') ? 'active' : '' }}">Enablement</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('portal.blueprints.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.blueprints.*') ? 'active' : '' }}">Blueprints</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ \App\Models\Contact::PORTAL_ROLES[$portalUser->portal_role] ?? $portalUser->portal_role }}</span>
+                    <span class="text-white-50" style="font-size: 0.875rem;">{{ $portalUser->full_name }}</span>
+                    <form action="{{ route('portal.logout') }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-outline-light">Logout</button>
+                    </form>
+                </div>
             </div>
             @endauth
         </div>
@@ -38,6 +101,15 @@
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show">
                 {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show">
+                @foreach($errors->all() as $error)
+                    <div>{{ $error }}</div>
+                @endforeach
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
