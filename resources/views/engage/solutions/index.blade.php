@@ -29,38 +29,53 @@
 </div>
 
 <div class="card shadow-0 mb-g">
-    <div class="card-body">
-        <table class="table table-hover m-0" id="solutions-table">
-            <thead><tr><th>Partner</th><th>Solution</th><th>Product Area</th><th>Industry</th><th>Stage</th><th>Days in Stage</th><th>Est. ACV</th><th>Actions</th></tr></thead>
-            <tbody>
-            @forelse($solutions as $sol)
-            <tr>
-                <td>{{ $sol->partner->name }}</td>
-                <td><strong>{{ $sol->name }}</strong></td>
-                <td>{{ $sol->product_area ?? '—' }}</td>
-                <td>{{ $sol->industry_focus ?? '—' }}</td>
-                <td>
-                    @php $stageColors = ['build'=>'secondary','market'=>'info','sell'=>'success','grow'=>'primary']; @endphp
-                    <span class="badge bg-{{ $stageColors[$sol->lifecycle_stage] }}">{{ ucfirst($sol->lifecycle_stage) }}</span>
-                </td>
-                <td>{{ $sol->stage_entered_at->diffInDays(now()) }}d</td>
-                <td>{{ $sol->estimated_acv ? '$'.number_format($sol->estimated_acv) : '—' }}</td>
-                <td>
-                    @if($sol->lifecycle_stage !== 'grow')
-                    <form action="{{ route('engage.solutions.advance', $sol) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button class="btn btn-xs btn-outline-success" title="Advance">
-                            <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#arrow-right"></use></svg>
-                        </button>
-                    </form>
-                    @endif
-                </td>
-            </tr>
-            @empty
-            <tr><td colspan="8" class="text-center text-muted py-4">No solutions tracked yet.</td></tr>
-            @endforelse
-            </tbody>
-        </table>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table id="solutions-table" class="table table-bordered table-hover table-striped w-100 mb-0">
+                <thead>
+                    <tr>
+                        <th>Partner</th>
+                        <th>Solution</th>
+                        <th>Product Area</th>
+                        <th>Industry</th>
+                        <th>Stage</th>
+                        <th>Days in Stage</th>
+                        <th>Est. ACV</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($solutions as $sol)
+                    <tr>
+                        <td>{{ $sol->partner->name }}</td>
+                        <td><strong>{{ $sol->name }}</strong></td>
+                        <td>{{ $sol->product_area ?? '—' }}</td>
+                        <td>{{ $sol->industry_focus ?? '—' }}</td>
+                        <td>
+                            @php $stageColors = ['build'=>'secondary','market'=>'info','sell'=>'success','grow'=>'primary']; @endphp
+                            <span class="badge bg-{{ $stageColors[$sol->lifecycle_stage] }}">{{ ucfirst($sol->lifecycle_stage) }}</span>
+                        </td>
+                        <td data-sort="{{ $sol->stage_entered_at ? (int) now()->diffInDays($sol->stage_entered_at) : 0 }}">
+                            {{ $sol->stage_entered_at ? (int) now()->diffInDays($sol->stage_entered_at) : 0 }}d
+                        </td>
+                        <td data-sort="{{ $sol->estimated_acv ?? 0 }}">{{ $sol->estimated_acv ? '$'.number_format($sol->estimated_acv) : '—' }}</td>
+                        <td>
+                            @if($sol->lifecycle_stage !== 'grow')
+                            <form action="{{ route('engage.solutions.advance', $sol) }}" method="POST" class="d-inline">
+                                @csrf
+                                <button class="btn btn-xs btn-outline-success" title="Advance to {{ ucfirst(['build'=>'market','market'=>'sell','sell'=>'grow'][$sol->lifecycle_stage] ?? '') }}">
+                                    <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#arrow-right"></use></svg>
+                                </button>
+                            </form>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="8" class="text-center text-muted py-4">No solutions tracked yet.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -92,5 +107,20 @@
 @endsection
 
 @section('scripts')
-<script>$(document).ready(function() { new SmartTable('#solutions-table', { sortable: true, perPage: 15 }); });</script>
+    @vite(['resources/scripts/pages/table-init.js'])
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.SmartTables && document.querySelector('#solutions-table tbody tr td:not([colspan])')) {
+            new window.SmartTables('solutions-table', {
+                perPage: 15,
+                sortable: true,
+                responsive: {
+                    enabled: true,
+                    breakpoint: 768,
+                    columnPriorities: { 0: 1, 1: 2, 4: 3, 6: 4, 5: 5, 2: 6, 3: 7, 7: 8 }
+                }
+            });
+        }
+    });
+    </script>
 @endsection

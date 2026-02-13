@@ -1,16 +1,19 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Partner;
-use App\Models\PartnerGoal;
-use App\Models\PartnerGoalDimension;
 use App\Models\AppSetting;
+use App\Models\GoalTemplate;
+use App\Models\Partner;
+use App\Models\PartnerAssignedGoal;
+use App\Models\PartnerGoal;
+use App\Services\GoalComputationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class GoalsController extends Controller
 {
-    public function index()
+    public function index(Request $request): \Illuminate\View\View
     {
         $user = auth()->user();
         $partnersQuery = $user->role === 'admin'
@@ -18,24 +21,52 @@ class GoalsController extends Controller
             : Partner::where('user_id', $user->id);
 
         $partners = $partnersQuery->select('id', 'name')->orderBy('name')->get();
-        $fy = $this->currentFiscalYear();
+        $partnerIds = $partners->pluck('id');
+        $fy = $request->query('fy', $this->currentFiscalYear());
 
-        $goals = PartnerGoal::whereIn('partner_id', $partners->pluck('id'))
+        // Legacy goals (sourced/influenced NNACV)
+        $goals = PartnerGoal::whereIn('partner_id', $partnerIds)
             ->where('fiscal_year', $fy)
             ->with('dimensions')
             ->get()
             ->keyBy('partner_id');
 
+        // New assigned goals
+        $assignedGoals = PartnerAssignedGoal::whereIn('partner_id', $partnerIds)
+            ->where('fiscal_year', $fy)
+            ->with(['partner', 'goalTemplate', 'assignedByUser'])
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get();
+
+        $goalsByCategory = $assignedGoals->groupBy('category');
+
+        // Category summary stats
+        $categorySummary = [];
+        foreach (GoalTemplate::CATEGORIES as $catKey => $catLabel) {
+            $catGoals = $goalsByCategory->get($catKey, collect());
+            $totalTarget = $catGoals->sum('target_value');
+            $totalActual = $catGoals->sum('actual_value');
+            $attainment = $totalTarget > 0 ? round(($totalActual / $totalTarget) * 100, 1) : 0;
+            $categorySummary[$catKey] = [
+                'label' => $catLabel,
+                'count' => $catGoals->count(),
+                'target' => $totalTarget,
+                'actual' => $totalActual,
+                'attainment' => $attainment,
+            ];
+        }
+
         // Revenue planning data
         $pipelineData = DB::table('opportunities')
-            ->whereIn('partner_id', $partners->pluck('id'))
+            ->whereIn('partner_id', $partnerIds)
             ->whereNotIn('stage', ['Closed Won', 'Closed Lost'])
             ->selectRaw('partner_id, SUM(amount) as pipeline, COUNT(*) as opp_count')
             ->groupBy('partner_id')
             ->pluck('pipeline', 'partner_id');
 
         $wonData = DB::table('opportunities')
-            ->whereIn('partner_id', $partners->pluck('id'))
+            ->whereIn('partner_id', $partnerIds)
             ->where('stage', 'Closed Won')
             ->where('fiscal_year', $fy)
             ->selectRaw('partner_id, SUM(amount) as won, COUNT(*) as won_count, AVG(amount) as asp')
@@ -43,58 +74,108 @@ class GoalsController extends Controller
             ->get()
             ->keyBy('partner_id');
 
-        // Historical ASP and win rate for revenue planning calculator
         $historicalAsp = DB::table('opportunities')
-            ->whereIn('partner_id', $partners->pluck('id'))
+            ->whereIn('partner_id', $partnerIds)
             ->where('stage', 'Closed Won')
             ->where('close_date', '>=', now()->subMonths(24))
             ->avg('amount') ?? 200000;
 
         $totalWon = DB::table('opportunities')
-            ->whereIn('partner_id', $partners->pluck('id'))
+            ->whereIn('partner_id', $partnerIds)
             ->where('stage', 'Closed Won')
             ->where('close_date', '>=', now()->subMonths(12))
             ->count();
         $totalLost = DB::table('opportunities')
-            ->whereIn('partner_id', $partners->pluck('id'))
+            ->whereIn('partner_id', $partnerIds)
             ->where('stage', 'Closed Lost')
             ->where('close_date', '>=', now()->subMonths(12))
             ->count();
         $historicalWinRate = ($totalWon + $totalLost) > 0 ? $totalWon / ($totalWon + $totalLost) : 0.25;
 
+        // Available templates for assigning new goals
+        $availableTemplates = GoalTemplate::where('is_active', true)
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get();
+
+        // Year-over-year comparison
+        $prevFy = $this->previousFiscalYear($fy);
+        $prevGoals = PartnerAssignedGoal::whereIn('partner_id', $partnerIds)
+            ->where('fiscal_year', $prevFy)
+            ->get();
+        $prevByCategory = [];
+        foreach (GoalTemplate::CATEGORIES as $catKey => $catLabel) {
+            $catGoals = $prevGoals->where('category', $catKey);
+            $prevByCategory[$catKey] = [
+                'target' => $catGoals->sum('target_value'),
+                'actual' => $catGoals->sum('actual_value'),
+            ];
+        }
+
         return view('plan.goals.index', compact(
             'partners', 'goals', 'fy', 'pipelineData', 'wonData',
-            'historicalAsp', 'historicalWinRate'
+            'historicalAsp', 'historicalWinRate', 'assignedGoals', 'goalsByCategory',
+            'categorySummary', 'availableTemplates', 'prevFy', 'prevByCategory'
         ));
     }
 
-    public function update(Request $request)
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'partner_id' => 'required|exists:partners,id',
-            'fiscal_year' => 'required|string',
-            'sourced_nnacv_target' => 'required|numeric|min:0',
-            'influenced_nnacv_target' => 'required|numeric|min:0',
+            'goal_template_id' => 'nullable|exists:goal_templates,id',
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|in:'.implode(',', array_keys(GoalTemplate::CATEGORIES)),
+            'metric_key' => 'required|string|in:'.implode(',', array_keys(GoalTemplate::METRIC_KEYS)),
+            'unit' => 'required|string|in:'.implode(',', array_keys(GoalTemplate::UNITS)),
+            'cadence' => 'required|string|in:'.implode(',', array_keys(GoalTemplate::CADENCES)),
+            'fiscal_year' => 'required|string|max:10',
+            'target_value' => 'required|numeric|min:0',
+            'notes' => 'nullable|string',
         ]);
 
-        $goal = PartnerGoal::updateOrCreate(
-            ['partner_id' => $request->partner_id, 'fiscal_year' => $request->fiscal_year],
-            ['sourced_nnacv_target' => $request->sourced_nnacv_target, 'influenced_nnacv_target' => $request->influenced_nnacv_target]
-        );
+        $validated['assigned_by'] = auth()->id();
 
-        // Update dimensions if provided
-        if ($request->has('dimensions')) {
-            foreach ($request->dimensions as $dim) {
-                PartnerGoalDimension::updateOrCreate(
-                    ['partner_goal_id' => $goal->id, 'dimension' => $dim['dimension']],
-                    ['target_value' => $dim['target_value'], 'unit' => $dim['unit'] ?? 'count',
-                     'q1_target' => $dim['q1_target'] ?? null, 'q2_target' => $dim['q2_target'] ?? null,
-                     'q3_target' => $dim['q3_target'] ?? null, 'q4_target' => $dim['q4_target'] ?? null]
-                );
-            }
-        }
+        PartnerAssignedGoal::create($validated);
 
-        return redirect()->back()->with('success', 'Goals updated successfully.');
+        return redirect()->back()->with('success', 'Goal assigned to partner.');
+    }
+
+    public function update(Request $request, PartnerAssignedGoal $goal): \Illuminate\Http\RedirectResponse
+    {
+        $validated = $request->validate([
+            'target_value' => 'required|numeric|min:0',
+            'actual_value' => 'nullable|numeric|min:0',
+            'q1_target' => 'nullable|numeric|min:0',
+            'q2_target' => 'nullable|numeric|min:0',
+            'q3_target' => 'nullable|numeric|min:0',
+            'q4_target' => 'nullable|numeric|min:0',
+            'q1_actual' => 'nullable|numeric|min:0',
+            'q2_actual' => 'nullable|numeric|min:0',
+            'q3_actual' => 'nullable|numeric|min:0',
+            'q4_actual' => 'nullable|numeric|min:0',
+            'status' => 'nullable|string|in:'.implode(',', array_keys(PartnerAssignedGoal::STATUSES)),
+            'notes' => 'nullable|string',
+        ]);
+
+        $goal->update($validated);
+
+        return redirect()->back()->with('success', 'Goal updated.');
+    }
+
+    public function destroy(PartnerAssignedGoal $goal): \Illuminate\Http\RedirectResponse
+    {
+        $goal->delete();
+
+        return redirect()->back()->with('success', 'Goal removed.');
+    }
+
+    public function refreshActuals(Request $request, GoalComputationService $service): \Illuminate\Http\RedirectResponse
+    {
+        $fy = $request->query('fy', $this->currentFiscalYear());
+        $count = $service->computeAll($fy);
+
+        return redirect()->back()->with('success', "Refreshed actuals for {$count} goal(s).");
     }
 
     protected function currentFiscalYear(): string
@@ -102,6 +183,14 @@ class GoalsController extends Controller
         $fyStart = (int) AppSetting::get('fiscal_year_start_month', 2);
         $now = now();
         $year = $now->month >= $fyStart ? $now->year : $now->year - 1;
-        return 'FY' . substr($year + 1, 2);
+
+        return 'FY'.substr($year + 1, 2);
+    }
+
+    protected function previousFiscalYear(string $fy): string
+    {
+        $num = (int) substr($fy, 2);
+
+        return 'FY'.str_pad($num - 1, 2, '0', STR_PAD_LEFT);
     }
 }

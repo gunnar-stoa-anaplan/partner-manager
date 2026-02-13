@@ -37,7 +37,7 @@ class Partner extends Model
     {
         return $this->belongsToMany(Account::class, 'account_partner');
     }
-    
+
     public function projects()
     {
         return $this->hasMany(Project::class);
@@ -151,12 +151,17 @@ class Partner extends Model
         return $this->hasMany(PartnerStageHistory::class);
     }
 
+    public function dealRegistrations()
+    {
+        return $this->hasMany(DealRegistration::class);
+    }
+
     /**
      * Get historical resource certification counts over time
      *
-     * @param string|null $program Filter by specific program (IFP, I&D, SPM, OWP)
-     * @param string|null $startDate Start date for time range
-     * @param string|null $endDate End date for time range
+     * @param  string|null  $program  Filter by specific program (IFP, I&D, SPM, OWP)
+     * @param  string|null  $startDate  Start date for time range
+     * @param  string|null  $endDate  End date for time range
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getResourceHistory($program = null, $startDate = null, $endDate = null)
@@ -182,8 +187,8 @@ class Partner extends Model
     /**
      * Get historical opportunity counts and amounts over time
      *
-     * @param string|null $startDate Start date for time range
-     * @param string|null $endDate End date for time range
+     * @param  string|null  $startDate  Start date for time range
+     * @param  string|null  $endDate  End date for time range
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getOpportunityHistory($startDate = null, $endDate = null)

@@ -1,73 +1,91 @@
 # Partner Manager 3 — Recommended Changes
 
-Generated: 2026-02-07
+Generated: 2026-02-07 | Updated: 2026-02-13
 
 ---
 
-## Priority 1 — Core Gaps
+## Previous Recommendations (2026-02-07)
 
-1. **Missing Lead Management views** — `LeadController` references views (`business-development.leads.*`) that don't exist. Sourced Leads, Influenced Leads, and lead assignment pages are non-functional.
+### Priority 1 — Core Gaps (Mostly Resolved)
 
-2. **Empty Partner CRUD** — `PartnerController::create()` and `store()` are empty stubs. Admin can't create partners via UI, only through imports.
+1. ~~**Missing Lead Management views**~~ — Resolved
+2. ~~**Empty Partner CRUD**~~ — Resolved
+3. ~~**Missing Field Enablement views**~~ — Resolved
+4. ~~**No Profile edit view**~~ — Resolved
+5. ~~**Partner Goals page**~~ — Resolved and expanded (see Feb 13 Goals system)
 
-3. **Missing Field Enablement views** — Routes for `/field/key-influencers`, `/field/breadth`, `/field/depth` exist but no Blade templates. The sidebar links lead to errors.
+### Priority 2 — Data & Analytics
 
-4. **No Profile edit view** — `ProfileController` has `edit`/`update` routes but no corresponding view template.
+6. **Pipeline Funnel time comparison** — Add a time slider or comparison showing funnel changes over time (52 weeks of snapshots available).
+7. ~~**No "Closed Lost" tracking**~~ — Resolved in seeder improvements
+8. **Opportunity deduplication on re-import** — No unique constraint on `salesforce_id`. Re-importing creates duplicates.
+9. **Fiscal quarter/year not auto-populated** — `FiscalYearHelper` exists but isn't used in the import flow.
+10. ~~**Partner Goals: show actuals vs targets**~~ — Resolved in Goals & Targets enhancement
 
-5. **Partner Goals page** — Migration and controller exist but verify it's fully wired up (view, navigation link, save flow).
+### Priority 3 — Dashboard & UX
 
----
+11. ~~**No PSM portfolio dashboard**~~ — Resolved
+12. ~~**No admin overview dashboard**~~ — Resolved (comprehensive 9-section admin dashboard)
+13. **Partner show page layout gap** — Pipeline Progression funnel leaves half the row empty.
+14. **Opportunity detail view missing** — Can see pipeline aggregates but can't drill into individual opportunities.
+15. **Breadcrumb inconsistency** — Not shown on all pages.
 
-## Priority 2 — Data & Analytics
+### Priority 4 — Code Quality & Security
 
-6. **Pipeline Funnel shows only current snapshot** — The funnel chart on `show.blade.php` shows current-state pipeline only. Add a time slider or comparison to show how the funnel has changed over time (52 weeks of snapshots available).
+16. **No Form Request validation classes** — All validation inline in controllers.
+17. **No authorization policies** — PSM access checks are inline. Use Laravel Policies.
+18. **No soft deletes on critical models** — Partners, Opportunities, Contacts hard-deleted on cascade.
+19. **No audit trail** — No tracking of who changed what.
+20. ~~**Eager loading overhead**~~ — Addressed
 
-7. **No "Closed Lost" tracking** — The seeder only progresses opps forward toward Closed Won. Real pipelines have deals that go to Closed Lost. Add attrition at each stage transition (10-15% fall to Closed Lost).
+### Priority 5 — Cleanup
 
-8. **Opportunity deduplication on re-import** — No unique constraint on `salesforce_id` or `opportunity_name`. Re-importing the same Excel creates duplicates.
-
-9. **Fiscal quarter/year not auto-populated** — `FiscalYearHelper` exists but isn't used in the import flow. Opportunities rely on manual or seeder-set values.
-
-10. **Partner Goals: show actuals vs targets** — The goals table stores targets but there's no view showing actual sourced/influenced NNACV vs those targets (progress bars, % to goal).
-
----
-
-## Priority 3 — Dashboard & UX
-
-11. **No PSM portfolio dashboard** — `/my-partners` shows a card list but no aggregated KPIs across the PSM's entire book of business (total pipeline, total sourced NNACV, total contacts, etc.).
-
-12. **No admin overview dashboard** — Admin has no central dashboard showing system-wide metrics (total partners, total pipeline, imports this week, PSM leaderboard).
-
-13. **Partner show page layout gap** — The Pipeline Progression funnel is in a `col-lg-6` leaving half the row empty. Consider adding a second chart (e.g., revenue by product area, or win rate trend) next to it.
-
-14. **Opportunity detail view missing** — You can see pipeline aggregates but can't drill into individual opportunities from the partner page.
-
-15. **Breadcrumb inconsistency** — Breadcrumbs aren't shown on all pages. Standardize across all authenticated views.
-
----
-
-## Priority 4 — Code Quality & Security
-
-16. **No Form Request validation classes** — All validation is inline in controllers. Extract to `FormRequest` classes for reusability and cleaner controllers.
-
-17. **No authorization policies** — PSM access checks are inline (`$partner->user_id !== auth()->id()`). Use Laravel Policies for `Partner`, `Opportunity`, `Lead`, etc.
-
-18. **No soft deletes on critical models** — Partners, Opportunities, Contacts are hard-deleted on cascade. One accidental delete loses all historical data. Add `SoftDeletes`.
-
-19. **No audit trail** — No tracking of who changed what. Consider `updated_by` on key models or a generic `audits` table.
-
-20. **Eager loading overhead** — `Partner` model has `protected $with = ['projects', 'contacts']`, loading these on every query even when not needed. Remove default eager loading and use explicit `->with()` where needed.
+21. **60+ unused SmartAdmin demo views** — Template demos never integrated.
+22. ~~**Unused models**~~ — Now in use (PartnerEvent, Account, Objective)
+23. **`storage/seeder_debug.json`** — Debug artifact.
+24. **No tests** — Only placeholder test files exist.
+25. **Multiple markdown files in root** — Planning docs should be moved to `docs/`.
 
 ---
 
-## Priority 5 — Cleanup
+## New Recommendations (2026-02-13)
 
-21. **60+ unused SmartAdmin demo views** — The `apex/`, `dashboard/`, `databites/`, `email/`, `tables/`, `forms/`, `ui/`, `forum/`, `messenger/`, `icons/`, `utilities/` directories are template demos never integrated. Remove them to reduce clutter.
+### High-Impact, Directly Actionable
 
-22. **Unused models** — `PartnerEvent`, `Account`, `Objective` are created but barely used. Either build them out or remove them.
+#### ~~1. Partner Health Score / Churn Risk Indicator~~ — DONE
+Composite "partner health" metric combining scorecard, pipeline, enablement, delivery CSAT, and goal attainment data. Traffic-light dashboard showing at-risk partners based on combined signals (declining pipeline, missed goals, low engagement, stale contacts) for PSM prioritization.
 
-23. **`storage/seeder_debug.json`** — Debug artifact sitting in storage, should be gitignored.
+#### ~~2. Deal Registration / Co-Sell Workflow~~ — DONE
+Workflow for partners to register deals and PSMs to manage the co-sell lifecycle (registration → approval → support → close). Core partner program feature.
 
-24. **No tests** — Only placeholder `ExampleTest` files exist. At minimum add feature tests for import flow, partner access control, and goal CRUD.
+#### 3. Partner Tiering / Segmentation Engine
+Automated tier assignment (Platinum/Gold/Silver) based on scoring criteria. Tiers unlock benefits, target allocations, and visibility.
 
-25. **Multiple markdown files in root** — `COMPONENT_EXAMPLES.md`, `FULL_SUMMARY_IMPLEMENTATION.md`, `SMARTADMIN_ANALYSIS.md`, etc. appear to be planning docs that should be removed or moved to a `docs/` folder.
+#### 4. Activity Timeline / Audit Log
+Unified per-partner timeline showing all touchpoints chronologically (meetings, emails, task completions, stage advances, deal closures, certifications earned).
+
+#### 5. Export & Reporting
+PDF/Excel export for QBRs, scorecards, and analytics dashboards.
+
+#### ~~6. Partner Self-Service Portal~~ — DONE
+Limited external-facing portal where partners can view their own performance, register for events, submit deal registrations, track blueprint progress, and update certifications.
+
+### Medium-Impact, Strategic
+
+#### 7. Renewal/Retention Tracking
+Track partner contract renewals, satisfaction trends, and at-risk renewal signals.
+
+#### 8. Incentive/MDF Management
+Market Development Funds (MDF) and incentive programs with approval workflows, spend tracking, and ROI measurement.
+
+#### 9. Communication Hub
+Centralized messaging (or Slack/Teams integration) with template-driven campaigns.
+
+#### ~~10. Benchmark Comparisons~~ — DONE
+Show partners how they compare to peers anonymously (e.g., "Top 25% for certifications, bottom quartile for pipeline").
+
+#### ~~11. Goal Auto-Computation~~ — DONE
+Auto-compute goal actuals from live data using the metric_key field in the goals system.
+
+#### 12. Mobile-Friendly Dashboard
+Simplified mobile view optimized for PSMs doing field visits.

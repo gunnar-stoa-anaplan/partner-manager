@@ -26,6 +26,7 @@ class Project extends Model
         'current_sprint',
         'delivery_team',
         'budget',
+        'phase',
         // Legacy fields (if needed)
         'client',
         'initiative',

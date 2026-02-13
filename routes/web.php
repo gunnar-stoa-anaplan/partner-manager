@@ -1,43 +1,46 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\PartnerController;
-use App\Http\Controllers\ContactController;
-use App\Http\Controllers\ObjectiveController;
-use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\FieldEnablementController;
-use App\Http\Controllers\ConfigurationController;
-use App\Http\Controllers\LeadController;
-use App\Http\Controllers\FundingController;
-use App\Http\Controllers\SalesforceCredentialController;
-use App\Http\Controllers\ImportController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ActionPlanController;
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AlertController;
+use App\Http\Controllers\Api\EnablementController;
 use App\Http\Controllers\Api\FilterDataController;
 use App\Http\Controllers\Api\PartnerEventController;
-use App\Http\Controllers\Api\EnablementController;
-use App\Http\Controllers\EnablementEventController;
-use App\Http\Controllers\BlueprintController;
+use App\Http\Controllers\ApiTokenController;
+use App\Http\Controllers\BenchmarkController;
 use App\Http\Controllers\BlueprintAssignmentController;
-use App\Http\Controllers\PartnerGoalController;
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\RoutingController;
-use App\Http\Controllers\PartnerPathController;
-use App\Http\Controllers\TaskBoardController;
-use App\Http\Controllers\ScorecardController;
+use App\Http\Controllers\BlueprintController;
 use App\Http\Controllers\CompetencyMatrixController;
+use App\Http\Controllers\ConfigurationController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DealRegistrationController;
+use App\Http\Controllers\EnablementEventController;
+use App\Http\Controllers\FieldEnablementController;
+use App\Http\Controllers\FundingController;
 use App\Http\Controllers\GoalsController;
-use App\Http\Controllers\ActionPlanController;
-use App\Http\Controllers\SolutionLifecycleController;
+use App\Http\Controllers\GoalTemplateController;
+use App\Http\Controllers\HealthDashboardController;
+use App\Http\Controllers\ImportController;
+use App\Http\Controllers\LeadController;
 use App\Http\Controllers\MeasureController;
-use App\Http\Controllers\AlertController;
-use App\Http\Controllers\QbrController;
+use App\Http\Controllers\NotificationTemplateController;
+use App\Http\Controllers\ObjectiveController;
+use App\Http\Controllers\PartnerController;
+use App\Http\Controllers\PartnerGoalController;
+use App\Http\Controllers\PartnerPathController;
 use App\Http\Controllers\PathConfigurationController;
 use App\Http\Controllers\PathReviewController;
-use App\Http\Controllers\NotificationTemplateController;
-use App\Http\Controllers\ApiTokenController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\QbrController;
+use App\Http\Controllers\RoutingController;
+use App\Http\Controllers\SalesforceCredentialController;
+use App\Http\Controllers\ScorecardController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SolutionLifecycleController;
+use App\Http\Controllers\TaskBoardController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,6 +89,7 @@ Route::middleware(['auth'])->group(function () {
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
+
         return view('calendar.portfolio', compact('partners'));
     })->name('calendar.portfolio');
     Route::get('/partners/{id}/calendar', function ($id) {
@@ -97,6 +101,7 @@ Route::middleware(['auth'])->group(function () {
         if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
             abort(403);
         }
+
         return view('calendar.partner', compact('partner'));
     })->name('partners.calendar');
     Route::view('full_calendar', 'fullcalendar')->name('full_calendar');
@@ -205,7 +210,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/partners/{id}/blueprints', [PartnerController::class, 'blueprints'])->name('partners.blueprints');
     Route::get('/partners/{id}/tab/{tab}', [PartnerController::class, 'partnerTab'])
         ->name('partners.tab')
-        ->where('tab', 'overview|pipeline|enablement|projects|path-health|calendar|influencers|resources');
+        ->where('tab', 'overview|pipeline|enablement|projects|path-health|calendar|influencers|resources|app-enablement');
     Route::get('/full-summary', [PartnerController::class, 'fullSummary'])->name('partners.full-summary');
     Route::get('/full-insights', [PartnerController::class, 'fullInsights'])->name('partners.full-insights');
 
@@ -216,11 +221,13 @@ Route::middleware(['auth'])->group(function () {
             'selected_partner_id' => $partner->id,
             'selected_partner_name' => $partner->name,
         ]);
+
         return redirect()->back();
     })->name('partners.select');
 
     Route::get('/partners/clear', function () {
         session()->forget(['selected_partner_id', 'selected_partner_name']);
+
         return redirect('/');
     })->name('partners.clear');
 
@@ -241,6 +248,7 @@ Route::middleware(['auth'])->group(function () {
         if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
             abort(403);
         }
+
         return view('enablement.partner', compact('partner'));
     })->name('partners.enablement');
 
@@ -349,6 +357,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/goals', [GoalsController::class, 'index'])->name('goals.index');
         Route::post('/goals', [GoalsController::class, 'store'])->name('goals.store');
         Route::put('/goals/{goal}', [GoalsController::class, 'update'])->name('goals.update');
+        Route::delete('/goals/{goal}', [GoalsController::class, 'destroy'])->name('goals.destroy');
+        Route::post('/goals/refresh-actuals', [GoalsController::class, 'refreshActuals'])->name('goals.refresh-actuals');
 
         // Action Plans
         Route::get('/action-plans', [ActionPlanController::class, 'index'])->name('action-plans.index');
@@ -368,6 +378,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/solutions', [SolutionLifecycleController::class, 'store'])->name('solutions.store');
         Route::put('/solutions/{solution}', [SolutionLifecycleController::class, 'update'])->name('solutions.update');
         Route::post('/solutions/{solution}/advance', [SolutionLifecycleController::class, 'advanceStage'])->name('solutions.advance');
+
+        // Deal Registrations
+        Route::get('/deal-registrations', [DealRegistrationController::class, 'index'])->name('deal-registrations.index');
+        Route::get('/deal-registrations/create', [DealRegistrationController::class, 'create'])->name('deal-registrations.create');
+        Route::post('/deal-registrations', [DealRegistrationController::class, 'store'])->name('deal-registrations.store');
+        Route::get('/deal-registrations/{dealRegistration}', [DealRegistrationController::class, 'show'])->name('deal-registrations.show');
+        Route::put('/deal-registrations/{dealRegistration}/review', [DealRegistrationController::class, 'review'])->name('deal-registrations.review');
     });
 
     /*
@@ -385,6 +402,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/revenue', fn () => redirect()->route('measure.index', ['tab' => 'revenue']))->name('revenue');
         Route::get('/enablement', fn () => redirect()->route('measure.index', ['tab' => 'enablement']))->name('enablement');
         Route::get('/delivery', fn () => redirect()->route('measure.index', ['tab' => 'delivery']))->name('delivery');
+
+        // Benchmarks
+        Route::get('/benchmarks', [BenchmarkController::class, 'index'])->name('benchmarks.index');
+        Route::get('/benchmarks/{partner}', [BenchmarkController::class, 'partner'])->name('benchmarks.partner');
     });
 
     /*
@@ -393,6 +414,10 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('act')->name('act.')->group(function () {
+        // Partner Health
+        Route::get('/health', [HealthDashboardController::class, 'index'])->name('health.index');
+        Route::get('/health/{partner}', [HealthDashboardController::class, 'show'])->name('health.show');
+
         // Alerts & Recommendations
         Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');
         Route::put('/alerts/{alert}/acknowledge', [AlertController::class, 'acknowledge'])->name('alerts.acknowledge');
@@ -441,6 +466,13 @@ Route::middleware(['auth'])->group(function () {
         // Scorecard Weight Configuration
         Route::get('/scorecard-weights', [ScorecardController::class, 'weights'])->name('scorecard-weights.index');
         Route::put('/scorecard-weights', [ScorecardController::class, 'updateWeights'])->name('scorecard-weights.update');
+
+        // Goal Templates
+        Route::get('/goal-templates', [GoalTemplateController::class, 'index'])->name('goal-templates.index');
+        Route::post('/goal-templates', [GoalTemplateController::class, 'store'])->name('goal-templates.store');
+        Route::put('/goal-templates/{template}', [GoalTemplateController::class, 'update'])->name('goal-templates.update');
+        Route::delete('/goal-templates/{template}', [GoalTemplateController::class, 'destroy'])->name('goal-templates.destroy');
+        Route::post('/goal-templates/{template}/assign', [GoalTemplateController::class, 'assign'])->name('goal-templates.assign');
 
         // Notification Templates
         Route::get('/notification-templates', [NotificationTemplateController::class, 'index'])->name('notification-templates.index');

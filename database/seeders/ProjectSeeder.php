@@ -60,6 +60,13 @@ class ProjectSeeder extends Seeder
                     default => fake()->numberBetween(10, 90),
                 };
 
+                // Weighted phase: 20% kickoff, 50% implementation, 30% live
+                $phase = fake()->randomElement(array_merge(
+                    array_fill(0, 2, 'kickoff'),
+                    array_fill(0, 5, 'implementation'),
+                    array_fill(0, 3, 'live'),
+                ));
+
                 $project = Project::create([
                     'partner_id' => $partner->id,
                     'account_id' => $accountId,
@@ -71,6 +78,7 @@ class ProjectSeeder extends Seeder
                     'ae_id' => $contacts[2] ?? null,
                     'acv' => $opp->amount,
                     'status' => $status,
+                    'phase' => $phase,
                     'percent_complete' => $percentComplete,
                     'total_sprints' => fake()->numberBetween(3, 12),
                     'current_sprint' => fake()->numberBetween(1, 8),

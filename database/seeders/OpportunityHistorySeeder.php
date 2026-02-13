@@ -7,6 +7,7 @@ use App\Models\Import;
 use App\Models\Opportunity;
 use App\Models\OpportunitySnapshot;
 use App\Models\Partner;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -79,6 +80,9 @@ class OpportunityHistorySeeder extends Seeder
         $partners = Partner::orderBy('id')->get();
         $admin = User::where('role', 'admin')->first() ?? User::first();
 
+        // Group products by product_line for assigning product_id to opportunities
+        $productsByLine = Product::all()->groupBy('product_line');
+
         if ($partners->isEmpty()) {
             $this->command->warn('No partners found. Run PartnerSeeder first.');
 
@@ -134,6 +138,11 @@ class OpportunityHistorySeeder extends Seeder
                     ? now()->subDays(rand(1, 10))
                     : $startDate->copy()->addWeeks($introWeek + $avgCloseWeeks + rand(-3, 5));
 
+                $productArea = $this->randomProductArea();
+                $productId = $productsByLine->has($productArea)
+                    ? $productsByLine[$productArea]->random()->id
+                    : null;
+
                 $partnerOpps[] = [
                     'partner_id' => $partner->id,
                     'account_name' => $account,
@@ -141,7 +150,8 @@ class OpportunityHistorySeeder extends Seeder
                     'amount' => round(rand($minAmt * 100, $maxAmt * 100) / 100, 2),
                     'type' => $type,
                     'revenue_type' => $revenueType,
-                    'product_area' => $this->randomProductArea(),
+                    'product_area' => $productArea,
+                    'product_id' => $productId,
                     'intro_week' => $introWeek,
                     'current_stage_index' => $startStageIdx,
                     'target_stage_index' => $targetStageIdx,
@@ -220,6 +230,7 @@ class OpportunityHistorySeeder extends Seeder
                             'lead_source' => $opp['lead_source'],
                             'revenue_type' => $opp['revenue_type'],
                             'product_area' => $opp['product_area'],
+                            'product_id' => $opp['product_id'],
                             'probability' => $this->getProbabilityForStage($this->stageProgression[$opp['current_stage_index']]),
                             'owner' => $opp['owner'],
                             'import_id' => $import->id,

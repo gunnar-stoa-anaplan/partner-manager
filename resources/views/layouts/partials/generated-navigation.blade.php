@@ -198,6 +198,15 @@
             <span class="nav-link-text">Solution Lifecycle</span>
         </a>
     </li>
+
+    <li>
+        <a href="{{ route('engage.deal-registrations.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#file-text"></use>
+            </svg>
+            <span class="nav-link-text">Deal Registrations</span>
+        </a>
+    </li>
     @endif
 
     @if(Auth::user()->role === 'admin' || session('selected_partner_id'))
@@ -338,11 +347,29 @@
             </li>
         </ul>
     </li>
+
+    <li>
+        <a href="{{ route('measure.benchmarks.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#award"></use>
+            </svg>
+            <span class="nav-link-text">Benchmarks</span>
+        </a>
+    </li>
     @endif
 
     {{-- Act Section --}}
     @if(Auth::user()->role === 'admin' || ($navSettings['nav_visible_act'] ?? '1') === '1')
     <li class="nav-title"><span>Act</span></li>
+
+    <li>
+        <a href="{{ route('act.health.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#heart"></use>
+            </svg>
+            <span class="nav-link-text">Partner Health</span>
+        </a>
+    </li>
 
     <li>
         <a href="{{ route('act.alerts.index') }}">
@@ -434,15 +461,6 @@
     </li>
 
     <li>
-        <a href="{{ route('blueprints.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#layers"></use>
-            </svg>
-            <span class="nav-link-text">Product Blueprints</span>
-        </a>
-    </li>
-
-    <li>
         <a href="{{ route('users.index') }}">
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#users"></use>
@@ -470,6 +488,15 @@
     </li>
 
     <li>
+        <a href="{{ route('admin.goal-templates.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#target"></use>
+            </svg>
+            <span class="nav-link-text">Goal Templates</span>
+        </a>
+    </li>
+
+    <li>
         <a href="{{ route('admin.notification-templates.index') }}">
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#mail"></use>
@@ -488,7 +515,7 @@
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#award"></use>
             </svg>
-            <span class="nav-link-text">Events</span>
+            <span class="nav-link-text">Enablement Events</span>
         </a>
     </li>
 
@@ -497,7 +524,7 @@
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#calendar"></use>
             </svg>
-            <span class="nav-link-text">Calendar</span>
+            <span class="nav-link-text">Enablement Calendar</span>
         </a>
     </li>
 

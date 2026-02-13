@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Contact extends Model
+class Contact extends Authenticatable
 {
     use HasFactory;
 
@@ -14,6 +14,7 @@ class Contact extends Model
         'first_name',
         'last_name',
         'email',
+        'password',
         'phone',
         'title',
         'avatar',
@@ -27,10 +28,20 @@ class Contact extends Model
         'linkedin_image_url',
         'linkedin_synced_at',
         'resource_role',
+        'portal_access',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 
     protected $casts = [
         'linkedin_synced_at' => 'datetime',
+        'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
+        'portal_access' => 'boolean',
+        'password' => 'hashed',
     ];
 
     const CONTACT_TYPES = [
@@ -90,9 +101,21 @@ class Contact extends Model
         return $this->hasMany(Certification::class);
     }
 
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'contact_product')
+            ->withPivot('status', 'trained_at')
+            ->withTimestamps();
+    }
+
     public function interactions()
     {
         return $this->hasMany(ContactInteraction::class)->orderByDesc('interaction_date');
+    }
+
+    public function dealRegistrations()
+    {
+        return $this->hasMany(DealRegistration::class);
     }
 
     public function scopeInfluencers($query)
@@ -112,7 +135,8 @@ class Contact extends Model
 
     public function getLinkedInSearchUrl(): string
     {
-        $query = urlencode("{$this->first_name} {$this->last_name}" . ($this->organization ? " {$this->organization}" : ''));
+        $query = urlencode("{$this->first_name} {$this->last_name}".($this->organization ? " {$this->organization}" : ''));
+
         return "https://www.linkedin.com/search/results/people/?keywords={$query}";
     }
 }

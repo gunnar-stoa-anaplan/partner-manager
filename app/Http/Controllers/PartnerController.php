@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Helpers\FiscalYearHelper;
 use App\Models\Blueprint;
 use App\Models\Certification;
 use App\Models\Contact;
@@ -13,9 +13,10 @@ use App\Models\PartnerGoal;
 use App\Models\PartnerGoalDimension;
 use App\Models\PartnerPathEnrollment;
 use App\Models\PartnerScorecard;
+use App\Models\Product;
 use App\Models\User;
-use App\Helpers\FiscalYearHelper;
 use App\Services\GateEvaluationService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PartnerController extends Controller
@@ -27,6 +28,7 @@ class PartnerController extends Controller
     {
         $partners = Partner::with('user')->orderBy('name')->get();
         $users = User::orderBy('name')->get();
+
         return view('partner.index', compact('partners', 'users'));
     }
 
@@ -92,15 +94,16 @@ class PartnerController extends Controller
         $this->authorizePartnerAccess($partner);
 
         $data = match ($tab) {
-            'overview'    => $this->overviewTabData($partner),
-            'pipeline'    => $this->pipelineTabData($partner),
-            'enablement'  => $this->enablementTabData($partner),
-            'projects'    => $this->projectsTabData($partner),
+            'overview' => $this->overviewTabData($partner),
+            'pipeline' => $this->pipelineTabData($partner),
+            'enablement' => $this->enablementTabData($partner),
+            'projects' => $this->projectsTabData($partner),
             'path-health' => $this->pathHealthTabData($partner),
-            'calendar'    => $this->calendarTabData($partner),
+            'calendar' => $this->calendarTabData($partner),
             'influencers' => $this->influencersTabData($partner),
-            'resources'   => $this->resourcesTabData($partner),
-            default       => abort(404),
+            'resources' => $this->resourcesTabData($partner),
+            'app-enablement' => $this->appEnablementTabData($partner),
+            default => abort(404),
         };
 
         return view("partner.tabs.{$tab}", array_merge(['partner' => $partner], $data));
@@ -122,13 +125,13 @@ class PartnerController extends Controller
     private function overviewTabData(Partner $partner): array
     {
         // Ensure relationships are loaded
-        if (!$partner->relationLoaded('opportunities')) {
+        if (! $partner->relationLoaded('opportunities')) {
             $partner->load('opportunities');
         }
-        if (!$partner->relationLoaded('blueprintAssignments')) {
+        if (! $partner->relationLoaded('blueprintAssignments')) {
             $partner->load(['blueprintAssignments.blueprint', 'blueprintAssignments.enrollments.progress']);
         }
-        if (!$partner->relationLoaded('contacts')) {
+        if (! $partner->relationLoaded('contacts')) {
             $partner->load('contacts');
         }
 
@@ -139,12 +142,12 @@ class PartnerController extends Controller
         $sourcedRevenuePct = $totalAmount > 0 ? round($sourcedAmount / $totalAmount * 100, 1) : 0;
         $influencedRevenuePct = $totalAmount > 0 ? round($influencedAmount / $totalAmount * 100, 1) : 0;
 
-        $assignmentsWithEnrollments = $partner->blueprintAssignments->filter(fn($a) => $a->enrollments->count() > 0);
+        $assignmentsWithEnrollments = $partner->blueprintAssignments->filter(fn ($a) => $a->enrollments->count() > 0);
         $avgBlueprintCompletion = $assignmentsWithEnrollments->count() > 0
-            ? round($assignmentsWithEnrollments->avg(fn($a) => $a->completionPercentage()), 1) : 0;
+            ? round($assignmentsWithEnrollments->avg(fn ($a) => $a->completionPercentage()), 1) : 0;
 
         $totalContacts = $partner->contacts->count();
-        $enrolledContactIds = $partner->blueprintAssignments->flatMap(fn($a) => $a->enrollments->pluck('contact_id'))->unique();
+        $enrolledContactIds = $partner->blueprintAssignments->flatMap(fn ($a) => $a->enrollments->pluck('contact_id'))->unique();
         $contactEngagement = $totalContacts > 0
             ? round($enrolledContactIds->count() / $totalContacts * 100, 1) : 0;
 
@@ -212,7 +215,7 @@ class PartnerController extends Controller
      */
     private function pipelineTabData(Partner $partner): array
     {
-        if (!$partner->relationLoaded('opportunities')) {
+        if (! $partner->relationLoaded('opportunities')) {
             $partner->load('opportunities');
         }
 
@@ -249,7 +252,7 @@ class PartnerController extends Controller
         $sourcedAttainmentPct = $sourcedTarget > 0 ? round($closedWonSourced / $sourcedTarget * 100, 1) : 0;
         $influencedAttainmentPct = $influencedTarget > 0 ? round($closedWonInfluenced / $influencedTarget * 100, 1) : 0;
 
-        $weightedPipeline = round($openOpps->sum(fn($o) => $o->amount * (float) ($o->probability ?? 0) / 100), 2);
+        $weightedPipeline = round($openOpps->sum(fn ($o) => $o->amount * (float) ($o->probability ?? 0) / 100), 2);
         $totalTarget = $sourcedTarget + $influencedTarget;
         $totalClosed = $closedWonSourced + $closedWonInfluenced;
         $coverageRatio = $totalTarget > 0 ? round(($totalClosed + $weightedPipeline) / $totalTarget, 2) : null;
@@ -257,25 +260,25 @@ class PartnerController extends Controller
         // ── Win Rate (12-month rolling) ──
         $won12m = $partner->opportunities
             ->where('stage', 'Closed Won')
-            ->filter(fn($o) => $o->close_date && $o->close_date->gte(now()->subMonths(12)))
+            ->filter(fn ($o) => $o->close_date && $o->close_date->gte(now()->subMonths(12)))
             ->count();
         $lost12m = $partner->opportunities
             ->where('stage', 'Closed Lost')
-            ->filter(fn($o) => $o->close_date && $o->close_date->gte(now()->subMonths(12)))
+            ->filter(fn ($o) => $o->close_date && $o->close_date->gte(now()->subMonths(12)))
             ->count();
         $winRate = ($won12m + $lost12m) > 0 ? round($won12m / ($won12m + $lost12m) * 100, 1) : 0;
         $wonAmount12m = round($partner->opportunities
             ->where('stage', 'Closed Won')
-            ->filter(fn($o) => $o->close_date && $o->close_date->gte(now()->subMonths(12)))
+            ->filter(fn ($o) => $o->close_date && $o->close_date->gte(now()->subMonths(12)))
             ->sum('amount'), 2);
 
         // ── New Business (Last 30 Days) ──
-        $newBiz30 = $openOpps->filter(fn($o) => $o->created_at->gte(now()->subDays(30)));
+        $newBiz30 = $openOpps->filter(fn ($o) => $o->created_at->gte(now()->subDays(30)));
         $newBiz30Count = $newBiz30->count();
         $newBiz30Amount = round($newBiz30->sum('amount'), 2);
 
         // ── Stale Deals (not updated in 30+ days) ──
-        $staleDeals = $openOpps->filter(fn($o) => $o->updated_at->lt(now()->subDays(30)));
+        $staleDeals = $openOpps->filter(fn ($o) => $o->updated_at->lt(now()->subDays(30)));
         $staleDealCount = $staleDeals->count();
         $staleDealAmount = round($staleDeals->sum('amount'), 2);
 
@@ -285,12 +288,11 @@ class PartnerController extends Controller
         $lowProbClosingCount = 0;
         try {
             $fyQuarterDates = FiscalYearHelper::getFiscalQuarterDates($currentFQ);
-            $closingThisQtr = $openOpps->filter(fn($o) =>
-                $o->close_date && $o->close_date->between($fyQuarterDates['start_date'], $fyQuarterDates['end_date'])
+            $closingThisQtr = $openOpps->filter(fn ($o) => $o->close_date && $o->close_date->between($fyQuarterDates['start_date'], $fyQuarterDates['end_date'])
             );
             $closingThisQtrCount = $closingThisQtr->count();
             $closingThisQtrAmount = round($closingThisQtr->sum('amount'), 2);
-            $lowProbClosingCount = $closingThisQtr->filter(fn($o) => ($o->probability ?? 0) < 50)->count();
+            $lowProbClosingCount = $closingThisQtr->filter(fn ($o) => ($o->probability ?? 0) < 50)->count();
         } catch (\Exception $e) {
             // Gracefully handle if fiscal quarter format is invalid
         }
@@ -304,15 +306,16 @@ class PartnerController extends Controller
         $stageVelocity = collect($stageOrder)->map(function ($stage) use ($partner) {
             $stageOpps = $partner->opportunities->where('stage', $stage);
             $count = $stageOpps->count();
+
             return [
                 'stage' => $stage,
                 'count' => $count,
                 'amount' => round($stageOpps->sum('amount'), 2),
                 'avg_days' => $count > 0
-                    ? (int) round($stageOpps->avg(fn($o) => abs(now()->diffInDays($o->updated_at))), 0)
+                    ? (int) round($stageOpps->avg(fn ($o) => abs(now()->diffInDays($o->updated_at))), 0)
                     : 0,
             ];
-        })->filter(fn($s) => $s['count'] > 0)->values();
+        })->filter(fn ($s) => $s['count'] > 0)->values();
 
         // ── Historical Pipeline Comparison (90 days ago) ──
         $historicalPipelineValue = 0;
@@ -341,8 +344,8 @@ class PartnerController extends Controller
 
         // ── Pipeline by Product Area ──
         $pipelineByProductArea = $openOpps
-            ->groupBy(fn($o) => $o->product_area ?? 'Unassigned')
-            ->map(fn($group) => round($group->sum('amount'), 2))
+            ->groupBy(fn ($o) => $o->product_area ?? 'Unassigned')
+            ->map(fn ($group) => round($group->sum('amount'), 2))
             ->sortDesc();
 
         // ── Historical opportunity snapshots (52 weeks) ── (existing)
@@ -377,10 +380,10 @@ class PartnerController extends Controller
         $allProductAreas = Blueprint::PRODUCT_AREAS;
         $goalRecord = $goal ? PartnerGoal::with('dimensions')->find($goal->id) : null;
 
-        $whitespaceSummary = collect($allProductAreas)->map(function ($area) use ($openOpps, $goalRecord, $currentFY) {
+        $whitespaceSummary = collect($allProductAreas)->map(function ($area) use ($openOpps, $goalRecord) {
             $areaOpps = $openOpps->where('product_area', $area);
             $pipelineValue = round($areaOpps->sum('amount'), 2);
-            $dimKey = 'pa_' . Str::snake(strtolower($area));
+            $dimKey = 'pa_'.Str::snake(strtolower($area));
 
             $goalDim = null;
             if ($goalRecord) {
@@ -458,20 +461,20 @@ class PartnerController extends Controller
         $alerts = [];
         $totalTarget = $sourcedTarget + $influencedTarget;
         $avgDealSize = $won12m > 0 ? round($wonAmount12m / $won12m, 0) : ($openOpps->count() > 0 ? round($openOpps->avg('amount'), 0) : 0);
-        $fmtAvg = '$' . number_format($avgDealSize, 0);
+        $fmtAvg = '$'.number_format($avgDealSize, 0);
 
         // 1. Coverage ratio alert
         if ($coverageRatio !== null && $coverageRatio < 1.5 && $totalTarget > 0) {
             $desiredCoverage = 3.0;
             $neededPipeline = max(0, ($totalTarget * $desiredCoverage) - ($currentPipelineValue + ($goal ? ($sourcedTarget - $sourcedShortfall) + ($influencedTarget - $influencedShortfall) : 0)));
             $dealsNeeded = $avgDealSize > 0 ? ceil($neededPipeline / $avgDealSize) : 0;
-            $fmtNeeded = '$' . number_format($neededPipeline, 0);
+            $fmtNeeded = '$'.number_format($neededPipeline, 0);
 
             $alerts[] = [
                 'level' => 'danger',
                 'icon' => 'fa-shield',
                 'title' => 'Pipeline Coverage Below Target',
-                'message' => "Your pipeline needs an additional {$fmtNeeded}" . ($dealsNeeded > 0 ? " or ~{$dealsNeeded} opportunities (at avg deal size of {$fmtAvg})" : '') . " to meet the desired 3x coverage ratio. Current weighted coverage is {$coverageRatio}x against $" . number_format($totalTarget, 0) . " FY{$currentFY} target.",
+                'message' => "Your pipeline needs an additional {$fmtNeeded}".($dealsNeeded > 0 ? " or ~{$dealsNeeded} opportunities (at avg deal size of {$fmtAvg})" : '')." to meet the desired 3x coverage ratio. Current weighted coverage is {$coverageRatio}x against $".number_format($totalTarget, 0)." FY{$currentFY} target.",
                 'action_url' => '#pipeline-opps-table',
                 'action_label' => 'Review Pipeline',
             ];
@@ -479,18 +482,18 @@ class PartnerController extends Controller
 
         // 2. Stale deals alert
         if ($staleDealCount > 0) {
-            $staleSorted = $openOpps->filter(fn($o) => $o->updated_at->lt(now()->subDays(30)))->sortByDesc('amount');
+            $staleSorted = $openOpps->filter(fn ($o) => $o->updated_at->lt(now()->subDays(30)))->sortByDesc('amount');
             $largest = $staleSorted->first();
             $largestName = $largest ? $largest->opportunity_name : '';
-            $largestAmt = $largest ? '$' . number_format($largest->amount, 0) : '';
+            $largestAmt = $largest ? '$'.number_format($largest->amount, 0) : '';
             $largestDays = $largest ? (int) abs(now()->diffInDays($largest->updated_at)) : 0;
-            $fmtStaleAmt = '$' . number_format($staleDealAmount, 0);
+            $fmtStaleAmt = '$'.number_format($staleDealAmount, 0);
 
             $alerts[] = [
                 'level' => 'danger',
                 'icon' => 'fa-clock',
                 'title' => 'Stale Deals Need Attention',
-                'message' => "{$staleDealCount} " . Str::plural('deal', $staleDealCount) . " worth {$fmtStaleAmt} " . ($staleDealCount === 1 ? 'has' : 'have') . " not been updated in 30+ days." . ($largest ? " The largest is \"{$largestName}\" ({$largestAmt}) last updated {$largestDays}d ago." : ''),
+                'message' => "{$staleDealCount} ".Str::plural('deal', $staleDealCount)." worth {$fmtStaleAmt} ".($staleDealCount === 1 ? 'has' : 'have').' not been updated in 30+ days.'.($largest ? " The largest is \"{$largestName}\" ({$largestAmt}) last updated {$largestDays}d ago." : ''),
                 'action_url' => '#pipeline-opps-table',
                 'action_label' => 'Review Stale Deals',
             ];
@@ -522,19 +525,19 @@ class PartnerController extends Controller
 
         // 5. Low-probability deals closing this quarter
         if ($lowProbClosingCount > 0) {
-            $lowProbDeals = $openOpps->filter(fn($o) => ($o->probability ?? 0) < 50 && $o->close_date)
+            $lowProbDeals = $openOpps->filter(fn ($o) => ($o->probability ?? 0) < 50 && $o->close_date)
                 ->sortByDesc('amount');
             $topDeal = $lowProbDeals->first();
             $topName = $topDeal ? $topDeal->opportunity_name : '';
-            $topAmt = $topDeal ? '$' . number_format($topDeal->amount, 0) : '';
+            $topAmt = $topDeal ? '$'.number_format($topDeal->amount, 0) : '';
             $topProb = $topDeal ? round($topDeal->probability, 0) : 0;
-            $fmtQtrAmt = '$' . number_format($closingThisQtrAmount, 0);
+            $fmtQtrAmt = '$'.number_format($closingThisQtrAmount, 0);
 
             $alerts[] = [
                 'level' => 'warning',
                 'icon' => 'fa-calendar-exclamation',
                 'title' => 'At-Risk Quarter Deals',
-                'message' => "{$lowProbClosingCount} " . Str::plural('deal', $lowProbClosingCount) . " worth {$fmtQtrAmt} closing this quarter with probability below 50%." . ($topDeal ? " Highest value: \"{$topName}\" ({$topAmt}, {$topProb}%)." : ''),
+                'message' => "{$lowProbClosingCount} ".Str::plural('deal', $lowProbClosingCount)." worth {$fmtQtrAmt} closing this quarter with probability below 50%.".($topDeal ? " Highest value: \"{$topName}\" ({$topAmt}, {$topProb}%)." : ''),
                 'action_url' => '#pipeline-opps-table',
                 'action_label' => 'Review Deals',
             ];
@@ -543,16 +546,16 @@ class PartnerController extends Controller
         // 6. Goal shortfall alert
         if ($goal && ($sourcedShortfall + $influencedShortfall) > 0) {
             $totalShortfall = $sourcedShortfall + $influencedShortfall;
-            $fmtTotal = '$' . number_format($totalShortfall, 0);
-            $fmtSourced = '$' . number_format($sourcedShortfall, 0);
-            $fmtInfluenced = '$' . number_format($influencedShortfall, 0);
+            $fmtTotal = '$'.number_format($totalShortfall, 0);
+            $fmtSourced = '$'.number_format($sourcedShortfall, 0);
+            $fmtInfluenced = '$'.number_format($influencedShortfall, 0);
             $dealsNeeded = $avgDealSize > 0 ? ceil($totalShortfall / $avgDealSize) : 0;
 
             $alerts[] = [
                 'level' => 'info',
                 'icon' => 'fa-bullseye',
-                'title' => 'FY' . $currentFY . ' Target Shortfall',
-                'message' => "FY{$currentFY} target shortfall: {$fmtTotal} remaining ({$fmtSourced} sourced, {$fmtInfluenced} influenced)." . ($dealsNeeded > 0 ? " At avg deal size of {$fmtAvg}, you need ~{$dealsNeeded} more wins to close the gap." : ''),
+                'title' => 'FY'.$currentFY.' Target Shortfall',
+                'message' => "FY{$currentFY} target shortfall: {$fmtTotal} remaining ({$fmtSourced} sourced, {$fmtInfluenced} influenced).".($dealsNeeded > 0 ? " At avg deal size of {$fmtAvg}, you need ~{$dealsNeeded} more wins to close the gap." : ''),
                 'action_url' => null,
                 'action_label' => null,
             ];
@@ -579,7 +582,7 @@ class PartnerController extends Controller
             ->get();
 
         $byRole = $influencers->groupBy('influencer_role')
-            ->map(fn($group) => $group->count())
+            ->map(fn ($group) => $group->count())
             ->sortDesc();
 
         $interactionsThisMonth = ContactInteraction::where('partner_id', $partner->id)
@@ -624,8 +627,9 @@ class PartnerController extends Controller
         // ── Depth: Interaction engagement analysis ──
         $depthMetrics = $influencers->map(function ($inf) {
             $uniqueTypes = $inf->interactions->pluck('interaction_type')->unique()->count();
-            $last30 = $inf->interactions->filter(fn($i) => $i->interaction_date->gte(now()->subDays(30)))->count();
-            $prev30 = $inf->interactions->filter(fn($i) => $i->interaction_date->between(now()->subDays(60), now()->subDays(30)))->count();
+            $last30 = $inf->interactions->filter(fn ($i) => $i->interaction_date->gte(now()->subDays(30)))->count();
+            $prev30 = $inf->interactions->filter(fn ($i) => $i->interaction_date->between(now()->subDays(60), now()->subDays(30)))->count();
+
             return [
                 'id' => $inf->id,
                 'name' => $inf->full_name,
@@ -638,7 +642,7 @@ class PartnerController extends Controller
             ];
         });
 
-        $deepInfluencers = $depthMetrics->filter(fn($d) => $d['total'] >= 3)->count();
+        $deepInfluencers = $depthMetrics->filter(fn ($d) => $d['total'] >= 3)->count();
         $avgInteractions = $influencers->count() > 0 ? round($depthMetrics->avg('total'), 1) : 0;
         $avgTypeDiversity = $influencers->count() > 0 ? round($depthMetrics->avg('unique_types'), 1) : 0;
 
@@ -651,7 +655,8 @@ class PartnerController extends Controller
         // Per-influencer interaction breakdown by type (for stacked bar)
         $depthByType = $influencers->map(function ($inf) {
             $typeCounts = $inf->interactions->groupBy('interaction_type')
-                ->map(fn($group) => $group->count());
+                ->map(fn ($group) => $group->count());
+
             return [
                 'name' => $inf->full_name,
                 'types' => $typeCounts,
@@ -691,7 +696,7 @@ class PartnerController extends Controller
             ->get();
 
         $byRole = $resources->groupBy('resource_role')
-            ->map(fn($group) => $group->count())
+            ->map(fn ($group) => $group->count())
             ->sortDesc();
 
         // Certification stats
@@ -700,19 +705,19 @@ class PartnerController extends Controller
         $totalCerts = $certifications->count();
         $certsByType = $certifications->groupBy('type')->map->count();
         $certsByLevel = $certifications->groupBy('level')->map->count();
-        $expiringSoon = $certifications->filter(fn($c) => $c->isExpiringSoon(90))->count();
+        $expiringSoon = $certifications->filter(fn ($c) => $c->isExpiringSoon(90))->count();
 
         // Blueprint enrollment stats
         $enrollments = $partner->blueprintAssignments()
             ->with(['enrollments.contact', 'enrollments.progress', 'blueprint'])
             ->get()
-            ->flatMap(fn($a) => $a->enrollments);
+            ->flatMap(fn ($a) => $a->enrollments);
 
         $completedEnrollments = $enrollments->where('status', 'completed')->count();
         $inProgressEnrollments = $enrollments->where('status', 'in_progress')->count();
         $totalEnrollments = $enrollments->count();
         $avgCompletion = $totalEnrollments > 0
-            ? round($enrollments->avg(fn($e) => $e->completionPercentage()), 1)
+            ? round($enrollments->avg(fn ($e) => $e->completionPercentage()), 1)
             : 0;
 
         // Enablement session registrations
@@ -721,11 +726,11 @@ class PartnerController extends Controller
             ->get();
         $attendedSessions = $registrations->where('status', 'attended')->count();
         $upcomingRegistrations = $registrations->filter(
-            fn($r) => $r->session && $r->session->session_date && $r->session->session_date->gte(now())
+            fn ($r) => $r->session && $r->session->session_date && $r->session->session_date->gte(now())
         )->count();
 
         // Projects staffed by resources
-        $projectsStaffed = $resources->flatMap(fn($r) => $r->projects)->unique('id')->count();
+        $projectsStaffed = $resources->flatMap(fn ($r) => $r->projects)->unique('id')->count();
 
         // Resource growth trend (6 months)
         $growthTrend = [];
@@ -776,6 +781,93 @@ class PartnerController extends Controller
     }
 
     /**
+     * App Enablement tab: product readiness matrix crossing products with pipeline progression.
+     */
+    private function appEnablementTabData(Partner $partner): array
+    {
+        $products = Product::published()
+            ->orderBy('product_line')
+            ->orderBy('sort_order')
+            ->get();
+
+        // Resource contacts for this partner with their product training
+        $resources = $partner->contacts()
+            ->where('contact_type', 'resource')
+            ->with('products')
+            ->get();
+
+        // Opportunities with product relationships
+        $opportunities = $partner->opportunities()
+            ->whereNotNull('product_id')
+            ->with('product')
+            ->get();
+
+        // Projects with opportunity+product
+        $projects = $partner->projects()
+            ->with('opportunity.product')
+            ->get();
+
+        // Build the matrix: for each product, compute each column
+        $matrix = $products->map(function (Product $product) use ($resources, $opportunities, $projects) {
+            // Trained resources
+            $trainedResources = $resources->filter(
+                fn ($r) => $r->products->contains(fn ($p) => $p->id === $product->id && $p->pivot->status === 'trained')
+            );
+            $inProgressResources = $resources->filter(
+                fn ($r) => $r->products->contains(fn ($p) => $p->id === $product->id && $p->pivot->status === 'in_progress')
+            );
+            $workshopResources = $resources->filter(
+                fn ($r) => $r->products->contains(fn ($p) => $p->id === $product->id && $p->pivot->status === 'workshop')
+            );
+
+            // Pipeline: Stage 3+ (Needs Analysis, Value Proposition, Proposal)
+            $pipelineStages = ['Needs Analysis', 'Value Proposition', 'Proposal/Price Quote', 'Negotiation/Review'];
+            $pipelineOpps = $opportunities->filter(
+                fn ($o) => $o->product_id === $product->id && in_array($o->stage, $pipelineStages)
+            );
+
+            // Won / Kick-off projects
+            $kickoffProjects = $projects->filter(
+                fn ($p) => $p->opportunity?->product_id === $product->id && $p->phase === 'kickoff'
+            );
+
+            // Implementation (IHS) projects
+            $implementationProjects = $projects->filter(
+                fn ($p) => $p->opportunity?->product_id === $product->id && $p->phase === 'implementation'
+            );
+
+            // Customer Live (CS) projects
+            $liveProjects = $projects->filter(
+                fn ($p) => $p->opportunity?->product_id === $product->id && $p->phase === 'live'
+            );
+
+            return [
+                'product' => $product,
+                'trained_count' => $trainedResources->count(),
+                'in_progress_count' => $inProgressResources->count(),
+                'workshop_count' => $workshopResources->count(),
+                'total_resources' => $trainedResources->count() + $inProgressResources->count() + $workshopResources->count(),
+                'pipeline_opps' => $pipelineOpps->map(fn ($o) => $o->account_name)->unique()->values(),
+                'pipeline_amount' => round($pipelineOpps->sum('amount'), 2),
+                'kickoff_projects' => $kickoffProjects->map(fn ($p) => $p->opportunity?->account_name ?? $p->name)->unique()->values(),
+                'implementation_projects' => $implementationProjects->map(fn ($p) => $p->opportunity?->account_name ?? $p->name)->unique()->values(),
+                'live_projects' => $liveProjects->map(fn ($p) => $p->opportunity?->account_name ?? $p->name)->unique()->values(),
+            ];
+        });
+
+        // Group by product line
+        $productLines = $matrix->groupBy(fn ($row) => $row['product']->product_line);
+
+        // KPI totals
+        $totalTrained = $matrix->sum('trained_count');
+        $totalInProgress = $matrix->sum('in_progress_count');
+        $totalPipeline = $matrix->sum(fn ($row) => $row['pipeline_opps']->count());
+        $totalLive = $matrix->sum(fn ($row) => $row['live_projects']->count());
+
+        return compact('productLines', 'matrix', 'totalTrained', 'totalInProgress', 'totalPipeline', 'totalLive');
+    }
+
+    /**
      * Enablement tab: blueprint radar + enablement donut + assignments + sessions.
      */
     private function enablementTabData(Partner $partner): array
@@ -800,13 +892,15 @@ class PartnerController extends Controller
         $blueprintByArea = [];
         foreach ($roleLabels as $roleKey => $roleLabel) {
             $roleAssignments = $partner->blueprintAssignments->where('role', $roleKey);
-            if ($roleAssignments->isEmpty()) continue;
+            if ($roleAssignments->isEmpty()) {
+                continue;
+            }
 
             $data = [];
             foreach ($productAreas as $area) {
-                $areaAssignments = $roleAssignments->filter(fn($a) => ($a->blueprint->product_area ?? 'Other') === $area);
+                $areaAssignments = $roleAssignments->filter(fn ($a) => ($a->blueprint->product_area ?? 'Other') === $area);
                 $data[] = $areaAssignments->isNotEmpty()
-                    ? round($areaAssignments->avg(fn($a) => $a->completionPercentage()), 1)
+                    ? round($areaAssignments->avg(fn ($a) => $a->completionPercentage()), 1)
                     : 0;
             }
             $blueprintByArea[] = ['name' => $roleLabel, 'data' => $data];
@@ -846,8 +940,8 @@ class PartnerController extends Controller
 
         $deliveryAssignments = $partner->blueprintAssignments->where('role', 'delivery');
         $completedDeliveryByArea = $deliveryAssignments
-            ->filter(fn($a) => $a->status === 'completed')
-            ->groupBy(fn($a) => $a->blueprint->product_area ?? 'Other')
+            ->filter(fn ($a) => $a->status === 'completed')
+            ->groupBy(fn ($a) => $a->blueprint->product_area ?? 'Other')
             ->map->count();
 
         $allAreas = $opportunitiesByArea->keys()
@@ -857,10 +951,11 @@ class PartnerController extends Controller
             ->sort()
             ->values();
 
-        $projectRisk = $allAreas->mapWithKeys(function($area) use ($opportunitiesByArea, $completedDeliveryByArea) {
+        $projectRisk = $allAreas->mapWithKeys(function ($area) use ($opportunitiesByArea, $completedDeliveryByArea) {
             $oppCount = $opportunitiesByArea->get($area, 0);
             $deliveryCount = $completedDeliveryByArea->get($area, 0);
             $ratio = $oppCount > 0 ? round($deliveryCount / $oppCount, 2) : ($deliveryCount > 0 ? 2.0 : 0);
+
             return [$area => $ratio];
         });
 
@@ -996,14 +1091,14 @@ class PartnerController extends Controller
             ->get();
 
         // Calculate aggregate metrics
-        $totalProjects = $partners->sum(fn($p) => $p->projects->count());
-        $totalOpportunities = $partners->sum(fn($p) => $p->opportunities->count());
-        $totalResources = $partners->sum(fn($p) => $p->resources->count());
-        $totalContacts = $partners->sum(fn($p) => $p->contacts->count());
-        $totalPipelineValue = $partners->sum(fn($p) => $p->opportunities->sum('amount'));
+        $totalProjects = $partners->sum(fn ($p) => $p->projects->count());
+        $totalOpportunities = $partners->sum(fn ($p) => $p->opportunities->count());
+        $totalResources = $partners->sum(fn ($p) => $p->resources->count());
+        $totalContacts = $partners->sum(fn ($p) => $p->contacts->count());
+        $totalPipelineValue = $partners->sum(fn ($p) => $p->opportunities->sum('amount'));
 
         // Get stage distribution across all partners
-        $allOpportunities = $partners->flatMap(fn($p) => $p->opportunities);
+        $allOpportunities = $partners->flatMap(fn ($p) => $p->opportunities);
         $stageDistribution = $allOpportunities->groupBy('stage')->map->count()->sortDesc()->take(5);
 
         return view('partner.full-summary', compact(
@@ -1062,17 +1157,17 @@ class PartnerController extends Controller
             ->keyBy('role');
 
         // Calculate aggregate metrics
-        $totalProjects = $partners->sum(fn($p) => $p->projects->count());
-        $totalOpportunities = $partners->sum(fn($p) => $p->opportunities->count());
-        $totalResources = $partners->sum(fn($p) => $p->resources->count());
-        $totalContacts = $partners->sum(fn($p) => $p->contacts->count());
-        $totalPipelineValue = $partners->sum(fn($p) => $p->opportunities->sum('amount'));
+        $totalProjects = $partners->sum(fn ($p) => $p->projects->count());
+        $totalOpportunities = $partners->sum(fn ($p) => $p->opportunities->count());
+        $totalResources = $partners->sum(fn ($p) => $p->resources->count());
+        $totalContacts = $partners->sum(fn ($p) => $p->contacts->count());
+        $totalPipelineValue = $partners->sum(fn ($p) => $p->opportunities->sum('amount'));
 
         // Get all opportunities for the feed
-        $allOpportunities = $partners->flatMap(fn($p) => $p->opportunities);
+        $allOpportunities = $partners->flatMap(fn ($p) => $p->opportunities);
 
         // Get partners sorted by pipeline value for quota cards
-        $topPartners = $partners->sortByDesc(function($partner) {
+        $topPartners = $partners->sortByDesc(function ($partner) {
             return $partner->opportunities->sum('amount');
         })->take(5);
 
@@ -1105,6 +1200,7 @@ class PartnerController extends Controller
     public function edit(Partner $partner)
     {
         $users = \App\Models\User::orderBy('name')->get();
+
         return view('partner.edit', compact('partner', 'users'));
     }
 
@@ -1114,9 +1210,9 @@ class PartnerController extends Controller
     public function update(Request $request, Partner $partner)
     {
         $partner->update([
-            'user_id' => $request->user_id
+            'user_id' => $request->user_id,
         ]);
-    
+
         return redirect()->route('partners.index')->with('success', 'Partner assignment updated successfully.');
     }
 
@@ -1163,7 +1259,7 @@ class PartnerController extends Controller
             ->orderBy('region')
             ->get()
             ->groupBy('geography')
-            ->map(fn($items) => $items->pluck('region')->unique()->values());
+            ->map(fn ($items) => $items->pluck('region')->unique()->values());
 
         // Build PSM → partners mapping for dependent filters
         $psmPartnerMap = Partner::whereNotNull('user_id')
@@ -1171,7 +1267,7 @@ class PartnerController extends Controller
             ->orderBy('name')
             ->get()
             ->groupBy('user_id')
-            ->map(fn($items) => $items->map(fn($p) => ['id' => $p->id, 'name' => $p->name])->values());
+            ->map(fn ($items) => $items->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])->values());
 
         return view('analysis.index', compact('partners', 'psms', 'geographies', 'regions', 'geoRegionMap', 'psmPartnerMap'));
     }
@@ -1205,7 +1301,7 @@ class PartnerController extends Controller
             ->orderBy('region')
             ->get()
             ->groupBy('geography')
-            ->map(fn($items) => $items->pluck('region')->unique()->values());
+            ->map(fn ($items) => $items->pluck('region')->unique()->values());
 
         // Historical opportunity data for trend charts
         $endDate = now();

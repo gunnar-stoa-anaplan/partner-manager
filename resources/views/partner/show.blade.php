@@ -178,6 +178,11 @@
                 <i class="fal fa-user-hard-hat me-1 d-none d-md-inline"></i> Resources
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#app-enablement" data-tab="app-enablement" role="tab">
+                <i class="fal fa-th me-1 d-none d-md-inline"></i> Nicole's View
+            </a>
+        </li>
     </ul>
 
     {{-- Tab Content --}}
@@ -242,6 +247,14 @@
                 <p class="mt-2 text-muted">Loading resource data...</p>
             </div>
         </div>
+
+        {{-- App Enablement (AJAX) --}}
+        <div class="tab-pane" id="tab-app-enablement" style="display: none;">
+            <div class="spinner-loader">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading app enablement data...</p>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -252,7 +265,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     var PARTNER_ID = {{ $partner->id }};
     var TAB_BASE_URL = '{{ url("/partners") }}/' + PARTNER_ID + '/tab/';
-    var AJAX_TABS = ['pipeline', 'enablement', 'projects', 'path-health', 'calendar', 'influencers', 'resources'];
+    var AJAX_TABS = ['pipeline', 'enablement', 'projects', 'path-health', 'calendar', 'influencers', 'resources', 'app-enablement'];
     var ALL_TABS = ['overview'].concat(AJAX_TABS);
 
     // State

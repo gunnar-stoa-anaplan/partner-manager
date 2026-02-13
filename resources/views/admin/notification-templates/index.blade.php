@@ -61,61 +61,67 @@
 
 @foreach($grouped as $eventType => $eventTemplates)
 <div class="card shadow-0 mb-g">
-    <div class="card-header">
-        <div class="card-title">{{ \App\Models\NotificationTemplate::EVENT_TYPES[$eventType] ?? ucfirst(str_replace('_', ' ', $eventType)) }}</div>
+    <div class="card-header d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse" data-bs-target="#event-group-{{ $loop->index }}">
+        <div class="card-title mb-0">{{ \App\Models\NotificationTemplate::EVENT_TYPES[$eventType] ?? ucfirst(str_replace('_', ' ', $eventType)) }}</div>
+        <div>
+            <span class="badge bg-secondary">{{ $eventTemplates->count() }} {{ Str::plural('template', $eventTemplates->count()) }}</span>
+            <svg class="sa-icon ms-1" style="width:16px;height:16px;transition:transform .2s"><use href="/icons/sprite.svg#chevron-down"></use></svg>
+        </div>
     </div>
-    <div class="card-body p-0">
-        @foreach($eventTemplates as $template)
-        <div class="p-3 {{ !$loop->last ? 'border-bottom' : '' }}">
-            <form action="{{ route('admin.notification-templates.update', $template) }}" method="POST">
-                @csrf @method('PUT')
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div>
-                        <span class="badge bg-{{ $template->channel === 'email' ? 'primary' : ($template->channel === 'in_app' ? 'info' : 'success') }}">{{ \App\Models\NotificationTemplate::CHANNELS[$template->channel] ?? $template->channel }}</span>
-                        <span class="badge bg-{{ $template->is_active ? 'success' : 'secondary' }} ms-1">{{ $template->is_active ? 'Active' : 'Inactive' }}</span>
-                        <small class="text-muted ms-2">ID: {{ $template->id }}</small>
-                    </div>
-                    <div class="btn-group btn-group-sm">
-                        <button type="submit" class="btn btn-outline-primary btn-sm">Save</button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm"
-                                onclick="fetch('{{ route('admin.notification-templates.test', $template) }}', {method:'POST', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>r.json()).then(d=>alert('Preview:\n\nSubject: '+d.rendered.subject+'\n\nBody: '+d.rendered.body.replace(/<[^>]*>/g,'')))">
-                            Preview
-                        </button>
-                    </div>
-                </div>
-                <div class="row g-2">
-                    <div class="col-md-2">
-                        <label class="form-label fs-sm">Channel</label>
-                        <select name="channel" class="form-select form-select-sm">
-                            @foreach(\App\Models\NotificationTemplate::CHANNELS as $key => $label)
-                            <option value="{{ $key }}" {{ $template->channel === $key ? 'selected' : '' }}>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fs-sm">Subject</label>
-                        <input type="text" name="subject" class="form-control form-control-sm" value="{{ $template->subject }}">
-                    </div>
-                    <div class="col-md-5">
-                        <label class="form-label fs-sm">Body</label>
-                        <textarea name="body" class="form-control form-control-sm" rows="3">{{ $template->body }}</textarea>
-                    </div>
-                    <div class="col-md-1 d-flex align-items-center justify-content-center">
-                        <div class="form-check">
-                            <input type="checkbox" name="is_active" value="1" class="form-check-input" {{ $template->is_active ? 'checked' : '' }}>
-                            <label class="form-check-label fs-sm">Active</label>
+    <div class="collapse" id="event-group-{{ $loop->index }}">
+        <div class="card-body p-0">
+            @foreach($eventTemplates as $template)
+            <div class="p-3 {{ !$loop->last ? 'border-bottom' : '' }}">
+                <form action="{{ route('admin.notification-templates.update', $template) }}" method="POST">
+                    @csrf @method('PUT')
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="badge bg-{{ $template->channel === 'email' ? 'primary' : ($template->channel === 'in_app' ? 'info' : 'success') }}">{{ \App\Models\NotificationTemplate::CHANNELS[$template->channel] ?? $template->channel }}</span>
+                            <span class="badge bg-{{ $template->is_active ? 'success' : 'secondary' }} ms-1">{{ $template->is_active ? 'Active' : 'Inactive' }}</span>
+                            <small class="text-muted ms-2">ID: {{ $template->id }}</small>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button type="submit" class="btn btn-outline-primary btn-sm">Save</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    onclick="fetch('{{ route('admin.notification-templates.test', $template) }}', {method:'POST', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>r.json()).then(d=>alert('Preview:\n\nSubject: '+d.rendered.subject+'\n\nBody: '+d.rendered.body.replace(/<[^>]*>/g,'')))">
+                                Preview
+                            </button>
                         </div>
                     </div>
-                </div>
-            </form>
-            <div class="mt-2 text-end">
-                <form action="{{ route('admin.notification-templates.destroy', $template) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this template?')">
-                    @csrf @method('DELETE')
-                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                    <div class="row g-2">
+                        <div class="col-md-2">
+                            <label class="form-label fs-sm">Channel</label>
+                            <select name="channel" class="form-select form-select-sm">
+                                @foreach(\App\Models\NotificationTemplate::CHANNELS as $key => $label)
+                                <option value="{{ $key }}" {{ $template->channel === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fs-sm">Subject</label>
+                            <input type="text" name="subject" class="form-control form-control-sm" value="{{ $template->subject }}">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fs-sm">Body</label>
+                            <textarea name="body" class="form-control form-control-sm" rows="3">{{ $template->body }}</textarea>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-center justify-content-center">
+                            <div class="form-check">
+                                <input type="checkbox" name="is_active" value="1" class="form-check-input" {{ $template->is_active ? 'checked' : '' }}>
+                                <label class="form-check-label fs-sm">Active</label>
+                            </div>
+                        </div>
+                    </div>
                 </form>
+                <div class="mt-2 text-end">
+                    <form action="{{ route('admin.notification-templates.destroy', $template) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this template?')">
+                        @csrf @method('DELETE')
+                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                </div>
             </div>
+            @endforeach
         </div>
-        @endforeach
     </div>
 </div>
 @endforeach

@@ -28,6 +28,7 @@ class Opportunity extends Model
         'lead_source',
         'revenue_type',
         'product_area',
+        'product_id',
         'probability',
         'owner',
         'excel_data',
@@ -47,6 +48,11 @@ class Opportunity extends Model
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 
     public function import(): BelongsTo

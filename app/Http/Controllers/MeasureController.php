@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Partner;
 use App\Models\AppSetting;
+use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -39,7 +40,9 @@ class MeasureController extends Controller
     {
         $avgScore = DB::table('partner_scorecards')
             ->whereIn('partner_id', $partnerIds)
-            ->whereIn('id', function ($q) { $q->selectRaw('MAX(id)')->from('partner_scorecards')->groupBy('partner_id'); })
+            ->whereIn('id', function ($q) {
+                $q->selectRaw('MAX(id)')->from('partner_scorecards')->groupBy('partner_id');
+            })
             ->avg('overall_score') ?? 0;
 
         $totalPipeline = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
@@ -73,7 +76,7 @@ class MeasureController extends Controller
         // Revenue by quarter
         $revenueByQuarter = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
             ->where('stage', 'Closed Won')->where('fiscal_year', $fy)
-            ->selectRaw("fiscal_quarter, revenue_type, SUM(amount) as total")
+            ->selectRaw('fiscal_quarter, revenue_type, SUM(amount) as total')
             ->groupBy('fiscal_quarter', 'revenue_type')
             ->get();
 
@@ -83,7 +86,7 @@ class MeasureController extends Controller
             ->whereIn('e.partner_id', $partnerIds)
             ->where('e.status', 'active')
             ->selectRaw('s.name, s.color, COUNT(*) as count')
-            ->groupBy('s.name', 's.color')
+            ->groupBy('s.name', 's.color', 's.stage_number')
             ->orderBy('s.stage_number')
             ->get();
 
@@ -106,7 +109,7 @@ class MeasureController extends Controller
 
         $byStage = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
             ->whereNotIn('stage', ['Closed Won', 'Closed Lost'])
-            ->selectRaw("stage, COUNT(*) as count, SUM(amount) as total")
+            ->selectRaw('stage, COUNT(*) as count, SUM(amount) as total')
             ->groupBy('stage')->get();
 
         $byOrigin = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
@@ -130,12 +133,13 @@ class MeasureController extends Controller
     {
         $totalLeads = DB::table('leads')->whereIn('partner_id', $partnerIds)->count();
         $byStatus = DB::table('leads')->whereIn('partner_id', $partnerIds)
-            ->selectRaw("status, COUNT(*) as count")->groupBy('status')->pluck('count', 'status');
+            ->selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status');
         $byPartner = DB::table('leads as l')
             ->join('partners as p', 'l.partner_id', '=', 'p.id')
             ->whereIn('l.partner_id', $partnerIds)
-            ->selectRaw("p.name, l.status, COUNT(*) as count")
+            ->selectRaw('p.name, l.status, COUNT(*) as count')
             ->groupBy('p.name', 'l.status')->get();
+
         return compact('totalLeads', 'byStatus', 'byPartner');
     }
 
@@ -143,11 +147,12 @@ class MeasureController extends Controller
     {
         $totalFunding = DB::table('fundings')->whereIn('partner_id', $partnerIds)->sum('amount');
         $byType = DB::table('fundings')->whereIn('partner_id', $partnerIds)
-            ->selectRaw("type, SUM(amount) as total, COUNT(*) as count")->groupBy('type')->get();
+            ->selectRaw('type, SUM(amount) as total, COUNT(*) as count')->groupBy('type')->get();
         $byPartner = DB::table('fundings as f')
             ->join('partners as p', 'f.partner_id', '=', 'p.id')
             ->whereIn('f.partner_id', $partnerIds)
-            ->selectRaw("p.name, SUM(f.amount) as total")->groupBy('p.name')->orderByDesc('total')->get();
+            ->selectRaw('p.name, SUM(f.amount) as total')->groupBy('p.name')->orderByDesc('total')->get();
+
         return compact('totalFunding', 'byType', 'byPartner');
     }
 
@@ -166,20 +171,20 @@ class MeasureController extends Controller
 
         $byQuarter = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
             ->where('stage', 'Closed Won')->where('fiscal_year', $fy)
-            ->selectRaw("fiscal_quarter, revenue_type, SUM(amount) as total")
+            ->selectRaw('fiscal_quarter, revenue_type, SUM(amount) as total')
             ->groupBy('fiscal_quarter', 'revenue_type')->get();
 
         $byProductArea = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
             ->where('stage', 'Closed Won')->where('fiscal_year', $fy)
             ->whereNotNull('product_area')
-            ->selectRaw("product_area, SUM(amount) as total")
+            ->selectRaw('product_area, SUM(amount) as total')
             ->groupBy('product_area')->orderByDesc('total')->get();
 
         $byPartner = DB::table('opportunities as o')
             ->join('partners as p', 'o.partner_id', '=', 'p.id')
             ->whereIn('o.partner_id', $partnerIds)
             ->where('o.stage', 'Closed Won')->where('o.fiscal_year', $fy)
-            ->selectRaw("p.name, SUM(o.amount) as total")
+            ->selectRaw('p.name, SUM(o.amount) as total')
             ->groupBy('p.name')->orderByDesc('total')->get();
 
         return compact('totalBookings', 'sourcedNnacv', 'influencedNnacv', 'avgAcv', 'byQuarter', 'byProductArea', 'byPartner');
@@ -199,12 +204,12 @@ class MeasureController extends Controller
         $bpCompletionRate = $totalBp > 0 ? round(($completedBp / $totalBp) * 100, 1) : 0;
 
         $certsByType = DB::table('certifications')->whereIn('partner_id', $partnerIds)->where('status', 'active')
-            ->selectRaw("type, COUNT(*) as count")->groupBy('type')->pluck('count', 'type');
+            ->selectRaw('type, COUNT(*) as count')->groupBy('type')->pluck('count', 'type');
 
         $bpByPartner = DB::table('partner_blueprint_assignments as pba')
             ->join('partners as p', 'pba.partner_id', '=', 'p.id')
             ->whereIn('pba.partner_id', $partnerIds)
-            ->selectRaw("p.name, pba.status, COUNT(*) as count")
+            ->selectRaw('p.name, pba.status, COUNT(*) as count')
             ->groupBy('p.name', 'pba.status')->get();
 
         return compact('activeCerts', 'expiring90', 'attendanceRate', 'bpCompletionRate', 'certsByType', 'bpByPartner');
@@ -229,12 +234,12 @@ class MeasureController extends Controller
         $escalationRate = $totalCases > 0 ? round(($escalatedCount / $totalCases) * 100, 1) : 0;
 
         $projectsByStatus = DB::table('projects')->whereIn('partner_id', $partnerIds)
-            ->selectRaw("status, COUNT(*) as count")->groupBy('status')->pluck('count', 'status');
+            ->selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status');
 
         $casesByPartner = DB::table('cases as c')
             ->join('partners as p', 'c.partner_id', '=', 'p.id')
             ->whereIn('c.partner_id', $partnerIds)
-            ->selectRaw("p.name, c.severity, COUNT(*) as count")
+            ->selectRaw('p.name, c.severity, COUNT(*) as count')
             ->groupBy('p.name', 'c.severity')->get();
 
         return compact('activeProjects', 'avgCsat', 'onTimeRate', 'refRate', 'openCases', 'escalationRate',
@@ -246,6 +251,7 @@ class MeasureController extends Controller
         $fyStart = (int) AppSetting::get('fiscal_year_start_month', 2);
         $now = now();
         $year = $now->month >= $fyStart ? $now->year : $now->year - 1;
-        return 'FY' . substr($year + 1, 2);
+
+        return 'FY'.substr($year + 1, 2);
     }
 }

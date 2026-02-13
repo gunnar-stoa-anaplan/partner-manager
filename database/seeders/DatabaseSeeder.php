@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             TaskTemplateSeeder::class,         // task templates per stage
             NotificationTemplateSeeder::class, // notification templates
             BlueprintSeeder::class,            // blueprints, outcomes, content items
+            ProductSeeder::class,              // product catalog (needed before opportunities)
 
             // === Phase 2: Business Data ===
             OpportunityHistorySeeder::class,   // 52 weeks of opportunities + snapshots for analytics
@@ -43,6 +44,7 @@ class DatabaseSeeder extends Seeder
             PartnerEventSeeder::class,         // events with contact attendees
             EnablementSeeder::class,           // enablement events, sessions, registrations
             CertificationSeeder::class,        // certifications per contact
+            ContactProductSeeder::class,       // product training per resource contact
             BlueprintAssignmentSeeder::class,  // assignments, enrollments, progress
 
             // === Phase 3: Plan Section ===

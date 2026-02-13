@@ -33,7 +33,7 @@
                         </span>
                     </td>
                     <td>
-                        @php $days = $enrollment->stage_entered_at ? now()->diffInDays($enrollment->stage_entered_at) : 0; @endphp
+                        @php $days = $enrollment->stage_entered_at ? (int) now()->diffInDays($enrollment->stage_entered_at) : 0; @endphp
                         <span class="{{ $days > 180 ? 'text-danger fw-500' : '' }}">{{ $days }} days</span>
                     </td>
                     <td>{{ $enrollment->enrolled_at?->format('M j, Y') ?? '—' }}</td>
