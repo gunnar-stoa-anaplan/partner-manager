@@ -33,6 +33,11 @@ class Product extends Model
         return $this->hasMany(Opportunity::class);
     }
 
+    public function launchPrograms(): HasMany
+    {
+        return $this->hasMany(LaunchProgram::class);
+    }
+
     public function contacts(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'contact_product')

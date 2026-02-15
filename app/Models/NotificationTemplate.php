@@ -30,6 +30,7 @@ class NotificationTemplate extends Model
         'path_stage_advanced' => 'Path Stage Advanced',
         'qbr_scheduled' => 'QBR Scheduled',
         'alert_generated' => 'Alert Generated',
+        'anaplan_version_outdated' => 'Anaplan Version Outdated',
     ];
 
     const CHANNELS = [

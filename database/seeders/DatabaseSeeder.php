@@ -46,6 +46,10 @@ class DatabaseSeeder extends Seeder
             CertificationSeeder::class,        // certifications per contact
             ContactProductSeeder::class,       // product training per resource contact
             BlueprintAssignmentSeeder::class,  // assignments, enrollments, progress
+            LaunchProgramSeeder::class,        // launch programs, milestones, partners, participants, feedback
+            AnaplanWorkspaceSeeder::class,     // anaplan workspaces, models, modules, lists
+            AnaplanVersionConfigSeeder::class, // version configs + notification template
+            LabSeeder::class,                   // workshop labs, checkpoints, participants, results
 
             // === Phase 3: Plan Section ===
             PartnerPathEnrollmentSeeder::class, // enrollments + stage history

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 class ResourceHistorySeeder extends Seeder
 {
     private array $programs = ['IFP', 'I&D', 'SPM', 'OWP'];
+
     private array $roles = ['Delivery', 'Pre-Sales', 'Sales'];
 
     /**
@@ -25,11 +26,11 @@ class ResourceHistorySeeder extends Seeder
     {
         return match (true) {
             str_contains($name, 'Accenture') => [22, 30, 1.3, 3],
-            str_contains($name, 'Deloitte')  => [18, 24, 1.2, 3],
-            str_contains($name, 'PwC')       => [14, 20, 1.1, 3],
-            str_contains($name, 'KPMG')      => [12, 18, 1.1, 2],
-            str_contains($name, 'EY')        => [12, 18, 1.0, 2],
-            default                          => [5, 12, 1.0, 2],
+            str_contains($name, 'Deloitte') => [18, 24, 1.2, 3],
+            str_contains($name, 'PwC') => [14, 20, 1.1, 3],
+            str_contains($name, 'KPMG') => [12, 18, 1.1, 2],
+            str_contains($name, 'EY') => [12, 18, 1.0, 2],
+            default => [5, 12, 1.0, 2],
         };
     }
 
@@ -49,6 +50,7 @@ class ResourceHistorySeeder extends Seeder
 
         if ($partners->isEmpty()) {
             $this->command->warn('No partners found. Run PartnerSeeder first.');
+
             return;
         }
 
@@ -103,11 +105,11 @@ class ResourceHistorySeeder extends Seeder
         for ($week = 0; $week < $weeksToSimulate; $week++) {
             $weekDate = $startDate->copy()->addWeeks($week);
 
-            // Create weekly import record
+            // Create weekly import record — all timestamps match the file name date
             $import = Import::create([
                 'type' => 'resources',
-                'file_name' => 'weekly_resources_' . $weekDate->format('Y_m_d') . '.xlsx',
-                'file_path' => 'imports/weekly_resources_' . $weekDate->format('Y_m_d') . '.xlsx',
+                'file_name' => 'weekly_resources_'.$weekDate->format('Y_m_d').'.xlsx',
+                'file_path' => 'imports/weekly_resources_'.$weekDate->format('Y_m_d').'.xlsx',
                 'status' => 'completed',
                 'user_id' => $admin->id,
                 'started_at' => $weekDate,
@@ -120,6 +122,8 @@ class ResourceHistorySeeder extends Seeder
                 'opportunities_created' => 0,
                 'opportunities_updated' => 0,
                 'resources_created' => 0,
+                'created_at' => $weekDate,
+                'updated_at' => $weekDate,
             ]);
 
             // Compute snapshots per partner/program/role for this week
@@ -137,7 +141,7 @@ class ResourceHistorySeeder extends Seeder
                         }
 
                         $key = "{$program}|{$person['role']}";
-                        if (!isset($aggregates[$key])) {
+                        if (! isset($aggregates[$key])) {
                             $aggregates[$key] = [
                                 'program' => $program,
                                 'role' => $person['role'],
@@ -168,14 +172,14 @@ class ResourceHistorySeeder extends Seeder
                         'completed_count' => $agg['completed'],
                         'total_count' => $agg['started'] + $agg['completed'],
                         'unique_people_count' => count(array_unique($agg['names'])),
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'created_at' => $weekDate,
+                        'updated_at' => $weekDate,
                     ];
                 }
             }
 
             // Batch insert snapshots
-            if (!empty($snapshots)) {
+            if (! empty($snapshots)) {
                 foreach (array_chunk($snapshots, 500) as $chunk) {
                     DB::table('resource_snapshots')->insert($chunk);
                 }
@@ -221,17 +225,17 @@ class ResourceHistorySeeder extends Seeder
         }
 
         // Batch insert current resource records
-        if (!empty($resourceRecords)) {
+        if (! empty($resourceRecords)) {
             foreach (array_chunk($resourceRecords, 500) as $chunk) {
                 DB::table('resources')->insert($chunk);
             }
         }
 
-        $totalPeople = collect($partnerPeople)->sum(fn($people) => count($people));
+        $totalPeople = collect($partnerPeople)->sum(fn ($people) => count($people));
         $completedCount = collect($resourceRecords)->where('status', 'Completed')->count();
         $startedCount = collect($resourceRecords)->where('status', 'Started')->count();
 
-        $this->command->info("Seeded {$totalPeople} people with " . count($resourceRecords) . " certifications across " . $partners->count() . " partners.");
+        $this->command->info("Seeded {$totalPeople} people with ".count($resourceRecords).' certifications across '.$partners->count().' partners.');
         $this->command->info("  Current state: {$completedCount} completed, {$startedCount} in progress");
         $this->command->info("  Created {$totalSnapshots} snapshot rows over {$weeksToSimulate} weekly imports.");
 
@@ -243,7 +247,7 @@ class ResourceHistorySeeder extends Seeder
             $pPeople = count($partnerPeople[$partner->id] ?? []);
             $this->command->info("  {$partner->name}: {$pPeople} people, {$pCompleted}/{$pTotal} certifications completed");
         }
-        $this->command->info("  ... and " . max(0, $partners->count() - 5) . " more partners");
+        $this->command->info('  ... and '.max(0, $partners->count() - 5).' more partners');
     }
 
     /**
@@ -252,8 +256,13 @@ class ResourceHistorySeeder extends Seeder
     private function weightedRole(): string
     {
         $rand = rand(1, 100);
-        if ($rand <= 50) return 'Delivery';
-        if ($rand <= 80) return 'Pre-Sales';
+        if ($rand <= 50) {
+            return 'Delivery';
+        }
+        if ($rand <= 80) {
+            return 'Pre-Sales';
+        }
+
         return 'Sales';
     }
 

@@ -504,6 +504,15 @@
             <span class="nav-link-text">Notification Templates</span>
         </a>
     </li>
+
+    <li>
+        <a href="{{ route('admin.anaplan-overview') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#layers"></use>
+            </svg>
+            <span class="nav-link-text">Anaplan Versions</span>
+        </a>
+    </li>
     @endif
 
     @if(Auth::user()->role === 'admin' || ($navSettings['nav_visible_program_admin'] ?? '1') === '1')
@@ -533,7 +542,25 @@
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#layers"></use>
             </svg>
-            <span class="nav-link-text">Product Blueprints</span>
+            <span class="nav-link-text">Enablement Blueprints</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ route('admin.launch-programs.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#zap"></use>
+            </svg>
+            <span class="nav-link-text">Launch Programs</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ route('labs.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#check-square"></use>
+            </svg>
+            <span class="nav-link-text">Workshop Labs</span>
         </a>
     </li>
     @endif
@@ -566,6 +593,15 @@
                 <use href="/icons/sprite.svg#cloud"></use>
             </svg>
             <span class="nav-link-text">Salesforce Credentials</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ route('admin.anaplan-provisioning.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#server"></use>
+            </svg>
+            <span class="nav-link-text">Anaplan Workspaces</span>
         </a>
     </li>
 

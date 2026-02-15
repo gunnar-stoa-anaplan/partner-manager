@@ -4,7 +4,7 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Create Blueprint', 'pageSubTitle1' => 'Administration', 'pageSubTitle1Url' => route('admin.dashboard'), 'pageSubTitle2' => 'Product Blueprints', 'pageSubTitle2Url' => route('blueprints.index'), 'pageSubText' => 'Define a new partner enablement blueprint'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Create Blueprint', 'pageSubTitle1' => 'Administration', 'pageSubTitle1Url' => route('admin.dashboard'), 'pageSubTitle2' => 'Enablement Blueprints', 'pageSubTitle2Url' => route('blueprints.index'), 'pageSubText' => 'Define a new partner enablement blueprint'])
 @endsection
 
 @section('content')

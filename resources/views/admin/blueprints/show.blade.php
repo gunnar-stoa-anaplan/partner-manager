@@ -4,7 +4,7 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $blueprint->name, 'pageSubTitle1' => 'Administration', 'pageSubTitle1Url' => route('admin.dashboard'), 'pageSubTitle2' => 'Product Blueprints', 'pageSubTitle2Url' => route('blueprints.index'), 'pageSubText' => \App\Models\Blueprint::CATEGORIES[$blueprint->category] ?? ''])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $blueprint->name, 'pageSubTitle1' => 'Administration', 'pageSubTitle1Url' => route('admin.dashboard'), 'pageSubTitle2' => 'Enablement Blueprints', 'pageSubTitle2Url' => route('blueprints.index'), 'pageSubText' => \App\Models\Blueprint::CATEGORIES[$blueprint->category] ?? ''])
 @endsection
 
 @section('content')

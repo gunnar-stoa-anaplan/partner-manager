@@ -8,7 +8,7 @@
 @endsection
 
 @section('content')
-<p class="text-muted fst-italic mt-3 mb-4">Product Blueprints define the enablement curriculum your partners need to complete for each product area. Each blueprint contains outcomes with specific content items — organized by role (GTM, Pre-Sales, Delivery). Create new blueprints here, or click into an existing one to manage its outcomes, content, and partner assignments.</p>
+<p class="text-muted fst-italic mt-3 mb-4">Enablement Blueprints define the enablement curriculum your partners need to complete for each product area. Each blueprint contains outcomes with specific content items — organized by role (GTM, Pre-Sales, Delivery). Create new blueprints here, or click into an existing one to manage its outcomes, content, and partner assignments.</p>
     <div class="row">
         <div class="col-lg-12">
             <div class="card shadow-0 mb-g">

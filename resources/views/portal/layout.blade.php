@@ -52,6 +52,10 @@
                         <a href="{{ route('portal.contacts.index') }}"
                            class="nav-link-portal {{ request()->routeIs('portal.contacts.*') ? 'active' : '' }}">Team</a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('portal.launch-programs.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.launch-programs.*') ? 'active' : '' }}">Launch Programs</a>
+                    </li>
                     @endif
 
                     {{-- Admin + Sales --}}
@@ -82,6 +86,14 @@
                     <li class="nav-item">
                         <a href="{{ route('portal.blueprints.index') }}"
                            class="nav-link-portal {{ request()->routeIs('portal.blueprints.*') ? 'active' : '' }}">Blueprints</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('portal.labs.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.labs.*') ? 'active' : '' }}">Labs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('portal.workspaces.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.workspaces.*') ? 'active' : '' }}">Workspaces</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center gap-2">

@@ -151,9 +151,36 @@ class Partner extends Model
         return $this->hasMany(PartnerStageHistory::class);
     }
 
+    public function certifications()
+    {
+        return $this->hasMany(Certification::class);
+    }
+
     public function dealRegistrations()
     {
         return $this->hasMany(DealRegistration::class);
+    }
+
+    public function launchProgramPartners()
+    {
+        return $this->hasMany(LaunchProgramPartner::class);
+    }
+
+    public function launchPrograms()
+    {
+        return $this->belongsToMany(LaunchProgram::class, 'launch_program_partners')
+            ->withPivot('status', 'nominated_by', 'accepted_at', 'notes')
+            ->withTimestamps();
+    }
+
+    public function anaplanWorkspaces()
+    {
+        return $this->hasMany(AnaplanWorkspace::class);
+    }
+
+    public function anaplanModels()
+    {
+        return $this->hasManyThrough(AnaplanModel::class, AnaplanWorkspace::class);
     }
 
     /**
@@ -220,6 +247,7 @@ class Partner extends Model
             $partner->opportunities()->delete();
             $partner->resources()->delete();
             $partner->goals()->delete();
+            $partner->anaplanWorkspaces()->delete();
         });
     }
 }

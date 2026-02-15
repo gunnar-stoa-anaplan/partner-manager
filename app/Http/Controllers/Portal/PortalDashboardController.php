@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Portal;
 use App\Http\Controllers\Controller;
 use App\Models\Certification;
 use App\Models\Contact;
+use App\Models\LaunchProgramPartner;
 use App\Models\PartnerAssignedGoal;
 use App\Models\PartnerScorecard;
 use App\Models\Project;
@@ -54,6 +55,10 @@ class PortalDashboardController extends Controller
                 ->get(),
             'certCount' => Certification::where('partner_id', $partner->id)->where('status', 'active')->count(),
             'contactCount' => Contact::where('partner_id', $partner->id)->count(),
+            'launchPrograms' => LaunchProgramPartner::where('partner_id', $partner->id)
+                ->whereNotIn('status', ['withdrawn'])
+                ->with(['program.product', 'program.milestones', 'participants.milestoneCompletions'])
+                ->get(),
         ];
     }
 

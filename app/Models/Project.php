@@ -27,21 +27,38 @@ class Project extends Model
         'delivery_team',
         'budget',
         'phase',
-        // Legacy fields (if needed)
-        'client',
-        'initiative',
-        'completion',
-        'team',
+        'customer_satisfaction',
+        'is_referenceable',
+        'led_to_expansion',
+        'scope_changes',
+        'go_live_date',
+        'outcome_notes',
     ];
 
-    protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
-        'acv' => 'decimal:2',
-        'percent_complete' => 'integer',
-        'total_sprints' => 'integer',
-        'current_sprint' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'date',
+            'end_date' => 'date',
+            'go_live_date' => 'date',
+            'acv' => 'decimal:2',
+            'percent_complete' => 'integer',
+            'total_sprints' => 'integer',
+            'current_sprint' => 'integer',
+            'customer_satisfaction' => 'integer',
+            'is_referenceable' => 'boolean',
+            'led_to_expansion' => 'boolean',
+            'scope_changes' => 'integer',
+        ];
+    }
+
+    /**
+     * Get the product area from the linked opportunity.
+     */
+    public function getProductAreaAttribute(): ?string
+    {
+        return $this->opportunity?->product_area;
+    }
 
     /**
      * The opportunity this project was created from.

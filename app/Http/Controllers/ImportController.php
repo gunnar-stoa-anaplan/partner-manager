@@ -6,18 +6,15 @@ use App\Helpers\FiscalYearHelper;
 use App\Helpers\PartnerNameHelper;
 use App\Models\Import;
 use App\Models\Opportunity;
-use App\Models\OpportunitySnapshot;
 use App\Models\Partner;
 use App\Models\Resource;
-use App\Models\ResourceSnapshot;
 use App\Models\User;
-use Illuminate\Http\Request;
 use App\Services\ChangeDetectionService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ImportController extends Controller
@@ -26,7 +23,7 @@ class ImportController extends Controller
     {
         $imports = Import::with('user')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->get();
 
         return view('configuration.imports.index', compact('imports'));
     }
@@ -44,7 +41,7 @@ class ImportController extends Controller
         ]);
 
         $file = $request->file('file');
-        $fileName = time() . '_' . $file->getClientOriginalName();
+        $fileName = time().'_'.$file->getClientOriginalName();
         $filePath = $file->storeAs('imports', $fileName, 'local');
 
         // Create import record
@@ -60,6 +57,7 @@ class ImportController extends Controller
         // Process the import
         try {
             $this->processImport($import);
+
             return redirect()
                 ->route('imports.show', $import)
                 ->with('success', 'Import completed successfully!');
@@ -72,13 +70,14 @@ class ImportController extends Controller
 
             return redirect()
                 ->route('imports.index')
-                ->with('error', 'Import failed: ' . $e->getMessage());
+                ->with('error', 'Import failed: '.$e->getMessage());
         }
     }
 
     public function show(Import $import)
     {
         $import->load('user', 'opportunities.partner');
+
         return view('configuration.imports.show', compact('import'));
     }
 
@@ -100,7 +99,7 @@ class ImportController extends Controller
     {
         $import->update(['status' => 'processing']);
 
-        $fullPath = storage_path('app/' . $import->file_path);
+        $fullPath = storage_path('app/'.$import->file_path);
 
         if ($import->type === 'opportunities') {
             $this->processOpportunitiesImport($import, $fullPath);
@@ -150,10 +149,10 @@ class ImportController extends Controller
 
         // First pass: Extract unique partner names
         foreach ($rows as $index => $row) {
-            if (!empty($row[$partnerPlanHQIndex])) {
+            if (! empty($row[$partnerPlanHQIndex])) {
                 $partnerNames[$row[$partnerPlanHQIndex]] = true;
             }
-            if (!empty($row[$finalImplementationPartnerIndex])) {
+            if (! empty($row[$finalImplementationPartnerIndex])) {
                 $partnerNames[$row[$finalImplementationPartnerIndex]] = true;
             }
         }
@@ -192,9 +191,9 @@ class ImportController extends Controller
 
                 // Determine partner ID
                 $partnerId = null;
-                if (!empty($row[$finalImplementationPartnerIndex])) {
+                if (! empty($row[$finalImplementationPartnerIndex])) {
                     $partnerId = $partnerMap[trim($row[$finalImplementationPartnerIndex])] ?? null;
-                } elseif (!empty($row[$partnerPlanHQIndex])) {
+                } elseif (! empty($row[$partnerPlanHQIndex])) {
                     $partnerId = $partnerMap[trim($row[$partnerPlanHQIndex])] ?? null;
                 }
 
@@ -230,7 +229,7 @@ class ImportController extends Controller
                 if ($opportunity) {
                     $opportunityData['previous_stage'] = $opportunity->stage;
                     $opportunityData['previous_close_date'] = $opportunity->close_date;
-                    if (!$opportunity->first_seen_at) {
+                    if (! $opportunity->first_seen_at) {
                         $opportunityData['first_seen_at'] = $opportunity->created_at;
                     }
                     $opportunity->update($opportunityData);
@@ -244,7 +243,7 @@ class ImportController extends Controller
                 $successfulRows++;
             } catch (\Exception $e) {
                 $failedRows++;
-                $errors[] = "Row " . ($index + 2) . ": " . $e->getMessage();
+                $errors[] = 'Row '.($index + 2).': '.$e->getMessage();
             }
         }
 
@@ -263,12 +262,12 @@ class ImportController extends Controller
             'partners_updated' => $partnersUpdated,
             'opportunities_created' => $opportunitiesCreated,
             'opportunities_updated' => $opportunitiesUpdated,
-            'error_log' => !empty($errors) ? implode("\n", $errors) : null,
+            'error_log' => ! empty($errors) ? implode("\n", $errors) : null,
             'summary' => [
                 'total_unique_partners' => count($partnerNames),
                 'partner_sources' => [
-                    'partner_plan_hq' => count(array_filter($rows, fn($r) => !empty($r[$partnerPlanHQIndex]))),
-                    'final_implementation_partner' => count(array_filter($rows, fn($r) => !empty($r[$finalImplementationPartnerIndex]))),
+                    'partner_plan_hq' => count(array_filter($rows, fn ($r) => ! empty($r[$partnerPlanHQIndex]))),
+                    'final_implementation_partner' => count(array_filter($rows, fn ($r) => ! empty($r[$finalImplementationPartnerIndex]))),
                 ],
             ],
         ]);
@@ -279,6 +278,7 @@ class ImportController extends Controller
         if (empty($value)) {
             return null;
         }
+
         // Remove currency symbols and commas
         return (float) preg_replace('/[^0-9.]/', '', $value);
     }
@@ -300,6 +300,7 @@ class ImportController extends Controller
         if (empty($value)) {
             return null;
         }
+
         // Remove % sign and convert to decimal
         return (float) str_replace('%', '', $value);
     }
@@ -341,7 +342,8 @@ class ImportController extends Controller
 
                 if (empty($partnerName)) {
                     $failedRows++;
-                    $errors[] = "Row " . ($index + 2) . ": Missing partner name";
+                    $errors[] = 'Row '.($index + 2).': Missing partner name';
+
                     continue;
                 }
 
@@ -351,23 +353,24 @@ class ImportController extends Controller
                     'region' => $region,
                 ]);
 
-                if (!$partner) {
+                if (! $partner) {
                     $failedRows++;
-                    $errors[] = "Row " . ($index + 2) . ": Could not create partner";
+                    $errors[] = 'Row '.($index + 2).': Could not create partner';
+
                     continue;
                 }
 
                 // Create or find PSM user if PSM name is provided
                 $psmUserId = null;
-                if (!empty($psmName)) {
+                if (! empty($psmName)) {
                     // Check if user exists by name (case-insensitive)
                     $psmUser = User::whereRaw('LOWER(name) = ?', [strtolower($psmName)])->first();
 
-                    if (!$psmUser) {
+                    if (! $psmUser) {
                         // Create new PSM user
                         $psmUser = User::create([
                             'name' => $psmName,
-                            'email' => Str::slug($psmName) . '@placeholder.com', // Placeholder email
+                            'email' => Str::slug($psmName).'@placeholder.com', // Placeholder email
                             'password' => bcrypt(Str::random(16)), // Random password
                             'role' => 'psm',
                         ]);
@@ -386,7 +389,7 @@ class ImportController extends Controller
                         ->where('role', 'psm')
                         ->exists();
 
-                    if (!$existingAssignment) {
+                    if (! $existingAssignment) {
                         $partner->psms()->attach($psmUser->id, ['role' => 'psm']);
                         $assignmentsCreated++;
                     }
@@ -403,7 +406,7 @@ class ImportController extends Controller
                 $successfulRows++;
             } catch (\Exception $e) {
                 $failedRows++;
-                $errors[] = "Row " . ($index + 2) . ": " . $e->getMessage();
+                $errors[] = 'Row '.($index + 2).': '.$e->getMessage();
             }
         }
 
@@ -413,7 +416,7 @@ class ImportController extends Controller
             'successful_rows' => $successfulRows,
             'failed_rows' => $failedRows,
             'partners_updated' => $partnersUpdated,
-            'error_log' => !empty($errors) ? implode("\n", $errors) : null,
+            'error_log' => ! empty($errors) ? implode("\n", $errors) : null,
             'summary' => [
                 'users_created' => $usersCreated,
                 'assignments_created' => $assignmentsCreated,
@@ -454,6 +457,7 @@ class ImportController extends Controller
         $existingResources = Resource::all()
             ->mapWithKeys(function ($resource) {
                 $key = "{$resource->partner_id}|{$resource->name}|{$resource->program}|{$resource->status}";
+
                 return [$key => true];
             })
             ->toArray();
@@ -475,7 +479,8 @@ class ImportController extends Controller
 
                 if (empty($partnerName)) {
                     $failedRows++;
-                    $errors[] = "Row " . ($index + 2) . ": Missing partner name";
+                    $errors[] = 'Row '.($index + 2).': Missing partner name';
+
                     continue;
                 }
 
@@ -487,16 +492,17 @@ class ImportController extends Controller
                     $partnerId = $partnerIdsByName[$matchedPartnerName] ?? null;
                 }
 
-                if (!$partnerId) {
+                if (! $partnerId) {
                     $failedRows++;
-                    $errors[] = "Row " . ($index + 2) . ": Partner '$partnerName' not found";
+                    $errors[] = 'Row '.($index + 2).": Partner '$partnerName' not found";
+
                     continue;
                 }
 
                 // Process certification columns (columns with ' Started' or ' Complete' suffix)
                 $certificationCount = 0;
                 foreach ($headers as $col) {
-                    if ((str_contains($col, ' Started') || str_contains($col, ' Complete')) && !empty($rowData[$col])) {
+                    if ((str_contains($col, ' Started') || str_contains($col, ' Complete')) && ! empty($rowData[$col])) {
                         if ($rowData[$col] > 0) {
                             $program = str_replace([' Started', ' Complete'], '', $col);
                             $program = trim($program);
@@ -505,7 +511,7 @@ class ImportController extends Controller
                             // Check if resource already exists using in-memory lookup
                             $resourceKey = "{$partnerId}|{$personName}|{$program}|{$status}";
 
-                            if (!isset($existingResources[$resourceKey])) {
+                            if (! isset($existingResources[$resourceKey])) {
                                 // Add to batch insert
                                 $resourcesToInsert[] = [
                                     'partner_id' => $partnerId,
@@ -537,15 +543,15 @@ class ImportController extends Controller
                 $failedRows++;
                 // Only log first 100 errors to prevent error_log overflow
                 if (count($errors) < 100) {
-                    $errors[] = "Row " . ($index + 2) . ": " . $e->getMessage();
+                    $errors[] = 'Row '.($index + 2).': '.$e->getMessage();
                 } elseif (count($errors) === 100) {
-                    $errors[] = "... and more errors (showing first 100 only)";
+                    $errors[] = '... and more errors (showing first 100 only)';
                 }
             }
         }
 
         // Batch insert all new resources in chunks
-        if (!empty($resourcesToInsert)) {
+        if (! empty($resourcesToInsert)) {
             foreach (array_chunk($resourcesToInsert, 500) as $chunk) {
                 DB::table('resources')->insert($chunk);
             }
@@ -560,7 +566,7 @@ class ImportController extends Controller
             'successful_rows' => $successfulRows,
             'failed_rows' => $failedRows,
             'resources_created' => $resourcesCreated,
-            'error_log' => !empty($errors) ? implode("\n", $errors) : null,
+            'error_log' => ! empty($errors) ? implode("\n", $errors) : null,
             'summary' => [
                 'resources_created' => $resourcesCreated,
                 'people_processed' => $successfulRows,
@@ -602,7 +608,7 @@ class ImportController extends Controller
         }
 
         // Batch insert snapshots
-        if (!empty($snapshots)) {
+        if (! empty($snapshots)) {
             foreach (array_chunk($snapshots, 500) as $chunk) {
                 DB::table('opportunity_snapshots')->insert($chunk);
             }
@@ -618,14 +624,14 @@ class ImportController extends Controller
 
         // Get aggregated resource counts per partner/program/role
         $aggregates = Resource::select(
-                'partner_id',
-                'program',
-                'role',
-                DB::raw('SUM(CASE WHEN status = "Started" THEN 1 ELSE 0 END) as started_count'),
-                DB::raw('SUM(CASE WHEN status = "Completed" THEN 1 ELSE 0 END) as completed_count'),
-                DB::raw('COUNT(*) as total_count'),
-                DB::raw('COUNT(DISTINCT name) as unique_people_count')
-            )
+            'partner_id',
+            'program',
+            'role',
+            DB::raw('SUM(CASE WHEN status = "Started" THEN 1 ELSE 0 END) as started_count'),
+            DB::raw('SUM(CASE WHEN status = "Completed" THEN 1 ELSE 0 END) as completed_count'),
+            DB::raw('COUNT(*) as total_count'),
+            DB::raw('COUNT(DISTINCT name) as unique_people_count')
+        )
             ->whereNotNull('partner_id')
             ->groupBy('partner_id', 'program', 'role')
             ->get();
@@ -650,7 +656,7 @@ class ImportController extends Controller
         }
 
         // Batch insert snapshots
-        if (!empty($snapshots)) {
+        if (! empty($snapshots)) {
             foreach (array_chunk($snapshots, 500) as $chunk) {
                 DB::table('resource_snapshots')->insert($chunk);
             }

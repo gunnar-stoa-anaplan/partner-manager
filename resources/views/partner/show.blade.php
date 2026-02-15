@@ -55,79 +55,52 @@
     <div class="row sortable-off">
         <div class="col-xs-12 col-sm-6 col-xl-3 mb-g">
             <div class="card">
-                <div class="row">
-                    <div class="col-6">
-                        <div class="p-3">
-                            <p class="p-0 mb-3 text-muted text-truncate">Active Projects</p>
-                            <span class="h5 text-nowrap">
-                                {{ number_format($activeProjects) }}
-                                <small class="text-muted fw-400">/ {{ $partner->projects->count() }}</small>
-                            </span>
-                        </div>
+                <div class="d-flex align-items-center justify-content-between px-3 py-2">
+                    <div>
+                        <p class="p-0 mb-1 text-muted text-truncate fs-sm">Active Projects</p>
+                        <span class="h5 mb-0">{{ number_format($activeProjects) }}</span>
                     </div>
-                    <div class="col-6">
-                        <div class="d-flex h-100 align-items-center justify-content-end pe-3">
-                            <div class="width-5 height-5 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                                <i class="fad fa-check-circle h4 text-primary m-0"></i>
-                            </div>
-                        </div>
+                    <div class="width-4 height-4 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                        <i class="fad fa-check-circle text-primary"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-xs-12 col-sm-6 col-xl-3 mb-g">
             <div class="card">
-                <div class="row">
-                    <div class="col-6">
-                        <div class="p-3">
-                            <p class="p-0 mb-3 text-muted text-truncate">Contacts</p>
-                            <span class="h5 text-nowrap">{{ number_format($totalContacts) }}</span>
-                        </div>
+                <div class="d-flex align-items-center justify-content-between px-3 py-2">
+                    <div>
+                        <p class="p-0 mb-1 text-muted text-truncate fs-sm">Model Builders</p>
+                        <span class="h5 mb-0">{{ number_format($certifiedModelBuilders) }}</span>
                     </div>
-                    <div class="col-6">
-                        <div class="d-flex h-100 align-items-center justify-content-end pe-3">
-                            <div class="width-5 height-5 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                                <i class="fad fa-users h4 text-primary m-0"></i>
-                            </div>
-                        </div>
+                    <div class="width-4 height-4 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                        <i class="fad fa-cogs text-primary"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-xs-12 col-sm-6 col-xl-3 mb-g">
             <div class="card">
-                <div class="row">
-                    <div class="col-6">
-                        <div class="p-3">
-                            <p class="p-0 mb-3 text-muted text-truncate">Leads</p>
-                            <span class="h5 text-nowrap">{{ number_format($totalLeads) }}</span>
-                        </div>
+                <div class="d-flex align-items-center justify-content-between px-3 py-2">
+                    <div>
+                        <p class="p-0 mb-1 text-muted text-truncate fs-sm">Solution Architects</p>
+                        <span class="h5 mb-0">{{ number_format($certifiedSolutionArchitects) }}</span>
                     </div>
-                    <div class="col-6">
-                        <div class="d-flex h-100 align-items-center justify-content-end pe-3">
-                            <div class="width-5 height-5 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                                <i class="fad fa-bullseye h4 text-primary m-0"></i>
-                            </div>
-                        </div>
+                    <div class="width-4 height-4 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                        <i class="fad fa-drafting-compass text-primary"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-xs-12 col-sm-6 col-xl-3 mb-g">
             <div class="card">
-                <div class="row">
-                    <div class="col-6">
-                        <div class="p-3">
-                            <p class="p-0 mb-3 text-muted text-truncate">Total ACV</p>
-                            <span class="h5 text-nowrap">${{ number_format($totalAcv, 0) }}</span>
-                        </div>
+                <div class="d-flex align-items-center justify-content-between px-3 py-2">
+                    <div>
+                        <p class="p-0 mb-1 text-muted text-truncate fs-sm">Total ACV</p>
+                        <span class="h5 mb-0">${{ number_format($totalAcv, 0) }}</span>
                     </div>
-                    <div class="col-6">
-                        <div class="d-flex h-100 align-items-center justify-content-end pe-3">
-                            <div class="width-5 height-5 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                                <i class="fad fa-chart-line h4 text-primary m-0"></i>
-                            </div>
-                        </div>
+                    <div class="width-4 height-4 bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                        <i class="fad fa-chart-line text-primary"></i>
                     </div>
                 </div>
             </div>
@@ -148,19 +121,14 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#enablement" data-tab="enablement" role="tab">
-                <i class="fal fa-award me-1 d-none d-md-inline"></i> Enablement
-            </a>
-        </li>
-        <li class="nav-item">
             <a class="nav-link" href="#projects" data-tab="projects" role="tab">
                 <i class="fal fa-project-diagram me-1 d-none d-md-inline"></i> Projects
                 <span class="badge bg-info bg-opacity-25 text-info ms-1">{{ $partner->projects->count() }}</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#path-health" data-tab="path-health" role="tab">
-                <i class="fal fa-heartbeat me-1 d-none d-md-inline"></i> Path & Health
+            <a class="nav-link" href="#enablement" data-tab="enablement" role="tab">
+                <i class="fal fa-award me-1 d-none d-md-inline"></i> Enablement
             </a>
         </li>
         <li class="nav-item">
@@ -183,6 +151,17 @@
                 <i class="fal fa-th me-1 d-none d-md-inline"></i> Nicole's View
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#launch-programs" data-tab="launch-programs" role="tab">
+                <i class="fal fa-rocket me-1 d-none d-md-inline"></i> Launch Programs
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#workspaces" data-tab="workspaces" role="tab">
+                <i class="fal fa-server me-1 d-none d-md-inline"></i> Workspaces
+                <span class="badge bg-info bg-opacity-25 text-info ms-1">{{ $partner->anaplanWorkspaces->count() }}</span>
+            </a>
+        </li>
     </ul>
 
     {{-- Tab Content --}}
@@ -200,14 +179,6 @@
             </div>
         </div>
 
-        {{-- Enablement (AJAX) --}}
-        <div class="tab-pane" id="tab-enablement" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading enablement data...</p>
-            </div>
-        </div>
-
         {{-- Projects (AJAX) --}}
         <div class="tab-pane" id="tab-projects" style="display: none;">
             <div class="spinner-loader">
@@ -216,11 +187,11 @@
             </div>
         </div>
 
-        {{-- Path & Health (AJAX) --}}
-        <div class="tab-pane" id="tab-path-health" style="display: none;">
+        {{-- Enablement (AJAX) --}}
+        <div class="tab-pane" id="tab-enablement" style="display: none;">
             <div class="spinner-loader">
                 <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading path & health data...</p>
+                <p class="mt-2 text-muted">Loading enablement data...</p>
             </div>
         </div>
 
@@ -255,6 +226,22 @@
                 <p class="mt-2 text-muted">Loading app enablement data...</p>
             </div>
         </div>
+
+        {{-- Launch Programs (AJAX) --}}
+        <div class="tab-pane" id="tab-launch-programs" style="display: none;">
+            <div class="spinner-loader">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading launch programs...</p>
+            </div>
+        </div>
+
+        {{-- Workspaces (AJAX) --}}
+        <div class="tab-pane" id="tab-workspaces" style="display: none;">
+            <div class="spinner-loader">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading workspace data...</p>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -265,7 +252,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     var PARTNER_ID = {{ $partner->id }};
     var TAB_BASE_URL = '{{ url("/partners") }}/' + PARTNER_ID + '/tab/';
-    var AJAX_TABS = ['pipeline', 'enablement', 'projects', 'path-health', 'calendar', 'influencers', 'resources', 'app-enablement'];
+    var AJAX_TABS = ['pipeline', 'projects', 'enablement', 'calendar', 'influencers', 'resources', 'app-enablement', 'launch-programs', 'workspaces'];
     var ALL_TABS = ['overview'].concat(AJAX_TABS);
 
     // State

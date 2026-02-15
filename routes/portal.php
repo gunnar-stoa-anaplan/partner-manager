@@ -9,8 +9,11 @@ use App\Http\Controllers\Portal\PortalDashboardController;
 use App\Http\Controllers\Portal\PortalDealRegistrationController;
 use App\Http\Controllers\Portal\PortalEnablementController;
 use App\Http\Controllers\Portal\PortalGoalsController;
+use App\Http\Controllers\Portal\PortalLabController;
+use App\Http\Controllers\Portal\PortalLaunchProgramController;
 use App\Http\Controllers\Portal\PortalLoginController;
 use App\Http\Controllers\Portal\PortalProjectsController;
+use App\Http\Controllers\Portal\PortalWorkspaceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,10 +38,16 @@ Route::middleware('portal')->group(function () {
     Route::post('/logout', [PortalLoginController::class, 'logout'])->name('logout');
     Route::get('/', [PortalDashboardController::class, 'index'])->name('dashboard');
 
-    // All roles: enablement & blueprints
+    // All roles: enablement, blueprints & workspaces
     Route::get('/enablement', [PortalEnablementController::class, 'index'])->name('enablement.index');
     Route::get('/blueprints', [PortalBlueprintsController::class, 'index'])->name('blueprints.index');
     Route::get('/blueprints/{enrollment}', [PortalBlueprintsController::class, 'show'])->name('blueprints.show');
+    Route::get('/workspaces', [PortalWorkspaceController::class, 'index'])->name('workspaces.index');
+
+    // Labs (all roles)
+    Route::get('/labs', [PortalLabController::class, 'index'])->name('labs.index');
+    Route::get('/labs/{lab}', [PortalLabController::class, 'show'])->name('labs.show');
+    Route::post('/labs/checkpoints/{checkpoint}/validate', [PortalLabController::class, 'validateCheckpoint'])->name('labs.validate-checkpoint');
 
     // Admin only: goals, certifications, calendar, team management
     Route::middleware('portal.role:admin')->group(function () {
@@ -49,6 +58,12 @@ Route::middleware('portal')->group(function () {
         Route::get('/contacts', [PortalContactsController::class, 'index'])->name('contacts.index');
         Route::get('/contacts/create', [PortalContactsController::class, 'create'])->name('contacts.create');
         Route::post('/contacts', [PortalContactsController::class, 'store'])->name('contacts.store');
+
+        // Launch Programs
+        Route::get('/launch-programs', [PortalLaunchProgramController::class, 'index'])->name('launch-programs.index');
+        Route::get('/launch-programs/{programPartner}', [PortalLaunchProgramController::class, 'show'])->name('launch-programs.show');
+        Route::post('/launch-programs/{programPartner}/milestones/{milestone}/complete', [PortalLaunchProgramController::class, 'completeMilestone'])->name('launch-programs.complete-milestone');
+        Route::post('/launch-programs/{programPartner}/feedback', [PortalLaunchProgramController::class, 'submitFeedback'])->name('launch-programs.submit-feedback');
     });
 
     // Admin + Sales: deal registrations

@@ -30,6 +30,7 @@ class EnablementSession extends Model
         'summary',
         'registration_deadline',
         'created_by',
+        'launch_program_id',
     ];
 
     protected $casts = [
@@ -86,6 +87,16 @@ class EnablementSession extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function launchProgram(): BelongsTo
+    {
+        return $this->belongsTo(LaunchProgram::class);
+    }
+
+    public function labs(): HasMany
+    {
+        return $this->hasMany(Lab::class, 'enablement_session_id');
+    }
+
     // ─── Accessors ─────────────────────────────────────────────
 
     public function getDisplayTitleAttribute(): string
@@ -104,6 +115,7 @@ class EnablementSession extends Model
         if ($max === null) {
             return false;
         }
+
         return $this->registrations()
             ->whereNotIn('status', ['cancelled'])
             ->count() >= $max;
@@ -125,6 +137,7 @@ class EnablementSession extends Model
         $taken = $this->registrations()
             ->whereNotIn('status', ['cancelled'])
             ->count();
+
         return max(0, $max - $taken);
     }
 
@@ -142,6 +155,7 @@ class EnablementSession extends Model
         if ($this->start_at->isPast()) {
             return false;
         }
+
         return true;
     }
 

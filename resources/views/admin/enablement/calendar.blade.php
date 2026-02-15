@@ -12,6 +12,7 @@
         border: none;
     }
     #draggable-events .fc-event:active { cursor: grabbing; }
+    #event-type-pills .btn.active { background-color: var(--bs-secondary); color: #fff; }
     #draggable-events .fc-event .event-meta {
         font-size: 0.75rem;
         opacity: 0.85;
@@ -47,7 +48,21 @@
                 </div>
                 <div class="card-body p-2">
                     <div class="form-text mb-2 px-1">Drag an event onto the calendar to schedule a session.</div>
-                    <div id="draggable-events">
+
+                    {{-- Search --}}
+                    <div class="px-1 mb-2">
+                        <input type="text" class="form-control form-control-sm" id="event-search" placeholder="Search events...">
+                    </div>
+
+                    {{-- Type pills --}}
+                    <div class="px-1 mb-2 d-flex flex-wrap gap-1" id="event-type-pills">
+                        <button class="btn btn-xs btn-outline-secondary active" data-type="all">All</button>
+                        @foreach(\App\Models\EnablementEvent::TYPES as $typeKey => $typeLabel)
+                            <button class="btn btn-xs btn-outline-secondary" data-type="{{ $typeKey }}">{{ $typeLabel }}</button>
+                        @endforeach
+                    </div>
+
+                    <div id="draggable-events" style="max-height: 50vh; overflow-y: auto;">
                         @php
                             $publishedEvents = \App\Models\EnablementEvent::where('status', 'published')
                                 ->orderBy('title')
@@ -57,6 +72,7 @@
                             <div class="fc-event"
                                  data-event-id="{{ $event->id }}"
                                  data-event-type="{{ $event->type }}"
+                                 data-event-title="{{ strtolower($event->title) }}"
                                  data-duration="{{ $event->duration_hours ? ($event->duration_hours * 60) : 60 }}"
                                  style="background-color: {{ \App\Models\EnablementEvent::TYPE_COLORS[$event->type] ?? '#868e96' }}">
                                 <div class="fw-500">{{ $event->title }}</div>
@@ -72,6 +88,9 @@
                                 <small>No published events. <a href="{{ route('enablement-events.create') }}">Create one</a>.</small>
                             </p>
                         @endforelse
+                    </div>
+                    <div class="text-muted text-center py-2 d-none" id="no-events-match">
+                        <small>No events match your filters.</small>
                     </div>
                 </div>
             </div>
@@ -184,4 +203,42 @@
         };
     </script>
     @vite(['resources/scripts/pages/enablement-calendar.js'])
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('event-search');
+            const pills = document.querySelectorAll('#event-type-pills button');
+            const events = document.querySelectorAll('#draggable-events .fc-event');
+            const noMatch = document.getElementById('no-events-match');
+            let activeType = 'all';
+
+            function filterEvents() {
+                const query = searchInput.value.toLowerCase().trim();
+                let visible = 0;
+
+                events.forEach(function (el) {
+                    const title = el.dataset.eventTitle || '';
+                    const type = el.dataset.eventType || '';
+                    const matchesSearch = !query || title.includes(query);
+                    const matchesType = activeType === 'all' || type === activeType;
+                    const show = matchesSearch && matchesType;
+                    el.style.display = show ? '' : 'none';
+                    if (show) visible++;
+                });
+
+                noMatch.classList.toggle('d-none', visible > 0);
+            }
+
+            searchInput.addEventListener('input', filterEvents);
+
+            pills.forEach(function (pill) {
+                pill.addEventListener('click', function () {
+                    pills.forEach(function (p) { p.classList.remove('active'); });
+                    pill.classList.add('active');
+                    activeType = pill.dataset.type;
+                    filterEvents();
+                });
+            });
+        });
+    </script>
 @endsection

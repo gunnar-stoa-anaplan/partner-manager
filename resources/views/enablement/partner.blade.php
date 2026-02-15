@@ -59,23 +59,8 @@
                 </div>
             </div>
 
-            {{-- Available Sessions to Drag --}}
-            <div class="card shadow-0 mb-3">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Available Sessions</h5>
-                </div>
-                <div class="card-body p-2">
-                    <div class="form-text mb-2 px-1">Drag a session onto the calendar to register this partner.</div>
-                    <div id="draggable-sessions">
-                        <div class="text-center text-muted py-2">
-                            <small>Loading sessions...</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {{-- Type Filter --}}
-            <div class="card shadow-0">
+            <div class="card shadow-0 mb-3">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Filter by Type</h5>
                     <button class="btn btn-xs btn-link p-0" id="toggleAllTypes">All</button>
@@ -92,6 +77,21 @@
                                 </label>
                             </div>
                         @endforeach
+                    </div>
+                </div>
+            </div>
+
+            {{-- Available Sessions to Drag --}}
+            <div class="card shadow-0">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Available Sessions</h5>
+                </div>
+                <div class="card-body p-2">
+                    <div class="form-text mb-2 px-1">Drag a session onto the calendar to register this partner.</div>
+                    <div id="draggable-sessions">
+                        <div class="text-center text-muted py-2">
+                            <small>Loading sessions...</small>
+                        </div>
                     </div>
                 </div>
             </div>

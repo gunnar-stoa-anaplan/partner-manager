@@ -79,13 +79,19 @@
                 @foreach($gateResults as $gate)
                 <tr>
                     <td>
-                        <strong>{{ $gate['label'] }}</strong>
-                        @if(!empty($gate['description']))
-                        <small class="d-block text-muted">{{ $gate['description'] }}</small>
-                        @endif
+                        <strong>{{ $gate['requirement_label'] }}</strong>
                     </td>
-                    <td class="text-center">{{ is_numeric($gate['current_value']) ? number_format($gate['current_value'], $gate['unit'] === 'percentage' ? 1 : 0) : $gate['current_value'] }}</td>
-                    <td class="text-center">{{ $gate['comparison'] }} {{ number_format($gate['threshold'], $gate['unit'] === 'percentage' ? 1 : 0) }}{{ $gate['unit'] === 'percentage' ? '%' : '' }}</td>
+                    <td class="text-center">
+                        @if($gate['unit'] === 'currency')${{ number_format($gate['actual_value']) }}
+                        @elseif($gate['unit'] === 'percentage'){{ number_format($gate['actual_value'], 1) }}%
+                        @else{{ $gate['actual_value'] }}@endif
+                    </td>
+                    <td class="text-center">
+                        {{ $gate['comparison'] }}
+                        @if($gate['unit'] === 'currency')${{ number_format($gate['threshold']) }}
+                        @elseif($gate['unit'] === 'percentage'){{ $gate['threshold'] }}%
+                        @else{{ $gate['threshold'] }}@endif
+                    </td>
                     <td class="text-center">
                         @if($gate['met'])
                         <span class="badge bg-success">Met</span>

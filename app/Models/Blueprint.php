@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Blueprint extends Model
@@ -27,6 +27,7 @@ class Blueprint extends Model
     const CATEGORIES = [
         'application' => 'Application Enablement',
         'product' => 'Product Enablement',
+        'delivery' => 'Delivery Excellence',
     ];
 
     const STATUSES = [
@@ -89,7 +90,7 @@ class Blueprint extends Model
                 $original = $blueprint->slug;
                 $count = 1;
                 while (static::withTrashed()->where('slug', $blueprint->slug)->exists()) {
-                    $blueprint->slug = $original . '-' . $count++;
+                    $blueprint->slug = $original.'-'.$count++;
                 }
             }
         });

@@ -7,6 +7,9 @@ use App\Models\Blueprint;
 use App\Models\Certification;
 use App\Models\Contact;
 use App\Models\ContactInteraction;
+use App\Models\LaunchProgram;
+use App\Models\LaunchProgramParticipant;
+use App\Models\LaunchProgramPartner;
 use App\Models\Partner;
 use App\Models\PartnerAlert;
 use App\Models\PartnerGoal;
@@ -37,7 +40,11 @@ class PartnerController extends Controller
      */
     public function myPartners()
     {
-        $partners = Partner::where('user_id', auth()->id())
+        $query = auth()->user()->role === 'admin'
+            ? Partner::query()
+            : Partner::where('user_id', auth()->id());
+
+        $partners = $query
             ->with(['projects', 'contacts', 'opportunities', 'leads'])
             ->orderBy('name')
             ->get();
@@ -66,21 +73,22 @@ class PartnerController extends Controller
      */
     public function show(string $id)
     {
-        $partner = Partner::with(['projects', 'contacts', 'opportunities', 'leads'])
+        $partner = Partner::with(['projects', 'contacts', 'opportunities', 'leads', 'certifications', 'anaplanWorkspaces'])
             ->findOrFail($id);
         $this->authorizePartnerAccess($partner);
 
         // KPI metrics (always visible above tabs)
         $activeProjects = $partner->projects->whereNotIn('status', ['Completed'])->count();
-        $totalContacts = $partner->contacts->count();
-        $totalLeads = $partner->leads->count();
+        $activeCerts = $partner->certifications->where('status', 'active');
+        $certifiedModelBuilders = $activeCerts->whereIn('type', ['model_builder', 'model_builder_pro'])->count();
+        $certifiedSolutionArchitects = $activeCerts->where('type', 'solution_architect')->count();
         $totalAcv = $partner->projects->sum('acv');
 
         // Overview tab data (server-rendered with the page)
         $overviewData = $this->overviewTabData($partner);
 
         return view('partner.show', array_merge(
-            compact('partner', 'activeProjects', 'totalContacts', 'totalLeads', 'totalAcv'),
+            compact('partner', 'activeProjects', 'certifiedModelBuilders', 'certifiedSolutionArchitects', 'totalAcv'),
             $overviewData
         ));
     }
@@ -98,11 +106,12 @@ class PartnerController extends Controller
             'pipeline' => $this->pipelineTabData($partner),
             'enablement' => $this->enablementTabData($partner),
             'projects' => $this->projectsTabData($partner),
-            'path-health' => $this->pathHealthTabData($partner),
             'calendar' => $this->calendarTabData($partner),
             'influencers' => $this->influencersTabData($partner),
             'resources' => $this->resourcesTabData($partner),
             'app-enablement' => $this->appEnablementTabData($partner),
+            'launch-programs' => $this->launchProgramsTabData($partner),
+            'workspaces' => $this->workspacesTabData($partner),
             default => abort(404),
         };
 
@@ -135,13 +144,42 @@ class PartnerController extends Controller
             $partner->load('contacts');
         }
 
-        // Business Metrics
-        $totalAmount = $partner->opportunities->sum('amount');
-        $sourcedAmount = $partner->opportunities->where('revenue_type', 'sourced')->sum('amount');
-        $influencedAmount = $partner->opportunities->where('revenue_type', 'influenced')->sum('amount');
-        $sourcedRevenuePct = $totalAmount > 0 ? round($sourcedAmount / $totalAmount * 100, 1) : 0;
-        $influencedRevenuePct = $totalAmount > 0 ? round($influencedAmount / $totalAmount * 100, 1) : 0;
+        // Fiscal context
+        $fiscal = FiscalYearHelper::getCurrentFiscalPeriod();
+        $currentFY = $fiscal['fiscal_year'];
+        $currentFQ = $fiscal['fiscal_quarter'];
 
+        // Business Metrics — quarter vs annual (YTD)
+        $qtrOpps = $partner->opportunities->where('fiscal_quarter', $currentFQ);
+        $qtrTotal = $qtrOpps->sum('amount');
+        $qtrSourced = $qtrOpps->where('revenue_type', 'sourced')->sum('amount');
+        $qtrInfluenced = $qtrOpps->where('revenue_type', 'influenced')->sum('amount');
+
+        $ytdOpps = $partner->opportunities->where('fiscal_year', $currentFY);
+        $ytdTotal = $ytdOpps->sum('amount');
+        $ytdSourced = $ytdOpps->where('revenue_type', 'sourced')->sum('amount');
+        $ytdInfluenced = $ytdOpps->where('revenue_type', 'influenced')->sum('amount');
+
+        $businessMetrics = [
+            'quarter' => [
+                'label' => $currentFQ,
+                'sourced_pct' => $qtrTotal > 0 ? round($qtrSourced / $qtrTotal * 100, 1) : 0,
+                'influenced_pct' => $qtrTotal > 0 ? round($qtrInfluenced / $qtrTotal * 100, 1) : 0,
+                'sourced_amount' => round($qtrSourced, 0),
+                'influenced_amount' => round($qtrInfluenced, 0),
+                'total_amount' => round($qtrTotal, 0),
+            ],
+            'annual' => [
+                'label' => 'FY'.$currentFY,
+                'sourced_pct' => $ytdTotal > 0 ? round($ytdSourced / $ytdTotal * 100, 1) : 0,
+                'influenced_pct' => $ytdTotal > 0 ? round($ytdInfluenced / $ytdTotal * 100, 1) : 0,
+                'sourced_amount' => round($ytdSourced, 0),
+                'influenced_amount' => round($ytdInfluenced, 0),
+                'total_amount' => round($ytdTotal, 0),
+            ],
+        ];
+
+        // Shared metrics (not period-dependent)
         $assignmentsWithEnrollments = $partner->blueprintAssignments->filter(fn ($a) => $a->enrollments->count() > 0);
         $avgBlueprintCompletion = $assignmentsWithEnrollments->count() > 0
             ? round($assignmentsWithEnrollments->avg(fn ($a) => $a->completionPercentage()), 1) : 0;
@@ -152,7 +190,7 @@ class PartnerController extends Controller
             ? round($enrolledContactIds->count() / $totalContacts * 100, 1) : 0;
 
         // Pipeline Growth YoY
-        $currentPipeline = $totalAmount;
+        $currentPipeline = $partner->opportunities->sum('amount');
         $yearAgoMonth = now()->subYear()->format('Y-m');
         $yearAgoPipeline = \DB::table('opportunity_snapshots')
             ->join('imports', 'opportunity_snapshots.import_id', '=', 'imports.id')
@@ -203,10 +241,15 @@ class PartnerController extends Controller
             ->orderByDesc('scored_at')
             ->first();
 
+        $scorecardHistory = PartnerScorecard::where('partner_id', $partner->id)
+            ->orderByDesc('scored_at')
+            ->take(6)
+            ->get();
+
         return compact(
-            'sourcedRevenuePct', 'influencedRevenuePct', 'avgBlueprintCompletion',
+            'businessMetrics', 'avgBlueprintCompletion',
             'pipelineGrowthYoY', 'contactEngagement',
-            'pathData', 'latestScorecard'
+            'pathData', 'latestScorecard', 'scorecardHistory'
         );
     }
 
@@ -928,38 +971,60 @@ class PartnerController extends Controller
      */
     private function projectsTabData(Partner $partner): array
     {
-        $partner->load(['projects', 'opportunities', 'blueprintAssignments.blueprint']);
+        $partner->load(['projects.opportunity', 'opportunities', 'blueprintAssignments.blueprint', 'blueprintAssignments.enrollments']);
 
         $projects = $partner->projects->sortByDesc('created_at');
 
-        // Project Risk per product area
-        $opportunitiesByArea = $partner->opportunities
+        // Delivery readiness: count people (enrollments) who completed delivery blueprints per area
+        $deliveryAssignments = $partner->blueprintAssignments->where('role', 'delivery');
+        $completedDeliveryByArea = collect();
+        foreach ($deliveryAssignments as $assignment) {
+            $area = $assignment->blueprint->product_area ?? 'Other';
+            $completedPeople = $assignment->enrollments->where('status', 'completed')->count();
+            $completedDeliveryByArea[$area] = ($completedDeliveryByArea->get($area, 0)) + $completedPeople;
+        }
+
+        // ── Active Project Risk: active projects vs delivery readiness ──
+        $activeProjects = $projects->whereNotIn('status', ['Completed', 'Draft']);
+        $activeByArea = $activeProjects
+            ->groupBy(fn ($p) => $p->product_area ?? 'Other')
+            ->filter(fn ($group, $key) => $key !== 'Other')
+            ->map->count();
+
+        $activeRisk = $this->computeRiskRatios($activeByArea, $completedDeliveryByArea);
+
+        // ── Upcoming Pipeline Risk: opps at stage 3+ (Needs Analysis+), excluding Closed Won/Lost ──
+        $upcomingStages = ['Needs Analysis', 'Value Proposition', 'Proposal/Price Quote', 'Negotiation/Review'];
+        $upcomingByArea = $partner->opportunities
+            ->whereIn('stage', $upcomingStages)
             ->whereNotNull('product_area')
             ->groupBy('product_area')
             ->map->count();
 
-        $deliveryAssignments = $partner->blueprintAssignments->where('role', 'delivery');
-        $completedDeliveryByArea = $deliveryAssignments
-            ->filter(fn ($a) => $a->status === 'completed')
-            ->groupBy(fn ($a) => $a->blueprint->product_area ?? 'Other')
-            ->map->count();
+        $upcomingRisk = $this->computeRiskRatios($upcomingByArea, $completedDeliveryByArea);
 
-        $allAreas = $opportunitiesByArea->keys()
-            ->merge($completedDeliveryByArea->keys())
+        return compact('projects', 'activeRisk', 'upcomingRisk');
+    }
+
+    /**
+     * Compute risk ratios: delivery readiness / demand count per area.
+     */
+    private function computeRiskRatios($demandByArea, $deliveryByArea): \Illuminate\Support\Collection
+    {
+        $allAreas = $demandByArea->keys()
+            ->merge($deliveryByArea->keys())
             ->unique()
             ->filter()
             ->sort()
             ->values();
 
-        $projectRisk = $allAreas->mapWithKeys(function ($area) use ($opportunitiesByArea, $completedDeliveryByArea) {
-            $oppCount = $opportunitiesByArea->get($area, 0);
-            $deliveryCount = $completedDeliveryByArea->get($area, 0);
-            $ratio = $oppCount > 0 ? round($deliveryCount / $oppCount, 2) : ($deliveryCount > 0 ? 2.0 : 0);
+        return $allAreas->mapWithKeys(function ($area) use ($demandByArea, $deliveryByArea) {
+            $demandCount = $demandByArea->get($area, 0);
+            $deliveryCount = $deliveryByArea->get($area, 0);
+            $ratio = $demandCount > 0 ? round($deliveryCount / $demandCount, 2) : ($deliveryCount > 0 ? 2.0 : 0);
 
             return [$area => $ratio];
         });
-
-        return compact('projects', 'projectRisk');
     }
 
     /**
@@ -1051,8 +1116,12 @@ class PartnerController extends Controller
      */
     public function fullSummary()
     {
-        // Get all partners assigned to the authenticated user
-        $partners = Partner::where('user_id', auth()->id())
+        // Get all partners assigned to the authenticated user (admins see all)
+        $query = auth()->user()->role === 'admin'
+            ? Partner::query()
+            : Partner::where('user_id', auth()->id());
+
+        $partners = $query
             ->with(['projects', 'contacts', 'opportunities', 'leads', 'resources'])
             ->get();
 
@@ -1119,8 +1188,12 @@ class PartnerController extends Controller
      */
     public function fullInsights()
     {
-        // Get all partners assigned to the authenticated user
-        $partners = Partner::where('user_id', auth()->id())
+        // Get all partners (admins see all, PSMs see their own)
+        $query = auth()->user()->role === 'admin'
+            ? Partner::query()
+            : Partner::where('user_id', auth()->id());
+
+        $partners = $query
             ->with(['projects', 'contacts', 'opportunities', 'leads', 'resources'])
             ->get();
 
@@ -1277,7 +1350,11 @@ class PartnerController extends Controller
      */
     public function guidedAnalysis()
     {
-        $partners = Partner::where('user_id', auth()->id())
+        $query = auth()->user()->role === 'admin'
+            ? Partner::query()
+            : Partner::where('user_id', auth()->id());
+
+        $partners = $query
             ->with(['projects', 'contacts', 'opportunities', 'leads', 'resources'])
             ->orderBy('name')
             ->get();
@@ -1336,7 +1413,11 @@ class PartnerController extends Controller
      */
     public function partnerCoach()
     {
-        $partners = Partner::where('user_id', auth()->id())
+        $query = auth()->user()->role === 'admin'
+            ? Partner::query()
+            : Partner::where('user_id', auth()->id());
+
+        $partners = $query
             ->with(['projects', 'contacts', 'opportunities', 'leads', 'resources'])
             ->orderBy('name')
             ->get();
@@ -1386,5 +1467,102 @@ class PartnerController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * Launch Programs tab: enrolled programs + available programs for nomination.
+     */
+    private function launchProgramsTabData(Partner $partner): array
+    {
+        $enrolledPrograms = LaunchProgramPartner::where('partner_id', $partner->id)
+            ->with([
+                'program.product',
+                'program.milestones',
+                'participants.contact',
+                'participants.milestoneCompletions',
+            ])
+            ->get();
+
+        $enrolledProgramIds = $enrolledPrograms->pluck('launch_program_id');
+
+        $availablePrograms = LaunchProgram::where('status', 'accepting_nominations')
+            ->whereNotIn('id', $enrolledProgramIds)
+            ->with('product')
+            ->get();
+
+        $contacts = $partner->contacts()->orderBy('first_name')->get();
+
+        return compact('enrolledPrograms', 'availablePrograms', 'contacts');
+    }
+
+    private function workspacesTabData(Partner $partner): array
+    {
+        $workspaces = $partner->anaplanWorkspaces()
+            ->with(['models.modules', 'models.lists'])
+            ->orderBy('name')
+            ->get();
+
+        $totalModels = $workspaces->flatMap(fn ($ws) => $ws->models)->count();
+        $activeModels = $workspaces->flatMap(fn ($ws) => $ws->models)->where('active_state', '!=', 'ARCHIVED')->count();
+        $totalMemory = $workspaces->flatMap(fn ($ws) => $ws->models)->sum('memory_usage');
+        $lastSync = $workspaces->max('last_synced_at');
+        $isConfigured = app(\App\Services\AnaplanApiService::class)->isConfigured();
+        $versionConfigs = \App\Models\AnaplanVersionConfig::all()->keyBy('product_area');
+
+        return compact('workspaces', 'totalModels', 'activeModels', 'totalMemory', 'lastSync', 'isConfigured', 'versionConfigs');
+    }
+
+    /**
+     * Nominate a partner for a launch program.
+     */
+    public function nominateForProgram(Partner $partner, LaunchProgram $launchProgram): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorizePartnerAccess($partner);
+
+        if (! $launchProgram->isAcceptingNominations()) {
+            return back()->with('error', 'This program is not currently accepting nominations.');
+        }
+
+        if (LaunchProgramPartner::where('launch_program_id', $launchProgram->id)->where('partner_id', $partner->id)->exists()) {
+            return back()->with('error', 'This partner is already enrolled in this program.');
+        }
+
+        LaunchProgramPartner::create([
+            'launch_program_id' => $launchProgram->id,
+            'partner_id' => $partner->id,
+            'status' => 'nominated',
+            'nominated_by' => auth()->id(),
+        ]);
+
+        return back()->with('success', "Partner nominated for {$launchProgram->name}.");
+    }
+
+    /**
+     * Add a participant to a launch program partner enrollment.
+     */
+    public function addParticipant(Request $request, LaunchProgramPartner $programPartner): \Illuminate\Http\RedirectResponse
+    {
+        $validated = $request->validate([
+            'contact_id' => ['required', 'exists:contacts,id'],
+            'role' => ['required', 'string', 'in:'.implode(',', array_keys(LaunchProgramParticipant::ROLES))],
+        ]);
+
+        $programPartner->participants()->create([
+            'contact_id' => $validated['contact_id'],
+            'role' => $validated['role'],
+            'assigned_by' => auth()->id(),
+        ]);
+
+        return back()->with('success', 'Participant added.');
+    }
+
+    /**
+     * Remove a participant from a launch program.
+     */
+    public function removeParticipant(LaunchProgramParticipant $participant): \Illuminate\Http\RedirectResponse
+    {
+        $participant->delete();
+
+        return back()->with('success', 'Participant removed.');
     }
 }

@@ -66,8 +66,22 @@
                             @forelse($imports as $import)
                             <tr class="{{ $import->failed_rows > 0 ? 'table-warning' : '' }}">
                                 <td>{{ $import->id }}</td>
-                                <td><span class="badge bg-info">{{ ucfirst($import->type) }}</span></td>
-                                <td>{{ $import->file_name }}</td>
+                                <td>
+                                    @if($import->type === 'anaplan_sync')
+                                        <span class="badge bg-primary">Anaplan Sync</span>
+                                    @else
+                                        <span class="badge bg-info">{{ ucfirst($import->type) }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($import->type === 'anaplan_sync')
+                                        <span class="text-muted fst-italic">
+                                            {{ $import->summary['workspaces_synced'] ?? 0 }} workspaces, {{ $import->summary['models_synced'] ?? 0 }} models
+                                        </span>
+                                    @else
+                                        {{ $import->file_name }}
+                                    @endif
+                                </td>
                                 <td>
                                     @if($import->status === 'completed')
                                         <span class="badge bg-success">Completed</span>
@@ -88,9 +102,15 @@
                                         <span class="text-muted">0</span>
                                     @endif
                                 </td>
-                                <td>{{ number_format($import->partners_created) }}</td>
+                                <td>
+                                    @if($import->type === 'anaplan_sync')
+                                        {{ number_format($import->summary['workspaces_synced'] ?? 0) }}
+                                    @else
+                                        {{ number_format($import->partners_created) }}
+                                    @endif
+                                </td>
                                 <td>{{ $import->user->name ?? 'System' }}</td>
-                                <td>{{ $import->created_at->format('M d, Y H:i') }}</td>
+                                <td data-sort="{{ $import->created_at->format('Y-m-d H:i:s') }}">{{ $import->created_at->format('M d, Y H:i') }}</td>
                                 <td class="text-nowrap">
                                     <a href="{{ route('imports.show', $import) }}" class="btn btn-sm btn-outline-info" title="View Details">
                                         <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#eye"></use></svg>
@@ -115,11 +135,27 @@
                     </table>
                 </div>
 
-                <div class="mt-3">
-                    {{ $imports->links('pagination::bootstrap-5') }}
-                </div>
             </div>
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+    @vite(['resources/scripts/pages/table-init.js'])
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.SmartTables && document.querySelector('#importsTable tbody tr td:not([colspan])')) {
+            new window.SmartTables('importsTable', {
+                perPage: 25,
+                sortable: true,
+                responsive: {
+                    enabled: true,
+                    breakpoint: 768,
+                    columnPriorities: { 2: 1, 9: 2, 1: 3, 3: 4, 8: 5, 4: 6, 5: 7, 6: 8, 7: 9, 0: 10, 10: 11 }
+                }
+            });
+        }
+    });
+    </script>
 @endsection

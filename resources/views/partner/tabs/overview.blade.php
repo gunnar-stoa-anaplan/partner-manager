@@ -1,64 +1,4 @@
-{{-- Overview Tab: Business Metrics + Health Score + Partner Path --}}
-
-<div class="row">
-    {{-- Business Metrics --}}
-    <div class="col-lg-{{ $latestScorecard ? '6' : '12' }}">
-        <div class="panel panel-icon panel-locked" id="panel-overview-metrics">
-            <div class="panel-hdr">
-                <h2> Business <span class="fw-light"><i>Metrics</i></span></h2>
-            </div>
-            <div class="panel-container">
-                <div class="panel-content">
-                    @php
-                        $metrics = [
-                            ['label' => 'Sourced Revenue', 'value' => $sourcedRevenuePct, 'color' => 'primary-700'],
-                            ['label' => 'Influenced Revenue', 'value' => $influencedRevenuePct, 'color' => 'primary-700'],
-                            ['label' => 'Delivery Blueprint Coverage', 'value' => $avgBlueprintCompletion, 'color' => 'primary-700'],
-                            ['label' => 'Contact Engagement', 'value' => $contactEngagement, 'color' => $contactEngagement > 80 ? 'success-500' : ($contactEngagement > 40 ? 'primary-700' : 'warning-500')],
-                        ];
-                    @endphp
-                    @foreach($metrics as $metric)
-                        <div class="d-flex mt-3">
-                            <span class="h6 m-0 fw-300">{{ $metric['label'] }}</span>
-                            <span class="h6 d-inline-block ms-auto">{{ $metric['value'] }}%</span>
-                        </div>
-                        <div class="progress progress mb-4 border shadow-inset-3">
-                            <div aria-label="{{ $metric['value'] }}%" aria-valuemax="100" aria-valuemin="0"
-                                 aria-valuenow="{{ $metric['value'] }}"
-                                 class="progress-bar bg-{{ $metric['color'] }} progress-bar-striped"
-                                 role="progressbar" style="width: {{ $metric['value'] }}%;"></div>
-                        </div>
-                    @endforeach
-                    <div class="d-flex mt-3">
-                        <span class="h6 m-0 fw-300">Pipeline Growth (YoY)</span>
-                        <span class="h6 d-inline-block ms-auto {{ $pipelineGrowthYoY >= 0 ? 'text-success' : 'text-danger' }}">{{ $pipelineGrowthYoY >= 0 ? '+' : '' }}{{ $pipelineGrowthYoY }}%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Health Scorecard --}}
-    @if($latestScorecard)
-    <div class="col-lg-6">
-        <div class="panel panel-icon panel-locked" id="panel-overview-scorecard">
-            <div class="panel-hdr">
-                <h2> Health <span class="fw-light"><i>Score</i></span></h2>
-                <div class="panel-toolbar">
-                    <span class="badge bg-{{ $latestScorecard->overall_score >= 55 ? 'success' : ($latestScorecard->overall_score >= 30 ? 'warning' : 'danger') }} fs-md">
-                        {{ number_format($latestScorecard->overall_score, 0) }}
-                    </span>
-                </div>
-            </div>
-            <div class="panel-container">
-                <div class="panel-content p-0">
-                    <div id="overview-scorecard-radar" style="min-height: 500px;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
-</div>
+{{-- Overview Tab: Partner Path + Business Metrics + Health Score --}}
 
 {{-- Partner Path Progress --}}
 @if($pathData->isNotEmpty())
@@ -187,6 +127,139 @@
 </div>
 @endif
 
+<div class="row">
+    {{-- Business Metrics --}}
+    <div class="col-lg-{{ $latestScorecard ? '6' : '12' }}">
+        <div class="panel panel-icon panel-locked" id="panel-overview-metrics">
+            <div class="panel-hdr">
+                <h2> Business <span class="fw-light"><i>Metrics</i></span></h2>
+                <div class="panel-toolbar">
+                    <div class="btn-group btn-group-sm" id="metrics-period-toggle" role="group">
+                        <button type="button" class="btn btn-outline-primary active" data-period="quarter">{{ $businessMetrics['quarter']['label'] }}</button>
+                        <button type="button" class="btn btn-outline-primary" data-period="annual">{{ $businessMetrics['annual']['label'] }}</button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-container">
+                <div class="panel-content">
+                    <div class="d-flex mt-3">
+                        <span class="h6 m-0 fw-300">Sourced Revenue</span>
+                        <span class="h6 d-inline-block ms-auto" id="metric-sourced-value">{{ $businessMetrics['quarter']['sourced_pct'] }}%</span>
+                    </div>
+                    <div class="progress progress mb-4 border shadow-inset-3">
+                        <div id="metric-sourced-bar" class="progress-bar bg-primary-700 progress-bar-striped" role="progressbar"
+                             style="width: {{ $businessMetrics['quarter']['sourced_pct'] }}%; transition: width 0.4s ease;"></div>
+                    </div>
+
+                    <div class="d-flex mt-3">
+                        <span class="h6 m-0 fw-300">Influenced Revenue</span>
+                        <span class="h6 d-inline-block ms-auto" id="metric-influenced-value">{{ $businessMetrics['quarter']['influenced_pct'] }}%</span>
+                    </div>
+                    <div class="progress progress mb-4 border shadow-inset-3">
+                        <div id="metric-influenced-bar" class="progress-bar bg-primary-700 progress-bar-striped" role="progressbar"
+                             style="width: {{ $businessMetrics['quarter']['influenced_pct'] }}%; transition: width 0.4s ease;"></div>
+                    </div>
+
+                    <div class="d-flex mt-3">
+                        <span class="h6 m-0 fw-300">Delivery Blueprint Coverage</span>
+                        <span class="h6 d-inline-block ms-auto">{{ $avgBlueprintCompletion }}%</span>
+                    </div>
+                    <div class="progress progress mb-4 border shadow-inset-3">
+                        <div class="progress-bar bg-primary-700 progress-bar-striped" role="progressbar"
+                             style="width: {{ $avgBlueprintCompletion }}%;"></div>
+                    </div>
+
+                    @php $engColor = $contactEngagement > 80 ? 'success-500' : ($contactEngagement > 40 ? 'primary-700' : 'warning-500'); @endphp
+                    <div class="d-flex mt-3">
+                        <span class="h6 m-0 fw-300">Contact Engagement</span>
+                        <span class="h6 d-inline-block ms-auto">{{ $contactEngagement }}%</span>
+                    </div>
+                    <div class="progress progress mb-4 border shadow-inset-3">
+                        <div class="progress-bar bg-{{ $engColor }} progress-bar-striped" role="progressbar"
+                             style="width: {{ $contactEngagement }}%;"></div>
+                    </div>
+
+                    <div class="d-flex mt-3">
+                        <span class="h6 m-0 fw-300">Pipeline Growth (YoY)</span>
+                        <span class="h6 d-inline-block ms-auto {{ $pipelineGrowthYoY >= 0 ? 'text-success' : 'text-danger' }}">{{ $pipelineGrowthYoY >= 0 ? '+' : '' }}{{ $pipelineGrowthYoY }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Health Scorecard + History --}}
+    @if($latestScorecard)
+    <div class="col-lg-6">
+        <div class="panel panel-icon panel-locked" id="panel-overview-scorecard">
+            <div class="panel-hdr">
+                <h2> Health <span class="fw-light"><i>Score</i></span></h2>
+                <div class="panel-toolbar">
+                    <span class="badge bg-{{ $latestScorecard->overall_score >= 55 ? 'success' : ($latestScorecard->overall_score >= 30 ? 'warning' : 'danger') }} fs-md">
+                        {{ number_format($latestScorecard->overall_score, 0) }}
+                    </span>
+                </div>
+            </div>
+            <div class="panel-container">
+                <div class="panel-content p-0">
+                    <div id="overview-scorecard-radar" style="min-height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+
+        @if($scorecardHistory->isNotEmpty())
+        <div class="panel panel-icon" id="panel-overview-history">
+            <div class="panel-hdr">
+                <h2> Scorecard <span class="fw-light"><i>History</i></span></h2>
+            </div>
+            <div class="panel-container">
+                <div class="panel-content">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th class="text-center">Overall Score</th>
+                                    <th>Tier</th>
+                                    <th class="text-center">Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($scorecardHistory as $index => $scorecard)
+                                @php
+                                    $prevScore = $scorecardHistory->get($index + 1)?->overall_score;
+                                    $trend = $prevScore !== null ? $scorecard->overall_score - $prevScore : null;
+                                @endphp
+                                <tr>
+                                    <td class="text-nowrap">{{ $scorecard->scored_at->format('M j, Y') }}</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-{{ $scorecard->overall_score >= 55 ? 'success' : ($scorecard->overall_score >= 30 ? 'warning' : 'danger') }} fs-sm">
+                                            {{ number_format($scorecard->overall_score, 0) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $scorecard->tier ?? '-' }}</td>
+                                    <td class="text-center">
+                                        @if($trend !== null)
+                                            <span class="{{ $trend >= 0 ? 'text-success' : 'text-danger' }}">
+                                                <i class="fal fa-arrow-{{ $trend >= 0 ? 'up' : 'down' }} me-1"></i>{{ abs(round($trend, 1)) }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">&mdash;</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    </div>
+    @endif
+</div>
+
 {{-- Chart Scripts --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -194,6 +267,22 @@ document.addEventListener('DOMContentLoaded', function() {
     var bv = (cm.bootstrapVars && cm.bootstrapVars.bodyColor) || null;
     var bodyColorHex = bv ? bv.hex : '#6c757d';
     var bodyColor01 = bv ? bv.rgba(0.1) : 'rgba(108,117,125,0.1)';
+
+    // Business Metrics period toggle
+    var metricsData = @json($businessMetrics);
+    var toggleBtns = document.querySelectorAll('#metrics-period-toggle button');
+    toggleBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            toggleBtns.forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            var period = this.dataset.period;
+            var data = metricsData[period];
+            document.getElementById('metric-sourced-value').textContent = data.sourced_pct + '%';
+            document.getElementById('metric-sourced-bar').style.width = data.sourced_pct + '%';
+            document.getElementById('metric-influenced-value').textContent = data.influenced_pct + '%';
+            document.getElementById('metric-influenced-bar').style.width = data.influenced_pct + '%';
+        });
+    });
 
     @if($latestScorecard)
     var scorecardData = @json($latestScorecard->getDimensionScores());

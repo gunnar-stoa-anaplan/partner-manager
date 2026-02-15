@@ -176,7 +176,7 @@ class OpportunityHistorySeeder extends Seeder
         for ($week = 0; $week < $weeksToSimulate; $week++) {
             $weekDate = $startDate->copy()->addWeeks($week);
 
-            // Create weekly import record
+            // Create weekly import record — all timestamps match the file name date
             $import = Import::create([
                 'type' => 'opportunities',
                 'file_name' => 'weekly_pipeline_'.$weekDate->format('Y_m_d').'.xlsx',
@@ -193,6 +193,8 @@ class OpportunityHistorySeeder extends Seeder
                 'opportunities_created' => 0,
                 'opportunities_updated' => 0,
                 'resources_created' => 0,
+                'created_at' => $weekDate,
+                'updated_at' => $weekDate,
             ]);
 
             $weekSnapshots = [];
@@ -292,8 +294,8 @@ class OpportunityHistorySeeder extends Seeder
                         'product_area' => $opp['product_area'],
                         'probability' => $this->getProbabilityForStage($currentStage),
                         'owner' => $opp['owner'],
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'created_at' => $weekDate,
+                        'updated_at' => $weekDate,
                     ];
                 }
             }

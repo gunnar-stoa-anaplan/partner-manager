@@ -90,6 +90,32 @@
 </div>
 @endif
 
+@if(isset($launchPrograms) && $launchPrograms->isNotEmpty())
+<div class="card portal-card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Launch Programs</h5>
+        <a href="{{ route('portal.launch-programs.index') }}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            @foreach($launchPrograms->take(3) as $lp)
+                @php $completion = $lp->completionPercentage(); @endphp
+                <div class="col-md-4 mb-2">
+                    <div class="border rounded p-3">
+                        <h6 class="mb-1">{{ $lp->program->name }}</h6>
+                        <small class="text-muted d-block mb-2">{{ $lp->program->product?->name ?? '' }}</small>
+                        <div class="progress mb-1" style="height:8px">
+                            <div class="progress-bar {{ $completion >= 80 ? 'bg-success' : 'bg-primary' }}" style="width:{{ $completion }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ $completion }}% complete</small>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
+
 <div class="card portal-card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">Recent Deal Registrations</h5>

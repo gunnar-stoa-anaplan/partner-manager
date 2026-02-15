@@ -3,6 +3,8 @@
 use App\Http\Controllers\ActionPlanController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AlertController;
+use App\Http\Controllers\AnaplanOverviewController;
+use App\Http\Controllers\AnaplanProvisioningController;
 use App\Http\Controllers\Api\EnablementController;
 use App\Http\Controllers\Api\FilterDataController;
 use App\Http\Controllers\Api\PartnerEventController;
@@ -21,6 +23,9 @@ use App\Http\Controllers\GoalsController;
 use App\Http\Controllers\GoalTemplateController;
 use App\Http\Controllers\HealthDashboardController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\LabController;
+use App\Http\Controllers\LabFacilitatorController;
+use App\Http\Controllers\LaunchProgramController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\MeasureController;
 use App\Http\Controllers\NotificationTemplateController;
@@ -85,10 +90,11 @@ Route::middleware(['auth'])->group(function () {
     Route::view('relationship_overview', 'relationship_overview')->name('relationship_overview');
     Route::get('/influence-map', [FieldEnablementController::class, 'influenceMap'])->name('influence_map');
     Route::get('/calendar', function () {
-        $partners = \App\Models\Partner::where('user_id', auth()->id())
-            ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
+        $query = auth()->user()->role === 'admin'
+            ? \App\Models\Partner::query()
+            : \App\Models\Partner::where('user_id', auth()->id());
+
+        $partners = $query->select('id', 'name')->orderBy('name')->get();
 
         return view('calendar.portfolio', compact('partners'));
     })->name('calendar.portfolio');
@@ -210,7 +216,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/partners/{id}/blueprints', [PartnerController::class, 'blueprints'])->name('partners.blueprints');
     Route::get('/partners/{id}/tab/{tab}', [PartnerController::class, 'partnerTab'])
         ->name('partners.tab')
-        ->where('tab', 'overview|pipeline|enablement|projects|path-health|calendar|influencers|resources|app-enablement');
+        ->where('tab', 'overview|pipeline|enablement|projects|calendar|influencers|resources|app-enablement|launch-programs|workspaces');
+
+    // Launch Program: PSM nomination + participant management
+    Route::post('/partners/{partner}/launch-programs/{launchProgram}/nominate', [PartnerController::class, 'nominateForProgram'])->name('partners.launch-programs.nominate');
+    Route::post('/launch-program-partners/{programPartner}/participants', [PartnerController::class, 'addParticipant'])->name('launch-program-partners.participants.store');
+    Route::delete('/launch-program-participants/{participant}', [PartnerController::class, 'removeParticipant'])->name('launch-program-participants.destroy');
     Route::get('/full-summary', [PartnerController::class, 'fullSummary'])->name('partners.full-summary');
     Route::get('/full-insights', [PartnerController::class, 'fullInsights'])->name('partners.full-insights');
 
@@ -251,6 +262,11 @@ Route::middleware(['auth'])->group(function () {
 
         return view('enablement.partner', compact('partner'));
     })->name('partners.enablement');
+
+    // Lab Facilitator Dashboard
+    Route::get('/enablement-sessions/{session}/lab-dashboard', [LabFacilitatorController::class, 'dashboard'])->name('sessions.lab-dashboard');
+    Route::post('/enablement-sessions/{session}/validate-all', [LabFacilitatorController::class, 'validateAll'])->name('sessions.validate-all');
+    Route::post('/lab-participants/{participant}/checkpoints/{checkpoint}/validate', [LabFacilitatorController::class, 'validateParticipant'])->name('lab-participants.validate');
 
     /*
     |--------------------------------------------------------------------------
@@ -325,6 +341,34 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/enablement-sessions/{id}/registrations', [EnablementEventController::class, 'sessionRegistrations'])->name('enablement-sessions.registrations');
         Route::put('/enablement-registrations/{id}', [EnablementEventController::class, 'updateRegistration'])->name('enablement-registrations.update');
         Route::get('/enablement-calendar', [EnablementEventController::class, 'calendar'])->name('enablement-calendar');
+
+        // Launch Programs CRUD
+        Route::resource('launch-programs', LaunchProgramController::class)->names('admin.launch-programs')->parameters(['launch-programs' => 'launchProgram']);
+        Route::post('/launch-programs/{launchProgram}/milestones', [LaunchProgramController::class, 'addMilestone'])->name('admin.launch-programs.milestones.store');
+        Route::put('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'updateMilestone'])->name('admin.launch-program-milestones.update');
+        Route::delete('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'destroyMilestone'])->name('admin.launch-program-milestones.destroy');
+        Route::put('/launch-program-partners/{programPartner}', [LaunchProgramController::class, 'updatePartnerStatus'])->name('admin.launch-program-partners.update');
+
+        // Workshop Labs
+        Route::resource('labs', LabController::class);
+        Route::post('/labs/{lab}/publish', [LabController::class, 'publish'])->name('labs.publish');
+        Route::post('/labs/{lab}/checkpoints', [LabController::class, 'addCheckpoint'])->name('labs.checkpoints.store');
+        Route::put('/lab-checkpoints/{checkpoint}', [LabController::class, 'updateCheckpoint'])->name('lab-checkpoints.update');
+        Route::delete('/lab-checkpoints/{checkpoint}', [LabController::class, 'destroyCheckpoint'])->name('lab-checkpoints.destroy');
+        Route::get('/labs/{lab}/browse-model', [LabController::class, 'browseModel'])->name('labs.browse-model');
+        Route::get('/labs/{lab}/browse-module/{moduleId}', [LabController::class, 'browseModule'])->name('labs.browse-module');
+        Route::get('/labs/{lab}/browse-lists', [LabController::class, 'browseLists'])->name('labs.browse-lists');
+        Route::post('/labs/{lab}/participants', [LabController::class, 'addParticipant'])->name('labs.participants.store');
+        Route::delete('/lab-participants/{participant}', [LabController::class, 'removeParticipant'])->name('lab-participants.destroy');
+
+        // Anaplan Provisioning
+        Route::get('/anaplan-provisioning', [AnaplanProvisioningController::class, 'index'])->name('admin.anaplan-provisioning.index');
+        Route::put('/anaplan-provisioning/workspaces/{workspace}/assign', [AnaplanProvisioningController::class, 'assignPartner'])->name('admin.anaplan-provisioning.assign');
+        Route::post('/anaplan-provisioning/sync', [AnaplanProvisioningController::class, 'sync'])->name('admin.anaplan-provisioning.sync');
+
+        // Anaplan Version Overview
+        Route::get('/anaplan-overview', [AnaplanOverviewController::class, 'index'])->name('admin.anaplan-overview');
+        Route::put('/anaplan-overview/version-config', [AnaplanOverviewController::class, 'updateVersionConfig'])->name('admin.anaplan-overview.update-version');
     });
 
     /*

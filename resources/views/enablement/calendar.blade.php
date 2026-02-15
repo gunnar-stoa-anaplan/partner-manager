@@ -86,7 +86,7 @@
     <script>
         window.enablementCalendarConfig = {
             mode: 'psm',
-            partners: @json(\App\Models\Partner::where('user_id', auth()->id())->select('id', 'name')->orderBy('name')->get()),
+            partners: @json((auth()->user()->role === 'admin' ? \App\Models\Partner::query() : \App\Models\Partner::where('user_id', auth()->id()))->select('id', 'name')->orderBy('name')->get()),
             eventTypes: @json(\App\Models\EnablementEvent::TYPES),
             typeColors: @json(\App\Models\EnablementEvent::TYPE_COLORS),
             apiBaseUrl: '{{ url("/api") }}',
