@@ -319,3 +319,28 @@
     </div>
 </form>
 @endsection
+
+@push('scripts')
+<script>
+    document.querySelectorAll('input[name="branding_theme"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            document.querySelectorAll('.theme-swatch-label .theme-swatch').forEach(function(swatch) {
+                swatch.classList.remove('border-primary', 'border-2');
+                swatch.classList.add('border-secondary-subtle');
+                var badge = swatch.querySelector('.position-absolute');
+                if (badge) {
+                    badge.remove();
+                }
+            });
+            var swatch = this.closest('.theme-swatch-label').querySelector('.theme-swatch');
+            swatch.classList.remove('border-secondary-subtle');
+            swatch.classList.add('border-primary', 'border-2');
+            var checkHtml = '<div class="position-absolute top-0 end-0 m-1">' +
+                '<span class="badge bg-primary rounded-pill" style="font-size: 0.6rem;">' +
+                '<svg class="sa-icon sa-icon-xs"><use href="/icons/sprite.svg#check"></use></svg>' +
+                '</span></div>';
+            swatch.insertAdjacentHTML('afterbegin', checkHtml);
+        });
+    });
+</script>
+@endpush

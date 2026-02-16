@@ -3,6 +3,7 @@
 <meta name="description" content="Page Description">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=5">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <!-- Standard favicon for browsers -->
 @php $customFavicon = \App\Models\AppSetting::get('branding_favicon_path'); @endphp

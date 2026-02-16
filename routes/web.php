@@ -13,6 +13,7 @@ use App\Http\Controllers\BenchmarkController;
 use App\Http\Controllers\BlueprintAssignmentController;
 use App\Http\Controllers\BlueprintController;
 use App\Http\Controllers\BrandingController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CompetencyMatrixController;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\ContactController;
@@ -180,6 +181,9 @@ Route::middleware(['auth'])->group(function () {
     */
     // Global Search
     Route::get('/api/search', [SearchController::class, 'search'])->name('api.search');
+
+    // AI Chat
+    Route::post('/api/chat', [ChatController::class, 'stream'])->name('api.chat');
 
     Route::prefix('api')->name('api.')->group(function () {
         Route::get('/filter-data/psm-partner-mapping', [FilterDataController::class, 'psmPartnerMapping'])->name('filter-data.psm-partner-mapping');
