@@ -440,13 +440,30 @@
     <li class="nav-title"><span>Partner Admin</span></li>
 
     @if($show('goals_scorecards'))
-    <li>
-        <a href="{{ route('partner-goals.index') }}">
+    <li class="nav-item">
+        <a href="#" title="Goals" data-filter-tags>
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#target"></use>
             </svg>
-            <span class="nav-link-text">Partner Goals</span>
+            <span class="nav-link-text">Goals</span>
         </a>
+        <ul>
+            <li>
+                <a href="{{ route('partner-goals.index') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.goal-templates.index') }}">
+                    <span class="nav-link-text">Templates</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.scorecard-weights.index') }}">
+                    <span class="nav-link-text">Scorecards</span>
+                </a>
+            </li>
+        </ul>
     </li>
     @endif
 
@@ -638,26 +655,6 @@
             <span class="nav-link-text">Admin Dashboard</span>
         </a>
     </li>
-
-    @if($show('goals_scorecards'))
-    <li>
-        <a href="{{ route('admin.scorecard-weights.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#sliders"></use>
-            </svg>
-            <span class="nav-link-text">Scorecard Weights</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('admin.goal-templates.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#target"></use>
-            </svg>
-            <span class="nav-link-text">Goal Templates</span>
-        </a>
-    </li>
-    @endif
 
     @endif
     @endif
