@@ -17,6 +17,23 @@
 <body>
     @php $portalUser = Auth::guard('portal')->user(); @endphp
 
+    {{-- Impersonation Banner --}}
+    @if(session('impersonating_portal'))
+    <div style="background: #dc3545; color: #fff; padding: 8px 0; text-align: center; font-size: 0.875rem; position: sticky; top: 0; z-index: 1100;">
+        <div class="container d-flex justify-content-center align-items-center gap-3 flex-wrap">
+            <span>
+                <strong>Impersonation Mode</strong> &mdash; Viewing as
+                <strong>{{ $portalUser?->full_name }}</strong>
+                (by {{ session('impersonator_user_name', 'Admin') }})
+            </span>
+            <form action="{{ route('portal.impersonate.stop') }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-light fw-bold">Return to Partner Manager</button>
+            </form>
+        </div>
+    </div>
+    @endif
+
     {{-- Portal Navigation --}}
     <nav class="navbar navbar-expand-lg portal-nav navbar-dark">
         <div class="container">
@@ -34,44 +51,55 @@
                            class="nav-link-portal {{ request()->routeIs('portal.dashboard') ? 'active' : '' }}">Dashboard</a>
                     </li>
 
-                    {{-- Admin only --}}
-                    @if($portalUser->isPortalAdmin())
+                    @if($portalUser->canAccess('goals'))
                     <li class="nav-item">
                         <a href="{{ route('portal.goals.index') }}"
                            class="nav-link-portal {{ request()->routeIs('portal.goals.*') ? 'active' : '' }}">Goals</a>
                     </li>
+                    @endif
+                    @if($portalUser->canAccess('certifications'))
                     <li class="nav-item">
                         <a href="{{ route('portal.certifications.index') }}"
                            class="nav-link-portal {{ request()->routeIs('portal.certifications.*') ? 'active' : '' }}">Certifications</a>
                     </li>
+                    @endif
+                    @if($portalUser->canAccess('calendar'))
                     <li class="nav-item">
                         <a href="{{ route('portal.calendar.index') }}"
                            class="nav-link-portal {{ request()->routeIs('portal.calendar.*') ? 'active' : '' }}">Calendar</a>
                     </li>
+                    @endif
+                    @if($portalUser->canAccess('contacts'))
                     <li class="nav-item">
                         <a href="{{ route('portal.contacts.index') }}"
                            class="nav-link-portal {{ request()->routeIs('portal.contacts.*') ? 'active' : '' }}">Team</a>
                     </li>
+                    @endif
+                    @if($portalUser->canAccess('launch_programs'))
                     <li class="nav-item">
                         <a href="{{ route('portal.launch-programs.index') }}"
                            class="nav-link-portal {{ request()->routeIs('portal.launch-programs.*') ? 'active' : '' }}">Launch Programs</a>
                     </li>
                     @endif
-
-                    {{-- Admin + Sales --}}
-                    @if($portalUser->hasPortalRole(['admin', 'sales']))
+                    @if($portalUser->canAccess('path'))
+                    <li class="nav-item">
+                        <a href="{{ route('portal.path.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.path.*') ? 'active' : '' }}">Path</a>
+                    </li>
+                    @endif
+                    @if($portalUser->canAccess('deal_registrations'))
                     <li class="nav-item">
                         <a href="{{ route('portal.deal-registrations.index') }}"
                            class="nav-link-portal {{ request()->routeIs('portal.deal-registrations.*') ? 'active' : '' }}">Deal Registrations</a>
                     </li>
                     @endif
-
-                    {{-- Admin + Delivery --}}
-                    @if($portalUser->hasPortalRole(['admin', 'delivery']))
+                    @if($portalUser->canAccess('projects'))
                     <li class="nav-item">
                         <a href="{{ route('portal.projects.index') }}"
                            class="nav-link-portal {{ request()->routeIs('portal.projects.*') ? 'active' : '' }}">Projects</a>
                     </li>
+                    @endif
+                    @if($portalUser->canAccess('cases'))
                     <li class="nav-item">
                         <a href="{{ route('portal.cases.index') }}"
                            class="nav-link-portal {{ request()->routeIs('portal.cases.*') ? 'active' : '' }}">Cases</a>
@@ -99,10 +127,17 @@
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ \App\Models\Contact::PORTAL_ROLES[$portalUser->portal_role] ?? $portalUser->portal_role }}</span>
                     <span class="text-white-50" style="font-size: 0.875rem;">{{ $portalUser->full_name }}</span>
-                    <form action="{{ route('portal.logout') }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="submit" class="btn btn-sm btn-outline-light">Logout</button>
-                    </form>
+                    @if(session('impersonating_portal'))
+                        <form action="{{ route('portal.impersonate.stop') }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-warning fw-bold">Return to Admin</button>
+                        </form>
+                    @else
+                        <form action="{{ route('portal.logout') }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-light">Logout</button>
+                        </form>
+                    @endif
                 </div>
             </div>
             @endauth

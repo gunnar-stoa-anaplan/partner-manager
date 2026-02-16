@@ -23,13 +23,11 @@ class PortalDashboardController extends Controller
 
         $data = ['contact' => $contact, 'partner' => $partner];
 
-        if ($contact->isPortalAdmin()) {
-            $data = array_merge($data, $this->adminData($partner, $healthService));
-        } elseif ($contact->isPortalSales()) {
-            $data = array_merge($data, $this->salesData($partner, $contact));
-        } elseif ($contact->isPortalDelivery()) {
-            $data = array_merge($data, $this->deliveryData($partner, $contact));
-        }
+        $data = match ($contact->dashboardGroup()) {
+            'admin' => array_merge($data, $this->adminData($partner, $healthService)),
+            'sales' => array_merge($data, $this->salesData($partner, $contact)),
+            'delivery' => array_merge($data, $this->deliveryData($partner, $contact)),
+        };
 
         return view('portal.dashboard', $data);
     }

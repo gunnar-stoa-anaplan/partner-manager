@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PartnerTask extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'partner_id', 'task_template_id', 'title', 'description',
         'category', 'requirement_level', 'status', 'priority',
@@ -106,6 +109,6 @@ class PartnerTask extends Model
     {
         return $this->due_date
             && $this->due_date->isPast()
-            && !in_array($this->status, ['completed', 'waived']);
+            && ! in_array($this->status, ['completed', 'waived']);
     }
 }

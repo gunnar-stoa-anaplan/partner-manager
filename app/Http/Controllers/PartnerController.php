@@ -113,6 +113,7 @@ class PartnerController extends Controller
             'app-enablement' => $this->appEnablementTabData($partner),
             'launch-programs' => $this->launchProgramsTabData($partner),
             'workspaces' => $this->workspacesTabData($partner),
+            'portal-users' => $this->portalUsersTabData($partner),
             default => abort(404),
         };
 
@@ -1602,6 +1603,17 @@ class PartnerController extends Controller
         $versionConfigs = \App\Models\AnaplanVersionConfig::all()->keyBy('product_area');
 
         return compact('workspaces', 'totalModels', 'activeModels', 'totalMemory', 'lastSync', 'isConfigured', 'versionConfigs');
+    }
+
+    private function portalUsersTabData(Partner $partner): array
+    {
+        $contacts = $partner->contacts()
+            ->where('contact_type', '!=', 'influencer')
+            ->orderByDesc('portal_access')
+            ->orderBy('first_name')
+            ->get();
+
+        return compact('contacts');
     }
 
     /**

@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PartnerPathStage extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'partner_path_id', 'stage_number', 'name', 'description',
         'color', 'icon', 'sort_order',

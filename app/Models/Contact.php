@@ -72,9 +72,39 @@ class Contact extends Authenticatable
     ];
 
     const PORTAL_ROLES = [
-        'admin' => 'Partner Admin',
-        'sales' => 'Partner Sales',
-        'delivery' => 'Partner Delivery',
+        'partner_admin' => 'Partner Admin',
+        'delivery_lead' => 'Delivery Lead',
+        'engagement_manager' => 'Engagement Manager',
+        'practice_lead' => 'Practice Lead',
+        'marketing' => 'Marketing',
+        'sales' => 'Sales',
+        'pre_sales' => 'Pre-Sales',
+        'technical_architect' => 'Technical Architect',
+        'delivery_resource' => 'Delivery Resource',
+    ];
+
+    const ROLE_CAPABILITIES = [
+        'partner_admin' => ['*'],
+        'delivery_lead' => ['projects', 'cases', 'enablement', 'blueprints', 'labs', 'workspaces', 'path'],
+        'engagement_manager' => ['projects', 'enablement', 'blueprints', 'path', 'goals', 'calendar', 'launch_programs'],
+        'practice_lead' => ['enablement', 'blueprints', 'labs', 'certifications', 'path', 'goals'],
+        'marketing' => ['enablement', 'blueprints'],
+        'sales' => ['deal_registrations', 'enablement', 'blueprints'],
+        'pre_sales' => ['deal_registrations', 'enablement', 'blueprints', 'labs'],
+        'technical_architect' => ['labs', 'workspaces', 'blueprints', 'enablement'],
+        'delivery_resource' => ['projects', 'cases', 'enablement', 'blueprints'],
+    ];
+
+    const DASHBOARD_GROUPS = [
+        'partner_admin' => 'admin',
+        'engagement_manager' => 'admin',
+        'practice_lead' => 'admin',
+        'sales' => 'sales',
+        'pre_sales' => 'sales',
+        'marketing' => 'sales',
+        'delivery_lead' => 'delivery',
+        'delivery_resource' => 'delivery',
+        'technical_architect' => 'delivery',
     ];
 
     public function partner()
@@ -157,17 +187,19 @@ class Contact extends Authenticatable
 
     public function isPortalAdmin(): bool
     {
-        return $this->portal_role === 'admin';
+        return $this->portal_role === 'partner_admin';
     }
 
-    public function isPortalSales(): bool
+    public function canAccess(string $capability): bool
     {
-        return $this->portal_role === 'sales';
+        $capabilities = self::ROLE_CAPABILITIES[$this->portal_role] ?? [];
+
+        return in_array('*', $capabilities, true) || in_array($capability, $capabilities, true);
     }
 
-    public function isPortalDelivery(): bool
+    public function dashboardGroup(): string
     {
-        return $this->portal_role === 'delivery';
+        return self::DASHBOARD_GROUPS[$this->portal_role] ?? 'delivery';
     }
 
     public function hasPortalRole(string|array $roles): bool

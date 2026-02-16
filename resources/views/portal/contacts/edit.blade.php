@@ -34,6 +34,24 @@
                     <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title', $contact->title) }}">
                     @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
+                <div class="col-md-6">
+                    <label class="form-label">Portal Access</label>
+                    <select name="portal_access" class="form-select @error('portal_access') is-invalid @enderror">
+                        <option value="0" {{ !old('portal_access', $contact->portal_access) ? 'selected' : '' }}>Disabled</option>
+                        <option value="1" {{ old('portal_access', $contact->portal_access) ? 'selected' : '' }}>Enabled</option>
+                    </select>
+                    @error('portal_access') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Portal Role</label>
+                    <select name="portal_role" class="form-select @error('portal_role') is-invalid @enderror">
+                        <option value="">— None —</option>
+                        @foreach(\App\Models\Contact::PORTAL_ROLES as $key => $label)
+                            <option value="{{ $key }}" {{ old('portal_role', $contact->portal_role) === $key ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    @error('portal_role') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
             </div>
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">Save Changes</button>

@@ -93,7 +93,7 @@ class ContactFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'portal_access' => true,
-            'portal_role' => 'admin',
+            'portal_role' => 'partner_admin',
             'password' => 'password',
         ]);
     }
@@ -111,7 +111,16 @@ class ContactFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'portal_access' => true,
-            'portal_role' => 'delivery',
+            'portal_role' => 'delivery_lead',
+            'password' => 'password',
+        ]);
+    }
+
+    public function portalRole(string $role): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'portal_access' => true,
+            'portal_role' => $role,
             'password' => 'password',
         ]);
     }

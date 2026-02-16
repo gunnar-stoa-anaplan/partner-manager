@@ -12,6 +12,7 @@ use App\Http\Controllers\Portal\PortalGoalsController;
 use App\Http\Controllers\Portal\PortalLabController;
 use App\Http\Controllers\Portal\PortalLaunchProgramController;
 use App\Http\Controllers\Portal\PortalLoginController;
+use App\Http\Controllers\Portal\PortalPathController;
 use App\Http\Controllers\Portal\PortalProjectsController;
 use App\Http\Controllers\Portal\PortalWorkspaceController;
 use Illuminate\Support\Facades\Route;
@@ -49,20 +50,37 @@ Route::middleware('portal')->group(function () {
     Route::get('/labs/{lab}', [PortalLabController::class, 'show'])->name('labs.show');
     Route::post('/labs/checkpoints/{checkpoint}/validate', [PortalLabController::class, 'validateCheckpoint'])->name('labs.validate-checkpoint');
 
-    // Admin only: goals, certifications, calendar, team management
-    Route::middleware('portal.role:admin')->group(function () {
+    // Capability-gated routes
+    Route::middleware('portal.can:goals')->group(function () {
         Route::get('/goals', [PortalGoalsController::class, 'index'])->name('goals.index');
+    });
+
+    Route::middleware('portal.can:certifications')->group(function () {
         Route::get('/certifications', [PortalCertificationsController::class, 'index'])->name('certifications.index');
+    });
+
+    Route::middleware('portal.can:calendar')->group(function () {
         Route::get('/calendar', [PortalCalendarController::class, 'index'])->name('calendar.index');
         Route::get('/calendar/events', [PortalCalendarController::class, 'events'])->name('calendar.events');
+    });
+
+    // Team management — partner_admin only (has contacts via wildcard)
+    Route::middleware('portal.can:contacts')->group(function () {
         Route::get('/contacts', [PortalContactsController::class, 'index'])->name('contacts.index');
         Route::get('/contacts/create', [PortalContactsController::class, 'create'])->name('contacts.create');
         Route::post('/contacts', [PortalContactsController::class, 'store'])->name('contacts.store');
         Route::get('/contacts/{contact}/edit', [PortalContactsController::class, 'edit'])->name('contacts.edit');
         Route::put('/contacts/{contact}', [PortalContactsController::class, 'update'])->name('contacts.update');
+        Route::patch('/contacts/{contact}/toggle-access', [PortalContactsController::class, 'toggleAccess'])->name('contacts.toggle-access');
+        Route::patch('/contacts/{contact}/update-role', [PortalContactsController::class, 'updateRole'])->name('contacts.update-role');
         Route::delete('/contacts/{contact}', [PortalContactsController::class, 'destroy'])->name('contacts.destroy');
+    });
 
-        // Launch Programs
+    Route::middleware('portal.can:path')->group(function () {
+        Route::get('/path', [PortalPathController::class, 'index'])->name('path.index');
+    });
+
+    Route::middleware('portal.can:launch_programs')->group(function () {
         Route::get('/launch-programs', [PortalLaunchProgramController::class, 'index'])->name('launch-programs.index');
         Route::get('/launch-programs/{programPartner}', [PortalLaunchProgramController::class, 'show'])->name('launch-programs.show');
         Route::post('/launch-programs/{programPartner}/milestones/{milestone}/complete', [PortalLaunchProgramController::class, 'completeMilestone'])->name('launch-programs.complete-milestone');
@@ -71,17 +89,18 @@ Route::middleware('portal')->group(function () {
         Route::delete('/launch-programs/{programPartner}/participants/{participant}', [PortalLaunchProgramController::class, 'removeParticipant'])->name('launch-programs.remove-participant');
     });
 
-    // Admin + Sales: deal registrations
-    Route::middleware('portal.role:admin,sales')->group(function () {
+    Route::middleware('portal.can:deal_registrations')->group(function () {
         Route::get('/deal-registrations', [PortalDealRegistrationController::class, 'index'])->name('deal-registrations.index');
         Route::get('/deal-registrations/create', [PortalDealRegistrationController::class, 'create'])->name('deal-registrations.create');
         Route::post('/deal-registrations', [PortalDealRegistrationController::class, 'store'])->name('deal-registrations.store');
     });
 
-    // Admin + Delivery: projects & cases
-    Route::middleware('portal.role:admin,delivery')->group(function () {
+    Route::middleware('portal.can:projects')->group(function () {
         Route::get('/projects', [PortalProjectsController::class, 'index'])->name('projects.index');
         Route::get('/projects/{project}', [PortalProjectsController::class, 'show'])->name('projects.show');
+    });
+
+    Route::middleware('portal.can:cases')->group(function () {
         Route::get('/cases', [PortalCasesController::class, 'index'])->name('cases.index');
         Route::post('/cases', [PortalCasesController::class, 'store'])->name('cases.store');
     });

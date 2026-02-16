@@ -15,7 +15,8 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Title</th>
-                        <th>Portal</th>
+                        <th class="text-center">Portal Access</th>
+                        <th>Portal Role</th>
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
@@ -25,11 +26,33 @@
                         <td class="fw-500">{{ $c->full_name }}</td>
                         <td>{{ $c->email }}</td>
                         <td>{{ $c->title ?? '—' }}</td>
-                        <td>
-                            @if($c->portal_access)
-                                <span class="badge bg-success">{{ \App\Models\Contact::PORTAL_ROLES[$c->portal_role] ?? 'Active' }}</span>
+                        <td class="text-center">
+                            @if($c->id === $contact->id)
+                                <span class="badge bg-success">You</span>
                             @else
-                                <span class="text-muted">—</span>
+                                <form action="{{ route('portal.contacts.toggle-access', $c) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-sm btn-{{ $c->portal_access ? 'success' : 'outline-secondary' }} rounded-pill px-3" style="font-size: 0.75rem;">
+                                        {{ $c->portal_access ? 'Enabled' : 'Disabled' }}
+                                    </button>
+                                </form>
+                            @endif
+                        </td>
+                        <td>
+                            @if($c->id === $contact->id)
+                                <span class="badge bg-primary">{{ \App\Models\Contact::PORTAL_ROLES[$c->portal_role] ?? '—' }}</span>
+                            @else
+                                <form action="{{ route('portal.contacts.update-role', $c) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <select name="portal_role" onchange="this.form.submit()" class="form-select form-select-sm" style="width: auto; font-size: 0.8rem;">
+                                        <option value="">— None —</option>
+                                        @foreach(\App\Models\Contact::PORTAL_ROLES as $key => $label)
+                                            <option value="{{ $key }}" {{ $c->portal_role === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </form>
                             @endif
                         </td>
                         <td class="text-end">
@@ -44,7 +67,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="text-muted text-center py-3">No contacts found.</td></tr>
+                    <tr><td colspan="6" class="text-muted text-center py-3">No contacts found.</td></tr>
                 @endforelse
                 </tbody>
             </table>
@@ -71,7 +94,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 info: "Showing {start} to {end} of {rows} contacts",
             },
             columns: [
-                { select: 4, sortable: false }
+                { select: 3, sortable: false },
+                { select: 4, sortable: false },
+                { select: 5, sortable: false }
             ]
         });
     }

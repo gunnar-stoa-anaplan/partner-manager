@@ -41,6 +41,10 @@ class PortalLoginController extends Controller
 
     public function logout(Request $request): \Illuminate\Http\RedirectResponse
     {
+        if ($request->session()->get('impersonating_portal')) {
+            return redirect()->route('portal.impersonate.stop');
+        }
+
         Auth::guard('portal')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

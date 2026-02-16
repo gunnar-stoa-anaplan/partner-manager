@@ -24,13 +24,13 @@ class PortalEnablementController extends Controller
         $upcomingSessions = EnablementSession::whereHas('event', function ($q) use ($contact) {
             $q->where('status', 'published');
 
-            // Filter by role relevance
-            if ($contact->isPortalSales()) {
+            // Filter by dashboard group relevance
+            if ($contact->dashboardGroup() === 'sales') {
                 $q->whereIn('category', ['Sales', 'Pre-Sales', 'Awareness']);
-            } elseif ($contact->isPortalDelivery()) {
+            } elseif ($contact->dashboardGroup() === 'delivery') {
                 $q->whereIn('category', ['Delivery', 'Platform', 'Awareness']);
             }
-            // Admin sees all
+            // Admin group sees all
         })
             ->where('start_at', '>=', now())
             ->where('status', '!=', 'cancelled')

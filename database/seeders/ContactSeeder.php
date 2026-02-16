@@ -38,7 +38,7 @@ class ContactSeeder extends Seeder
             'contact_type' => 'resource',
             'resource_role' => 'solution_architect',
             'portal_access' => true,
-            'portal_role' => 'admin',
+            'portal_role' => 'partner_admin',
         ],
         [
             'first_name' => 'Jordan',
@@ -47,16 +47,16 @@ class ContactSeeder extends Seeder
             'contact_type' => 'resource',
             'resource_role' => 'project_manager',
             'portal_access' => true,
-            'portal_role' => 'delivery',
+            'portal_role' => 'delivery_lead',
         ],
         [
-            'first_name' => 'Taylor',
-            'last_name' => 'Chen',
-            'title' => 'Client Account Lead',
-            'contact_type' => 'influencer',
-            'influencer_role' => 'client_account_lead',
+            'first_name' => 'Alvina',
+            'last_name' => 'Koelpin',
+            'title' => 'Technical Architect',
+            'contact_type' => 'resource',
+            'resource_role' => 'solution_architect',
             'portal_access' => true,
-            'portal_role' => 'sales',
+            'portal_role' => 'technical_architect',
         ],
     ];
 

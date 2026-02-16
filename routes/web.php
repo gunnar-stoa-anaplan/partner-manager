@@ -37,6 +37,8 @@ use App\Http\Controllers\PartnerGoalController;
 use App\Http\Controllers\PartnerPathController;
 use App\Http\Controllers\PathConfigurationController;
 use App\Http\Controllers\PathReviewController;
+use App\Http\Controllers\PortalImpersonationController;
+use App\Http\Controllers\PortalUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\QbrController;
@@ -218,7 +220,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/partners/{id}/blueprints', [PartnerController::class, 'blueprints'])->name('partners.blueprints');
     Route::get('/partners/{id}/tab/{tab}', [PartnerController::class, 'partnerTab'])
         ->name('partners.tab')
-        ->where('tab', 'overview|pipeline|enablement|projects|calendar|influencers|resources|app-enablement|launch-programs|workspaces');
+        ->where('tab', 'overview|pipeline|enablement|projects|calendar|influencers|resources|app-enablement|launch-programs|workspaces|portal-users');
+
+    // Portal User Management (PSM/Admin)
+    Route::patch('/partners/{partner}/portal-users/{contact}/toggle-access', [PortalUserController::class, 'toggleAccess'])->name('partners.portal-users.toggle-access');
+    Route::patch('/partners/{partner}/portal-users/{contact}/update-role', [PortalUserController::class, 'updateRole'])->name('partners.portal-users.update-role');
+    Route::patch('/partners/{partner}/portal-users/{contact}/set-password', [PortalUserController::class, 'setPassword'])->name('partners.portal-users.set-password');
+    Route::post('/partners/{partner}/portal-users/import', [PortalUserController::class, 'import'])->name('partners.portal-users.import');
+    Route::get('/partners/portal-users/template', [PortalUserController::class, 'downloadTemplate'])->name('partners.portal-users.template');
+
+    // Portal Impersonation (PSM/Admin) — stop must be before start to avoid {contact} matching "stop"
+    Route::post('/portal/impersonate/stop', [PortalImpersonationController::class, 'stop'])->name('portal.impersonate.stop');
+    Route::post('/portal/impersonate/{contact}', [PortalImpersonationController::class, 'start'])->name('portal.impersonate.start');
 
     // Launch Program: PSM nomination + participant management
     Route::post('/partners/{partner}/launch-programs/{launchProgram}/nominate', [PartnerController::class, 'nominateForProgram'])->name('partners.launch-programs.nominate');

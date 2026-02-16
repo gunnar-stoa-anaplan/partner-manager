@@ -28,6 +28,22 @@
                     <label class="form-label">Title</label>
                     <input type="text" name="title" class="form-control" value="{{ old('title') }}">
                 </div>
+                <div class="col-md-6">
+                    <label class="form-label">Portal Access</label>
+                    <select name="portal_access" class="form-select">
+                        <option value="0" {{ !old('portal_access') ? 'selected' : '' }}>Disabled</option>
+                        <option value="1" {{ old('portal_access') ? 'selected' : '' }}>Enabled</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Portal Role</label>
+                    <select name="portal_role" class="form-select">
+                        <option value="">— None —</option>
+                        @foreach(\App\Models\Contact::PORTAL_ROLES as $key => $label)
+                            <option value="{{ $key }}" {{ old('portal_role') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">Add Contact</button>

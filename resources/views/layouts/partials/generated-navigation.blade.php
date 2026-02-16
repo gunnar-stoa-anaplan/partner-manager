@@ -18,13 +18,25 @@
     </li>
 
     @auth
-    <li>
-        <a href="{{ route('partners.my') }}">
+    <li class="nav-item">
+        <a href="#" title="Partners" data-filter-tags>
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#briefcase"></use>
             </svg>
-            <span class="nav-link-text">My Partners</span>
+            <span class="nav-link-text">Partners</span>
         </a>
+        <ul>
+            <li>
+                <a href="{{ route('dashboard') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('partners.my') }}">
+                    <span class="nav-link-text">List</span>
+                </a>
+            </li>
+        </ul>
     </li>
 
     {{-- Analysis --}}
@@ -60,20 +72,9 @@
     @endif
 
     {{-- Plan Section --}}
-    @if($show('partner_paths', 'goals_scorecards'))
+    @if($show('goals_scorecards'))
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_plan'] ?? '1') === '1')
     <li class="nav-title"><span>Plan</span></li>
-
-    @if($show('partner_paths'))
-    <li>
-        <a href="{{ route('plan.paths.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#map"></use>
-            </svg>
-            <span class="nav-link-text">Partner Paths</span>
-        </a>
-    </li>
-    @endif
 
     @if($show('goals_scorecards'))
     <li>
@@ -397,7 +398,7 @@
     @endif
 
     {{-- Act Section --}}
-    @if($show('health_alerts', 'partner_paths'))
+    @if($show('health_alerts'))
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_act'] ?? '1') === '1')
     <li class="nav-title"><span>Act</span></li>
 
@@ -430,16 +431,6 @@
     </li>
     @endif
 
-    @if($show('partner_paths'))
-    <li>
-        <a href="{{ route('act.path-reviews.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#check-circle"></use>
-            </svg>
-            <span class="nav-link-text">Path Reviews</span>
-        </a>
-    </li>
-    @endif
     @endif
     @endif
 
@@ -456,6 +447,39 @@
             </svg>
             <span class="nav-link-text">Partner Goals</span>
         </a>
+    </li>
+    @endif
+
+    @if($show('partner_paths'))
+    <li class="nav-item">
+        <a href="#" title="Partner Paths" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#map"></use>
+            </svg>
+            <span class="nav-link-text">Partner Paths</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('plan.paths.index') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.paths.index') }}">
+                    <span class="nav-link-text">Path Configuration</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.task-templates.index') }}">
+                    <span class="nav-link-text">Task Templates</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('act.path-reviews.index') }}">
+                    <span class="nav-link-text">Path Reviews</span>
+                </a>
+            </li>
+        </ul>
     </li>
     @endif
 
@@ -500,7 +524,7 @@
     @endif
 
     {{-- Administration --}}
-    @if($show('partner_paths', 'goals_scorecards', 'anaplan'))
+    @if($show('goals_scorecards', 'anaplan'))
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_administration'] ?? '1') === '1')
     <li class="nav-title"><span>Administration</span></li>
 
@@ -512,17 +536,6 @@
             <span class="nav-link-text">Admin Dashboard</span>
         </a>
     </li>
-
-    @if($show('partner_paths'))
-    <li>
-        <a href="{{ route('admin.paths.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#map"></use>
-            </svg>
-            <span class="nav-link-text">Path Configuration</span>
-        </a>
-    </li>
-    @endif
 
     @if($show('goals_scorecards'))
     <li>

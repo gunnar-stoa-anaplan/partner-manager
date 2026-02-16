@@ -7,7 +7,10 @@ use App\Models\LaunchProgramPartner;
 use App\Models\Partner;
 use App\Models\PartnerAssignedGoal;
 use App\Models\PartnerHealthSnapshot;
+use App\Models\PartnerPathEnrollment;
+use App\Models\PartnerPathStage;
 use App\Models\PartnerScorecard;
+use App\Models\PartnerTask;
 use Illuminate\Support\Facades\DB;
 
 class PartnerHealthService
@@ -297,6 +300,51 @@ class PartnerHealthService
                 $daysToGa = $prog->target_ga_date ? (int) now()->diffInDays($prog->target_ga_date, false) : null;
                 $urgency = $daysToGa !== null && $daysToGa <= 30 ? ' — GA in '.$daysToGa.' days' : '';
                 $signals[] = $prog->name.': '.$incompleteRequired->count().' required milestone'.($incompleteRequired->count() > 1 ? 's' : '').' incomplete'.$urgency;
+            }
+        }
+
+        // Path risk signals
+        $pathEnrollments = PartnerPathEnrollment::where('partner_id', $partner->id)
+            ->where('status', 'active')
+            ->with('currentStage')
+            ->get();
+
+        if ($pathEnrollments->isEmpty()) {
+            $signals[] = 'No active partner path enrollment';
+        } else {
+            foreach ($pathEnrollments as $pathEnrollment) {
+                $daysInStage = (int) $pathEnrollment->stage_entered_at->diffInDays(now());
+
+                if ($daysInStage > 90) {
+                    $signals[] = $pathEnrollment->currentStage->name.' stage: '.$daysInStage.' days without advancement';
+                }
+
+                $overdueRequired = PartnerTask::where('partner_path_enrollment_id', $pathEnrollment->id)
+                    ->where('requirement_level', 'required')
+                    ->overdue()
+                    ->count();
+                if ($overdueRequired > 0) {
+                    $signals[] = $overdueRequired.' overdue required path task'.($overdueRequired > 1 ? 's' : '');
+                }
+
+                if ($daysInStage > 60) {
+                    $nextStage = PartnerPathStage::where('partner_path_id', $pathEnrollment->partner_path_id)
+                        ->where('stage_number', '>', $pathEnrollment->currentStage->stage_number)
+                        ->orderBy('stage_number')
+                        ->first();
+
+                    if ($nextStage) {
+                        $gateService = app(GateEvaluationService::class);
+                        $gateResults = $gateService->evaluateGates($partner, $pathEnrollment->current_stage_id, $nextStage->id);
+                        $totalGates = $gateResults->count();
+                        $metGates = $gateResults->where('met', true)->count();
+
+                        if ($totalGates > 0 && ($metGates / $totalGates) < 0.5) {
+                            $pct = round(($metGates / $totalGates) * 100);
+                            $signals[] = 'Gate readiness only '.$pct.'% after '.$daysInStage.' days in '.$pathEnrollment->currentStage->name;
+                        }
+                    }
+                }
             }
         }
 

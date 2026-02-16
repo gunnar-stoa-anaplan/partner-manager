@@ -16,8 +16,9 @@ class PortalAuth
         }
 
         $contact = Auth::guard('portal')->user();
+        $isImpersonating = $request->session()->get('impersonating_portal', false);
 
-        if (! $contact->portal_access) {
+        if (! $contact->portal_access && ! $isImpersonating) {
             Auth::guard('portal')->logout();
 
             return redirect()->route('portal.login')

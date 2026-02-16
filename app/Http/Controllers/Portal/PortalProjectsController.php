@@ -14,12 +14,13 @@ class PortalProjectsController extends Controller
         $contact = Auth::guard('portal')->user();
         $partner = $contact->partner;
 
-        if ($contact->isPortalAdmin()) {
+        if ($contact->dashboardGroup() === 'admin') {
+            // Admin group sees all partner projects
             $projects = Project::where('partner_id', $partner->id)
                 ->orderByDesc('created_at')
                 ->get();
         } else {
-            // Delivery sees only their assigned projects
+            // Delivery/other roles see only their assigned projects
             $projects = $contact->projects()
                 ->where('partner_id', $partner->id)
                 ->orderByDesc('created_at')
@@ -36,8 +37,8 @@ class PortalProjectsController extends Controller
         // Ensure project belongs to this partner
         abort_unless($project->partner_id === $contact->partner_id, 403);
 
-        // Delivery contacts can only see projects they're assigned to
-        if ($contact->isPortalDelivery()) {
+        // Non-admin contacts can only see projects they're assigned to
+        if ($contact->dashboardGroup() !== 'admin') {
             abort_unless($contact->projects()->where('projects.id', $project->id)->exists(), 403);
         }
 

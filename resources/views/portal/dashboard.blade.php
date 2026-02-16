@@ -5,7 +5,7 @@
 <p class="text-muted mb-4">{{ $partner->name }} — {{ \App\Models\Contact::PORTAL_ROLES[$contact->portal_role] ?? '' }} Dashboard</p>
 
 {{-- ===== ADMIN DASHBOARD ===== --}}
-@if($contact->isPortalAdmin())
+@if($contact->dashboardGroup() === 'admin')
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card portal-card mb-3">
@@ -144,7 +144,7 @@
 </div>
 
 {{-- ===== SALES DASHBOARD ===== --}}
-@elseif($contact->isPortalSales())
+@elseif($contact->dashboardGroup() === 'sales')
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card portal-card mb-3">
@@ -224,7 +224,7 @@
 </div>
 
 {{-- ===== DELIVERY DASHBOARD ===== --}}
-@elseif($contact->isPortalDelivery())
+@elseif($contact->dashboardGroup() === 'delivery')
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card portal-card mb-3">
