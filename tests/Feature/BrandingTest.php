@@ -201,6 +201,152 @@ class BrandingTest extends TestCase
         $this->assertEquals('', AppSetting::get('branding_favicon_path'));
     }
 
+    // ─── Custom Brand Colors ──────────────────────────────────────
+
+    public function test_admin_can_set_custom_brand_colors(): void
+    {
+        $response = $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'branding_color_primary' => '#ff6600',
+            'branding_color_success' => '#00cc44',
+        ]);
+
+        $response->assertRedirect(route('admin.branding'));
+        $response->assertSessionHas('success');
+        $this->assertEquals('#ff6600', AppSetting::get('branding_color_primary'));
+        $this->assertEquals('#00cc44', AppSetting::get('branding_color_success'));
+        $this->assertNotEmpty(AppSetting::get('branding_custom_colors_css'));
+    }
+
+    public function test_custom_colors_css_contains_correct_variables(): void
+    {
+        $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'branding_color_primary' => '#ff6600',
+        ]);
+
+        $css = AppSetting::get('branding_custom_colors_css');
+        $this->assertStringContainsString('--bs-primary: #ff6600', $css);
+        $this->assertStringContainsString('--bs-primary-rgb: 255,102,0', $css);
+        $this->assertStringContainsString('--primary-500: #ff6600', $css);
+        $this->assertStringContainsString('--primary-50:', $css);
+        $this->assertStringContainsString('--primary-900:', $css);
+    }
+
+    public function test_admin_can_clear_custom_colors(): void
+    {
+        AppSetting::set('branding_color_primary', '#ff6600');
+        AppSetting::set('branding_custom_colors_css', 'some css');
+
+        $response = $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'clear_custom_colors' => '1',
+        ]);
+
+        $response->assertRedirect(route('admin.branding'));
+        $this->assertEquals('', AppSetting::get('branding_color_primary'));
+        $this->assertEquals('', AppSetting::get('branding_custom_colors_css'));
+    }
+
+    public function test_empty_colors_clear_custom_colors_css(): void
+    {
+        AppSetting::set('branding_custom_colors_css', 'old css');
+
+        $response = $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'branding_color_primary' => '',
+            'branding_color_success' => '',
+        ]);
+
+        $response->assertRedirect(route('admin.branding'));
+        $this->assertEquals('', AppSetting::get('branding_custom_colors_css'));
+    }
+
+    public function test_invalid_hex_color_is_rejected(): void
+    {
+        $response = $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'branding_color_primary' => 'not-a-color',
+        ]);
+
+        $response->assertSessionHasErrors('branding_color_primary');
+    }
+
+    public function test_short_hex_color_is_rejected(): void
+    {
+        $response = $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'branding_color_primary' => '#fff',
+        ]);
+
+        $response->assertSessionHasErrors('branding_color_primary');
+    }
+
+    // ─── Custom CSS Upload ────────────────────────────────────────
+
+    public function test_admin_can_upload_custom_css(): void
+    {
+        $file = UploadedFile::fake()->create('custom.css', 100, 'text/css');
+
+        $response = $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'branding_custom_css' => $file,
+        ]);
+
+        $response->assertRedirect(route('admin.branding'));
+        $response->assertSessionHas('success');
+
+        $cssPath = AppSetting::get('branding_custom_css_path');
+        $this->assertNotEmpty($cssPath);
+        Storage::disk('public')->assertExists($cssPath);
+    }
+
+    public function test_uploading_new_css_deletes_old_one(): void
+    {
+        Storage::disk('public')->put('branding/old-custom.css', 'old css');
+        AppSetting::set('branding_custom_css_path', 'branding/old-custom.css');
+
+        $file = UploadedFile::fake()->create('new-custom.css', 100, 'text/css');
+
+        $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'branding_custom_css' => $file,
+        ]);
+
+        Storage::disk('public')->assertMissing('branding/old-custom.css');
+
+        $newPath = AppSetting::get('branding_custom_css_path');
+        Storage::disk('public')->assertExists($newPath);
+    }
+
+    public function test_admin_can_remove_custom_css(): void
+    {
+        Storage::disk('public')->put('branding/custom.css', 'content');
+        AppSetting::set('branding_custom_css_path', 'branding/custom.css');
+
+        $response = $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'remove_custom_css' => '1',
+        ]);
+
+        $response->assertRedirect(route('admin.branding'));
+        Storage::disk('public')->assertMissing('branding/custom.css');
+        $this->assertEquals('', AppSetting::get('branding_custom_css_path'));
+    }
+
+    public function test_non_css_file_is_rejected(): void
+    {
+        $file = UploadedFile::fake()->create('malicious.js', 100, 'application/javascript');
+
+        $response = $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'branding_custom_css' => $file,
+        ]);
+
+        $response->assertSessionHasErrors('branding_custom_css');
+    }
+
+    public function test_oversized_css_file_is_rejected(): void
+    {
+        $file = UploadedFile::fake()->create('huge.css', 2000, 'text/css');
+
+        $response = $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'branding_custom_css' => $file,
+        ]);
+
+        $response->assertSessionHasErrors('branding_custom_css');
+    }
+
     // ─── Layout Integration ──────────────────────────────────────
 
     public function test_custom_app_name_appears_in_page_title(): void
@@ -248,5 +394,62 @@ class BrandingTest extends TestCase
         $response->assertSee('Earth');
         $response->assertSee('Aurora');
         $response->assertSee('Nebula');
+    }
+
+    public function test_custom_colors_css_injected_when_set(): void
+    {
+        AppSetting::set('branding_custom_colors_css', ':root { --bs-primary: #ff6600; }');
+
+        $response = $this->actingAs($this->admin)->get(route('admin.branding'));
+
+        $response->assertOk();
+        $response->assertSee('custom-brand-colors', false);
+        $response->assertSee('--bs-primary: #ff6600', false);
+    }
+
+    public function test_custom_colors_css_not_injected_when_not_set(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.branding'));
+
+        $response->assertOk();
+        $response->assertDontSee('custom-brand-colors', false);
+    }
+
+    public function test_custom_css_link_injected_when_set(): void
+    {
+        Storage::disk('public')->put('branding/custom.css', 'body { color: red; }');
+        AppSetting::set('branding_custom_css_path', 'branding/custom.css');
+
+        $response = $this->actingAs($this->admin)->get(route('admin.branding'));
+
+        $response->assertOk();
+        $response->assertSee('custom-css-style', false);
+    }
+
+    public function test_custom_css_link_not_injected_when_not_set(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.branding'));
+
+        $response->assertOk();
+        $response->assertDontSee('custom-css-style', false);
+    }
+
+    public function test_page_shows_custom_brand_colors_section(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.branding'));
+
+        $response->assertOk();
+        $response->assertSee('Custom Brand Colors');
+        $response->assertSee('Custom CSS');
+    }
+
+    public function test_page_shows_saved_custom_colors(): void
+    {
+        AppSetting::set('branding_color_primary', '#ff6600');
+
+        $response = $this->actingAs($this->admin)->get(route('admin.branding'));
+
+        $response->assertOk();
+        $response->assertSee('#ff6600', false);
     }
 }

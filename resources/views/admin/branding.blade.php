@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-<p class="text-muted fst-italic mt-3 mb-4">Customize how the application looks to your users. Set your organization's name, upload a logo and favicon, and choose a default color theme. Individual users can still override the theme from their settings drawer.</p>
+<p class="text-muted fst-italic mt-3 mb-4">Customize how the application looks to your users. Set your organization's name, upload a logo and favicon, choose a default color theme, override brand colors, or upload custom CSS. Individual users can still override the theme from their settings drawer.</p>
 
 @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -137,6 +137,88 @@
                 </div>
             </div>
 
+            {{-- Custom Brand Colors Card --}}
+            <div class="card shadow-0 mb-g">
+                <div class="card-header">
+                    <div class="card-title">Custom Brand Colors</div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted fs-sm mb-3">Override specific colors to match your organization's branding. Leave a field empty to use the selected theme's default for that color.</p>
+
+                    @php
+                        $brandColors = [
+                            'primary' => ['label' => 'Primary', 'default' => '#886ab5'],
+                            'success' => ['label' => 'Success', 'default' => '#1dc9b7'],
+                            'info' => ['label' => 'Info', 'default' => '#2196f3'],
+                            'warning' => ['label' => 'Warning', 'default' => '#ffc241'],
+                            'danger' => ['label' => 'Danger', 'default' => '#fd3995'],
+                        ];
+                    @endphp
+
+                    <div class="row g-3">
+                        @foreach($brandColors as $key => $color)
+                            <div class="col-sm-6 col-lg">
+                                <label for="branding_color_{{ $key }}" class="form-label fs-sm">{{ $color['label'] }}</label>
+                                @php $savedColor = old('branding_color_'.$key, $settings['branding_color_'.$key] ?? ''); @endphp
+                                <div class="input-group">
+                                    <input type="color" class="form-control form-control-color border-end-0"
+                                           id="picker_{{ $key }}"
+                                           value="{{ $savedColor ?: $color['default'] }}"
+                                           oninput="document.getElementById('branding_color_{{ $key }}').value = this.value">
+                                    <input type="text" class="form-control font-monospace fs-sm"
+                                           id="branding_color_{{ $key }}"
+                                           name="branding_color_{{ $key }}"
+                                           value="{{ $savedColor }}"
+                                           placeholder="Not set"
+                                           maxlength="7"
+                                           oninput="if(this.value.match(/^#[0-9a-fA-F]{6}$/)) document.getElementById('picker_{{ $key }}').value = this.value">
+                                </div>
+                                @error('branding_color_'.$key)
+                                    <div class="text-danger fs-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        @endforeach
+                    </div>
+
+                    @php $hasAnyCustomColor = collect($brandColors)->keys()->contains(fn($key) => ! empty($settings['branding_color_'.$key])); @endphp
+                    @if($hasAnyCustomColor)
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="clear_custom_colors" name="clear_custom_colors" value="1">
+                            <label class="form-check-label text-danger fs-sm" for="clear_custom_colors">Clear all custom colors</label>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Custom CSS Card --}}
+            <div class="card shadow-0 mb-g">
+                <div class="card-header">
+                    <div class="card-title">Custom CSS</div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted fs-sm mb-3">Upload a custom CSS file for advanced styling. This loads after all other styles and can override any CSS variable or rule.</p>
+
+                    @php $currentCss = $settings['branding_custom_css_path'] ?? ''; @endphp
+                    @if($currentCss && Storage::disk('public')->exists($currentCss))
+                        <div class="mb-2 p-3 border rounded bg-light d-flex align-items-center gap-3">
+                            <svg class="sa-icon"><use href="/icons/sprite.svg#file"></use></svg>
+                            <span class="fs-sm font-monospace">{{ basename($currentCss) }}</span>
+                            <div class="form-check ms-auto">
+                                <input class="form-check-input" type="checkbox" id="remove_custom_css" name="remove_custom_css" value="1">
+                                <label class="form-check-label text-danger fs-sm" for="remove_custom_css">Remove</label>
+                            </div>
+                        </div>
+                    @endif
+
+                    <input type="file" class="form-control @error('branding_custom_css') is-invalid @enderror"
+                           id="branding_custom_css" name="branding_custom_css" accept=".css,text/css">
+                    @error('branding_custom_css')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <small class="form-text text-muted">CSS file only. Max 1 MB. Override Bootstrap CSS variables or add custom rules.</small>
+                </div>
+            </div>
+
             <div class="mb-g">
                 <button type="submit" class="btn btn-primary">
                     <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#save"></use></svg>
@@ -171,6 +253,17 @@
 
                         <dt class="text-muted fs-sm">Theme</dt>
                         <dd>{{ ucfirst($settings['branding_theme'] ?? '') ?: 'Default' }}</dd>
+
+                        <dt class="text-muted fs-sm">Custom Colors</dt>
+                        @php
+                            $customColorCount = collect(['primary', 'success', 'info', 'warning', 'danger'])
+                                ->filter(fn($k) => ! empty($settings['branding_color_'.$k]))
+                                ->count();
+                        @endphp
+                        <dd>{{ $customColorCount ? $customColorCount.' of 5 set' : 'None' }}</dd>
+
+                        <dt class="text-muted fs-sm">Custom CSS</dt>
+                        <dd>{{ ($settings['branding_custom_css_path'] ?? '') ? 'Uploaded' : 'None' }}</dd>
 
                         <dt class="text-muted fs-sm">Favicon</dt>
                         <dd>{{ ($settings['branding_favicon_path'] ?? '') ? 'Custom' : 'Default' }}</dd>

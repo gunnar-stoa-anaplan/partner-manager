@@ -11,5 +11,17 @@
     <link id="default-theme-style" rel="stylesheet" href="/css/themes/{{ $defaultTheme }}.css">
 @endif
 
+<!-- Custom brand color overrides -->
+@php $customColorsCss = \App\Models\AppSetting::get('branding_custom_colors_css'); @endphp
+@if($customColorsCss)
+    <style id="custom-brand-colors">{!! $customColorsCss !!}</style>
+@endif
+
+<!-- Custom CSS file -->
+@php $customCssPath = \App\Models\AppSetting::get('branding_custom_css_path'); @endphp
+@if($customCssPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($customCssPath))
+    <link id="custom-css-style" rel="stylesheet" href="{{ \Illuminate\Support\Facades\Storage::url($customCssPath) }}">
+@endif
+
 <!-- Save/Load functionality JavaScript -->
 @vite(['resources/scripts/core/saveloadscript.js'])
