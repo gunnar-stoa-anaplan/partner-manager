@@ -39,17 +39,17 @@
             @if($show('analysis'))
             @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
             <li>
-                <a href="{{ route('analysis.index') }}">
+                <a href="{{ route('custom-filters.index') }}">
                     <span class="nav-link-text">Custom Filters</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('analysis.guided') }}">
+                <a href="{{ route('wizard.index') }}">
                     <span class="nav-link-text">Wizard</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('analysis.coach') }}">
+                <a href="{{ route('coach.index') }}">
                     <span class="nav-link-text">Coach</span>
                 </a>
             </li>

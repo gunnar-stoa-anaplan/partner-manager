@@ -94,7 +94,7 @@
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Guided Analysis', 'pageSubTitle1' => 'Analysis', 'pageSubTitle1Url' => route('analysis.index')])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Wizard', 'pageSubTitle1' => 'Partners', 'pageSubTitle1Url' => route('partners.my')])
 @endsection
 
 @section('content')

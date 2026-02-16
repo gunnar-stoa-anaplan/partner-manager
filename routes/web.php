@@ -169,9 +169,9 @@ Route::middleware(['auth'])->group(function () {
     | Analysis & Insights
     |--------------------------------------------------------------------------
     */
-    Route::get('/analysis', [PartnerController::class, 'analysis'])->name('analysis.index');
-    Route::get('/guided-analysis', [PartnerController::class, 'guidedAnalysis'])->name('analysis.guided');
-    Route::get('/partner-coach', [PartnerController::class, 'partnerCoach'])->name('analysis.coach');
+    Route::get('/custom-filters', [PartnerController::class, 'analysis'])->name('custom-filters.index');
+    Route::get('/wizard', [PartnerController::class, 'guidedAnalysis'])->name('wizard.index');
+    Route::get('/coach', [PartnerController::class, 'partnerCoach'])->name('coach.index');
 
     /*
     |--------------------------------------------------------------------------
