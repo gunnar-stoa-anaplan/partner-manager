@@ -47,6 +47,7 @@ use App\Http\Controllers\SalesforceCredentialController;
 use App\Http\Controllers\ScorecardController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SolutionLifecycleController;
+use App\Http\Controllers\SystemStatusController;
 use App\Http\Controllers\TaskBoardController;
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\UserController;
@@ -407,7 +408,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/anaplan-overview', [AnaplanOverviewController::class, 'index'])->name('admin.anaplan-overview');
         Route::put('/anaplan-overview/version-config', [AnaplanOverviewController::class, 'updateVersionConfig'])->name('admin.anaplan-overview.update-version');
 
-        // System Updates
+        // System Status & Updates
+        Route::get('/system-status', [SystemStatusController::class, 'index'])->name('admin.system-status');
         Route::get('/system-update', [UpdateController::class, 'show'])->name('admin.update');
         Route::post('/system-update/accept', [UpdateController::class, 'accept'])->name('admin.update.accept');
     });

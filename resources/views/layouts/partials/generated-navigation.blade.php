@@ -656,6 +656,15 @@
     </li>
 
     <li>
+        <a href="{{ route('admin.system-status') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#server"></use>
+            </svg>
+            <span class="nav-link-text">System Status</span>
+        </a>
+    </li>
+
+    <li>
         <a href="{{ route('configuration.index') }}">
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#settings"></use>
@@ -689,6 +698,16 @@
                 <use href="/icons/sprite.svg#activity"></use>
             </svg>
             <span class="nav-link-text">System Pulse</span>
+            <span class="dl-ref badge badge-info">live</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="/telescope" target="_blank">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#search"></use>
+            </svg>
+            <span class="nav-link-text">Telescope</span>
             <span class="dl-ref badge badge-info">live</span>
         </a>
     </li>
