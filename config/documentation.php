@@ -64,9 +64,6 @@ return [
         'Introduction' => [
             'Overview' => 'overview',
             'Getting Started' => 'getting-started',
-            'Architecture' => 'architecture',
-            'Deployment' => 'deployment',
-            'Updates & Upgrades' => 'updates-and-upgrades',
             'Roles & Permissions' => 'roles-and-permissions',
         ],
         'Plan' => [
@@ -102,6 +99,9 @@ return [
             'Portal Roles' => 'portal-roles',
         ],
         'Administration' => [
+            'Architecture' => 'architecture',
+            'Deployment' => 'deployment',
+            'Updates & Upgrades' => 'updates-and-upgrades',
             'Configuration' => 'configuration',
             'Branding' => 'branding',
             'User Management' => 'user-management',
