@@ -33,43 +33,30 @@
             </li>
             <li>
                 <a href="{{ route('partners.my') }}">
-                    <span class="nav-link-text">List</span>
+                    <span class="nav-link-text">My Partners</span>
                 </a>
             </li>
+            @if($show('analysis'))
+            @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
+            <li>
+                <a href="{{ route('analysis.index') }}">
+                    <span class="nav-link-text">Custom Filters</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('analysis.guided') }}">
+                    <span class="nav-link-text">Wizard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('analysis.coach') }}">
+                    <span class="nav-link-text">Coach</span>
+                </a>
+            </li>
+            @endif
+            @endif
         </ul>
     </li>
-
-    {{-- Analysis --}}
-    @if($show('analysis'))
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
-    <li>
-        <a href="{{ route('analysis.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#trending-up"></use>
-            </svg>
-            <span class="nav-link-text">Custom Analysis</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('analysis.guided') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#compass"></use>
-            </svg>
-            <span class="nav-link-text">Guided Analysis</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('analysis.coach') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#message-circle"></use>
-            </svg>
-            <span class="nav-link-text">Partner Coach</span>
-        </a>
-    </li>
-    @endif
-    @endif
 
     {{-- Plan Section --}}
     @if($show('goals_scorecards'))
