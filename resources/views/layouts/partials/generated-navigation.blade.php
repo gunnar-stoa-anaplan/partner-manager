@@ -1,3 +1,11 @@
+@php
+    /**
+     * Dev Focus: when a feature is selected, only show nav items tagged with that feature.
+     * When no focus is set ($devFocus is empty), show everything normally using section toggles.
+     */
+    $focused = !empty($devFocus);
+    $show = fn(string ...$features) => !$focused || in_array($devFocus, $features);
+@endphp
 <ul id="js-nav-menu" class="nav-menu">
 
     <li>
@@ -19,7 +27,9 @@
         </a>
     </li>
 
-    @if(Auth::user()->role === 'admin' || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
+    {{-- Analysis --}}
+    @if($show('analysis'))
+    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
     <li>
         <a href="{{ route('analysis.index') }}">
             <svg class="sa-icon">
@@ -47,11 +57,14 @@
         </a>
     </li>
     @endif
+    @endif
 
     {{-- Plan Section --}}
-    @if(Auth::user()->role === 'admin' || ($navSettings['nav_visible_plan'] ?? '1') === '1')
+    @if($show('partner_paths', 'goals_scorecards'))
+    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_plan'] ?? '1') === '1')
     <li class="nav-title"><span>Plan</span></li>
 
+    @if($show('partner_paths'))
     <li>
         <a href="{{ route('plan.paths.index') }}">
             <svg class="sa-icon">
@@ -60,7 +73,9 @@
             <span class="nav-link-text">Partner Paths</span>
         </a>
     </li>
+    @endif
 
+    @if($show('goals_scorecards'))
     <li>
         <a href="{{ route('plan.scorecard.index') }}">
             <svg class="sa-icon">
@@ -106,10 +121,15 @@
         </a>
     </li>
     @endif
+    @endif
+    @endif
 
-    @if(Auth::user()->role === 'admin' || ($navSettings['nav_visible_engage'] ?? '1') === '1')
+    {{-- Engage Section --}}
+    @if($show('deal_registration', 'enablement_events', 'projects'))
+    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_engage'] ?? '1') === '1')
     <li class="nav-title"><span>Engage</span></li>
 
+    @if($show('projects'))
     <li class="nav-item">
         <a href="#" title="Project Health" data-filter-tags>
             <svg class="sa-icon">
@@ -130,7 +150,9 @@
             </li>
         </ul>
     </li>
+    @endif
 
+    @if($show('enablement_events'))
     <li class="nav-item">
         <a href="#" title="Field Engagements" data-filter-tags>
             <svg class="sa-icon">
@@ -151,7 +173,9 @@
             </li>
         </ul>
     </li>
+    @endif
 
+    @if($show('field_enablement'))
     <li class="nav-item">
         <a href="#" title="Field Enablement" data-filter-tags>
             <svg class="sa-icon">
@@ -189,7 +213,9 @@
             @endif
         </ul>
     </li>
+    @endif
 
+    @if($show('deal_registration'))
     <li>
         <a href="{{ route('engage.solutions.index') }}">
             <svg class="sa-icon">
@@ -208,9 +234,12 @@
         </a>
     </li>
     @endif
+    @endif
+    @endif
 
-    @if(Auth::user()->role === 'admin' || session('selected_partner_id'))
-    @if(Auth::user()->role === 'admin' || ($navSettings['nav_visible_key_metrics'] ?? '1') === '1')
+    {{-- Key Metrics (Partner Profile) - only show when a partner is selected during focus mode --}}
+    @if($focused ? session('selected_partner_id') : (Auth::user()->role === 'admin' || session('selected_partner_id')))
+    @if(!$focused || ($navSettings['nav_visible_key_metrics'] ?? '1') === '1')
     <li class="nav-item">
         <a href="#" title="Key Metrics" data-filter-tags>
             <svg class="sa-icon">
@@ -251,7 +280,9 @@
     </li>
     @endif
 
-    @if(Auth::user()->role === 'admin' || ($navSettings['nav_visible_business_dev'] ?? '1') === '1')
+    {{-- Business Development --}}
+    @if($show('deal_registration'))
+    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_business_dev'] ?? '1') === '1')
     <li class="nav-item">
         <a href="#" title="Business Development" data-filter-tags>
             <svg class="sa-icon">
@@ -279,11 +310,14 @@
     </li>
     @endif
     @endif
+    @endif
 
     {{-- Measure Section --}}
-    @if(Auth::user()->role === 'admin' || ($navSettings['nav_visible_measure'] ?? '1') === '1')
+    @if($show('goals_scorecards', 'measure'))
+    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_measure'] ?? '1') === '1')
     <li class="nav-title"><span>Measure</span></li>
 
+    @if($show('measure'))
     <li>
         <a href="{{ route('partners.full-summary') }}">
             <svg class="sa-icon">
@@ -347,7 +381,9 @@
             </li>
         </ul>
     </li>
+    @endif
 
+    @if($show('goals_scorecards'))
     <li>
         <a href="{{ route('measure.benchmarks.index') }}">
             <svg class="sa-icon">
@@ -357,11 +393,15 @@
         </a>
     </li>
     @endif
+    @endif
+    @endif
 
     {{-- Act Section --}}
-    @if(Auth::user()->role === 'admin' || ($navSettings['nav_visible_act'] ?? '1') === '1')
+    @if($show('health_alerts', 'partner_paths'))
+    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_act'] ?? '1') === '1')
     <li class="nav-title"><span>Act</span></li>
 
+    @if($show('health_alerts'))
     <li>
         <a href="{{ route('act.health.index') }}">
             <svg class="sa-icon">
@@ -388,7 +428,9 @@
             <span class="nav-link-text">QBR Workbench</span>
         </a>
     </li>
+    @endif
 
+    @if($show('partner_paths'))
     <li>
         <a href="{{ route('act.path-reviews.index') }}">
             <svg class="sa-icon">
@@ -398,11 +440,15 @@
         </a>
     </li>
     @endif
+    @endif
+    @endif
 
     {{-- Partner Admin - Admin Only --}}
     @if(Auth::user()->role === 'admin')
+    @if($show('goals_scorecards', 'partner_paths', 'deal_registration'))
     <li class="nav-title"><span>Partner Admin</span></li>
 
+    @if($show('goals_scorecards'))
     <li>
         <a href="{{ route('partner-goals.index') }}">
             <svg class="sa-icon">
@@ -411,7 +457,9 @@
             <span class="nav-link-text">Partner Goals</span>
         </a>
     </li>
+    @endif
 
+    @if($show('partner_paths', 'goals_scorecards'))
     <li>
         <a href="{{ route('partners.index') }}">
             <svg class="sa-icon">
@@ -420,7 +468,9 @@
             <span class="nav-link-text">Partner Assignments</span>
         </a>
     </li>
+    @endif
 
+    @if($show('deal_registration'))
     <li class="nav-item">
         <a href="#" title="Lead Assignment" data-filter-tags>
             <svg class="sa-icon">
@@ -446,9 +496,12 @@
             </li>
         </ul>
     </li>
+    @endif
+    @endif
 
     {{-- Administration --}}
-    @if(Auth::user()->role === 'admin' || ($navSettings['nav_visible_administration'] ?? '1') === '1')
+    @if($show('partner_paths', 'goals_scorecards', 'anaplan'))
+    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_administration'] ?? '1') === '1')
     <li class="nav-title"><span>Administration</span></li>
 
     <li>
@@ -460,15 +513,7 @@
         </a>
     </li>
 
-    <li>
-        <a href="{{ route('users.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#users"></use>
-            </svg>
-            <span class="nav-link-text">User Management</span>
-        </a>
-    </li>
-
+    @if($show('partner_paths'))
     <li>
         <a href="{{ route('admin.paths.index') }}">
             <svg class="sa-icon">
@@ -477,7 +522,9 @@
             <span class="nav-link-text">Path Configuration</span>
         </a>
     </li>
+    @endif
 
+    @if($show('goals_scorecards'))
     <li>
         <a href="{{ route('admin.scorecard-weights.index') }}">
             <svg class="sa-icon">
@@ -495,16 +542,9 @@
             <span class="nav-link-text">Goal Templates</span>
         </a>
     </li>
+    @endif
 
-    <li>
-        <a href="{{ route('admin.notification-templates.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#mail"></use>
-            </svg>
-            <span class="nav-link-text">Notification Templates</span>
-        </a>
-    </li>
-
+    @if($show('anaplan'))
     <li>
         <a href="{{ route('admin.anaplan-overview') }}">
             <svg class="sa-icon">
@@ -514,11 +554,40 @@
         </a>
     </li>
     @endif
+    @endif
+    @endif
 
-    @if(Auth::user()->role === 'admin' || ($navSettings['nav_visible_program_admin'] ?? '1') === '1')
     {{-- Partner Enablement --}}
+    @if($show('blueprints', 'launch_programs', 'labs', 'enablement_events'))
+    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_program_admin'] ?? '1') === '1')
     <li class="nav-title"><span>Partner Enablement</span></li>
 
+    @if($show('blueprints'))
+    <li class="nav-item">
+        <a href="#" title="Enablement" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#layers"></use>
+            </svg>
+            <span class="nav-link-text">Enablement</span>
+        </a>
+        <ul>
+            @if(Auth::user()->role === 'admin')
+            <li>
+                <a href="{{ route('admin.enablement-dashboard') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            @endif
+            <li>
+                <a href="{{ Auth::user()->role === 'admin' ? route('blueprints.index') : route('blueprints.catalog') }}">
+                    <span class="nav-link-text">Blueprints</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    @if($show('enablement_events'))
     <li>
         <a href="{{ route('enablement-events.index') }}">
             <svg class="sa-icon">
@@ -536,16 +605,9 @@
             <span class="nav-link-text">Enablement Calendar</span>
         </a>
     </li>
+    @endif
 
-    <li>
-        <a href="{{ route('blueprints.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#layers"></use>
-            </svg>
-            <span class="nav-link-text">Enablement Blueprints</span>
-        </a>
-    </li>
-
+    @if($show('launch_programs'))
     <li>
         <a href="{{ route('admin.launch-programs.index') }}">
             <svg class="sa-icon">
@@ -554,7 +616,9 @@
             <span class="nav-link-text">Launch Programs</span>
         </a>
     </li>
+    @endif
 
+    @if($show('labs'))
     <li>
         <a href="{{ route('labs.index') }}">
             <svg class="sa-icon">
@@ -564,9 +628,11 @@
         </a>
     </li>
     @endif
+    @endif
+    @endif
 
-    @if(Auth::user()->role === 'admin' || ($navSettings['nav_visible_system'] ?? '1') === '1')
-    {{-- System --}}
+    {{-- System - always show Configuration so dev can change focus --}}
+    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_system'] ?? '1') === '1')
     <li class="nav-title"><span>System</span></li>
 
     <li>
@@ -578,6 +644,18 @@
         </a>
     </li>
 
+    @if($show('anaplan'))
+    <li>
+        <a href="{{ route('admin.anaplan-provisioning.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#server"></use>
+            </svg>
+            <span class="nav-link-text">Anaplan Workspaces</span>
+        </a>
+    </li>
+    @endif
+
+    @if(!$focused)
     <li>
         <a href="{{ route('imports.index') }}">
             <svg class="sa-icon">
@@ -597,15 +675,6 @@
     </li>
 
     <li>
-        <a href="{{ route('admin.anaplan-provisioning.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#server"></use>
-            </svg>
-            <span class="nav-link-text">Anaplan Workspaces</span>
-        </a>
-    </li>
-
-    <li>
         <a href="/pulse" target="_blank">
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#activity"></use>
@@ -614,6 +683,7 @@
             <span class="dl-ref badge badge-info">live</span>
         </a>
     </li>
+    @endif
     @endif
 
     @endif

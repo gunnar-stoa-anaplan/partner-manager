@@ -37,7 +37,11 @@ class AppServiceProvider extends ServiceProvider
             $navSettings = AppSetting::where('key', 'like', 'nav_visible_%')
                 ->pluck('value', 'key')
                 ->toArray();
+
+            $devFocus = AppSetting::get('dev_focus_feature', '');
+
             $view->with('navSettings', $navSettings);
+            $view->with('devFocus', $devFocus);
         });
     }
 }

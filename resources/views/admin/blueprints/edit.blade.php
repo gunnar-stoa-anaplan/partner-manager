@@ -35,7 +35,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('blueprints.update', $blueprint) }}" method="POST">
+                    <form action="{{ isset($ownerMode) ? route('blueprints.owner.update', $blueprint) : route('blueprints.update', $blueprint) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -73,18 +73,65 @@
                             <textarea class="form-control" id="description" name="description" rows="3">{{ old('description', $blueprint->description) }}</textarea>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label" for="status">Status <span class="text-danger">*</span></label>
-                            <select class="form-select" id="status" name="status" required>
-                                @foreach(\App\Models\Blueprint::STATUSES as $value => $label)
-                                    <option value="{{ $value }}" {{ old('status', $blueprint->status) === $value ? 'selected' : '' }}>{{ $label }}</option>
-                                @endforeach
-                            </select>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="status">Status <span class="text-danger">*</span></label>
+                                <select class="form-select" id="status" name="status" required>
+                                    @if(isset($ownerMode))
+                                        @foreach(['draft' => 'Draft', 'submitted' => 'Submitted'] as $value => $label)
+                                            <option value="{{ $value }}" {{ old('status', $blueprint->status) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    @else
+                                        @foreach(\App\Models\Blueprint::STATUSES as $value => $label)
+                                            <option value="{{ $value }}" {{ old('status', $blueprint->status) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            @if(!isset($ownerMode))
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="owner_id">Owner</label>
+                                <select class="form-select" id="owner_id" name="owner_id">
+                                    <option value="">No Owner</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}" {{ old('owner_id', $blueprint->owner_id) == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">The owner can edit and submit this blueprint for publishing.</small>
+                            </div>
+                            @endif
                         </div>
+
+                        @if(!isset($ownerMode) && ($blueprint->drafted_at || $blueprint->published_at || $blueprint->archived_at))
+                        <div class="row mb-3">
+                            @if($blueprint->drafted_at)
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">Drafted</small>
+                                <span>{{ $blueprint->drafted_at->format('M j, Y g:i A') }}</span>
+                            </div>
+                            @endif
+                            @if($blueprint->published_at)
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">Published</small>
+                                <span>{{ $blueprint->published_at->format('M j, Y g:i A') }}</span>
+                            </div>
+                            @endif
+                            @if($blueprint->archived_at)
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">Archived</small>
+                                <span>{{ $blueprint->archived_at->format('M j, Y g:i A') }}</span>
+                            </div>
+                            @endif
+                        </div>
+                        @endif
 
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">Update Blueprint</button>
-                            <a href="{{ route('blueprints.show', $blueprint) }}" class="btn btn-outline-secondary">Cancel</a>
+                            @if(isset($ownerMode))
+                                <a href="{{ url('/') }}" class="btn btn-outline-secondary">Cancel</a>
+                            @else
+                                <a href="{{ route('blueprints.show', $blueprint) }}" class="btn btn-outline-secondary">Cancel</a>
+                            @endif
                         </div>
                     </form>
                 </div>

@@ -22,6 +22,10 @@ class Blueprint extends Model
         'version',
         'status',
         'created_by',
+        'owner_id',
+        'published_at',
+        'archived_at',
+        'drafted_at',
     ];
 
     const CATEGORIES = [
@@ -32,6 +36,7 @@ class Blueprint extends Model
 
     const STATUSES = [
         'draft' => 'Draft',
+        'submitted' => 'Submitted',
         'published' => 'Published',
         'archived' => 'Archived',
     ];
@@ -56,6 +61,11 @@ class Blueprint extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
     public function assignments(): HasMany
     {
         return $this->hasMany(PartnerBlueprintAssignment::class);
@@ -66,6 +76,11 @@ class Blueprint extends Model
     public function scopePublished($query)
     {
         return $query->where('status', 'published');
+    }
+
+    public function scopeSubmitted($query)
+    {
+        return $query->where('status', 'submitted');
     }
 
     // ─── Methods ───────────────────────────────────────────────
@@ -80,6 +95,17 @@ class Blueprint extends Model
         return $this->assignments()->count();
     }
 
+    // ─── Casts ──────────────────────────────────────────────────
+
+    protected function casts(): array
+    {
+        return [
+            'published_at' => 'datetime',
+            'archived_at' => 'datetime',
+            'drafted_at' => 'datetime',
+        ];
+    }
+
     // ─── Boot ──────────────────────────────────────────────────
 
     protected static function booted()
@@ -92,6 +118,10 @@ class Blueprint extends Model
                 while (static::withTrashed()->where('slug', $blueprint->slug)->exists()) {
                     $blueprint->slug = $original.'-'.$count++;
                 }
+            }
+
+            if ($blueprint->status === 'draft' && ! $blueprint->drafted_at) {
+                $blueprint->drafted_at = now();
             }
         });
     }

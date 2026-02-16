@@ -38,14 +38,26 @@
     </div>
 </div>
 
+@php
+    $role = $assignment->role;
+    $roleColumn = match($role) {
+        'gtm' => 'gtm_applicable',
+        'pre_sales' => 'pre_sales_applicable',
+        'delivery' => 'delivery_applicable',
+        default => 'delivery_applicable',
+    };
+@endphp
+
 @foreach($blueprint->outcomes as $outcome)
+@php $outcomeItems = $outcome->contentItems->where($roleColumn, '!=', 'na'); @endphp
+@if($outcomeItems->count())
 <div class="card portal-card mb-3">
-    <div class="card-header"><strong>{{ $outcome->name }}</strong></div>
+    <div class="card-header"><strong>{{ $outcome->title }}</strong></div>
     <div class="card-body p-0">
         <table class="table table-sm mb-0">
-            <thead><tr><th>Content Item</th><th>Type</th><th>Duration</th><th>Status</th></tr></thead>
+            <thead><tr><th>Content Item</th><th>Source</th><th>Duration</th><th>Status</th></tr></thead>
             <tbody>
-            @foreach($outcome->contentItems as $item)
+            @foreach($outcomeItems as $item)
                 @php
                     $progress = $enrollment->progress->firstWhere('blueprint_content_item_id', $item->id);
                     $completed = $progress && $progress->completed;
@@ -59,7 +71,7 @@
                         @endif
                     </td>
                     <td>{{ $item->source ?? '—' }}</td>
-                    <td>{{ $item->duration ?? '—' }}</td>
+                    <td>{{ $item->duration_display ?? '—' }}</td>
                     <td>
                         @if($completed)
                             <span class="badge bg-success">Completed</span>
@@ -73,5 +85,6 @@
         </table>
     </div>
 </div>
+@endif
 @endforeach
 @endsection

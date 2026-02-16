@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PartnerBlueprintAssignment extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'partner_id',
         'blueprint_id',
@@ -80,7 +83,9 @@ class PartnerBlueprintAssignment extends Model
     public function completionPercentage(): float
     {
         $totalItems = $this->applicableContentItemCount();
-        if ($totalItems === 0) return 0;
+        if ($totalItems === 0) {
+            return 0;
+        }
 
         $completedCount = 0;
         foreach ($this->enrollments as $enrollment) {
@@ -88,7 +93,9 @@ class PartnerBlueprintAssignment extends Model
         }
 
         $enrollmentCount = $this->enrollments->count();
-        if ($enrollmentCount === 0) return 0;
+        if ($enrollmentCount === 0) {
+            return 0;
+        }
 
         return round(($completedCount / ($totalItems * $enrollmentCount)) * 100, 1);
     }

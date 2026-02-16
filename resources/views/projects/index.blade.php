@@ -227,7 +227,6 @@
 
 @section('scripts')
     @vite(['resources/scripts/pages/table-init.js'])
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // SmartAdmin theme colors

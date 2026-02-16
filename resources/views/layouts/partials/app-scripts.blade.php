@@ -6,8 +6,8 @@
 <!-- App.js -->
 @vite(['resources/scripts/core/smartApp.js'])
 
-<!-- ApexCharts -->
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<!-- ApexCharts (bundled from npm to avoid CDN version mismatch) -->
+@vite(['resources/scripts/core/apexcharts-global.js'])
 
 @yield('scripts')
 @stack('scripts')

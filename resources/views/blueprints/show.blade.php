@@ -45,7 +45,8 @@
                     <div class="row mb-3">
                         <div class="col-md-3">
                             <small class="text-muted d-block">Category</small>
-                            <span class="badge bg-{{ $blueprint->category === 'application' ? 'info' : 'warning' }}">
+                            @php $catColors = ['application' => 'info', 'product' => 'warning', 'delivery' => 'primary']; @endphp
+                            <span class="badge bg-{{ $catColors[$blueprint->category] ?? 'secondary' }}">
                                 {{ \App\Models\Blueprint::CATEGORIES[$blueprint->category] ?? $blueprint->category }}
                             </span>
                         </div>

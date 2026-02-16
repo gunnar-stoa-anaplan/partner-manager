@@ -257,7 +257,6 @@
 
 @section('scripts')
     @vite(['resources/scripts/pages/table-init.js'])
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         var cm = window.colorMap || {};
@@ -350,8 +349,8 @@
                 series: [{ name: 'Avg Risk Score', data: rpValues }],
                 plotOptions: { bar: { horizontal: true, barHeight: '55%', borderRadius: 3, distributed: true } },
                 colors: rpValues.map(function(v){ return v >= 60 ? ((dng[500]||{}).hex||'#fd3995') : v >= 35 ? ((wrn[500]||{}).hex||'#ffc241') : ((inf[500]||{}).hex||'#33b5e5'); }),
-                xaxis: { labels: { style: { colors: bodyColorHex } }, max: 100 },
-                yaxis: { labels: { style: { colors: bodyColorHex, fontSize: '10px' } } },
+                xaxis: { categories: rpLabels, labels: { style: { colors: bodyColorHex, fontSize: '10px' } } },
+                yaxis: { max: 100, labels: { style: { colors: bodyColorHex } } },
                 legend: { show: false },
                 dataLabels: { enabled: true, style: { fontSize: '11px', fontWeight: 600 } },
                 grid: { borderColor: bodyColor01 },
@@ -380,8 +379,8 @@
                     (suc[500] || {}).hex || '#1dc9b7',
                     (suc[300] || {}).hex || '#5EDBC9'
                 ],
-                xaxis: { labels: { style: { colors: bodyColorHex, fontSize: '11px' }, formatter: fmtCurrency } },
-                yaxis: { labels: { style: { colors: bodyColorHex, fontSize: '10px' } } },
+                xaxis: { categories: raLabels, labels: { style: { colors: bodyColorHex, fontSize: '10px' } } },
+                yaxis: { labels: { style: { colors: bodyColorHex } } },
                 legend: { show: false },
                 dataLabels: { enabled: true, formatter: fmtCurrency, style: { fontSize: '10px', colors: ['#fff'] } },
                 grid: { borderColor: bodyColor01 },

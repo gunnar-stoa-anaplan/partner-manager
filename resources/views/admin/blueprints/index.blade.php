@@ -54,7 +54,8 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <span class="badge bg-{{ $blueprint->category === 'application' ? 'info' : 'warning' }}-50 text-{{ $blueprint->category === 'application' ? 'info' : 'warning' }}">
+                                            @php $catColors = ['application' => 'info', 'product' => 'warning', 'delivery' => 'primary']; @endphp
+                                            <span class="badge bg-{{ $catColors[$blueprint->category] ?? 'secondary' }}-50 text-{{ $catColors[$blueprint->category] ?? 'secondary' }}">
                                                 {{ \App\Models\Blueprint::CATEGORIES[$blueprint->category] ?? $blueprint->category }}
                                             </span>
                                         </td>
@@ -64,7 +65,7 @@
                                         <td class="text-center">{{ $blueprint->assignments_count }}</td>
                                         <td>
                                             @php
-                                                $statusColors = ['draft' => 'secondary', 'published' => 'success', 'archived' => 'warning'];
+                                                $statusColors = ['draft' => 'secondary', 'submitted' => 'info', 'published' => 'success', 'archived' => 'warning'];
                                             @endphp
                                             <span class="badge bg-{{ $statusColors[$blueprint->status] ?? 'secondary' }}">
                                                 {{ ucfirst($blueprint->status) }}
@@ -77,6 +78,12 @@
                                             <a href="{{ route('blueprints.edit', $blueprint) }}" class="btn btn-sm btn-outline-primary" title="Edit">
                                                 <i class="fal fa-pencil"></i>
                                             </a>
+                                            <form action="{{ route('blueprints.duplicate', $blueprint) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Duplicate">
+                                                    <i class="fal fa-copy"></i>
+                                                </button>
+                                            </form>
                                             <form action="{{ route('blueprints.destroy', $blueprint) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')

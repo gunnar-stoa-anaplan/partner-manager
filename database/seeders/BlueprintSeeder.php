@@ -4,7 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\Blueprint;
 use App\Models\BlueprintContentItem;
+use App\Models\BlueprintEnrollment;
 use App\Models\BlueprintOutcome;
+use App\Models\BlueprintProgress;
+use App\Models\PartnerBlueprintAssignment;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -13,6 +16,15 @@ class BlueprintSeeder extends Seeder
     public function run(): void
     {
         $this->command->info('Seeding Enablement Blueprints V2.0...');
+
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        BlueprintProgress::truncate();
+        BlueprintEnrollment::truncate();
+        PartnerBlueprintAssignment::truncate();
+        BlueprintContentItem::truncate();
+        BlueprintOutcome::truncate();
+        Blueprint::truncate();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
         $adminId = User::where('role', 'admin')->first()->id ?? 1;
 

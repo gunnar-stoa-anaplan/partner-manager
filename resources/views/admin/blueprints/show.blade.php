@@ -41,7 +41,8 @@
                     <div class="row">
                         <div class="col-md-2">
                             <small class="text-muted d-block">Category</small>
-                            <span class="badge bg-{{ $blueprint->category === 'application' ? 'info' : 'warning' }}">
+                            @php $catColors = ['application' => 'info', 'product' => 'warning', 'delivery' => 'primary']; @endphp
+                            <span class="badge bg-{{ $catColors[$blueprint->category] ?? 'secondary' }}">
                                 {{ \App\Models\Blueprint::CATEGORIES[$blueprint->category] ?? $blueprint->category }}
                             </span>
                         </div>
@@ -51,20 +52,20 @@
                         </div>
                         <div class="col-md-2">
                             <small class="text-muted d-block">Status</small>
-                            @php $statusColors = ['draft' => 'secondary', 'published' => 'success', 'archived' => 'warning']; @endphp
+                            @php $statusColors = ['draft' => 'secondary', 'submitted' => 'info', 'published' => 'success', 'archived' => 'warning']; @endphp
                             <span class="badge bg-{{ $statusColors[$blueprint->status] ?? 'secondary' }}">{{ ucfirst($blueprint->status) }}</span>
                         </div>
                         <div class="col-md-2">
-                            <small class="text-muted d-block">Outcomes</small>
-                            <strong>{{ $blueprint->outcomes->count() }}</strong>
+                            <small class="text-muted d-block">Owner</small>
+                            <strong>{{ $blueprint->owner->name ?? '-' }}</strong>
+                        </div>
+                        <div class="col-md-2">
+                            <small class="text-muted d-block">Date Published</small>
+                            <strong>{{ $blueprint->published_at ? $blueprint->published_at->format('M j, Y') : '-' }}</strong>
                         </div>
                         <div class="col-md-2">
                             <small class="text-muted d-block">Content Items</small>
                             <strong>{{ $blueprint->outcomes->sum(fn($o) => $o->contentItems->count()) }}</strong>
-                        </div>
-                        <div class="col-md-2">
-                            <small class="text-muted d-block">Assignments</small>
-                            <strong>{{ $blueprint->assignments->count() }}</strong>
                         </div>
                     </div>
                     @if($blueprint->description)
@@ -176,7 +177,7 @@
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover mb-0">
+                            <table id="blueprint-assignments-table" class="table table-bordered table-hover mb-0">
                                 <thead>
                                     <tr>
                                         <th>Partner</th>
@@ -215,4 +216,13 @@
 @endsection
 
 @section('scripts')
+    @vite(['resources/scripts/pages/table-init.js'])
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var el = document.querySelector('#blueprint-assignments-table');
+            if (window.SmartTables && el && el.querySelector('tbody tr td:not([colspan])')) {
+                new window.SmartTables('blueprint-assignments-table', { perPage: 10, sortable: true, searchable: true });
+            }
+        });
+    </script>
 @endsection

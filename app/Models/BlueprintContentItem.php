@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BlueprintContentItem extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'blueprint_outcome_id',
         'sort_order',

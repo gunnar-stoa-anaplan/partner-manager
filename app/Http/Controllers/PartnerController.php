@@ -19,6 +19,7 @@ use App\Models\PartnerScorecard;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\GateEvaluationService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -921,6 +922,7 @@ class PartnerController extends Controller
             'blueprintAssignments.enrollments.progress',
             'blueprintAssignments.assignedBy',
             'enablementSessions',
+            'contacts:id,partner_id,first_name,last_name,email',
         ]);
 
         // Blueprint completion by product area + role (radar chart)
@@ -957,13 +959,102 @@ class PartnerController extends Controller
 
         $blueprintAssignments = $partner->blueprintAssignments;
 
+        // ── KPI metrics (moved from blade @php block) ──
+        $enrolledContactIds = $blueprintAssignments->flatMap(fn ($a) => $a->enrollments->pluck('contact_id'))->unique();
+        $assignmentsWithEnrollments = $blueprintAssignments->filter(fn ($a) => $a->enrollments->count() > 0);
+        $avgCompletion = $assignmentsWithEnrollments->count() > 0
+            ? round($assignmentsWithEnrollments->avg(fn ($a) => $a->completionPercentage()), 1) : 0;
+        $completedAssignments = $assignmentsWithEnrollments->filter(fn ($a) => $a->completionPercentage() >= 100)->count();
+
+        // ── Enrollment Depth per blueprint ──
+        $enrollmentDepth = $assignmentsWithEnrollments
+            ->map(fn ($a) => [
+                'name' => Str::limit($a->blueprint->name, 30),
+                'enrolled' => $a->enrollments->count(),
+                'completion' => $a->completionPercentage(),
+                'role' => $a->role,
+            ])
+            ->sortByDesc('enrolled')
+            ->values();
+
+        $avgDepth = $assignmentsWithEnrollments->count() > 0
+            ? round($assignmentsWithEnrollments->avg(fn ($a) => $a->enrollments->count()), 1)
+            : 0;
+
+        // ── Stalled Blueprints (in-progress but no recent activity) ──
+        $stalledAssignments = $blueprintAssignments
+            ->filter(fn ($a) => $a->completionPercentage() > 0 && $a->completionPercentage() < 100)
+            ->map(function ($a) {
+                $lastActivity = $a->enrollments
+                    ->flatMap(fn ($e) => $e->progress)
+                    ->where('completed', true)
+                    ->max('completed_at');
+
+                return [
+                    'name' => Str::limit($a->blueprint->name, 30),
+                    'days_since_activity' => $lastActivity
+                        ? (int) Carbon::parse($lastActivity)->diffInDays(now())
+                        : (int) $a->created_at->diffInDays(now()),
+                    'completion' => $a->completionPercentage(),
+                    'role' => $a->role,
+                ];
+            })
+            ->sortByDesc('days_since_activity')
+            ->values();
+
+        $stalledCount = $stalledAssignments->filter(fn ($a) => $a['days_since_activity'] > 30)->count();
+
+        // ── Time to Complete distribution ──
+        $completedEnrollments = $blueprintAssignments
+            ->flatMap(fn ($a) => $a->enrollments)
+            ->where('status', 'completed')
+            ->filter(fn ($e) => $e->completed_at !== null);
+
+        $bucketDefs = [
+            ['bucket' => '< 2 weeks', 'max_days' => 14],
+            ['bucket' => '2-4 weeks', 'max_days' => 28],
+            ['bucket' => '1-2 months', 'max_days' => 60],
+            ['bucket' => '2-3 months', 'max_days' => 90],
+            ['bucket' => '3+ months', 'max_days' => PHP_INT_MAX],
+        ];
+
+        $timeToCompleteBuckets = collect($bucketDefs)->map(fn ($b) => array_merge($b, ['count' => 0]))->all();
+        foreach ($completedEnrollments as $enrollment) {
+            $days = (int) $enrollment->created_at->diffInDays($enrollment->completed_at);
+            foreach ($timeToCompleteBuckets as $idx => &$bucket) {
+                if ($days <= $bucket['max_days']) {
+                    $bucket['count']++;
+                    break;
+                }
+            }
+        }
+        unset($bucket);
+
+        $avgTimeToComplete = $completedEnrollments->count() > 0
+            ? (int) round($completedEnrollments->avg(fn ($e) => $e->created_at->diffInDays($e->completed_at)))
+            : null;
+
         // Upcoming sessions
         $upcomingSessions = $partner->enablementSessions
             ->where('session_date', '>=', now())
             ->sortBy('session_date')
             ->take(10);
 
-        return compact('blueprintByArea', 'blueprintAreas', 'enablementByStatus', 'blueprintAssignments', 'upcomingSessions');
+        // Contacts for embedded calendar
+        $contacts = $partner->contacts->map(fn ($c) => [
+            'id' => $c->id,
+            'name' => $c->first_name.' '.$c->last_name,
+            'email' => $c->email,
+        ]);
+
+        return compact(
+            'blueprintByArea', 'blueprintAreas', 'enablementByStatus',
+            'blueprintAssignments', 'upcomingSessions', 'contacts',
+            'enrolledContactIds', 'avgCompletion', 'completedAssignments',
+            'enrollmentDepth', 'avgDepth',
+            'stalledAssignments', 'stalledCount',
+            'timeToCompleteBuckets', 'avgTimeToComplete',
+        );
     }
 
     /**

@@ -85,7 +85,8 @@
                     <div class="card-header d-flex align-items-center">
                         <div class="card-title flex-grow-1 d-flex align-items-center gap-2">
                             <span>{{ $assignment->blueprint->name }}</span>
-                            <span class="badge bg-{{ $assignment->blueprint->category === 'application' ? 'info' : 'warning' }} opacity-75 fw-400">
+                            @php $catColors = ['application' => 'info', 'product' => 'warning', 'delivery' => 'primary']; @endphp
+                            <span class="badge bg-{{ $catColors[$assignment->blueprint->category] ?? 'secondary' }} opacity-75 fw-400">
                                 {{ \App\Models\Blueprint::CATEGORIES[$assignment->blueprint->category] ?? $assignment->blueprint->category }}
                             </span>
                             @if($assignment->blueprint->product_area)
@@ -96,7 +97,7 @@
                             <a href="{{ route('blueprint-assignments.show', $assignment) }}" class="btn btn-sm btn-outline-primary">
                                 <i class="fal fa-chart-bar me-1"></i> Details
                             </a>
-                            <a href="{{ route('blueprints.show', $assignment->blueprint) }}" class="btn btn-sm btn-outline-secondary">
+                            <a href="{{ route('blueprints.detail', $assignment->blueprint) }}" class="btn btn-sm btn-outline-secondary">
                                 <i class="fal fa-eye me-1"></i> Blueprint
                             </a>
                         </div>
@@ -188,7 +189,7 @@
                         <div class="mb-3"><i class="fal fa-layer-group fa-3x text-muted opacity-50"></i></div>
                         <h5 class="text-muted">No blueprints assigned yet</h5>
                         <p class="text-muted mb-3">Assign enablement blueprints to {{ $partner->name }} to track their readiness progression.</p>
-                        <a href="{{ route('blueprints.index') }}" class="btn btn-primary btn-sm">
+                        <a href="{{ route('blueprints.catalog') }}" class="btn btn-primary btn-sm">
                             <i class="fal fa-layers me-1"></i> Browse Blueprints
                         </a>
                     </div>

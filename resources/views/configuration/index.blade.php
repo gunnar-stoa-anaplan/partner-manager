@@ -100,50 +100,44 @@
         <div class="card shadow-0 mb-g">
             <div class="card-header">
                 <div class="card-title">
-                    Navigation Visibility
+                    Dev Focus
                 </div>
             </div>
             <div class="card-body">
-                <p class="text-muted fs-sm mb-3">Toggle navigation sections on/off during development. Hidden sections won't appear in the sidebar for any user.</p>
-                <form action="{{ route('configuration.update-navigation') }}" method="POST">
+                <p class="text-muted fs-sm mb-3">Select a feature to focus on. The sidebar will show only the screens relevant to that feature.</p>
+
+                <form id="dev-focus-form" action="{{ route('configuration.update-dev-focus') }}" method="POST">
                     @csrf
                     @method('PUT')
 
                     @php
-                        $navSections = [
-                            'nav_visible_analysis' => ['label' => 'Analysis Tools', 'desc' => 'Custom Analysis, Guided Analysis, Partner Coach'],
-                            'nav_visible_plan' => ['label' => 'Plan', 'desc' => 'Partner Paths, Scorecard, Competency Matrix, Task Board, Goals & Targets, Action Plans'],
-                            'nav_visible_engage' => ['label' => 'Engage', 'desc' => 'Project Health, Field Engagements, Field Enablement, Solution Lifecycle'],
-                            'nav_visible_key_metrics' => ['label' => 'Key Metrics', 'desc' => 'Partner Profile, Summary, Insights, Calendar, Blueprints'],
-                            'nav_visible_business_dev' => ['label' => 'Business Development', 'desc' => 'Sourced Leads, Influenced Leads, Development Funding'],
-                            'nav_visible_measure' => ['label' => 'Measure', 'desc' => 'Full Summary, Full Insights, At a Glance, Pipeline, Lead Flow, Funding, Revenue, Enablement, Delivery'],
-                            'nav_visible_act' => ['label' => 'Act', 'desc' => 'Alerts & Recommendations, QBR Workbench, Path Reviews'],
-                            'nav_visible_administration' => ['label' => 'Administration', 'desc' => 'Admin Dashboard, Partner Goals, Assignments, Leads, Users, Path Config, Templates'],
-                            'nav_visible_program_admin' => ['label' => 'Partner Enablement', 'desc' => 'Enablement Events, Calendar, Blueprints'],
-                            'nav_visible_system' => ['label' => 'System', 'desc' => 'Configuration, Imports, Salesforce, Pulse'],
+                        $currentFocus = $settings['dev_focus_feature'] ?? '';
+                        $focusOptions = [
+                            '' => ['label' => 'Show All', 'desc' => 'Full navigation — all sections visible'],
+                            'blueprints' => ['label' => 'Blueprints', 'desc' => 'Enablement Blueprints, partner blueprint tab'],
+                            'labs' => ['label' => 'Workshop Labs', 'desc' => 'Lab admin, checkpoints, facilitator dashboard'],
+                            'launch_programs' => ['label' => 'Launch Programs', 'desc' => 'Program milestones, partner nominations'],
+                            'enablement_events' => ['label' => 'Enablement Events', 'desc' => 'Events, sessions, calendars, registration'],
+                            'partner_paths' => ['label' => 'Partner Paths', 'desc' => 'Stages, gates, path config, path reviews'],
+                            'goals_scorecards' => ['label' => 'Goals & Scorecards', 'desc' => 'Goals, scorecard weights, templates, benchmarks'],
+                            'health_alerts' => ['label' => 'Health & Alerts', 'desc' => 'Partner health, alerts, QBR workbench'],
+                            'deal_registration' => ['label' => 'Deal Registration', 'desc' => 'Deals, leads, solution lifecycle, funding'],
+                            'anaplan' => ['label' => 'Anaplan Integration', 'desc' => 'Workspace sync, versions, provisioning'],
                         ];
                     @endphp
 
-                    @foreach($navSections as $key => $section)
-                        <div class="d-flex align-items-center justify-content-between py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
+                    @foreach($focusOptions as $value => $option)
+                        <label class="d-flex align-items-start gap-2 py-2 cursor-pointer {{ !$loop->last ? 'border-bottom' : '' }}" style="cursor:pointer">
+                            <input type="radio" name="dev_focus_feature" value="{{ $value }}"
+                                   class="form-check-input mt-1"
+                                   {{ $currentFocus === $value ? 'checked' : '' }}
+                                   onchange="this.form.submit()">
                             <div>
-                                <span class="fw-500 fs-sm">{{ $section['label'] }}</span>
-                                <small class="d-block text-muted">{{ $section['desc'] }}</small>
+                                <span class="fw-500 fs-sm">{{ $option['label'] }}</span>
+                                <small class="d-block text-muted">{{ $option['desc'] }}</small>
                             </div>
-                            <div class="form-check form-switch">
-                                <input type="hidden" name="{{ $key }}" value="0">
-                                <input class="form-check-input" type="checkbox" name="{{ $key }}" value="1"
-                                       {{ ($settings[$key] ?? '1') === '1' ? 'checked' : '' }}>
-                            </div>
-                        </div>
+                        </label>
                     @endforeach
-
-                    <div class="mt-3">
-                        <button type="submit" class="btn btn-primary btn-sm w-100">
-                            <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#eye"></use></svg>
-                            Update Visibility
-                        </button>
-                    </div>
                 </form>
             </div>
         </div>

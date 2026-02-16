@@ -11,12 +11,16 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import dayGridPlugin from '@fullcalendar/daygrid';
 
-document.addEventListener('DOMContentLoaded', function () {
+function initEnablementCalendar() {
     var config = window.enablementCalendarConfig;
     if (!config) return;
 
     var calendarEl = document.getElementById('enablement-calendar');
     if (!calendarEl) return;
+
+    // Prevent double-init
+    if (calendarEl.dataset.calendarInit) return;
+    calendarEl.dataset.calendarInit = '1';
 
     var mode = config.mode; // 'admin', 'psm', 'partner'
 
@@ -973,4 +977,11 @@ document.addEventListener('DOMContentLoaded', function () {
         div.appendChild(document.createTextNode(str));
         return div.innerHTML;
     }
-});
+}
+
+// Support both page load and AJAX tab loading (DOMContentLoaded already fired)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEnablementCalendar);
+} else {
+    initEnablementCalendar();
+}

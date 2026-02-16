@@ -29,7 +29,7 @@
                         <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#enrollContactModal">
                             <i class="fal fa-user-plus me-1"></i> Enroll Contacts
                         </button>
-                        <a href="{{ route('blueprints.show', $assignment->blueprint) }}" class="btn btn-sm btn-outline-secondary">
+                        <a href="{{ route('blueprints.detail', $assignment->blueprint) }}" class="btn btn-sm btn-outline-secondary">
                             <i class="fal fa-arrow-left me-1"></i> Back to Blueprint
                         </a>
                     </div>

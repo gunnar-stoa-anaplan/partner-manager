@@ -973,7 +973,6 @@
 
 @section('scripts')
 @vite(['resources/scripts/pages/table-init.js'])
-<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var sampleData = @json($partners);

@@ -30,8 +30,17 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
+                // Vendor CSS
+                'node_modules/node-waves/dist/waves.min.css',
+                'node_modules/jsvectormap/dist/jsvectormap.min.css',
+                'node_modules/@highlightjs/cdn-assets/styles/night-owl.css',
+                // Webfonts
+                'resources/webfonts/fontawesome/fontawesome.scss',
+                'resources/webfonts/smartadmin/sa-icons.scss',
+                // App CSS
                 'resources/sass/smartapp.scss',
                 ...getFilesFlat('resources/sass/themes'),
+                // App JS
                 ...getFilesRecursive('resources/scripts', ['.js'], ['smarttable']),
             ],
             refresh: true,

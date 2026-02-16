@@ -65,13 +65,25 @@
                             <textarea class="form-control" id="description" name="description" rows="3">{{ old('description') }}</textarea>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label" for="status">Status <span class="text-danger">*</span></label>
-                            <select class="form-select" id="status" name="status" required>
-                                @foreach(\App\Models\Blueprint::STATUSES as $value => $label)
-                                    <option value="{{ $value }}" {{ old('status', 'draft') === $value ? 'selected' : '' }}>{{ $label }}</option>
-                                @endforeach
-                            </select>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="status">Status <span class="text-danger">*</span></label>
+                                <select class="form-select" id="status" name="status" required>
+                                    @foreach(\App\Models\Blueprint::STATUSES as $value => $label)
+                                        <option value="{{ $value }}" {{ old('status', 'draft') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="owner_id">Owner</label>
+                                <select class="form-select" id="owner_id" name="owner_id">
+                                    <option value="">No Owner</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}" {{ old('owner_id') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">Optional. The owner can edit and submit this blueprint for publishing.</small>
+                            </div>
                         </div>
 
                         <div class="d-flex gap-2">

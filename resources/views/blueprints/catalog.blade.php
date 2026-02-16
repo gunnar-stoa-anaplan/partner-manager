@@ -19,7 +19,8 @@
         <div class="row mb-2">
             <div class="col-12">
                 <h4 class="fw-500 mb-3">
-                    <i class="fal fa-{{ $category === 'application' ? 'cubes' : 'box' }} me-2 text-primary"></i>
+                    @php $catIcons = ['application' => 'cubes', 'product' => 'box', 'delivery' => 'rocket']; @endphp
+                    <i class="fal fa-{{ $catIcons[$category] ?? 'layer-group' }} me-2 text-primary"></i>
                     {{ \App\Models\Blueprint::CATEGORIES[$category] ?? ucfirst($category) }}
                 </h4>
             </div>

@@ -1,4 +1,4 @@
-{{-- Enablement Tab: Blueprint Radar + Enablement Donut + Assignments + Sessions --}}
+{{-- Enablement Tab: Charts + KPIs + Calendar --}}
 
 <div class="row">
     {{-- Blueprint Completion Radar --}}
@@ -35,223 +35,211 @@
     <a href="{{ route('partners.blueprints', $partner->id) }}" class="btn btn-outline-warning btn-sm">
         <i class="fal fa-layers me-1"></i> Full Blueprint Progress
     </a>
-    <a href="{{ route('partners.enablement', $partner->id) }}" class="btn btn-outline-info btn-sm">
-        <i class="fal fa-award me-1"></i> Enablement Calendar
-    </a>
-    <a href="{{ route('partners.calendar', $partner->id) }}" class="btn btn-outline-primary btn-sm">
-        <i class="fal fa-calendar me-1"></i> Partner Calendar
-    </a>
 </div>
 
-{{-- Blueprint Assignments --}}
-@php
-    $enrolledContactIds = $blueprintAssignments->flatMap(fn($a) => $a->enrollments->pluck('contact_id'))->unique();
-    $assignmentsWithEnrollments = $blueprintAssignments->filter(fn($a) => $a->enrollments->count() > 0);
-    $avgCompletion = $assignmentsWithEnrollments->count() > 0
-        ? round($assignmentsWithEnrollments->avg(fn($a) => $a->completionPercentage()), 1) : 0;
-    $completedAssignments = $assignmentsWithEnrollments->filter(fn($a) => $a->completionPercentage() >= 100)->count();
-@endphp
-
-{{-- Summary KPI Cards --}}
+{{-- KPI Cards (6 cards) --}}
 <div class="row mb-g">
-    <div class="col-sm-6 col-xl-3 mb-g mb-xl-0">
+    @php
+        $kpis = [
+            ['label' => 'Avg Completion', 'value' => $avgCompletion . '%', 'sub' => 'across all assignments', 'icon' => 'chart-pie', 'color' => $avgCompletion >= 75 ? 'success' : ($avgCompletion >= 40 ? 'warning' : 'danger')],
+            ['label' => 'Enrolled Contacts', 'value' => $enrolledContactIds->count(), 'sub' => 'of ' . $partner->contacts->count() . ' total', 'icon' => 'users', 'color' => 'info'],
+            ['label' => 'Stalled', 'value' => $stalledCount, 'sub' => '> 30 days inactive', 'icon' => 'exclamation-triangle', 'color' => $stalledCount > 0 ? 'danger' : 'success'],
+            ['label' => 'Completed', 'value' => $completedAssignments . ' / ' . $blueprintAssignments->count(), 'sub' => 'assignments done', 'icon' => 'check-circle', 'color' => 'success'],
+            ['label' => 'Avg Depth', 'value' => $avgDepth, 'sub' => 'enrollees per blueprint', 'icon' => 'user-friends', 'color' => $avgDepth >= 3 ? 'success' : ($avgDepth >= 2 ? 'info' : 'warning')],
+            ['label' => 'Avg Time', 'value' => $avgTimeToComplete !== null ? $avgTimeToComplete . 'd' : '-', 'sub' => 'to complete', 'icon' => 'clock', 'color' => 'info'],
+        ];
+    @endphp
+    @foreach($kpis as $kpi)
+    <div class="col-sm-6 col-xl-2 mb-g mb-xl-0">
         <div class="card shadow-0">
             <div class="card-body d-flex align-items-center">
                 <div class="flex-grow-1">
-                    <p class="text-muted mb-1 small">Total Assignments</p>
-                    <span class="h3 mb-0 fw-500">{{ $blueprintAssignments->count() }}</span>
+                    <p class="text-muted mb-1 small">{{ $kpi['label'] }}</p>
+                    <span class="h3 mb-0 fw-500">{{ $kpi['value'] }}</span>
+                    <small class="d-block text-muted">{{ $kpi['sub'] }}</small>
                 </div>
-                <div class="width-5 height-5 bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                    <i class="fal fa-layers fa-lg text-primary"></i>
+                <div class="width-4 height-4 bg-{{ $kpi['color'] }} bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="fal fa-{{ $kpi['icon'] }} fa-lg text-{{ $kpi['color'] }}"></i>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3 mb-g mb-xl-0">
-        <div class="card shadow-0">
-            <div class="card-body d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <p class="text-muted mb-1 small">Enrolled Contacts</p>
-                    <span class="h3 mb-0 fw-500">{{ $enrolledContactIds->count() }}</span>
-                </div>
-                <div class="width-5 height-5 bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                    <i class="fal fa-users fa-lg text-info"></i>
+    @endforeach
+</div>
+
+{{-- Row 2: Coverage & Depth --}}
+<div class="row">
+    <div class="col-lg-7">
+        <div class="panel panel-icon" id="panel-area-role">
+            <div class="panel-hdr">
+                <h2>Completion by <span class="fw-light"><i>Area & Role</i></span></h2>
+            </div>
+            <div class="panel-container">
+                <div class="panel-content">
+                    <div id="chart-area-role" style="height: 350px;"></div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3 mb-g mb-xl-0">
-        <div class="card shadow-0">
-            <div class="card-body d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <p class="text-muted mb-1 small">Avg Completion</p>
-                    <span class="h3 mb-0 fw-500">{{ $avgCompletion }}%</span>
-                </div>
-                <div class="width-5 height-5 bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                    <i class="fal fa-chart-pie fa-lg text-warning"></i>
-                </div>
+    <div class="col-lg-5">
+        <div class="panel panel-icon" id="panel-depth">
+            <div class="panel-hdr">
+                <h2>Enrollment <span class="fw-light"><i>Depth</i></span></h2>
             </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3 mb-g mb-xl-0">
-        <div class="card shadow-0">
-            <div class="card-body d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <p class="text-muted mb-1 small">Completed</p>
-                    <span class="h3 mb-0 fw-500">{{ $completedAssignments }} <small class="text-muted fw-400">/ {{ $blueprintAssignments->count() }}</small></span>
-                </div>
-                <div class="width-5 height-5 bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                    <i class="fal fa-check-circle fa-lg text-success"></i>
+            <div class="panel-container">
+                <div class="panel-content">
+                    <div id="chart-enrollment-depth" style="height: 350px;"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-{{-- Assignment Cards --}}
-@forelse($blueprintAssignments as $assignment)
-    @php
-        $pct = $assignment->completionPercentage();
-        $progressColor = $pct >= 100 ? 'success' : ($pct >= 50 ? 'info' : ($pct > 0 ? 'warning' : 'secondary'));
-        $applicableCount = $assignment->applicableContentItemCount();
-    @endphp
-    <div class="card shadow-0 mb-g">
-        <div class="card-header d-flex align-items-center">
-            <div class="card-title flex-grow-1 d-flex align-items-center gap-2">
-                <span>{{ $assignment->blueprint->name }}</span>
-                <span class="badge bg-{{ $assignment->blueprint->category === 'application' ? 'info' : 'warning' }} opacity-75 fw-400">
-                    {{ \App\Models\Blueprint::CATEGORIES[$assignment->blueprint->category] ?? $assignment->blueprint->category }}
-                </span>
-                @if($assignment->blueprint->product_area)
-                    <span class="badge bg-light text-dark border fw-400">{{ $assignment->blueprint->product_area }}</span>
-                @endif
+{{-- Row 3: Health & Velocity --}}
+<div class="row">
+    <div class="col-lg-6">
+        <div class="panel panel-icon" id="panel-stalled">
+            <div class="panel-hdr">
+                <h2>Stalled <span class="fw-light"><i>Blueprints</i></span></h2>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <a href="{{ route('blueprint-assignments.show', $assignment) }}" class="btn btn-sm btn-outline-primary">
-                    <i class="fal fa-chart-bar me-1"></i> Details
+            <div class="panel-container">
+                <div class="panel-content">
+                    <div id="chart-stalled" style="height: 350px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="panel panel-icon" id="panel-time-complete">
+            <div class="panel-hdr">
+                <h2>Time to <span class="fw-light"><i>Complete</i></span></h2>
+            </div>
+            <div class="panel-container">
+                <div class="panel-content">
+                    <div id="chart-time-complete" style="height: 350px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Enablement Calendar with Sidebar --}}
+<style>
+    #draggable-sessions .fc-event {
+        cursor: grab; padding: 5px 8px; margin-bottom: 5px;
+        border-radius: 4px; font-size: 0.8rem; color: #fff; border: none;
+    }
+    #draggable-sessions .fc-event:active { cursor: grabbing; }
+    #draggable-sessions .fc-event .event-meta { font-size: 0.7rem; opacity: 0.85; }
+</style>
+<div class="row mb-g">
+    <div class="col-lg-9">
+        <div class="card shadow-0">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-title mb-0">Enablement Calendar</div>
+                <a href="{{ route('enablement.calendar') }}" class="btn btn-xs btn-outline-info">
+                    <i class="fal fa-external-link me-1"></i> Full Calendar
                 </a>
             </div>
+            <div class="card-body">
+                <div id="enablement-calendar" style="min-height: 500px;"></div>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-2">
-                    <small class="text-muted d-block">Role</small>
-                    <span class="badge" style="background-color: {{ \App\Models\PartnerBlueprintAssignment::ROLE_COLORS[$assignment->role] ?? '#868e96' }}">
-                        {{ \App\Models\PartnerBlueprintAssignment::ROLES[$assignment->role] ?? $assignment->role }}
-                    </span>
-                </div>
-                <div class="col-md-2">
-                    <small class="text-muted d-block">Status</small>
-                    <span class="badge bg-{{ $assignment->status === 'active' ? 'success' : ($assignment->status === 'paused' ? 'warning' : 'info') }}">
-                        {{ ucfirst($assignment->status) }}
-                    </span>
-                </div>
-                <div class="col-md-2">
-                    <small class="text-muted d-block">Content Items</small>
-                    <strong>{{ $applicableCount }}</strong>
-                </div>
-                <div class="col-md-2">
-                    <small class="text-muted d-block">Enrolled</small>
-                    <strong>{{ $assignment->enrollments->count() }}</strong> contacts
-                </div>
-                <div class="col-md-2">
-                    <small class="text-muted d-block">Assigned By</small>
-                    <span>{{ $assignment->assignedBy->name }}</span>
-                </div>
-                <div class="col-md-2">
-                    <small class="text-muted d-block">Since</small>
-                    <span>{{ $assignment->created_at->format('M j, Y') }}</span>
-                </div>
+    </div>
+    <div class="col-lg-3">
+        {{-- Type Filter --}}
+        <div class="card shadow-0 mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <h6 class="card-title mb-0">Filter by Type</h6>
+                <button class="btn btn-xs btn-link p-0" id="toggleAllTypes">All</button>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <small class="text-muted text-nowrap fw-500">Overall:</small>
-                <div class="progress flex-grow-1" style="height: 10px;">
-                    <div class="progress-bar bg-{{ $progressColor }}" style="width: {{ $pct }}%"></div>
-                </div>
-                <small class="text-muted text-nowrap fw-500">{{ $pct }}%</small>
-            </div>
-
-            {{-- Enrolled Contacts --}}
-            @if($assignment->enrollments->count())
-                <div class="border-top pt-3 mt-3">
-                    <small class="text-muted fw-500 d-block mb-2">Enrolled Contacts</small>
-                    @foreach($assignment->enrollments as $enrollment)
-                        @php
-                            $ePct = $enrollment->completionPercentage();
-                            $eCompleted = $enrollment->completedItemsCount();
-                            $eTotal = $enrollment->totalApplicableItems();
-                            $eColor = $ePct >= 100 ? 'success' : ($ePct >= 50 ? 'info' : ($ePct > 0 ? 'warning' : 'secondary'));
-                        @endphp
-                        <div class="d-flex align-items-center gap-3 mb-2">
-                            <div style="min-width: 160px;">
-                                <a href="{{ route('blueprint-enrollments.show', $enrollment) }}" class="text-dark">
-                                    {{ $enrollment->contact->first_name }} {{ $enrollment->contact->last_name }}
-                                </a>
-                            </div>
-                            <span class="badge" style="background-color: {{ \App\Models\BlueprintEnrollment::STATUS_COLORS[$enrollment->status] ?? '#868e96' }}; min-width: 80px;">
-                                {{ \App\Models\BlueprintEnrollment::STATUSES[$enrollment->status] ?? $enrollment->status }}
-                            </span>
-                            <div class="progress flex-grow-1" style="height: 6px;">
-                                <div class="progress-bar bg-{{ $eColor }}" style="width: {{ $ePct }}%"></div>
-                            </div>
-                            <small class="text-muted text-nowrap">{{ $eCompleted }}/{{ $eTotal }} ({{ $ePct }}%)</small>
+            <div class="card-body py-2">
+                <div id="type-filters">
+                    @foreach(\App\Models\EnablementEvent::TYPES as $typeKey => $typeLabel)
+                        <div class="form-check form-check-sm">
+                            <input class="form-check-input type-filter" type="checkbox"
+                                   value="{{ $typeKey }}" id="type-filter-{{ $typeKey }}" checked>
+                            <label class="form-check-label small" for="type-filter-{{ $typeKey }}">
+                                <span class="badge me-1" style="background-color: {{ \App\Models\EnablementEvent::TYPE_COLORS[$typeKey] ?? '#868e96' }}; width: 8px; height: 8px; display: inline-block; border-radius: 50%; padding: 0;"></span>
+                                {{ $typeLabel }}
+                            </label>
                         </div>
                     @endforeach
                 </div>
-            @else
-                <div class="text-center py-3 text-muted border-top mt-3">
-                    <i class="fal fa-user-plus me-1"></i> No contacts enrolled yet.
-                    <a href="{{ route('blueprint-assignments.show', $assignment) }}">Enroll contacts</a>
-                </div>
-            @endif
+            </div>
         </div>
-    </div>
-@empty
-    <div class="card shadow-0">
-        <div class="card-body text-center py-5">
-            <div class="mb-3"><i class="fal fa-layer-group fa-3x text-muted opacity-50"></i></div>
-            <h5 class="text-muted">No blueprints assigned yet</h5>
-            <p class="text-muted mb-3">Assign enablement blueprints to {{ $partner->name }} to track their readiness progression.</p>
-        </div>
-    </div>
-@endforelse
 
-{{-- Upcoming Sessions --}}
-@if($upcomingSessions->isNotEmpty())
-<div class="card shadow-0 mb-g">
-    <div class="card-header">
-        <div class="card-title">Upcoming Sessions</div>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-sm table-bordered table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Event</th>
-                        <th>Location</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($upcomingSessions as $session)
-                    <tr>
-                        <td class="text-nowrap">{{ $session->session_date ? \Carbon\Carbon::parse($session->session_date)->format('M j, Y') : '-' }}</td>
-                        <td class="fw-500">{{ $session->title ?? $session->event_title ?? '-' }}</td>
-                        <td>{{ $session->location ?? 'Virtual' }}</td>
-                        <td>
-                            <span class="badge bg-{{ $session->status === 'completed' ? 'success' : ($session->status === 'cancelled' ? 'danger' : 'info') }} opacity-75">
-                                {{ ucfirst(str_replace('_', ' ', $session->status ?? 'scheduled')) }}
-                            </span>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        {{-- Available Sessions (drag to register) --}}
+        <div class="card shadow-0">
+            <div class="card-header py-2">
+                <h6 class="card-title mb-0">Available Sessions</h6>
+            </div>
+            <div class="card-body p-2">
+                <div class="form-text mb-2 px-1 small">Drag a session onto the calendar to register this partner.</div>
+                <div id="draggable-sessions" style="max-height: 400px; overflow-y: auto;">
+                    <div class="text-center text-muted py-2"><small>Loading sessions...</small></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-@endif
+
+{{-- Contact Assignment Modal --}}
+<div class="modal fade" id="contactAssignModal" tabindex="-1" aria-labelledby="contactAssignTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactAssignTitle">Assign {{ $partner->name }} Contacts</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="assignSessionId">
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <h6 class="text-muted mb-1">Session</h6>
+                        <h5 id="assignSessionTitle" class="mb-0"></h5>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span id="assignTypeBadge" class="badge"></span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><small class="text-muted d-block">Date</small><strong id="assignSessionDate"></strong></div>
+                    <div class="col-md-4"><small class="text-muted d-block">Location</small><strong id="assignSessionLocation"></strong></div>
+                    <div class="col-md-4"><small class="text-muted d-block">Instructor</small><strong id="assignSessionInstructor"></strong></div>
+                </div>
+                <hr>
+                <h6 class="text-muted mb-2"><i class="fal fa-users me-1"></i> Assigned Contacts</h6>
+                <div id="assignedContactsList" class="mb-3"><p class="text-muted">Loading...</p></div>
+                <hr>
+                <h6 class="text-muted mb-2"><i class="fal fa-user-plus me-1"></i> Add Contacts</h6>
+                <div id="availableContacts">
+                    @foreach($partner->contacts as $contact)
+                        <div class="form-check" id="contact-row-{{ $contact->id }}">
+                            <input class="form-check-input assign-contact-cb" type="checkbox"
+                                   value="{{ $contact->id }}" id="assign-contact-{{ $contact->id }}">
+                            <label class="form-check-label" for="assign-contact-{{ $contact->id }}">
+                                {{ $contact->first_name }} {{ $contact->last_name }}
+                                @if($contact->email) <small class="text-muted">({{ $contact->email }})</small> @endif
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="mt-3">
+                    <button type="button" class="btn btn-sm btn-primary" id="assignContactsBtn">
+                        <i class="fal fa-user-plus me-1"></i> Assign Selected
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger ms-2 d-none" id="removePartnerBtn">
+                        <i class="fal fa-times me-1"></i> Unregister Partner
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Toast Container --}}
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100" id="toast-container"></div>
 
 {{-- Chart Scripts --}}
 <script>
@@ -260,6 +248,32 @@
     var bv = (cm.bootstrapVars && cm.bootstrapVars.bodyColor) || null;
     var bodyColorHex = bv ? bv.hex : '#6c757d';
     var bodyColor01 = bv ? bv.rgba(0.1) : 'rgba(108,117,125,0.1)';
+    var dlToolbar = { show: true, tools: { download: true, selection: false, zoom: false, zoomin: false, zoomout: false, pan: false, reset: false } };
+
+    function addCopyMenuItem(chartContext) {
+        var menuEl = chartContext.el.querySelector('.apexcharts-menu');
+        if (!menuEl || menuEl.querySelector('.copy-clipboard-item')) return;
+        var copyItem = document.createElement('div');
+        copyItem.className = 'apexcharts-menu-item copy-clipboard-item';
+        copyItem.textContent = 'Copy';
+        copyItem.addEventListener('click', function() {
+            chartContext.dataURI({ scale: 2 }).then(function(uri) {
+                fetch(uri.imgURI)
+                    .then(function(res) { return res.blob(); })
+                    .then(function(blob) {
+                        return navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                    })
+                    .then(function() {
+                        copyItem.textContent = 'Copied!';
+                        setTimeout(function() { copyItem.textContent = 'Copy'; }, 1500);
+                    });
+            });
+            menuEl.classList.remove('apexcharts-menu-open');
+        });
+        menuEl.appendChild(copyItem);
+    }
+
+    var roleColors = { delivery: '#00BCD4', gtm: '#fd7e14', pre_sales: '#886ab5' };
 
     // ── Blueprint Completion Radar ──
     var blueprintSeries = @json($blueprintByArea);
@@ -267,7 +281,7 @@
     if (blueprintSeries.length > 0 && blueprintLabels.length > 0) {
         var radarColors = ['#00BCD4', '#fd7e14', '#886ab5'];
         new ApexCharts(document.querySelector('#enablement-blueprint-radar'), {
-            chart: { height: 350, width: '100%', type: 'radar', toolbar: { show: false }, fontFamily: 'inherit', parentHeightOffset: 0 },
+            chart: { height: 350, width: '100%', type: 'radar', toolbar: dlToolbar, fontFamily: 'inherit', parentHeightOffset: 0, events: { mounted: addCopyMenuItem, updated: addCopyMenuItem } },
             series: blueprintSeries,
             labels: blueprintLabels,
             colors: radarColors,
@@ -292,7 +306,7 @@
     var engColors = { 'scheduled': '#17a2b8', 'in_progress': '#886ab5', 'completed': '#28a745', 'cancelled': '#dc3545' };
     if (engLabels.length > 0) {
         new ApexCharts(document.querySelector('#enablement-donut-chart'), {
-            chart: { type: 'donut', height: 350 },
+            chart: { type: 'donut', height: 350, toolbar: dlToolbar, events: { mounted: addCopyMenuItem, updated: addCopyMenuItem } },
             series: engValues,
             labels: engLabels.map(function(s) { return s.replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); }); }),
             colors: engLabels.map(function(s) { return engColors[s] || '#868e96'; }),
@@ -303,5 +317,108 @@
     } else {
         document.querySelector('#enablement-donut-chart').innerHTML = '<div class="text-center text-muted py-5"><i class="fal fa-award fa-2x mb-2 opacity-50"></i><p>No enablement sessions yet</p></div>';
     }
+
+    // ── Completion by Area & Role (grouped bar) ──
+    if (blueprintSeries.length > 0 && blueprintLabels.length > 0) {
+        new ApexCharts(document.querySelector('#chart-area-role'), {
+            chart: { type: 'bar', height: 350, toolbar: dlToolbar, fontFamily: 'inherit', events: { mounted: addCopyMenuItem, updated: addCopyMenuItem } },
+            series: blueprintSeries,
+            plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '70%' } },
+            colors: ['#00BCD4', '#fd7e14', '#886ab5'],
+            dataLabels: { enabled: true, formatter: function(val) { return val + '%'; }, style: { fontSize: '11px' } },
+            xaxis: { categories: blueprintLabels, labels: { style: { colors: bodyColorHex } } },
+            yaxis: { max: 100, labels: { style: { colors: bodyColorHex } } },
+            legend: { show: true, position: 'top', labels: { colors: bodyColorHex } },
+            tooltip: { theme: 'dark', y: { formatter: function(val) { return val + '%'; } } },
+            grid: { borderColor: bodyColor01, strokeDashArray: 5 }
+        }).render();
+    } else {
+        document.querySelector('#chart-area-role').innerHTML = '<div class="text-center text-muted py-5"><i class="fal fa-chart-bar fa-2x mb-2 opacity-50"></i><p>No assignment data</p></div>';
+    }
+
+    // ── Enrollment Depth (horizontal bar) ──
+    var depthData = @json($enrollmentDepth);
+    if (depthData.length > 0) {
+        var depthColors = depthData.map(function(d) {
+            return d.enrolled >= 3 ? '#28a745' : (d.enrolled >= 2 ? '#fd7e14' : '#dc3545');
+        });
+        new ApexCharts(document.querySelector('#chart-enrollment-depth'), {
+            chart: { type: 'bar', height: 350, toolbar: dlToolbar, fontFamily: 'inherit', events: { mounted: addCopyMenuItem, updated: addCopyMenuItem } },
+            series: [{ name: 'Enrollees', data: depthData.map(function(d) { return d.enrolled; }) }],
+            plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '65%', distributed: true } },
+            colors: depthColors,
+            xaxis: { categories: depthData.map(function(d) { return d.name; }), labels: { style: { colors: bodyColorHex } } },
+            yaxis: { labels: { style: { colors: bodyColorHex } } },
+            legend: { show: false },
+            tooltip: { theme: 'dark', custom: function(opts) {
+                var d = depthData[opts.dataPointIndex];
+                return '<div class="px-3 py-2"><b>' + d.name + '</b><br>' + d.enrolled + ' enrollees | ' + d.completion + '% complete</div>';
+            } },
+            grid: { borderColor: bodyColor01, strokeDashArray: 5 }
+        }).render();
+    } else {
+        document.querySelector('#chart-enrollment-depth').innerHTML = '<div class="text-center text-muted py-5"><i class="fal fa-users fa-2x mb-2 opacity-50"></i><p>No enrollments yet</p></div>';
+    }
+
+    // ── Stalled Blueprints (horizontal bar) ──
+    var stalledData = @json($stalledAssignments);
+    if (stalledData.length > 0) {
+        var stalledColors = stalledData.map(function(d) {
+            return d.days_since_activity > 30 ? '#dc3545' : (d.days_since_activity > 14 ? '#fd7e14' : '#28a745');
+        });
+        new ApexCharts(document.querySelector('#chart-stalled'), {
+            chart: { type: 'bar', height: 350, toolbar: dlToolbar, fontFamily: 'inherit', events: { mounted: addCopyMenuItem, updated: addCopyMenuItem } },
+            series: [{ name: 'Days Inactive', data: stalledData.map(function(d) { return d.days_since_activity; }) }],
+            plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '65%', distributed: true } },
+            colors: stalledColors,
+            dataLabels: { enabled: true, formatter: function(val) { return val + 'd'; }, style: { fontSize: '11px' } },
+            xaxis: { categories: stalledData.map(function(d) { return d.name; }), labels: { style: { colors: bodyColorHex } } },
+            yaxis: { labels: { style: { colors: bodyColorHex } } },
+            legend: { show: false },
+            tooltip: { theme: 'dark', custom: function(opts) {
+                var d = stalledData[opts.dataPointIndex];
+                return '<div class="px-3 py-2"><b>' + d.name + '</b><br>' + d.days_since_activity + ' days idle | ' + d.completion + '% complete</div>';
+            } },
+            grid: { borderColor: bodyColor01, strokeDashArray: 5 }
+        }).render();
+    } else {
+        document.querySelector('#chart-stalled').innerHTML = '<div class="text-center text-muted py-5"><i class="fal fa-check-circle fa-2x mb-2 text-success opacity-50"></i><p>No stalled blueprints</p></div>';
+    }
+
+    // ── Time to Complete (vertical bar) ──
+    var ttcData = @json($timeToCompleteBuckets);
+    var ttcLabels = ttcData.map(function(b) { return b.bucket; });
+    var ttcValues = ttcData.map(function(b) { return b.count; });
+    var ttcTotal = ttcValues.reduce(function(a, b) { return a + b; }, 0);
+    if (ttcTotal > 0) {
+        new ApexCharts(document.querySelector('#chart-time-complete'), {
+            chart: { type: 'bar', height: 350, toolbar: dlToolbar, fontFamily: 'inherit', events: { mounted: addCopyMenuItem, updated: addCopyMenuItem } },
+            series: [{ name: 'Completions', data: ttcValues }],
+            plotOptions: { bar: { columnWidth: '55%', borderRadius: 4, distributed: true } },
+            colors: ['#28a745', '#17a2b8', '#886ab5', '#fd7e14', '#dc3545'],
+            xaxis: { categories: ttcLabels, labels: { style: { colors: bodyColorHex, fontSize: '10px' } } },
+            yaxis: { labels: { style: { colors: bodyColorHex } } },
+            legend: { show: false },
+            tooltip: { theme: 'dark' },
+            grid: { borderColor: bodyColor01 }
+        }).render();
+    } else {
+        document.querySelector('#chart-time-complete').innerHTML = '<div class="text-center text-muted py-5"><i class="fal fa-clock fa-2x mb-2 opacity-50"></i><p>No completed enrollments yet</p></div>';
+    }
+
+    // ── Embedded Enablement Calendar ──
+    @if(isset($contacts))
+    window.enablementCalendarConfig = {
+        mode: 'partner',
+        partnerId: {{ $partner->id }},
+        partnerName: @json($partner->name),
+        contacts: @json($contacts),
+        eventTypes: @json(\App\Models\EnablementEvent::TYPES),
+        typeColors: @json(\App\Models\EnablementEvent::TYPE_COLORS),
+        apiBaseUrl: '{{ url("/api") }}',
+        csrfToken: '{{ csrf_token() }}',
+    };
+    @endif
 })();
 </script>
+@vite(['resources/scripts/pages/enablement-calendar.js'])

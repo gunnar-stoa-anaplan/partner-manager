@@ -730,7 +730,6 @@
 
 @section('scripts')
     @vite(['resources/scripts/pages/table-init.js'])
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         var cm = window.colorMap || {};
@@ -809,8 +808,8 @@
                 series: [{ name: 'Pipeline', data: psValues }],
                 plotOptions: { bar: { horizontal: true, barHeight: '60%', borderRadius: 3, distributed: true } },
                 colors: chartColors,
-                xaxis: { labels: { style: { colors: bodyColorHex, fontSize: '11px' }, formatter: fmtCurrency } },
-                yaxis: { categories: psLabels, labels: { style: { colors: bodyColorHex, fontSize: '11px' } } },
+                xaxis: { categories: psLabels, labels: { style: { colors: bodyColorHex, fontSize: '11px' } } },
+                yaxis: { labels: { style: { colors: bodyColorHex, fontSize: '11px' } } },
                 legend: { show: false },
                 dataLabels: { enabled: true, formatter: fmtCurrency, style: { fontSize: '10px', colors: ['#fff'] } },
                 grid: { borderColor: bodyColor01 },
@@ -886,8 +885,8 @@
                 series: [{ name: 'Partners', data: psmValues }],
                 plotOptions: { bar: { horizontal: true, barHeight: '55%', borderRadius: 3, distributed: true } },
                 colors: chartColors,
-                xaxis: { labels: { style: { colors: bodyColorHex } } },
-                yaxis: { labels: { style: { colors: bodyColorHex, fontSize: '11px' } } },
+                xaxis: { categories: psmLabels, labels: { style: { colors: bodyColorHex, fontSize: '11px' } } },
+                yaxis: { labels: { style: { colors: bodyColorHex } } },
                 legend: { show: false },
                 dataLabels: { enabled: true, style: { fontSize: '12px', fontWeight: 600 } },
                 grid: { borderColor: bodyColor01 },
@@ -1051,8 +1050,8 @@
                 series: [{ name: 'Partners', data: indValues }],
                 plotOptions: { bar: { horizontal: true, barHeight: '60%', borderRadius: 3, distributed: true } },
                 colors: chartColors,
-                xaxis: { labels: { style: { colors: bodyColorHex } } },
-                yaxis: { labels: { style: { colors: bodyColorHex, fontSize: '11px' } } },
+                xaxis: { categories: indLabels, labels: { style: { colors: bodyColorHex, fontSize: '11px' } } },
+                yaxis: { labels: { style: { colors: bodyColorHex } } },
                 legend: { show: false },
                 dataLabels: { enabled: true, style: { fontSize: '12px', fontWeight: 600 } },
                 grid: { borderColor: bodyColor01 },
@@ -1092,8 +1091,8 @@
                 series: [{ name: 'Size (MB)', data: tbValues }],
                 plotOptions: { bar: { horizontal: true, barHeight: '55%', borderRadius: 3, distributed: true } },
                 colors: chartColors,
-                xaxis: { labels: { style: { colors: bodyColorHex }, formatter: function(v){ return v + ' MB'; } } },
-                yaxis: { labels: { style: { colors: bodyColorHex, fontSize: '10px' } } },
+                xaxis: { categories: tbLabels, labels: { style: { colors: bodyColorHex, fontSize: '10px' } } },
+                yaxis: { labels: { style: { colors: bodyColorHex } } },
                 legend: { show: false },
                 dataLabels: { enabled: true, formatter: function(v){ return v + ' MB'; }, style: { fontSize: '10px', colors: ['#fff'] } },
                 grid: { borderColor: bodyColor01 },

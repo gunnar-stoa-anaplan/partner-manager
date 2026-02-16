@@ -52,4 +52,19 @@ class ConfigurationController extends Controller
 
         return redirect()->route('configuration.index')->with('success', 'Navigation visibility updated successfully.');
     }
+
+    public function updateDevFocus(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $validated = $request->validate([
+            'dev_focus_feature' => 'nullable|string|max:50',
+        ]);
+
+        AppSetting::set('dev_focus_feature', $validated['dev_focus_feature'] ?? '');
+
+        $label = $validated['dev_focus_feature']
+            ? str_replace('_', ' ', ucfirst($validated['dev_focus_feature']))
+            : 'Show All';
+
+        return redirect()->route('configuration.index')->with('success', "Dev Focus set to: {$label}");
+    }
 }

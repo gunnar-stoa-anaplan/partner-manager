@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blueprint;
-use App\Models\BlueprintOutcome;
 use App\Models\BlueprintContentItem;
+use App\Models\BlueprintOutcome;
+use App\Models\NotificationTemplate;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class BlueprintController extends Controller
@@ -22,21 +24,25 @@ class BlueprintController extends Controller
 
     public function create()
     {
-        return view('admin.blueprints.create');
+        $users = User::orderBy('name')->get(['id', 'name']);
+
+        return view('admin.blueprints.create', compact('users'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category' => 'required|in:application,product',
+            'category' => 'required|in:application,product,delivery',
             'product_area' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'version' => 'nullable|string|max:50',
-            'status' => 'required|in:draft,published,archived',
+            'status' => 'required|in:draft,submitted,published,archived',
+            'owner_id' => 'nullable|exists:users,id',
         ]);
 
         $validated['created_by'] = auth()->id();
+        $this->applyStatusDates($validated, null);
 
         $blueprint = Blueprint::create($validated);
 
@@ -46,7 +52,7 @@ class BlueprintController extends Controller
 
     public function show(Blueprint $blueprint)
     {
-        $blueprint->load(['outcomes.contentItems', 'assignments.partner', 'assignments.enrollments.contact']);
+        $blueprint->load(['outcomes.contentItems', 'assignments.partner', 'assignments.enrollments.contact', 'owner']);
 
         return view('admin.blueprints.show', compact('blueprint'));
     }
@@ -54,21 +60,24 @@ class BlueprintController extends Controller
     public function edit(Blueprint $blueprint)
     {
         $blueprint->load('outcomes.contentItems');
+        $users = User::orderBy('name')->get(['id', 'name']);
 
-        return view('admin.blueprints.edit', compact('blueprint'));
+        return view('admin.blueprints.edit', compact('blueprint', 'users'));
     }
 
     public function update(Request $request, Blueprint $blueprint)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category' => 'required|in:application,product',
+            'category' => 'required|in:application,product,delivery',
             'product_area' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'version' => 'nullable|string|max:50',
-            'status' => 'required|in:draft,published,archived',
+            'status' => 'required|in:draft,submitted,published,archived',
+            'owner_id' => 'nullable|exists:users,id',
         ]);
 
+        $this->applyStatusDates($validated, $blueprint);
         $blueprint->update($validated);
 
         return redirect()->route('blueprints.show', $blueprint)
@@ -81,6 +90,106 @@ class BlueprintController extends Controller
 
         return redirect()->route('blueprints.index')
             ->with('success', 'Blueprint deleted successfully.');
+    }
+
+    // ─── Duplicate ──────────────────────────────────────────────
+
+    public function duplicate(Blueprint $blueprint)
+    {
+        $blueprint->load('outcomes.contentItems');
+
+        $copy = Blueprint::create([
+            'name' => $blueprint->name.' - Copy',
+            'category' => $blueprint->category,
+            'product_area' => $blueprint->product_area,
+            'description' => $blueprint->description,
+            'version' => $blueprint->version,
+            'status' => 'draft',
+            'created_by' => auth()->id(),
+            'owner_id' => null,
+            'drafted_at' => now(),
+        ]);
+
+        foreach ($blueprint->outcomes as $outcome) {
+            $newOutcome = BlueprintOutcome::create([
+                'blueprint_id' => $copy->id,
+                'title' => $outcome->title,
+                'description' => $outcome->description,
+                'sort_order' => $outcome->sort_order,
+            ]);
+
+            foreach ($outcome->contentItems as $item) {
+                BlueprintContentItem::create([
+                    'blueprint_outcome_id' => $newOutcome->id,
+                    'sort_order' => $item->sort_order,
+                    'title' => $item->title,
+                    'url' => $item->url,
+                    'duration_minutes' => $item->duration_minutes,
+                    'duration_display' => $item->duration_display,
+                    'source' => $item->source,
+                    'prerequisites' => $item->prerequisites,
+                    'gtm_applicable' => $item->gtm_applicable,
+                    'pre_sales_applicable' => $item->pre_sales_applicable,
+                    'delivery_applicable' => $item->delivery_applicable,
+                ]);
+            }
+        }
+
+        return redirect()->route('blueprints.show', $copy)
+            ->with('success', 'Blueprint duplicated successfully.');
+    }
+
+    // ─── Submit for Publishing ──────────────────────────────────
+
+    public function submit(Blueprint $blueprint)
+    {
+        if ($blueprint->owner_id !== auth()->id()) {
+            abort(403, 'Only the blueprint owner can submit for publishing.');
+        }
+
+        $blueprint->update(['status' => 'submitted']);
+
+        $this->notifyAdminsOfSubmission($blueprint);
+
+        return redirect()->back()
+            ->with('success', 'Blueprint submitted for publishing.');
+    }
+
+    // ─── Owner Edit Access ──────────────────────────────────────
+
+    public function ownerEdit(Blueprint $blueprint)
+    {
+        if ($blueprint->owner_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $blueprint->load('outcomes.contentItems');
+        $users = User::orderBy('name')->get(['id', 'name']);
+        $ownerMode = true;
+
+        return view('admin.blueprints.edit', compact('blueprint', 'users', 'ownerMode'));
+    }
+
+    public function ownerUpdate(Request $request, Blueprint $blueprint)
+    {
+        if ($blueprint->owner_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|in:application,product,delivery',
+            'product_area' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'version' => 'nullable|string|max:50',
+            'status' => 'required|in:draft,submitted',
+        ]);
+
+        $this->applyStatusDates($validated, $blueprint);
+        $blueprint->update($validated);
+
+        return redirect()->route('blueprints.owner.edit', $blueprint)
+            ->with('success', 'Blueprint updated successfully.');
     }
 
     // ─── Outcome Management ────────────────────────────────────
@@ -176,5 +285,49 @@ class BlueprintController extends Controller
 
         return redirect()->route('blueprints.edit', $blueprintId)
             ->with('success', 'Content item deleted successfully.');
+    }
+
+    // ─── Private Helpers ────────────────────────────────────────
+
+    /**
+     * Auto-set date fields based on status transitions.
+     *
+     * @param  array<string, mixed>  $validated
+     */
+    private function applyStatusDates(array &$validated, ?Blueprint $existing): void
+    {
+        $newStatus = $validated['status'] ?? null;
+        $oldStatus = $existing?->status;
+
+        if ($newStatus && $newStatus !== $oldStatus) {
+            match ($newStatus) {
+                'published' => $validated['published_at'] = $validated['published_at'] ?? now(),
+                'archived' => $validated['archived_at'] = $validated['archived_at'] ?? now(),
+                'draft' => $validated['drafted_at'] = $validated['drafted_at'] ?? now(),
+                default => null,
+            };
+        }
+    }
+
+    private function notifyAdminsOfSubmission(Blueprint $blueprint): void
+    {
+        $template = NotificationTemplate::where('event_type', 'blueprint_submitted')->first();
+
+        if ($template) {
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                $template->render([
+                    'blueprint_name' => $blueprint->name,
+                    'submitted_by' => $blueprint->owner->name ?? 'Unknown',
+                    'recipient_name' => $admin->name,
+                ]);
+            }
+        }
+
+        \Illuminate\Support\Facades\Log::info('Blueprint submitted for publishing', [
+            'blueprint_id' => $blueprint->id,
+            'blueprint_name' => $blueprint->name,
+            'submitted_by' => auth()->id(),
+        ]);
     }
 }

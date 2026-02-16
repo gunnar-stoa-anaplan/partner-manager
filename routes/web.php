@@ -16,6 +16,7 @@ use App\Http\Controllers\CompetencyMatrixController;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DealRegistrationController;
+use App\Http\Controllers\EnablementDashboardController;
 use App\Http\Controllers\EnablementEventController;
 use App\Http\Controllers\FieldEnablementController;
 use App\Http\Controllers\FundingController;
@@ -273,11 +274,23 @@ Route::middleware(['auth'])->group(function () {
     | Blueprint Assignments & Enrollments (PSM)
     |--------------------------------------------------------------------------
     */
+    Route::get('/blueprints-catalog', [BlueprintAssignmentController::class, 'catalog'])->name('blueprints.catalog');
+    Route::get('/blueprints-catalog/{blueprint}', [BlueprintAssignmentController::class, 'blueprintDetail'])->name('blueprints.detail');
+    Route::post('/blueprints-catalog/{blueprint}/assign', [BlueprintAssignmentController::class, 'assign'])->name('blueprints.assign');
     Route::delete('/blueprint-assignments/{assignment}', [BlueprintAssignmentController::class, 'removeAssignment'])->name('blueprint-assignments.destroy');
     Route::get('/blueprint-assignments/{assignment}', [BlueprintAssignmentController::class, 'partnerProgress'])->name('blueprint-assignments.show');
     Route::post('/blueprint-assignments/{assignment}/enroll', [BlueprintAssignmentController::class, 'enrollContact'])->name('blueprint-assignments.enroll');
     Route::delete('/blueprint-enrollments/{enrollment}', [BlueprintAssignmentController::class, 'removeEnrollment'])->name('blueprint-enrollments.destroy');
     Route::get('/blueprint-enrollments/{enrollment}', [BlueprintAssignmentController::class, 'contactProgress'])->name('blueprint-enrollments.show');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Blueprint Owner Access (non-admin users who own a blueprint)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/my-blueprints/{blueprint}/edit', [BlueprintController::class, 'ownerEdit'])->name('blueprints.owner.edit');
+    Route::put('/my-blueprints/{blueprint}', [BlueprintController::class, 'ownerUpdate'])->name('blueprints.owner.update');
+    Route::post('/my-blueprints/{blueprint}/submit', [BlueprintController::class, 'submit'])->name('blueprints.owner.submit');
 
     /*
     |--------------------------------------------------------------------------
@@ -321,9 +334,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/configuration', [ConfigurationController::class, 'index'])->name('configuration.index');
         Route::put('/configuration', [ConfigurationController::class, 'update'])->name('configuration.update');
         Route::put('/configuration/navigation', [ConfigurationController::class, 'updateNavigation'])->name('configuration.update-navigation');
+        Route::put('/configuration/dev-focus', [ConfigurationController::class, 'updateDevFocus'])->name('configuration.update-dev-focus');
 
         // Blueprint CRUD
         Route::resource('blueprints', BlueprintController::class);
+        Route::post('/blueprints/{blueprint}/duplicate', [BlueprintController::class, 'duplicate'])->name('blueprints.duplicate');
         Route::post('/blueprints/{blueprint}/outcomes', [BlueprintController::class, 'addOutcome'])->name('blueprints.outcomes.store');
         Route::put('/blueprint-outcomes/{outcome}', [BlueprintController::class, 'updateOutcome'])->name('blueprint-outcomes.update');
         Route::delete('/blueprint-outcomes/{outcome}', [BlueprintController::class, 'destroyOutcome'])->name('blueprint-outcomes.destroy');
@@ -341,6 +356,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/enablement-sessions/{id}/registrations', [EnablementEventController::class, 'sessionRegistrations'])->name('enablement-sessions.registrations');
         Route::put('/enablement-registrations/{id}', [EnablementEventController::class, 'updateRegistration'])->name('enablement-registrations.update');
         Route::get('/enablement-calendar', [EnablementEventController::class, 'calendar'])->name('enablement-calendar');
+
+        // Enablement Dashboard
+        Route::get('/enablement-dashboard', [EnablementDashboardController::class, 'index'])->name('admin.enablement-dashboard');
 
         // Launch Programs CRUD
         Route::resource('launch-programs', LaunchProgramController::class)->names('admin.launch-programs')->parameters(['launch-programs' => 'launchProgram']);
