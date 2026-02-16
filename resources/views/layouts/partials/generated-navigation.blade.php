@@ -642,10 +642,9 @@
     @endif
     @endif
 
-    {{-- Administration --}}
-    @if($show('goals_scorecards'))
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_administration'] ?? '1') === '1')
-    <li class="nav-title"><span>Administration</span></li>
+    {{-- System - always show Configuration so dev can change focus --}}
+    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_system'] ?? '1') === '1')
+    <li class="nav-title"><span>System</span></li>
 
     <li>
         <a href="{{ route('admin.dashboard') }}">
@@ -655,13 +654,6 @@
             <span class="nav-link-text">Admin Dashboard</span>
         </a>
     </li>
-
-    @endif
-    @endif
-
-    {{-- System - always show Configuration so dev can change focus --}}
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_system'] ?? '1') === '1')
-    <li class="nav-title"><span>System</span></li>
 
     <li>
         <a href="{{ route('configuration.index') }}">
