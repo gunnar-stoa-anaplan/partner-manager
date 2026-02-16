@@ -2,9 +2,14 @@
    data-soundpath="media/sound/" data-soundfile="sawhisp.mp3">
     <!-- <img src="img/logo.svg" alt="logo"> -->
 
-    <svg class="custom-logo">
-        <use href="/img/app-logo.svg#custom-logo"></use>
-    </svg>
+    @php $customLogo = \App\Models\AppSetting::get('branding_logo_path'); @endphp
+    @if($customLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($customLogo))
+        <img src="{{ \Illuminate\Support\Facades\Storage::url($customLogo) }}" alt="Logo" class="custom-logo" style="max-height: 40px;">
+    @else
+        <svg class="custom-logo">
+            <use href="/img/app-logo.svg#custom-logo"></use>
+        </svg>
+    @endif
 
     <!-- Logo Backdrop Animation -->
     <div class="logo-backdrop">

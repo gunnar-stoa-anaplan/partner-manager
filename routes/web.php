@@ -12,6 +12,7 @@ use App\Http\Controllers\ApiTokenController;
 use App\Http\Controllers\BenchmarkController;
 use App\Http\Controllers\BlueprintAssignmentController;
 use App\Http\Controllers\BlueprintController;
+use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\CompetencyMatrixController;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\ContactController;
@@ -412,6 +413,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/system-status', [SystemStatusController::class, 'index'])->name('admin.system-status');
         Route::get('/system-update', [UpdateController::class, 'show'])->name('admin.update');
         Route::post('/system-update/accept', [UpdateController::class, 'accept'])->name('admin.update.accept');
+
+        // Branding
+        Route::get('/branding', [BrandingController::class, 'index'])->name('admin.branding');
+        Route::put('/branding', [BrandingController::class, 'update'])->name('admin.branding.update');
     });
 
     /*

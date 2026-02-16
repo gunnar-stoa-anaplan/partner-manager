@@ -673,6 +673,15 @@
         </a>
     </li>
 
+    <li>
+        <a href="{{ route('admin.branding') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#edit"></use>
+            </svg>
+            <span class="nav-link-text">Branding</span>
+        </a>
+    </li>
+
     @if(!$focused)
     <li>
         <a href="{{ route('imports.index') }}">
