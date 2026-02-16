@@ -284,6 +284,14 @@ The MyService operator verifies the instance appears on the fleet dashboard:
 └────────────────────────────────────────────────────────┘
 ```
 
+## Post-Deployment Setup
+
+Once the application is running and verified, the administrator should complete the following initial configuration:
+
+1. **Branding** — Upload the organization's logo, set the app name, and choose a default color theme. See [Branding](branding) for details.
+2. **Configuration** — Set fiscal year start month, default currency, and other operational settings. See [Configuration](configuration).
+3. **User Management** — Create user accounts and assign roles. See [User Management](user-management).
+
 ## Troubleshooting
 
 ### App Container Won't Start

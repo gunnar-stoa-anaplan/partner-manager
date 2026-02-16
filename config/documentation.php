@@ -103,6 +103,7 @@ return [
         ],
         'Administration' => [
             'Configuration' => 'configuration',
+            'Branding' => 'branding',
             'User Management' => 'user-management',
             'Blueprints Admin' => 'blueprints-admin',
             'Enablement Calendar' => 'enablement-calendar',
