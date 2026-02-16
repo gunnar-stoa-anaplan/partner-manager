@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TaskTemplate extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'partner_path_id', 'stage_id', 'category', 'requirement_level',
         'title', 'description', 'completion_criteria', 'effort_size',
