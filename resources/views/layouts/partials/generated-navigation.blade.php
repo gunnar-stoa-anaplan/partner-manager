@@ -436,7 +436,7 @@
 
     {{-- Partner Admin - Admin Only --}}
     @if(Auth::user()->role === 'admin')
-    @if($show('goals_scorecards', 'partner_paths', 'deal_registration', 'anaplan', 'blueprints', 'enablement_events', 'labs'))
+    @if($show('goals_scorecards', 'partner_paths', 'deal_registration', 'anaplan', 'blueprints', 'enablement_events', 'labs', 'launch_programs'))
     <li class="nav-title"><span>Partner Admin</span></li>
 
     @if($show('goals_scorecards'))
@@ -600,6 +600,29 @@
         </ul>
     </li>
     @endif
+
+    @if($show('launch_programs'))
+    <li class="nav-item">
+        <a href="#" title="Launch Programs" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#zap"></use>
+            </svg>
+            <span class="nav-link-text">Launch Programs</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('admin.launch-programs.dashboard') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.launch-programs.index') }}">
+                    <span class="nav-link-text">Program Details</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
     @endif
 
     {{-- Administration --}}
@@ -636,38 +659,6 @@
     </li>
     @endif
 
-    @endif
-    @endif
-
-    {{-- Partner Enablement --}}
-    @if($show('launch_programs'))
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_program_admin'] ?? '1') === '1')
-    <li class="nav-title"><span>Partner Enablement</span></li>
-
-    @if($show('launch_programs'))
-    <li class="nav-item">
-        <a href="#" title="Launch Programs" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#zap"></use>
-            </svg>
-            <span class="nav-link-text">Launch Programs</span>
-        </a>
-        <ul>
-            @if(Auth::user()->role === 'admin')
-            <li>
-                <a href="{{ route('admin.launch-programs.dashboard') }}">
-                    <span class="nav-link-text">Dashboard</span>
-                </a>
-            </li>
-            @endif
-            <li>
-                <a href="{{ route('admin.launch-programs.index') }}">
-                    <span class="nav-link-text">Program Details</span>
-                </a>
-            </li>
-        </ul>
-    </li>
-    @endif
     @endif
     @endif
 
