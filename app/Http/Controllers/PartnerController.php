@@ -1577,6 +1577,7 @@ class PartnerController extends Controller
         $enrolledProgramIds = $enrolledPrograms->pluck('launch_program_id');
 
         $availablePrograms = LaunchProgram::where('status', 'accepting_nominations')
+            ->where('partner_strategy', 'include')
             ->whereNotIn('id', $enrolledProgramIds)
             ->with('product')
             ->get();
@@ -1610,12 +1611,14 @@ class PartnerController extends Controller
     {
         $this->authorizePartnerAccess($partner);
 
+        $redirectUrl = route('partners.show', $partner).'#launch-programs';
+
         if (! $launchProgram->isAcceptingNominations()) {
-            return back()->with('error', 'This program is not currently accepting nominations.');
+            return redirect($redirectUrl)->with('error', 'This program is not currently accepting nominations.');
         }
 
         if (LaunchProgramPartner::where('launch_program_id', $launchProgram->id)->where('partner_id', $partner->id)->exists()) {
-            return back()->with('error', 'This partner is already enrolled in this program.');
+            return redirect($redirectUrl)->with('error', 'This partner is already enrolled in this program.');
         }
 
         LaunchProgramPartner::create([
@@ -1625,7 +1628,7 @@ class PartnerController extends Controller
             'nominated_by' => auth()->id(),
         ]);
 
-        return back()->with('success', "Partner nominated for {$launchProgram->name}.");
+        return redirect($redirectUrl)->with('success', "Partner nominated for {$launchProgram->name}.");
     }
 
     /**
@@ -1644,7 +1647,10 @@ class PartnerController extends Controller
             'assigned_by' => auth()->id(),
         ]);
 
-        return back()->with('success', 'Participant added.');
+        $partnerId = $programPartner->partner_id;
+
+        return redirect(route('partners.show', $partnerId).'#launch-programs')
+            ->with('success', 'Participant added.');
     }
 
     /**
@@ -1652,8 +1658,10 @@ class PartnerController extends Controller
      */
     public function removeParticipant(LaunchProgramParticipant $participant): \Illuminate\Http\RedirectResponse
     {
+        $partnerId = $participant->programPartner->partner_id;
         $participant->delete();
 
-        return back()->with('success', 'Participant removed.');
+        return redirect(route('partners.show', $partnerId).'#launch-programs')
+            ->with('success', 'Participant removed.');
     }
 }

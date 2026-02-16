@@ -23,7 +23,10 @@ class LaunchProgram extends Model
         'target_ga_date',
         'ends_at',
         'max_partners',
+        'partner_strategy',
+        'exclusion_reason',
         'created_by',
+        'owner_id',
     ];
 
     const STATUSES = [
@@ -32,6 +35,11 @@ class LaunchProgram extends Model
         'active' => 'Active',
         'completed' => 'Completed',
         'cancelled' => 'Cancelled',
+    ];
+
+    const PARTNER_STRATEGIES = [
+        'include' => 'Include Partners',
+        'exclude' => 'Exclude Partners',
     ];
 
     const STATUS_COLORS = [
@@ -89,6 +97,16 @@ class LaunchProgram extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function dateChanges(): HasMany
+    {
+        return $this->hasMany(LaunchProgramDateChange::class)->orderByDesc('created_at');
+    }
+
     public function sessions(): HasMany
     {
         return $this->hasMany(EnablementSession::class);
@@ -107,6 +125,11 @@ class LaunchProgram extends Model
     public function partnerCount(): int
     {
         return $this->programPartners()->whereNotIn('status', ['withdrawn'])->count();
+    }
+
+    public function isIncludingPartners(): bool
+    {
+        return $this->partner_strategy !== 'exclude';
     }
 
     public function completionPercentage(): float

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\LaunchProgram;
+use App\Models\LaunchProgramDateChange;
 use App\Models\LaunchProgramFeedback;
 use App\Models\LaunchProgramMilestoneCompletion;
 use App\Models\LaunchProgramParticipant;
@@ -17,6 +18,7 @@ class LaunchProgramSeeder extends Seeder
     public function run(): void
     {
         $admin = User::where('role', 'admin')->first() ?? User::first();
+        $users = User::all();
 
         // ── Program 1: Active program with lots of data ──
         $polaris = $this->createProgram([
@@ -29,7 +31,9 @@ class LaunchProgramSeeder extends Seeder
             'target_ga_date' => now()->addWeeks(10),
             'ends_at' => now()->addWeeks(14),
             'max_partners' => 8,
+            'partner_strategy' => 'include',
             'created_by' => $admin->id,
+            'owner_id' => $users->where('role', 'psm')->random()?->id ?? $admin->id,
         ], [
             ['title' => 'Sign NDA', 'type' => 'document', 'is_required' => true, 'due_date' => now()->subWeeks(4)],
             ['title' => 'Complete Polaris Enablement Blueprint', 'type' => 'enablement', 'is_required' => true, 'due_date' => now()->subWeeks(2)],
@@ -41,7 +45,41 @@ class LaunchProgramSeeder extends Seeder
 
         // Enroll 5-7 partners with participants and partial completions (Accenture always included)
         $accenture = Partner::where('name', 'like', '%Accenture%')->first();
-        $this->enrollPartners($polaris, rand(5, 7), 'active', 0.6, $accenture);
+        $this->enrollPartners($polaris, rand(5, 7), 'active', 0.6, $accenture, 0.3);
+
+        // Add date change history for Polaris (GA was pushed back twice)
+        LaunchProgramDateChange::create([
+            'launch_program_id' => $polaris->id,
+            'field' => 'target_ga_date',
+            'old_date' => now()->addWeeks(6),
+            'new_date' => now()->addWeeks(8),
+            'reason' => 'Product team needs additional time for API stabilization.',
+            'changed_by' => $admin->id,
+            'created_at' => now()->subWeeks(3),
+            'updated_at' => now()->subWeeks(3),
+        ]);
+
+        LaunchProgramDateChange::create([
+            'launch_program_id' => $polaris->id,
+            'field' => 'target_ga_date',
+            'old_date' => now()->addWeeks(8),
+            'new_date' => now()->addWeeks(10),
+            'reason' => 'Security review findings require additional remediation before GA.',
+            'changed_by' => $admin->id,
+            'created_at' => now()->subWeeks(1),
+            'updated_at' => now()->subWeeks(1),
+        ]);
+
+        LaunchProgramDateChange::create([
+            'launch_program_id' => $polaris->id,
+            'field' => 'ends_at',
+            'old_date' => now()->addWeeks(12),
+            'new_date' => now()->addWeeks(14),
+            'reason' => 'Extended to accommodate GA date shift.',
+            'changed_by' => $admin->id,
+            'created_at' => now()->subWeeks(1),
+            'updated_at' => now()->subWeeks(1),
+        ]);
 
         // ── Program 2: Accepting nominations ──
         $ado = $this->createProgram([
@@ -54,7 +92,9 @@ class LaunchProgramSeeder extends Seeder
             'target_ga_date' => now()->addWeeks(20),
             'ends_at' => now()->addWeeks(24),
             'max_partners' => 5,
+            'partner_strategy' => 'include',
             'created_by' => $admin->id,
+            'owner_id' => $users->where('role', 'psm')->random()?->id ?? $admin->id,
         ], [
             ['title' => 'Sign Participation Agreement', 'type' => 'document', 'is_required' => true, 'due_date' => now()->addWeeks(4)],
             ['title' => 'Assign Technical Lead', 'type' => 'task', 'is_required' => true, 'due_date' => now()->addWeeks(5)],
@@ -64,7 +104,31 @@ class LaunchProgramSeeder extends Seeder
 
         $this->enrollPartners($ado, rand(2, 3), 'nominated', 0.0, null);
 
-        // ── Program 3: Draft (no enrollments) ──
+        // ── Program 3: Active, fully completed by Accenture (no risk) ──
+        $demandPlanning = $this->createProgram([
+            'name' => 'Demand Planning Certification Launch',
+            'slug' => 'demand-planning-certification-launch',
+            'product_id' => Product::where('slug', 'demand-planning')->value('id'),
+            'description' => 'Partner certification program for the updated Demand Planning module. Complete all milestones to earn delivery certification.',
+            'status' => 'active',
+            'starts_at' => now()->subWeeks(10),
+            'target_ga_date' => now()->addWeeks(4),
+            'ends_at' => now()->addWeeks(6),
+            'max_partners' => 10,
+            'partner_strategy' => 'include',
+            'created_by' => $admin->id,
+            'owner_id' => $users->where('role', 'psm')->random()?->id ?? $admin->id,
+        ], [
+            ['title' => 'Complete Product Overview Training', 'type' => 'enablement', 'is_required' => true, 'due_date' => now()->subWeeks(6)],
+            ['title' => 'Pass Certification Exam', 'type' => 'task', 'is_required' => true, 'due_date' => now()->subWeeks(2)],
+            ['title' => 'Submit Practice Model', 'type' => 'document', 'is_required' => true, 'due_date' => now()->subWeeks(1)],
+            ['title' => 'Share Customer Case Study', 'type' => 'document', 'is_required' => false, 'due_date' => now()->addWeeks(3)],
+        ]);
+
+        // Enroll Accenture with 100% completion (no risk)
+        $this->enrollPartners($demandPlanning, rand(3, 5), 'active', 0.7, $accenture, 1.0);
+
+        // ── Program 4: Draft with exclusion (no launch partners) ──
         $this->createProgram([
             'name' => 'Forecaster Beta',
             'slug' => 'forecaster-beta',
@@ -74,8 +138,11 @@ class LaunchProgramSeeder extends Seeder
             'starts_at' => now()->addWeeks(8),
             'target_ga_date' => now()->addWeeks(30),
             'ends_at' => null,
-            'max_partners' => 4,
+            'max_partners' => null,
+            'partner_strategy' => 'exclude',
+            'exclusion_reason' => 'Internal-only beta phase. Partner access will be evaluated after initial product validation is complete.',
             'created_by' => $admin->id,
+            'owner_id' => $admin->id,
         ], [
             ['title' => 'Sign Beta Agreement', 'type' => 'document', 'is_required' => true, 'due_date' => null],
             ['title' => 'Complete Pre-requisite Training', 'type' => 'enablement', 'is_required' => true, 'due_date' => null],
@@ -97,7 +164,7 @@ class LaunchProgramSeeder extends Seeder
         return $program;
     }
 
-    private function enrollPartners(LaunchProgram $program, int $count, string $defaultStatus, float $completionRate, ?Partner $mustInclude = null): void
+    private function enrollPartners(LaunchProgram $program, int $count, string $defaultStatus, float $completionRate, ?Partner $mustInclude = null, ?float $mustIncludeCompletionRate = null): void
     {
         $partners = Partner::when($mustInclude, fn ($q) => $q->where('id', '!=', $mustInclude->id))
             ->inRandomOrder()
@@ -113,8 +180,11 @@ class LaunchProgramSeeder extends Seeder
         $roles = array_keys(LaunchProgramParticipant::ROLES);
 
         foreach ($partners as $partner) {
+            $isMustInclude = $mustInclude && $partner->id === $mustInclude->id;
+            $rate = ($isMustInclude && $mustIncludeCompletionRate !== null) ? $mustIncludeCompletionRate : $completionRate;
+
             $status = $defaultStatus === 'active'
-                ? collect(['accepted', 'active', 'active', 'active'])->random()
+                ? ($isMustInclude ? 'active' : collect(['accepted', 'active', 'active', 'active'])->random())
                 : $defaultStatus;
 
             $lpp = LaunchProgramPartner::create([
@@ -137,8 +207,19 @@ class LaunchProgramSeeder extends Seeder
                 ]);
 
                 // Complete milestones based on completion rate
-                if ($completionRate > 0) {
-                    $toComplete = $milestones->filter(fn () => (float) rand(0, 100) / 100 < $completionRate);
+                if ($rate > 0) {
+                    $toComplete = $milestones->filter(fn () => (float) rand(0, 100) / 100 < $rate);
+
+                    // For the must-include partner at a low rate, ensure required milestones stay incomplete
+                    if ($isMustInclude && $mustIncludeCompletionRate !== null && $mustIncludeCompletionRate < 1.0) {
+                        $requiredInComplete = $toComplete->where('is_required', true);
+                        if ($requiredInComplete->count() === $requiredMilestones->count()) {
+                            // Drop 2 required milestones so there's always a risk alert
+                            $toDrop = $requiredInComplete->take(2)->pluck('id');
+                            $toComplete = $toComplete->reject(fn ($ms) => $toDrop->contains($ms->id));
+                        }
+                    }
+
                     foreach ($toComplete as $milestone) {
                         LaunchProgramMilestoneCompletion::create([
                             'launch_program_participant_id' => $participant->id,

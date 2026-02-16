@@ -48,12 +48,33 @@
                                 </div>
                             </div>
 
-                            <div class="d-flex justify-content-between text-muted small mb-3">
+                            <div class="d-flex justify-content-between text-muted small mb-2">
                                 <span>{{ $milestoneCount }} milestones ({{ $requiredCount }} required)</span>
                                 @if($prog->target_ga_date)
                                     <span>GA: {{ $prog->target_ga_date->format('M j, Y') }}</span>
                                 @endif
                             </div>
+
+                            @if($prog->status === 'active' && $milestoneCount > 0 && $completion < 100)
+                                @php
+                                    $allCompletedIds = $enrollment->participants->flatMap(fn($p) => $p->milestoneCompletions->pluck('launch_program_milestone_id'))->unique();
+                                    $incompleteRequired = $prog->milestones->where('is_required', true)->reject(fn($ms) => $allCompletedIds->contains($ms->id));
+                                    $incompleteOptional = $prog->milestones->where('is_required', false)->reject(fn($ms) => $allCompletedIds->contains($ms->id));
+                                @endphp
+                                @if($incompleteRequired->isNotEmpty())
+                                    <div class="mb-2">
+                                        <span class="badge bg-danger bg-opacity-15 text-danger" style="font-size: 0.7rem;">
+                                            {{ $incompleteRequired->count() }} required milestone{{ $incompleteRequired->count() > 1 ? 's' : '' }} pending
+                                        </span>
+                                    </div>
+                                @elseif($incompleteOptional->isNotEmpty())
+                                    <div class="mb-2">
+                                        <span class="badge bg-warning bg-opacity-15 text-dark" style="font-size: 0.7rem;">
+                                            {{ $incompleteOptional->count() }} optional milestone{{ $incompleteOptional->count() > 1 ? 's' : '' }} remaining
+                                        </span>
+                                    </div>
+                                @endif
+                            @endif
 
                             <a href="{{ route('portal.launch-programs.show', $enrollment) }}" class="btn btn-sm btn-outline-primary w-100">View Details</a>
                         </div>

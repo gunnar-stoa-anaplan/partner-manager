@@ -608,13 +608,27 @@
     @endif
 
     @if($show('launch_programs'))
-    <li>
-        <a href="{{ route('admin.launch-programs.index') }}">
+    <li class="nav-item">
+        <a href="#" title="Launch Programs" data-filter-tags>
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#zap"></use>
             </svg>
             <span class="nav-link-text">Launch Programs</span>
         </a>
+        <ul>
+            @if(Auth::user()->role === 'admin')
+            <li>
+                <a href="{{ route('admin.launch-programs.dashboard') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            @endif
+            <li>
+                <a href="{{ route('admin.launch-programs.index') }}">
+                    <span class="nav-link-text">Program Details</span>
+                </a>
+            </li>
+        </ul>
     </li>
     @endif
 

@@ -1,7 +1,7 @@
 @extends('layouts.vertical', ['pageTitle' => 'Create Launch Program'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Create Launch Program', 'pageSubTitle1' => 'Launch Programs', 'pageSubTitle1Url' => route('admin.launch-programs.index')])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Create Launch Program', 'pageSubTitle1' => 'Program Details', 'pageSubTitle1Url' => route('admin.launch-programs.index')])
 @endsection
 
 @section('content')
@@ -35,14 +35,26 @@
                             @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
-                                @foreach(\App\Models\LaunchProgram::STATUSES as $key => $label)
-                                    <option value="{{ $key }}" @selected(old('status', 'draft') === $key)>{{ $label }}</option>
-                                @endforeach
-                            </select>
-                            @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                                <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
+                                    @foreach(\App\Models\LaunchProgram::STATUSES as $key => $label)
+                                        <option value="{{ $key }}" @selected(old('status', 'draft') === $key)>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label for="owner_id" class="form-label">PSM Owner</label>
+                                <select class="form-select @error('owner_id') is-invalid @enderror" id="owner_id" name="owner_id">
+                                    <option value="">— No owner —</option>
+                                    @foreach($psms as $psm)
+                                        <option value="{{ $psm->id }}" @selected(old('owner_id') == $psm->id)>{{ $psm->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('owner_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
                         </div>
 
                         <div class="row mb-3">
@@ -63,10 +75,27 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="max_partners" class="form-label">Max Partners</label>
-                            <input type="number" class="form-control @error('max_partners') is-invalid @enderror" id="max_partners" name="max_partners" value="{{ old('max_partners') }}" min="1" style="max-width: 150px;">
-                            @error('max_partners') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="max_partners" class="form-label">Max Partners</label>
+                                <input type="number" class="form-control @error('max_partners') is-invalid @enderror" id="max_partners" name="max_partners" value="{{ old('max_partners') }}" min="1">
+                                @error('max_partners') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label for="partner_strategy" class="form-label">Partner Strategy <span class="text-danger">*</span></label>
+                                <select class="form-select @error('partner_strategy') is-invalid @enderror" id="partner_strategy" name="partner_strategy" required>
+                                    @foreach(\App\Models\LaunchProgram::PARTNER_STRATEGIES as $key => $label)
+                                        <option value="{{ $key }}" @selected(old('partner_strategy', 'include') === $key)>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                @error('partner_strategy') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="exclusion-reason-group" style="{{ old('partner_strategy', 'include') === 'exclude' ? '' : 'display: none;' }}">
+                            <label for="exclusion_reason" class="form-label">Exclusion Reason <span class="text-danger">*</span></label>
+                            <textarea class="form-control @error('exclusion_reason') is-invalid @enderror" id="exclusion_reason" name="exclusion_reason" rows="2" placeholder="Explain why this program does not include launch partners...">{{ old('exclusion_reason') }}</textarea>
+                            @error('exclusion_reason') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="d-flex justify-content-end gap-2">
@@ -78,4 +107,16 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var strategySelect = document.getElementById('partner_strategy');
+    var exclusionGroup = document.getElementById('exclusion-reason-group');
+    strategySelect.addEventListener('change', function() {
+        exclusionGroup.style.display = this.value === 'exclude' ? '' : 'none';
+    });
+});
+</script>
 @endsection

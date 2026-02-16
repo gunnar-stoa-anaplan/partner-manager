@@ -34,11 +34,34 @@
                         </div>
                     </div>
 
-                    {{-- Milestones --}}
+                    {{-- Risk Alert --}}
                     @php
                         $milestones = $prog->milestones;
                         $completedIds = $enrollment->participants->flatMap(fn($p) => $p->milestoneCompletions->pluck('launch_program_milestone_id'))->unique();
+                        $incompleteRequired = $milestones->where('is_required', true)->reject(fn($ms) => $completedIds->contains($ms->id));
+                        $incompleteOptional = $milestones->where('is_required', false)->reject(fn($ms) => $completedIds->contains($ms->id));
+                        $daysToGa = $prog->target_ga_date ? (int) now()->diffInDays($prog->target_ga_date, false) : null;
                     @endphp
+                    @if($prog->status === 'active' && ($incompleteRequired->isNotEmpty() || $incompleteOptional->isNotEmpty()))
+                        <div class="alert py-2 px-3 mb-3 {{ $incompleteRequired->isNotEmpty() ? 'alert-danger' : 'alert-warning' }}" style="font-size: 0.8rem;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>
+                                    @if($incompleteRequired->isNotEmpty())
+                                        &#9888; {{ $incompleteRequired->count() }} required milestone{{ $incompleteRequired->count() > 1 ? 's' : '' }} incomplete
+                                    @else
+                                        {{ $incompleteOptional->count() }} optional milestone{{ $incompleteOptional->count() > 1 ? 's' : '' }} remaining
+                                    @endif
+                                </span>
+                                @if($daysToGa !== null)
+                                    <span class="badge {{ $daysToGa <= 30 ? 'bg-danger' : ($daysToGa <= 60 ? 'bg-warning text-dark' : 'bg-secondary') }}">
+                                        {{ $daysToGa }} days to GA
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Milestones --}}
                     <div class="mb-3">
                         <small class="fw-500 d-block mb-1">Milestones ({{ $completedIds->count() }}/{{ $milestones->count() }})</small>
                         @foreach($milestones as $ms)

@@ -1,7 +1,7 @@
 @extends('layouts.vertical', ['pageTitle' => $program->name])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $program->name, 'pageSubTitle1' => 'Launch Programs', 'pageSubTitle1Url' => route('admin.launch-programs.index'), 'pageSubText' => $program->product?->name ?? 'No product assigned'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $program->name, 'pageSubTitle1' => 'Program Details', 'pageSubTitle1Url' => route('admin.launch-programs.index'), 'pageSubText' => $program->product?->name ?? 'No product assigned'])
 @endsection
 
 @section('content')
@@ -24,8 +24,17 @@
             <span class="badge fs-nano" style="background-color: {{ \App\Models\LaunchProgram::STATUS_COLORS[$program->status] ?? '#868e96' }}">
                 {{ \App\Models\LaunchProgram::STATUSES[$program->status] ?? $program->status }}
             </span>
+            @if($program->owner)
+                <span class="ms-2 text-muted small">Owner: <strong>{{ $program->owner->name }}</strong></span>
+            @endif
+            @if(!$program->isIncludingPartners())
+                <span class="badge bg-secondary ms-2">No Launch Partners</span>
+            @endif
             @if($program->description)
                 <p class="text-muted mt-2 mb-0">{{ $program->description }}</p>
+            @endif
+            @if(!$program->isIncludingPartners() && $program->exclusion_reason)
+                <p class="text-muted small mt-1 mb-0 fst-italic">Exclusion reason: {{ $program->exclusion_reason }}</p>
             @endif
         </div>
         <a href="{{ route('admin.launch-programs.edit', $program) }}" class="btn btn-outline-primary btn-sm">
@@ -44,7 +53,7 @@
         <div class="col-sm-6 col-xl-3 mb-g">
             <div class="card shadow-0 h-100">
                 <div class="card-body text-center">
-                    <h3 class="mb-1">{{ $activePartners }}</h3>
+                    <h3 class="mb-1">{{ $program->isIncludingPartners() ? $activePartners : '—' }}</h3>
                     <small class="text-muted">Partners Enrolled</small>
                 </div>
             </div>
@@ -52,7 +61,7 @@
         <div class="col-sm-6 col-xl-3 mb-g">
             <div class="card shadow-0 h-100">
                 <div class="card-body text-center">
-                    <h3 class="mb-1">{{ $avgCompletion }}%</h3>
+                    <h3 class="mb-1">{{ $program->isIncludingPartners() ? $avgCompletion . '%' : '—' }}</h3>
                     <small class="text-muted">Avg Completion</small>
                 </div>
             </div>
@@ -173,12 +182,43 @@
         </div>
 
         {{-- Enrolled Partners --}}
+        @if($program->isIncludingPartners())
         <div class="col-lg-6 mb-g">
             <div class="card shadow-0 h-100">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Enrolled Partners</h5>
+                    @if(auth()->user()->role === 'admin')
+                        <button class="btn btn-xs btn-primary" data-bs-toggle="collapse" data-bs-target="#adminNominateForm">
+                            <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#plus"></use></svg>
+                        </button>
+                    @endif
                 </div>
                 <div class="card-body p-0">
+                    {{-- Admin Nomination Form (collapsed) --}}
+                    @if(auth()->user()->role === 'admin')
+                    <div class="collapse p-3 border-bottom" id="adminNominateForm">
+                        <form action="{{ route('admin.launch-programs.admin-nominate', $program) }}" method="POST">
+                            @csrf
+                            <div class="row g-2">
+                                <div class="col-md-5">
+                                    <select class="form-select form-select-sm" name="partner_id" required>
+                                        <option value="">Select Partner...</option>
+                                        @foreach($partners as $partner)
+                                            <option value="{{ $partner->id }}">{{ $partner->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control form-control-sm" name="notes" placeholder="Notes (optional)">
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-primary btn-sm w-100">Nominate</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    @endif
+
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
@@ -207,7 +247,7 @@
                                         <small class="text-muted">{{ $completion }}%</small>
                                     </td>
                                     <td class="text-end">
-                                        @if($pp->status === 'nominated')
+                                        @if($pp->status === 'nominated' && (auth()->user()->role === 'admin' || auth()->id() === $program->owner_id))
                                             <form action="{{ route('admin.launch-program-partners.update', $pp) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('PUT')
@@ -229,6 +269,21 @@
                 </div>
             </div>
         </div>
+        @else
+        <div class="col-lg-6 mb-g">
+            <div class="card shadow-0 h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Enrolled Partners</h5>
+                </div>
+                <div class="card-body text-center text-muted py-4">
+                    <p class="mb-1">This program excludes launch partners.</p>
+                    @if($program->exclusion_reason)
+                        <small class="fst-italic">{{ $program->exclusion_reason }}</small>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 
     {{-- Feedback --}}
@@ -269,7 +324,7 @@
     @endif
 
     {{-- Date Info --}}
-    <div class="card shadow-0">
+    <div class="card shadow-0 mb-g">
         <div class="card-body">
             <div class="row text-center">
                 <div class="col-md-3">
@@ -291,4 +346,44 @@
             </div>
         </div>
     </div>
+
+    {{-- Date Change History --}}
+    @if($program->dateChanges->isNotEmpty())
+    <div class="card shadow-0">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Date Change History</h5>
+            <button class="btn btn-xs btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#dateChangeHistory">
+                <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#clock"></use></svg>
+                {{ $program->dateChanges->count() }} {{ Str::plural('change', $program->dateChanges->count()) }}
+            </button>
+        </div>
+        <div class="collapse" id="dateChangeHistory">
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    @foreach($program->dateChanges as $dc)
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <span class="badge bg-secondary" style="font-size: 0.65rem;">
+                                        {{ \App\Models\LaunchProgramDateChange::FIELD_LABELS[$dc->field] ?? $dc->field }}
+                                    </span>
+                                    <span class="ms-2 small">
+                                        <span class="text-muted">{{ $dc->old_date?->format('M j, Y') ?? 'Not set' }}</span>
+                                        <span class="mx-1">&rarr;</span>
+                                        <span class="fw-500">{{ $dc->new_date?->format('M j, Y') ?? 'Cleared' }}</span>
+                                    </span>
+                                </div>
+                                <small class="text-muted">{{ $dc->created_at->diffForHumans() }}</small>
+                            </div>
+                            @if($dc->reason)
+                                <p class="mb-0 mt-1 text-muted small fst-italic">"{{ $dc->reason }}"</p>
+                            @endif
+                            <small class="text-muted">by {{ $dc->changedBy->name ?? 'Unknown' }}</small>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 @endsection

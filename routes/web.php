@@ -27,6 +27,7 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\LabController;
 use App\Http\Controllers\LabFacilitatorController;
 use App\Http\Controllers\LaunchProgramController;
+use App\Http\Controllers\LaunchProgramDashboardController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\MeasureController;
 use App\Http\Controllers\NotificationTemplateController;
@@ -223,6 +224,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/partners/{partner}/launch-programs/{launchProgram}/nominate', [PartnerController::class, 'nominateForProgram'])->name('partners.launch-programs.nominate');
     Route::post('/launch-program-partners/{programPartner}/participants', [PartnerController::class, 'addParticipant'])->name('launch-program-partners.participants.store');
     Route::delete('/launch-program-participants/{participant}', [PartnerController::class, 'removeParticipant'])->name('launch-program-participants.destroy');
+    Route::put('/launch-program-partners/{programPartner}', [LaunchProgramController::class, 'updatePartnerStatus'])->name('admin.launch-program-partners.update');
     Route::get('/full-summary', [PartnerController::class, 'fullSummary'])->name('partners.full-summary');
     Route::get('/full-insights', [PartnerController::class, 'fullInsights'])->name('partners.full-insights');
 
@@ -360,12 +362,15 @@ Route::middleware(['auth'])->group(function () {
         // Enablement Dashboard
         Route::get('/enablement-dashboard', [EnablementDashboardController::class, 'index'])->name('admin.enablement-dashboard');
 
+        // Launch Programs Dashboard (must be before resource to avoid {launchProgram} conflict)
+        Route::get('/launch-programs/dashboard', [LaunchProgramDashboardController::class, 'index'])->name('admin.launch-programs.dashboard');
+
         // Launch Programs CRUD
         Route::resource('launch-programs', LaunchProgramController::class)->names('admin.launch-programs')->parameters(['launch-programs' => 'launchProgram']);
         Route::post('/launch-programs/{launchProgram}/milestones', [LaunchProgramController::class, 'addMilestone'])->name('admin.launch-programs.milestones.store');
+        Route::post('/launch-programs/{launchProgram}/admin-nominate', [LaunchProgramController::class, 'adminNominate'])->name('admin.launch-programs.admin-nominate');
         Route::put('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'updateMilestone'])->name('admin.launch-program-milestones.update');
         Route::delete('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'destroyMilestone'])->name('admin.launch-program-milestones.destroy');
-        Route::put('/launch-program-partners/{programPartner}', [LaunchProgramController::class, 'updatePartnerStatus'])->name('admin.launch-program-partners.update');
 
         // Workshop Labs
         Route::resource('labs', LabController::class);

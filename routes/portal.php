@@ -58,12 +58,17 @@ Route::middleware('portal')->group(function () {
         Route::get('/contacts', [PortalContactsController::class, 'index'])->name('contacts.index');
         Route::get('/contacts/create', [PortalContactsController::class, 'create'])->name('contacts.create');
         Route::post('/contacts', [PortalContactsController::class, 'store'])->name('contacts.store');
+        Route::get('/contacts/{contact}/edit', [PortalContactsController::class, 'edit'])->name('contacts.edit');
+        Route::put('/contacts/{contact}', [PortalContactsController::class, 'update'])->name('contacts.update');
+        Route::delete('/contacts/{contact}', [PortalContactsController::class, 'destroy'])->name('contacts.destroy');
 
         // Launch Programs
         Route::get('/launch-programs', [PortalLaunchProgramController::class, 'index'])->name('launch-programs.index');
         Route::get('/launch-programs/{programPartner}', [PortalLaunchProgramController::class, 'show'])->name('launch-programs.show');
         Route::post('/launch-programs/{programPartner}/milestones/{milestone}/complete', [PortalLaunchProgramController::class, 'completeMilestone'])->name('launch-programs.complete-milestone');
         Route::post('/launch-programs/{programPartner}/feedback', [PortalLaunchProgramController::class, 'submitFeedback'])->name('launch-programs.submit-feedback');
+        Route::post('/launch-programs/{programPartner}/participants', [PortalLaunchProgramController::class, 'addParticipant'])->name('launch-programs.add-participant');
+        Route::delete('/launch-programs/{programPartner}/participants/{participant}', [PortalLaunchProgramController::class, 'removeParticipant'])->name('launch-programs.remove-participant');
     });
 
     // Admin + Sales: deal registrations

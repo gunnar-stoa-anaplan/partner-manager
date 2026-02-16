@@ -15,6 +15,7 @@ class PortalContactsController extends Controller
         $partner = $contact->partner;
 
         $contacts = Contact::where('partner_id', $partner->id)
+            ->where('contact_type', '!=', 'influencer')
             ->orderBy('first_name')
             ->get();
 
@@ -48,5 +49,57 @@ class PortalContactsController extends Controller
 
         return redirect()->route('portal.contacts.index')
             ->with('success', 'Contact added successfully.');
+    }
+
+    public function edit(Contact $contact): \Illuminate\View\View
+    {
+        $portalUser = Auth::guard('portal')->user();
+
+        if ($contact->partner_id !== $portalUser->partner_id) {
+            abort(403);
+        }
+
+        return view('portal.contacts.edit', compact('contact'));
+    }
+
+    public function update(Request $request, Contact $contact): \Illuminate\Http\RedirectResponse
+    {
+        $portalUser = Auth::guard('portal')->user();
+
+        if ($contact->partner_id !== $portalUser->partner_id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:255',
+            'title' => 'nullable|string|max:255',
+        ]);
+
+        $contact->update($validated);
+
+        return redirect()->route('portal.contacts.index')
+            ->with('success', $contact->full_name.' updated successfully.');
+    }
+
+    public function destroy(Contact $contact): \Illuminate\Http\RedirectResponse
+    {
+        $portalUser = Auth::guard('portal')->user();
+
+        if ($contact->partner_id !== $portalUser->partner_id) {
+            abort(403);
+        }
+
+        if ($contact->id === $portalUser->id) {
+            return back()->with('error', 'You cannot delete your own account.');
+        }
+
+        $name = $contact->full_name;
+        $contact->delete();
+
+        return redirect()->route('portal.contacts.index')
+            ->with('success', $name.' has been removed.');
     }
 }

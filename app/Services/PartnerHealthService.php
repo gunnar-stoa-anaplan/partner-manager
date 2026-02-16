@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\AppSetting;
+use App\Models\LaunchProgramPartner;
 use App\Models\Partner;
 use App\Models\PartnerAssignedGoal;
 use App\Models\PartnerHealthSnapshot;
@@ -271,6 +272,32 @@ class PartnerHealthService
             ->count();
         if ($expiringCerts >= 2) {
             $signals[] = "{$expiringCerts} certifications expiring within 60 days";
+        }
+
+        // Launch program risk signals
+        $enrollments = LaunchProgramPartner::where('partner_id', $partner->id)
+            ->whereNotIn('status', ['withdrawn'])
+            ->with(['program.milestones', 'participants.milestoneCompletions'])
+            ->get();
+
+        foreach ($enrollments as $enrollment) {
+            $prog = $enrollment->program;
+            if ($prog->status !== 'active') {
+                continue;
+            }
+
+            $milestones = $prog->milestones;
+            $completedIds = $enrollment->participants
+                ->flatMap(fn ($p) => $p->milestoneCompletions->pluck('launch_program_milestone_id'))
+                ->unique();
+            $incompleteRequired = $milestones->where('is_required', true)
+                ->reject(fn ($ms) => $completedIds->contains($ms->id));
+
+            if ($incompleteRequired->isNotEmpty()) {
+                $daysToGa = $prog->target_ga_date ? (int) now()->diffInDays($prog->target_ga_date, false) : null;
+                $urgency = $daysToGa !== null && $daysToGa <= 30 ? ' — GA in '.$daysToGa.' days' : '';
+                $signals[] = $prog->name.': '.$incompleteRequired->count().' required milestone'.($incompleteRequired->count() > 1 ? 's' : '').' incomplete'.$urgency;
+            }
         }
 
         return $signals;

@@ -1,7 +1,7 @@
-@extends('layouts.vertical', ['pageTitle' => 'Launch Programs'])
+@extends('layouts.vertical', ['pageTitle' => 'Program Details'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Launch Programs', 'pageSubTitle1' => 'Partner Enablement', 'pageSubTitle1Url' => route('admin.launch-programs.index'), 'pageSubText' => 'Manage product launch partner programs'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Program Details', 'pageSubTitle1' => 'Partner Enablement', 'pageSubTitle1Url' => route('admin.launch-programs.index'), 'pageSubText' => 'Manage product launch partner programs'])
 @endsection
 
 @section('content')
@@ -30,6 +30,8 @@
                         <th>Name</th>
                         <th>Product</th>
                         <th>Status</th>
+                        <th>Strategy</th>
+                        <th>Owner</th>
                         <th class="text-center">Partners</th>
                         <th class="text-center">Milestones</th>
                         <th>GA Date</th>
@@ -50,10 +52,22 @@
                                     {{ \App\Models\LaunchProgram::STATUSES[$program->status] ?? $program->status }}
                                 </span>
                             </td>
+                            <td>
+                                @if($program->partner_strategy === 'exclude')
+                                    <span class="badge bg-secondary">No Launch Partners</span>
+                                @else
+                                    <span class="text-muted small">Include</span>
+                                @endif
+                            </td>
+                            <td>{{ $program->owner->name ?? '—' }}</td>
                             <td class="text-center">
-                                {{ $program->program_partners_count }}
-                                @if($program->max_partners)
-                                    <span class="text-muted">/ {{ $program->max_partners }}</span>
+                                @if($program->partner_strategy === 'exclude')
+                                    <span class="text-muted">—</span>
+                                @else
+                                    {{ $program->program_partners_count }}
+                                    @if($program->max_partners)
+                                        <span class="text-muted">/ {{ $program->max_partners }}</span>
+                                    @endif
                                 @endif
                             </td>
                             <td class="text-center">{{ $program->milestones_count }}</td>
@@ -66,7 +80,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">No launch programs yet. <a href="{{ route('admin.launch-programs.create') }}">Create one</a>.</td>
+                            <td colspan="9" class="text-center text-muted py-4">No launch programs yet. <a href="{{ route('admin.launch-programs.create') }}">Create one</a>.</td>
                         </tr>
                     @endforelse
                 </tbody>

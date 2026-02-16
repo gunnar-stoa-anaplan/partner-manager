@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Contact;
 use App\Models\LaunchProgram;
+use App\Models\LaunchProgramDateChange;
 use App\Models\LaunchProgramMilestone;
 use App\Models\LaunchProgramMilestoneCompletion;
 use App\Models\LaunchProgramParticipant;
@@ -69,6 +70,7 @@ class LaunchProgramFeatureTest extends TestCase
             'status' => 'draft',
             'starts_at' => now()->addDays(7)->toDateString(),
             'ends_at' => now()->addMonths(6)->toDateString(),
+            'partner_strategy' => 'include',
         ], $overrides);
     }
 
@@ -677,6 +679,124 @@ class LaunchProgramFeatureTest extends TestCase
         $response->assertForbidden();
     }
 
+    // ─── Portal Team Management ──────────────────────────────────
+
+    public function test_portal_admin_can_add_team_member(): void
+    {
+        $contact = $this->createPortalContact('admin');
+        $colleague = Contact::factory()->create(['partner_id' => $this->partner->id]);
+        $program = $this->createProgram('active');
+        $enrollment = $this->createEnrollment($program, null, 'active');
+
+        $response = $this->actingAs($contact, 'portal')->post(route('portal.launch-programs.add-participant', $enrollment), [
+            'contact_id' => $colleague->id,
+            'role' => 'technical_lead',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('launch_program_participants', [
+            'launch_program_partner_id' => $enrollment->id,
+            'contact_id' => $colleague->id,
+            'role' => 'technical_lead',
+            'assigned_by' => null,
+        ]);
+    }
+
+    public function test_portal_admin_cannot_add_contact_from_different_partner(): void
+    {
+        $contact = $this->createPortalContact('admin');
+        $otherPartner = Partner::factory()->create();
+        $otherContact = Contact::factory()->create(['partner_id' => $otherPartner->id]);
+        $program = $this->createProgram('active');
+        $enrollment = $this->createEnrollment($program, null, 'active');
+
+        $response = $this->actingAs($contact, 'portal')->post(route('portal.launch-programs.add-participant', $enrollment), [
+            'contact_id' => $otherContact->id,
+            'role' => 'technical_lead',
+        ]);
+
+        $response->assertNotFound();
+        $this->assertDatabaseMissing('launch_program_participants', [
+            'contact_id' => $otherContact->id,
+        ]);
+    }
+
+    public function test_portal_admin_cannot_add_duplicate_participant(): void
+    {
+        $contact = $this->createPortalContact('admin');
+        $colleague = Contact::factory()->create(['partner_id' => $this->partner->id]);
+        $program = $this->createProgram('active');
+        $enrollment = $this->createEnrollment($program, null, 'active');
+
+        LaunchProgramParticipant::factory()->create([
+            'launch_program_partner_id' => $enrollment->id,
+            'contact_id' => $colleague->id,
+        ]);
+
+        $response = $this->actingAs($contact, 'portal')->post(route('portal.launch-programs.add-participant', $enrollment), [
+            'contact_id' => $colleague->id,
+            'role' => 'technical_lead',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+        $this->assertEquals(1, LaunchProgramParticipant::where('contact_id', $colleague->id)->count());
+    }
+
+    public function test_portal_admin_can_remove_team_member(): void
+    {
+        $contact = $this->createPortalContact('admin');
+        $colleague = Contact::factory()->create(['partner_id' => $this->partner->id]);
+        $program = $this->createProgram('active');
+        $enrollment = $this->createEnrollment($program, null, 'active');
+
+        $participant = LaunchProgramParticipant::factory()->create([
+            'launch_program_partner_id' => $enrollment->id,
+            'contact_id' => $colleague->id,
+        ]);
+
+        $response = $this->actingAs($contact, 'portal')->delete(route('portal.launch-programs.remove-participant', [$enrollment, $participant]));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+        $this->assertDatabaseMissing('launch_program_participants', ['id' => $participant->id]);
+    }
+
+    public function test_portal_admin_cannot_remove_themselves(): void
+    {
+        $contact = $this->createPortalContact('admin');
+        $program = $this->createProgram('active');
+        $enrollment = $this->createEnrollment($program, null, 'active');
+
+        $selfParticipant = LaunchProgramParticipant::factory()->create([
+            'launch_program_partner_id' => $enrollment->id,
+            'contact_id' => $contact->id,
+        ]);
+
+        $response = $this->actingAs($contact, 'portal')->delete(route('portal.launch-programs.remove-participant', [$enrollment, $selfParticipant]));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('launch_program_participants', ['id' => $selfParticipant->id]);
+    }
+
+    public function test_portal_admin_cannot_manage_other_partners_enrollment(): void
+    {
+        $contact = $this->createPortalContact('admin');
+        $otherPartner = Partner::factory()->create();
+        $program = $this->createProgram('active');
+        $enrollment = $this->createEnrollment($program, $otherPartner, 'active');
+        $colleague = Contact::factory()->create(['partner_id' => $otherPartner->id]);
+
+        $response = $this->actingAs($contact, 'portal')->post(route('portal.launch-programs.add-participant', $enrollment), [
+            'contact_id' => $colleague->id,
+            'role' => 'technical_lead',
+        ]);
+
+        $response->assertForbidden();
+    }
+
     // ─── Model: LaunchProgram ─────────────────────────────────────
 
     public function test_model_is_accepting_nominations(): void
@@ -820,5 +940,275 @@ class LaunchProgramFeatureTest extends TestCase
         $this->assertCount(2, $ids);
         $this->assertContains($m1->id, $ids);
         $this->assertContains($m2->id, $ids);
+    }
+
+    // ─── Dashboard ───────────────────────────────────────────────
+
+    public function test_admin_can_view_dashboard(): void
+    {
+        $this->createProgram('active');
+
+        $response = $this->actingAs($this->admin)->get(route('admin.launch-programs.dashboard'));
+
+        $response->assertOk();
+        $response->assertViewIs('admin.launch-programs.dashboard');
+        $response->assertViewHasAll([
+            'totalPrograms',
+            'activePrograms',
+            'enrolledPartners',
+            'avgCompletion',
+            'totalFeedback',
+            'programsByStatus',
+            'partnersByStatus',
+            'milestonesByType',
+            'timelinePrograms',
+            'recentFeedback',
+            'recentDateChanges',
+        ]);
+    }
+
+    public function test_psm_cannot_view_dashboard(): void
+    {
+        $response = $this->actingAs($this->psm)->get(route('admin.launch-programs.dashboard'));
+
+        $response->assertForbidden();
+    }
+
+    // ─── Date Change Tracking ────────────────────────────────────
+
+    public function test_date_changes_tracked_on_update(): void
+    {
+        $program = $this->createProgram('active');
+        $originalGa = $program->target_ga_date?->toDateString() ?? now()->addWeeks(10)->toDateString();
+
+        // Set a known GA date first
+        $program->update(['target_ga_date' => '2026-06-01']);
+
+        $newGa = '2026-07-15';
+        $this->actingAs($this->admin)->put(route('admin.launch-programs.update', $program), $this->validProgramData([
+            'name' => $program->name,
+            'status' => $program->status,
+            'starts_at' => $program->starts_at->toDateString(),
+            'ends_at' => $program->ends_at->toDateString(),
+            'target_ga_date' => $newGa,
+            'date_change_reason' => 'Security review delayed GA.',
+        ]));
+
+        $this->assertDatabaseHas('launch_program_date_changes', [
+            'launch_program_id' => $program->id,
+            'field' => 'target_ga_date',
+            'old_date' => '2026-06-01',
+            'new_date' => $newGa,
+            'reason' => 'Security review delayed GA.',
+        ]);
+    }
+
+    public function test_no_date_change_when_dates_unchanged(): void
+    {
+        $program = $this->createProgram('active');
+
+        $this->actingAs($this->admin)->put(route('admin.launch-programs.update', $program), $this->validProgramData([
+            'name' => $program->name,
+            'status' => $program->status,
+            'starts_at' => $program->starts_at->toDateString(),
+            'target_ga_date' => $program->target_ga_date?->toDateString(),
+            'ends_at' => $program->ends_at?->toDateString(),
+        ]));
+
+        $this->assertEquals(0, LaunchProgramDateChange::where('launch_program_id', $program->id)->count());
+    }
+
+    public function test_multiple_date_fields_tracked_simultaneously(): void
+    {
+        $program = LaunchProgram::factory()->create([
+            'status' => 'active',
+            'starts_at' => '2026-03-01',
+            'target_ga_date' => '2026-06-01',
+            'ends_at' => '2026-09-01',
+            'created_by' => $this->admin->id,
+        ]);
+
+        $this->actingAs($this->admin)->put(route('admin.launch-programs.update', $program), $this->validProgramData([
+            'name' => $program->name,
+            'status' => $program->status,
+            'starts_at' => '2026-04-01',
+            'target_ga_date' => '2026-07-01',
+            'ends_at' => '2026-10-01',
+            'date_change_reason' => 'All dates shifted by one month.',
+        ]));
+
+        $this->assertEquals(3, LaunchProgramDateChange::where('launch_program_id', $program->id)->count());
+    }
+
+    // ─── Partner Strategy ────────────────────────────────────────
+
+    public function test_admin_can_create_program_with_exclude_strategy(): void
+    {
+        $data = $this->validProgramData([
+            'partner_strategy' => 'exclude',
+            'exclusion_reason' => 'Internal beta only.',
+        ]);
+
+        $this->actingAs($this->admin)->post(route('admin.launch-programs.store'), $data);
+
+        $this->assertDatabaseHas('launch_programs', [
+            'name' => 'Test Launch Program',
+            'partner_strategy' => 'exclude',
+            'exclusion_reason' => 'Internal beta only.',
+        ]);
+    }
+
+    public function test_exclude_strategy_requires_reason(): void
+    {
+        $data = $this->validProgramData([
+            'partner_strategy' => 'exclude',
+            'exclusion_reason' => null,
+        ]);
+
+        $response = $this->actingAs($this->admin)->post(route('admin.launch-programs.store'), $data);
+
+        $response->assertSessionHasErrors('exclusion_reason');
+    }
+
+    public function test_include_strategy_clears_exclusion_reason(): void
+    {
+        $data = $this->validProgramData([
+            'partner_strategy' => 'include',
+            'exclusion_reason' => 'Should be cleared.',
+        ]);
+
+        $this->actingAs($this->admin)->post(route('admin.launch-programs.store'), $data);
+
+        $program = LaunchProgram::where('name', 'Test Launch Program')->first();
+        $this->assertNull($program->exclusion_reason);
+    }
+
+    public function test_excluded_programs_hidden_from_partner_tab_available(): void
+    {
+        $excludedProgram = LaunchProgram::factory()->acceptingNominations()->create([
+            'created_by' => $this->admin->id,
+            'partner_strategy' => 'exclude',
+            'exclusion_reason' => 'Not for partners.',
+        ]);
+
+        $includedProgram = LaunchProgram::factory()->acceptingNominations()->create([
+            'created_by' => $this->admin->id,
+            'partner_strategy' => 'include',
+        ]);
+
+        $response = $this->actingAs($this->psm)->get(route('partners.tab', [
+            'id' => $this->partner->id,
+            'tab' => 'launch-programs',
+        ]));
+
+        $availablePrograms = $response->viewData('availablePrograms');
+        $this->assertFalse($availablePrograms->contains('id', $excludedProgram->id));
+        $this->assertTrue($availablePrograms->contains('id', $includedProgram->id));
+    }
+
+    // ─── Program Owner ───────────────────────────────────────────
+
+    public function test_admin_can_set_owner_on_create(): void
+    {
+        $owner = User::factory()->create(['role' => 'psm']);
+
+        $data = $this->validProgramData(['owner_id' => $owner->id]);
+        $this->actingAs($this->admin)->post(route('admin.launch-programs.store'), $data);
+
+        $this->assertDatabaseHas('launch_programs', [
+            'name' => 'Test Launch Program',
+            'owner_id' => $owner->id,
+        ]);
+    }
+
+    public function test_owner_can_approve_nominated_partner(): void
+    {
+        $owner = User::factory()->create(['role' => 'psm']);
+        $program = LaunchProgram::factory()->active()->create([
+            'created_by' => $this->admin->id,
+            'owner_id' => $owner->id,
+        ]);
+        $enrollment = $this->createEnrollment($program);
+
+        $response = $this->actingAs($owner)->put(route('admin.launch-program-partners.update', $enrollment), [
+            'status' => 'accepted',
+        ]);
+
+        $response->assertRedirect();
+        $enrollment->refresh();
+        $this->assertEquals('accepted', $enrollment->status);
+    }
+
+    public function test_non_owner_psm_cannot_approve_partner(): void
+    {
+        $owner = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $program = LaunchProgram::factory()->active()->create([
+            'created_by' => $this->admin->id,
+            'owner_id' => $owner->id,
+        ]);
+        $enrollment = $this->createEnrollment($program);
+
+        $response = $this->actingAs($otherPsm)->put(route('admin.launch-program-partners.update', $enrollment), [
+            'status' => 'accepted',
+        ]);
+
+        $response->assertForbidden();
+    }
+
+    // ─── Admin Nomination ────────────────────────────────────────
+
+    public function test_admin_can_nominate_partner_from_show(): void
+    {
+        $program = $this->createProgram('active');
+
+        $response = $this->actingAs($this->admin)->post(route('admin.launch-programs.admin-nominate', $program), [
+            'partner_id' => $this->partner->id,
+            'notes' => 'Strong delivery track record.',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('launch_program_partners', [
+            'launch_program_id' => $program->id,
+            'partner_id' => $this->partner->id,
+            'status' => 'nominated',
+        ]);
+    }
+
+    public function test_admin_nomination_prevents_duplicate(): void
+    {
+        $program = $this->createProgram('active');
+        $this->createEnrollment($program);
+
+        $response = $this->actingAs($this->admin)->post(route('admin.launch-programs.admin-nominate', $program), [
+            'partner_id' => $this->partner->id,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+    }
+
+    // ─── Model: isIncludingPartners ──────────────────────────────
+
+    public function test_model_is_including_partners_true(): void
+    {
+        $program = LaunchProgram::factory()->create([
+            'partner_strategy' => 'include',
+            'created_by' => $this->admin->id,
+        ]);
+
+        $this->assertTrue($program->isIncludingPartners());
+    }
+
+    public function test_model_is_including_partners_false(): void
+    {
+        $program = LaunchProgram::factory()->create([
+            'partner_strategy' => 'exclude',
+            'exclusion_reason' => 'Internal only.',
+            'created_by' => $this->admin->id,
+        ]);
+
+        $this->assertFalse($program->isIncludingPartners());
     }
 }
