@@ -23,8 +23,8 @@ class ViewServiceProvider extends ServiceProvider
     {
         // Share authenticated user's partner count across all views
         View::composer('*', function ($view) {
-            if (auth()->check()) {
-                $view->with('authUserPartnerCount', auth()->user()->partners()->count());
+            if (auth('web')->check()) {
+                $view->with('authUserPartnerCount', auth('web')->user()->partners()->count());
             }
         });
 
@@ -38,10 +38,10 @@ class ViewServiceProvider extends ServiceProvider
 
         // Share breadcrumb defaults
         View::composer('shared.breadcrumb', function ($view) {
-            if (!$view->offsetExists('items')) {
+            if (! $view->offsetExists('items')) {
                 $view->with('items', []);
             }
-            if (!$view->offsetExists('current')) {
+            if (! $view->offsetExists('current')) {
                 $view->with('current', null);
             }
         });
