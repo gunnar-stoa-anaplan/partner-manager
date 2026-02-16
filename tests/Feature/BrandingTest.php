@@ -415,23 +415,40 @@ class BrandingTest extends TestCase
         $response->assertDontSee('custom-brand-colors', false);
     }
 
-    public function test_custom_css_link_injected_when_set(): void
+    public function test_custom_theme_css_loaded_when_selected(): void
     {
-        Storage::disk('public')->put('branding/custom.css', 'body { color: red; }');
+        Storage::disk('public')->put('branding/custom.css', ':root { --bs-primary: red; }');
         AppSetting::set('branding_custom_css_path', 'branding/custom.css');
+        AppSetting::set('branding_theme', 'custom');
 
         $response = $this->actingAs($this->admin)->get(route('admin.branding'));
 
         $response->assertOk();
-        $response->assertSee('custom-css-style', false);
+        $response->assertSee('default-theme-style', false);
+        $response->assertSee('/storage/branding/custom.css', false);
     }
 
-    public function test_custom_css_link_not_injected_when_not_set(): void
+    public function test_custom_theme_not_loaded_when_not_selected(): void
     {
+        Storage::disk('public')->put('branding/custom.css', ':root { --bs-primary: red; }');
+        AppSetting::set('branding_custom_css_path', 'branding/custom.css');
+        AppSetting::set('branding_theme', 'earth');
+
         $response = $this->actingAs($this->admin)->get(route('admin.branding'));
 
         $response->assertOk();
-        $response->assertDontSee('custom-css-style', false);
+        $response->assertSee('/css/themes/earth.css', false);
+        $response->assertDontSee('/storage/branding/custom.css', false);
+    }
+
+    public function test_no_theme_loaded_when_custom_selected_but_file_missing(): void
+    {
+        AppSetting::set('branding_theme', 'custom');
+
+        $response = $this->actingAs($this->admin)->get(route('admin.branding'));
+
+        $response->assertOk();
+        $response->assertDontSee('default-theme-style', false);
     }
 
     public function test_page_shows_custom_brand_colors_section(): void
@@ -440,7 +457,7 @@ class BrandingTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Custom Brand Colors');
-        $response->assertSee('Custom CSS');
+        $response->assertSee('Custom Theme');
     }
 
     public function test_page_shows_saved_custom_colors(): void
@@ -451,5 +468,80 @@ class BrandingTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('#ff6600', false);
+    }
+
+    // ─── Custom Theme ─────────────────────────────────────────────
+
+    public function test_admin_can_set_custom_theme_name(): void
+    {
+        $response = $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'branding_custom_theme_name' => 'Acme Corporate',
+        ]);
+
+        $response->assertRedirect(route('admin.branding'));
+        $response->assertSessionHas('success');
+        $this->assertEquals('Acme Corporate', AppSetting::get('branding_custom_theme_name'));
+    }
+
+    public function test_admin_can_select_custom_as_default_theme(): void
+    {
+        $response = $this->actingAs($this->admin)->put(route('admin.branding.update'), [
+            'branding_theme' => 'custom',
+        ]);
+
+        $response->assertRedirect(route('admin.branding'));
+        $this->assertEquals('custom', AppSetting::get('branding_theme'));
+    }
+
+    public function test_custom_theme_appears_in_theme_picker(): void
+    {
+        Storage::disk('public')->put('branding/custom.css', ':root { --bs-primary: red; }');
+        AppSetting::set('branding_custom_css_path', 'branding/custom.css');
+        AppSetting::set('branding_custom_theme_name', 'Acme Corporate');
+
+        $response = $this->actingAs($this->admin)->get(route('admin.branding'));
+
+        $response->assertOk();
+        $response->assertSee('Acme Corporate');
+        $response->assertSee('value="custom"', false);
+    }
+
+    public function test_custom_theme_hidden_when_no_css_uploaded(): void
+    {
+        AppSetting::set('branding_custom_theme_name', 'Acme Corporate');
+
+        $response = $this->actingAs($this->admin)->get(route('admin.branding'));
+
+        $response->assertOk();
+        $response->assertDontSee('value="custom"', false);
+    }
+
+    public function test_custom_theme_hidden_when_no_name_set(): void
+    {
+        Storage::disk('public')->put('branding/custom.css', ':root { --bs-primary: red; }');
+        AppSetting::set('branding_custom_css_path', 'branding/custom.css');
+
+        $response = $this->actingAs($this->admin)->get(route('admin.branding'));
+
+        $response->assertOk();
+        $response->assertDontSee('value="custom"', false);
+    }
+
+    public function test_page_shows_download_template_link(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.branding'));
+
+        $response->assertOk();
+        $response->assertSee('Download Template');
+        $response->assertSee('/css/sample-theme-template.css', false);
+    }
+
+    public function test_page_shows_custom_theme_name_input(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.branding'));
+
+        $response->assertOk();
+        $response->assertSee('Theme Name');
+        $response->assertSee('branding_custom_theme_name', false);
     }
 }

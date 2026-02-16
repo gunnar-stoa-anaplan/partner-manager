@@ -30,7 +30,7 @@ class BrandingController extends Controller
 
         $request->validate([
             'branding_app_name' => 'nullable|string|max:255',
-            'branding_theme' => 'nullable|string|in:'.$themes,
+            'branding_theme' => 'nullable|string|in:custom,'.$themes,
             'branding_logo' => 'nullable|image|mimes:jpeg,jpg,png,gif,svg|max:2048',
             'branding_favicon' => 'nullable|image|mimes:png,ico|max:512',
             'branding_color_primary' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
@@ -38,6 +38,7 @@ class BrandingController extends Controller
             'branding_color_info' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'branding_color_warning' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'branding_color_danger' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'branding_custom_theme_name' => 'nullable|string|max:50',
             'branding_custom_css' => ['nullable', 'file', 'max:1024', function (string $attribute, mixed $value, \Closure $fail) {
                 if (strtolower($value->getClientOriginalExtension()) !== 'css') {
                     $fail('The custom CSS file must have a .css extension.');
@@ -93,6 +94,9 @@ class BrandingController extends Controller
                 $customColors ? $this->generateCustomColorsCss($customColors) : ''
             );
         }
+
+        // Custom theme name
+        AppSetting::set('branding_custom_theme_name', $request->input('branding_custom_theme_name', ''));
 
         // Custom CSS file upload
         if ($request->hasFile('branding_custom_css')) {

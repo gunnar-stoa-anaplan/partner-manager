@@ -1,6 +1,6 @@
 # Branding
 
-The Branding page allows administrators to customize the application's appearance for their organization — logo, favicon, application name, default color theme, custom brand colors, and custom CSS. These settings apply deployment-wide and take effect immediately.
+The Branding page allows administrators to customize the application's appearance for their organization — logo, favicon, application name, default color theme, custom brand colors, and custom themes. These settings apply deployment-wide and take effect immediately.
 
 ## Accessing Branding
 
@@ -72,7 +72,6 @@ The default theme sets the color palette for all users who haven't chosen their 
 
 1. **Server default** — The theme selected on the Branding page is loaded as a CSS stylesheet on every page
 2. **Custom brand colors** — If set, inline CSS overrides specific colors on top of the selected theme
-3. **Custom CSS file** — If uploaded, loaded after all other styles for advanced customization
 4. **User override** — Individual users can select a different theme from the **settings drawer** (gear icon). Their preference is saved in browser localStorage and takes priority
 5. **Factory reset** — Users can reset their settings drawer to return to the deployment default
 
@@ -102,46 +101,49 @@ The system automatically generates a full shade scale (50 through 900) from each
 
 To remove all custom color overrides and revert to the selected theme's defaults, check **Clear all custom colors** and save. This checkbox only appears when at least one custom color has been set.
 
-## Custom CSS
+## Custom Theme
 
-For advanced customization beyond color pickers and built-in themes, administrators can upload a custom CSS file. This file loads last in the stylesheet cascade (before user localStorage preferences), allowing it to override any CSS variable or rule.
+For advanced customization beyond color pickers and built-in themes, administrators can create and upload a custom theme. Custom themes appear in the theme picker alongside built-in themes and can be selected as the deployment default.
+
+### Creating a Custom Theme
+
+1. Click the **Download Template** button on the Custom Theme card to get a well-commented CSS template
+2. Edit the template in any text editor — change colors, shade scales, navigation styles, and dark mode overrides
+3. Give the theme a **name** (e.g. "Acme Corporate") in the Theme Name field
+4. Upload the edited CSS file
+5. Click **Save Branding** — the theme now appears in the theme picker
+6. Select the custom theme swatch in the **Default Theme** section to make it the deployment default
+
+### Sample Template
+
+The downloadable template includes organized sections for all key CSS variables:
+
+- **Core Colors** — Primary, success, info, warning, and danger with RGB variants
+- **Color Shade Scales** — Shades 50 (lightest) through 900 (darkest) for each color
+- **Subtle Backgrounds & Borders** — Alert and badge background tints
+- **Application Navigation** — Sidebar link colors and hover states
+- **Links & Form Validation** — Default link and form state colors
+- **Dark Mode** — `[data-bs-theme=dark]` overrides for dark backgrounds
+
+Each variable includes a comment explaining its purpose. You only need to include variables you want to override — omit sections and the defaults will be used.
+
+### Requirements
 
 | Property | Requirement |
 |----------|-------------|
 | **Format** | CSS file (.css extension) |
 | **Max size** | 1 MB |
+| **Theme name** | Required for the theme to appear in the picker (max 50 characters) |
 
-### Use Cases
+### Managing the Custom Theme
 
-- Override specific Bootstrap 5 CSS variables not covered by the color pickers
-- Adjust typography, spacing, or component styles
-- Add custom component styles for organization-specific UI
-- Define dark mode color overrides
-
-### Writing a Custom CSS File
-
-The custom CSS file can override Bootstrap 5 CSS custom properties (`:root` variables) to change colors, or add any standard CSS rules:
-
-```css
-:root, [data-bs-theme=light] {
-    --bs-primary: #your-color;
-    --bs-primary-rgb: r, g, b;
-    --primary-500: #your-color;
-    /* ... additional color scales (50-900) for primary, success, info, etc. */
-}
-
-[data-bs-theme=dark] {
-    /* Dark mode overrides */
-}
-```
-
-See any existing theme file (e.g. `public/css/themes/earth.css`) as a reference for the full set of variables to override.
-
-### Managing the Custom CSS File
-
-- **Upload** — Select a `.css` file from the Custom CSS card
+- **Upload** — Select a `.css` file from the Custom Theme card
 - **Replace** — Upload a new file; the previous CSS file is automatically deleted
 - **Remove** — Check the "Remove" checkbox next to the current file and save
+- **Rename** — Change the Theme Name field and save
+
+> [!TIP]
+> For a complete reference implementation, see any built-in theme file (e.g. `public/css/themes/earth.css`). The sample template uses the same variable structure with helpful comments added.
 
 ## How Branding is Stored
 
@@ -150,7 +152,7 @@ All branding settings are stored as key-value pairs in the `app_settings` table:
 | Setting | Key | Example Value |
 |---------|-----|---------------|
 | Application name | `branding_app_name` | `Acme Partner Hub` |
-| Default theme | `branding_theme` | `earth` |
+| Default theme | `branding_theme` | `earth` or `custom` |
 | Logo file path | `branding_logo_path` | `branding/logo-abc123.png` |
 | Favicon file path | `branding_favicon_path` | `branding/favicon-def456.png` |
 | Custom color (primary) | `branding_color_primary` | `#FF6600` |
@@ -159,7 +161,8 @@ All branding settings are stored as key-value pairs in the `app_settings` table:
 | Custom color (warning) | `branding_color_warning` | `#FFC107` |
 | Custom color (danger) | `branding_color_danger` | `#DC3545` |
 | Generated color CSS | `branding_custom_colors_css` | *(auto-generated)* |
-| Custom CSS file path | `branding_custom_css_path` | `branding/custom-1234.css` |
+| Custom theme name | `branding_custom_theme_name` | `Acme Corporate` |
+| Custom theme file path | `branding_custom_css_path` | `branding/custom-1234.css` |
 
 Uploaded files are stored in `storage/app/public/branding/` and served via the public storage symlink. No database migration is required — the existing `app_settings` table handles all branding configuration.
 
@@ -174,7 +177,7 @@ After a fresh deployment, administrators should configure branding as one of the
 5. Optionally upload a custom favicon
 6. Select a default color theme that aligns with the organization's brand
 7. Optionally set custom brand colors for precise color matching
-8. Optionally upload a custom CSS file for advanced styling
+8. Optionally create and upload a custom theme using the downloadable template
 9. Click **Save Branding**
 
 The changes take effect immediately for all users on their next page load.

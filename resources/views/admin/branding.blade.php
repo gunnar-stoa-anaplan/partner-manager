@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-<p class="text-muted fst-italic mt-3 mb-4">Customize how the application looks to your users. Set your organization's name, upload a logo and favicon, choose a default color theme, override brand colors, or upload custom CSS. Individual users can still override the theme from their settings drawer.</p>
+<p class="text-muted fst-italic mt-3 mb-4">Customize how the application looks to your users. Set your organization's name, upload a logo and favicon, choose a default color theme, create a custom theme, or override brand colors. Individual users can still override the theme from their settings drawer.</p>
 
 @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -129,6 +129,30 @@
                                 <small class="d-block text-center mt-1 fw-500 fs-xs">{{ $swatch['label'] }}</small>
                             </label>
                         @endforeach
+
+                        @php
+                            $customThemeName = $settings['branding_custom_theme_name'] ?? '';
+                            $customCssExists = ($settings['branding_custom_css_path'] ?? '') && Storage::disk('public')->exists($settings['branding_custom_css_path'] ?? '');
+                        @endphp
+                        @if($customCssExists && $customThemeName)
+                            <label class="theme-swatch-label position-relative" style="cursor: pointer;">
+                                <input type="radio" name="branding_theme" value="custom"
+                                       class="position-absolute opacity-0"
+                                       {{ $currentTheme === 'custom' ? 'checked' : '' }}>
+                                <div class="theme-swatch rounded border {{ $currentTheme === 'custom' ? 'border-primary border-2' : 'border-secondary-subtle' }} d-flex align-items-center justify-content-center"
+                                     style="width: 80px; height: 50px; background: linear-gradient(135deg, var(--bs-primary), var(--bs-info), var(--bs-success)); transition: border-color 0.15s;">
+                                    @if($currentTheme === 'custom')
+                                        <div class="position-absolute top-0 end-0 m-1">
+                                            <span class="badge bg-primary rounded-pill" style="font-size: 0.6rem;">
+                                                <svg class="sa-icon sa-icon-xs"><use href="/icons/sprite.svg#check"></use></svg>
+                                            </span>
+                                        </div>
+                                    @endif
+                                    <svg class="sa-icon text-white" style="opacity: 0.85;"><use href="/icons/sprite.svg#palette"></use></svg>
+                                </div>
+                                <small class="d-block text-center mt-1 fw-500 fs-xs">{{ $customThemeName }}</small>
+                            </label>
+                        @endif
                     </div>
 
                     @error('branding_theme')
@@ -190,13 +214,30 @@
                 </div>
             </div>
 
-            {{-- Custom CSS Card --}}
+            {{-- Custom Theme Card --}}
             <div class="card shadow-0 mb-g">
-                <div class="card-header">
-                    <div class="card-title">Custom CSS</div>
+                <div class="card-header d-flex align-items-center">
+                    <div class="card-title">Custom Theme</div>
+                    <a href="/css/sample-theme-template.css" download class="btn btn-outline-info btn-xs ms-auto">
+                        <svg class="sa-icon sa-icon-xs me-1"><use href="/icons/sprite.svg#download"></use></svg>
+                        Download Template
+                    </a>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted fs-sm mb-3">Upload a custom CSS file for advanced styling. This loads after all other styles and can override any CSS variable or rule.</p>
+                    <p class="text-muted fs-sm mb-3">Create your own theme by editing the sample template, then upload it here with a name. The theme will appear in the theme picker above alongside the built-in themes.</p>
+
+                    <div class="mb-3">
+                        <label for="branding_custom_theme_name" class="form-label">Theme Name</label>
+                        <input type="text" class="form-control @error('branding_custom_theme_name') is-invalid @enderror"
+                               id="branding_custom_theme_name" name="branding_custom_theme_name"
+                               value="{{ old('branding_custom_theme_name', $settings['branding_custom_theme_name'] ?? '') }}"
+                               placeholder="e.g. Acme Corporate"
+                               maxlength="50">
+                        @error('branding_custom_theme_name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="form-text text-muted">This name appears in the theme picker. Required to make the theme selectable.</small>
+                    </div>
 
                     @php $currentCss = $settings['branding_custom_css_path'] ?? ''; @endphp
                     @if($currentCss && Storage::disk('public')->exists($currentCss))
@@ -262,8 +303,9 @@
                         @endphp
                         <dd>{{ $customColorCount ? $customColorCount.' of 5 set' : 'None' }}</dd>
 
-                        <dt class="text-muted fs-sm">Custom CSS</dt>
-                        <dd>{{ ($settings['branding_custom_css_path'] ?? '') ? 'Uploaded' : 'None' }}</dd>
+                        <dt class="text-muted fs-sm">Custom Theme</dt>
+                        @php $previewThemeName = $settings['branding_custom_theme_name'] ?? ''; @endphp
+                        <dd>{{ ($settings['branding_custom_css_path'] ?? '') ? ($previewThemeName ?: 'Uploaded (unnamed)') : 'None' }}</dd>
 
                         <dt class="text-muted fs-sm">Favicon</dt>
                         <dd>{{ ($settings['branding_favicon_path'] ?? '') ? 'Custom' : 'Default' }}</dd>
