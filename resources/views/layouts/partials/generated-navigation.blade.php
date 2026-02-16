@@ -437,7 +437,7 @@
     {{-- Partner Admin - Admin Only --}}
     @if(Auth::user()->role === 'admin')
     @if($show('goals_scorecards', 'partner_paths', 'deal_registration', 'anaplan', 'blueprints', 'enablement_events', 'labs', 'launch_programs'))
-    <li class="nav-title"><span>Partner Admin</span></li>
+    <li class="nav-title"><span>Partner Administration</span></li>
 
     @if($show('goals_scorecards'))
     <li class="nav-item">
@@ -644,7 +644,7 @@
 
     {{-- System - always show Configuration so dev can change focus --}}
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_system'] ?? '1') === '1')
-    <li class="nav-title"><span>System</span></li>
+    <li class="nav-title"><span>System Administration</span></li>
 
     <li>
         <a href="{{ route('admin.dashboard') }}">
