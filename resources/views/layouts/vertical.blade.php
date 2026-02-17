@@ -13,6 +13,8 @@
 
     @include('layouts.partials/app-sidebar')
 
+    @include('layouts.partials/app-update-banner')
+
     <main class="app-body">
 
         <div class="app-content">

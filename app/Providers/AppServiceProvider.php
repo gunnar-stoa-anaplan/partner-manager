@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\ChatServiceInterface;
 use App\Models\AppSetting;
+use App\Services\SimulatedChatService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -15,7 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(ChatServiceInterface::class, SimulatedChatService::class);
     }
 
     /**

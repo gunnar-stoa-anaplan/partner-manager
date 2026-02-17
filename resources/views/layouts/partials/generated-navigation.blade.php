@@ -33,43 +33,30 @@
             </li>
             <li>
                 <a href="{{ route('partners.my') }}">
-                    <span class="nav-link-text">List</span>
+                    <span class="nav-link-text">My Partners</span>
                 </a>
             </li>
+            @if($show('analysis'))
+            @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
+            <li>
+                <a href="{{ route('custom-filters.index') }}">
+                    <span class="nav-link-text">Custom Filters</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('wizard.index') }}">
+                    <span class="nav-link-text">Wizard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('coach.index') }}">
+                    <span class="nav-link-text">Coach</span>
+                </a>
+            </li>
+            @endif
+            @endif
         </ul>
     </li>
-
-    {{-- Analysis --}}
-    @if($show('analysis'))
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
-    <li>
-        <a href="{{ route('analysis.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#trending-up"></use>
-            </svg>
-            <span class="nav-link-text">Custom Analysis</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('analysis.guided') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#compass"></use>
-            </svg>
-            <span class="nav-link-text">Guided Analysis</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('analysis.coach') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#message-circle"></use>
-            </svg>
-            <span class="nav-link-text">Partner Coach</span>
-        </a>
-    </li>
-    @endif
-    @endif
 
     {{-- Plan Section --}}
     @if($show('goals_scorecards'))
@@ -436,17 +423,34 @@
 
     {{-- Partner Admin - Admin Only --}}
     @if(Auth::user()->role === 'admin')
-    @if($show('goals_scorecards', 'partner_paths', 'deal_registration'))
-    <li class="nav-title"><span>Partner Admin</span></li>
+    @if($show('goals_scorecards', 'partner_paths', 'deal_registration', 'anaplan', 'blueprints', 'enablement_events', 'labs', 'launch_programs'))
+    <li class="nav-title"><span>Partner Administration</span></li>
 
     @if($show('goals_scorecards'))
-    <li>
-        <a href="{{ route('partner-goals.index') }}">
+    <li class="nav-item">
+        <a href="#" title="Goals" data-filter-tags>
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#target"></use>
             </svg>
-            <span class="nav-link-text">Partner Goals</span>
+            <span class="nav-link-text">Goals</span>
         </a>
+        <ul>
+            <li>
+                <a href="{{ route('partner-goals.index') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.goal-templates.index') }}">
+                    <span class="nav-link-text">Templates</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.scorecard-weights.index') }}">
+                    <span class="nav-link-text">Scorecards</span>
+                </a>
+            </li>
+        </ul>
     </li>
     @endif
 
@@ -521,61 +525,31 @@
         </ul>
     </li>
     @endif
-    @endif
-
-    {{-- Administration --}}
-    @if($show('goals_scorecards', 'anaplan'))
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_administration'] ?? '1') === '1')
-    <li class="nav-title"><span>Administration</span></li>
-
-    <li>
-        <a href="{{ route('admin.dashboard') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#monitor"></use>
-            </svg>
-            <span class="nav-link-text">Admin Dashboard</span>
-        </a>
-    </li>
-
-    @if($show('goals_scorecards'))
-    <li>
-        <a href="{{ route('admin.scorecard-weights.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#sliders"></use>
-            </svg>
-            <span class="nav-link-text">Scorecard Weights</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('admin.goal-templates.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#target"></use>
-            </svg>
-            <span class="nav-link-text">Goal Templates</span>
-        </a>
-    </li>
-    @endif
 
     @if($show('anaplan'))
-    <li>
-        <a href="{{ route('admin.anaplan-overview') }}">
+    <li class="nav-item">
+        <a href="#" title="Provisioning" data-filter-tags>
             <svg class="sa-icon">
-                <use href="/icons/sprite.svg#layers"></use>
+                <use href="/icons/sprite.svg#server"></use>
             </svg>
-            <span class="nav-link-text">Anaplan Versions</span>
+            <span class="nav-link-text">Provisioning</span>
         </a>
+        <ul>
+            <li>
+                <a href="{{ route('admin.anaplan-overview') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.anaplan-provisioning.index') }}">
+                    <span class="nav-link-text">Workspaces</span>
+                </a>
+            </li>
+        </ul>
     </li>
     @endif
-    @endif
-    @endif
 
-    {{-- Partner Enablement --}}
-    @if($show('blueprints', 'launch_programs', 'labs', 'enablement_events'))
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_program_admin'] ?? '1') === '1')
-    <li class="nav-title"><span>Partner Enablement</span></li>
-
-    @if($show('blueprints'))
+    @if($show('blueprints', 'enablement_events'))
     <li class="nav-item">
         <a href="#" title="Enablement" data-filter-tags>
             <svg class="sa-icon">
@@ -584,39 +558,50 @@
             <span class="nav-link-text">Enablement</span>
         </a>
         <ul>
-            @if(Auth::user()->role === 'admin')
             <li>
                 <a href="{{ route('admin.enablement-dashboard') }}">
                     <span class="nav-link-text">Dashboard</span>
                 </a>
             </li>
-            @endif
             <li>
                 <a href="{{ Auth::user()->role === 'admin' ? route('blueprints.index') : route('blueprints.catalog') }}">
                     <span class="nav-link-text">Blueprints</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('enablement-events.index') }}">
+                    <span class="nav-link-text">Enablement Events</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('enablement-calendar') }}">
+                    <span class="nav-link-text">Enablement Calendar</span>
                 </a>
             </li>
         </ul>
     </li>
     @endif
 
-    @if($show('enablement_events'))
-    <li>
-        <a href="{{ route('enablement-events.index') }}">
+    @if($show('labs'))
+    <li class="nav-item">
+        <a href="#" title="Workshops" data-filter-tags>
             <svg class="sa-icon">
-                <use href="/icons/sprite.svg#award"></use>
+                <use href="/icons/sprite.svg#check-square"></use>
             </svg>
-            <span class="nav-link-text">Enablement Events</span>
+            <span class="nav-link-text">Workshops</span>
         </a>
-    </li>
-
-    <li>
-        <a href="{{ route('enablement-calendar') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#calendar"></use>
-            </svg>
-            <span class="nav-link-text">Enablement Calendar</span>
-        </a>
+        <ul>
+            <li>
+                <a href="{{ route('labs.index') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('labs.index') }}">
+                    <span class="nav-link-text">Labs</span>
+                </a>
+            </li>
+        </ul>
     </li>
     @endif
 
@@ -629,13 +614,11 @@
             <span class="nav-link-text">Launch Programs</span>
         </a>
         <ul>
-            @if(Auth::user()->role === 'admin')
             <li>
                 <a href="{{ route('admin.launch-programs.dashboard') }}">
                     <span class="nav-link-text">Dashboard</span>
                 </a>
             </li>
-            @endif
             <li>
                 <a href="{{ route('admin.launch-programs.index') }}">
                     <span class="nav-link-text">Program Details</span>
@@ -644,23 +627,29 @@
         </ul>
     </li>
     @endif
-
-    @if($show('labs'))
-    <li>
-        <a href="{{ route('labs.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#check-square"></use>
-            </svg>
-            <span class="nav-link-text">Workshop Labs</span>
-        </a>
-    </li>
-    @endif
-    @endif
     @endif
 
     {{-- System - always show Configuration so dev can change focus --}}
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_system'] ?? '1') === '1')
-    <li class="nav-title"><span>System</span></li>
+    <li class="nav-title"><span>System Administration</span></li>
+
+    <li>
+        <a href="{{ route('admin.dashboard') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#monitor"></use>
+            </svg>
+            <span class="nav-link-text">Admin Dashboard</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ route('admin.system-status') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#server"></use>
+            </svg>
+            <span class="nav-link-text">System Status</span>
+        </a>
+    </li>
 
     <li>
         <a href="{{ route('configuration.index') }}">
@@ -671,16 +660,14 @@
         </a>
     </li>
 
-    @if($show('anaplan'))
     <li>
-        <a href="{{ route('admin.anaplan-provisioning.index') }}">
+        <a href="{{ route('admin.branding') }}">
             <svg class="sa-icon">
-                <use href="/icons/sprite.svg#server"></use>
+                <use href="/icons/sprite.svg#edit"></use>
             </svg>
-            <span class="nav-link-text">Anaplan Workspaces</span>
+            <span class="nav-link-text">Branding</span>
         </a>
     </li>
-    @endif
 
     @if(!$focused)
     <li>
@@ -707,6 +694,16 @@
                 <use href="/icons/sprite.svg#activity"></use>
             </svg>
             <span class="nav-link-text">System Pulse</span>
+            <span class="dl-ref badge badge-info">live</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="/telescope" target="_blank">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#search"></use>
+            </svg>
+            <span class="nav-link-text">Telescope</span>
             <span class="dl-ref badge badge-info">live</span>
         </a>
     </li>

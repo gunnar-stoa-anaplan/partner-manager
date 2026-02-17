@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PartnerPathGate extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'partner_path_id', 'from_stage_id', 'to_stage_id',
         'requirement_key', 'requirement_label', 'comparison',

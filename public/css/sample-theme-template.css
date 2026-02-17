@@ -1,0 +1,233 @@
+/*
+ * ============================================================================
+ * Custom Theme Template for Partner Manager
+ * ============================================================================
+ *
+ * Use this file as a starting point for creating your own theme. Edit the
+ * color values below to match your organization's brand, then upload the
+ * file on the Branding page (System Administration > Branding).
+ *
+ * HOW IT WORKS:
+ * - The variables below override Bootstrap 5 CSS custom properties
+ * - Each color has a base value (500) and a scale from 50 (lightest) to 900 (darkest)
+ * - The base --bs-{color} variable is used by buttons, badges, alerts, etc.
+ * - The shade scale (50-900) is used throughout the UI for hover states,
+ *   borders, backgrounds, and subtle color variations
+ *
+ * TIPS:
+ * - Start by changing only the 5 core colors (primary, success, info, warning, danger)
+ * - Generate shade scales using a tool like https://colorkit.co/color-shades-generator/
+ * - Test both light and dark modes after making changes
+ * - For a reference implementation, see any file in public/css/themes/ (e.g. earth.css)
+ * - You only need to include the variables you want to override — omit sections
+ *   you don't need and the defaults will be used
+ *
+ * ============================================================================
+ */
+
+
+/* ─── Light Mode ────────────────────────────────────────────────────────── */
+
+:root, [data-bs-theme=light] {
+
+    /* ── Core Colors ──────────────────────────────────────────────────────
+     *
+     * These are the 5 primary brand colors used throughout the application.
+     * Change these to match your organization's palette.
+     */
+
+    /* Primary — Buttons, links, active navigation, primary actions */
+    --bs-primary: #886ab5;
+    --bs-primary-rgb: 136, 106, 181;
+
+    /* Success — Success states, positive indicators, confirmations */
+    --bs-success: #1dc9b7;
+    --bs-success-rgb: 29, 201, 183;
+
+    /* Info — Informational elements, secondary actions, help */
+    --bs-info: #2196F3;
+    --bs-info-rgb: 33, 150, 243;
+
+    /* Warning — Warning alerts, caution indicators */
+    --bs-warning: #ffc241;
+    --bs-warning-rgb: 255, 194, 65;
+
+    /* Danger — Errors, destructive actions, critical alerts */
+    --bs-danger: #fd3995;
+    --bs-danger-rgb: 253, 57, 149;
+
+
+    /* ── Color Shade Scales ───────────────────────────────────────────────
+     *
+     * Each color needs a scale from 50 (lightest) to 900 (darkest).
+     * 500 should match the base color above.
+     * Lighter shades are used for backgrounds, borders, and hover states.
+     * Darker shades are used for active states and emphasis.
+     */
+
+    /* Primary scale */
+    --primary-50:  #d9cee8;
+    --primary-100: #ccbddf;
+    --primary-200: #bfacd6;
+    --primary-300: #b29bcd;
+    --primary-400: #a58ac4;
+    --primary-500: #886ab5;
+    --primary-600: #7b5daa;
+    --primary-700: #6e509f;
+    --primary-800: #614394;
+    --primary-900: #543689;
+
+    /* Success scale */
+    --success-50:  #a3e8df;
+    --success-100: #8ee2d7;
+    --success-200: #79dcce;
+    --success-300: #64d6c6;
+    --success-400: #4fd0bd;
+    --success-500: #1dc9b7;
+    --success-600: #1ab5a5;
+    --success-700: #17a193;
+    --success-800: #148d81;
+    --success-900: #11796f;
+
+    /* Info scale */
+    --info-50:  #a5d4f9;
+    --info-100: #8ec8f7;
+    --info-200: #77bcf5;
+    --info-300: #60b0f3;
+    --info-400: #49a4f1;
+    --info-500: #2196F3;
+    --info-600: #0d87e7;
+    --info-700: #0c79cf;
+    --info-800: #0a6bb7;
+    --info-900: #095d9f;
+
+    /* Warning scale */
+    --warning-50:  #ffecb5;
+    --warning-100: #ffe59e;
+    --warning-200: #ffde87;
+    --warning-300: #ffd770;
+    --warning-400: #ffd059;
+    --warning-500: #ffc241;
+    --warning-600: #ffb829;
+    --warning-700: #ffae11;
+    --warning-800: #f8a100;
+    --warning-900: #e09100;
+
+    /* Danger scale */
+    --danger-50:  #feb0cd;
+    --danger-100: #fe9dc1;
+    --danger-200: #fe8ab5;
+    --danger-300: #fd77a9;
+    --danger-400: #fd649d;
+    --danger-500: #fd3995;
+    --danger-600: #fd2089;
+    --danger-700: #fd077d;
+    --danger-800: #ec0071;
+    --danger-900: #d30065;
+
+
+    /* ── Subtle Backgrounds & Borders ─────────────────────────────────────
+     *
+     * Used for alert backgrounds, badge backgrounds, and other subtle elements.
+     * These should be very light tints of each color.
+     */
+
+    --bs-primary-bg-subtle:     #e8dff2;
+    --bs-primary-border-subtle: #ccbddf;
+    --bs-primary-text-emphasis:  #3a2d4e;
+
+    --bs-success-bg-subtle:     #d4f4ef;
+    --bs-success-border-subtle: #8ee2d7;
+    --bs-success-text-emphasis:  #0c5049;
+
+    --bs-info-bg-subtle:        #d1e9fc;
+    --bs-info-border-subtle:    #8ec8f7;
+    --bs-info-text-emphasis:    #0a3d65;
+
+    --bs-warning-bg-subtle:     #fff3d6;
+    --bs-warning-border-subtle: #ffe59e;
+    --bs-warning-text-emphasis:  #66500d;
+
+    --bs-danger-bg-subtle:      #fed5e5;
+    --bs-danger-border-subtle:  #fe9dc1;
+    --bs-danger-text-emphasis:   #6b0e3e;
+
+
+    /* ── Application Navigation ───────────────────────────────────────────
+     *
+     * Controls sidebar navigation colors.
+     */
+
+    --app-nav-link-color:         var(--bs-gray-800);
+    --app-nav-link-hover-color:   var(--primary-600);
+    --app-nav-link-active-color:  var(--primary-600);
+    --app-nav-title-color:        #666666;
+    --app-nav-item-hover-bg:      rgba(136, 106, 181, 0.045);
+    --app-nav-item-active-bg:     rgba(var(--secondary), 0.07);
+
+
+    /* ── Links ────────────────────────────────────────────────────────────
+     *
+     * Default link colors throughout the application.
+     */
+
+    --bs-link-color:        var(--bs-primary);
+    --bs-link-color-rgb:    var(--bs-primary-rgb);
+    --bs-link-hover-color:  var(--primary-700);
+
+
+    /* ── Form Validation ──────────────────────────────────────────────────
+     *
+     * Colors for valid/invalid form states.
+     */
+
+    --bs-form-valid-color:          var(--bs-success);
+    --bs-form-valid-border-color:   var(--bs-success);
+    --bs-form-invalid-color:        var(--bs-danger);
+    --bs-form-invalid-border-color: var(--bs-danger);
+}
+
+
+/* ─── Dark Mode ─────────────────────────────────────────────────────────── */
+/*
+ * These overrides apply when the user switches to dark mode.
+ * Adjust colors for readability on dark backgrounds.
+ * Lighter tints of your brand colors typically work best.
+ */
+
+[data-bs-theme=dark] {
+
+    /* Dark mode body colors */
+    --bs-body-color: #dee2e6;
+    --bs-body-bg:    #212529;
+
+    /* Lighter variants of brand colors for dark backgrounds */
+    --bs-primary-text-emphasis:  #b9a5d5;
+    --bs-success-text-emphasis:  #6ddbc9;
+    --bs-info-text-emphasis:     #6db8f7;
+    --bs-warning-text-emphasis:  #ffd780;
+    --bs-danger-text-emphasis:   #fe8ab5;
+
+    /* Darker subtle backgrounds for dark mode */
+    --bs-primary-bg-subtle:     #2d2441;
+    --bs-success-bg-subtle:     #0f3a34;
+    --bs-info-bg-subtle:        #0a2c4d;
+    --bs-warning-bg-subtle:     #3d3010;
+    --bs-danger-bg-subtle:      #3d0f28;
+
+    /* Dark mode navigation */
+    --app-nav-link-color:        #adb5bd;
+    --app-nav-link-hover-color:  var(--primary-300);
+    --app-nav-link-active-color: #fff;
+    --app-nav-title-color:       #6c757d;
+    --app-nav-item-hover-bg:     rgba(255, 255, 255, 0.05);
+    --app-nav-item-active-bg:    rgba(255, 255, 255, 0.05);
+
+    /* Dark mode borders and inputs */
+    --bs-border-color:              #495057;
+    --bs-border-color-translucent:  rgba(255, 255, 255, 0.15);
+
+    /* Dark mode links */
+    --bs-link-color:     var(--primary-300);
+    --bs-link-color-rgb: 178, 155, 205;
+}

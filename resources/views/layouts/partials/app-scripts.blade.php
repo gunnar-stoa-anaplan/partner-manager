@@ -9,5 +9,8 @@
 <!-- ApexCharts (bundled from npm to avoid CDN version mismatch) -->
 @vite(['resources/scripts/core/apexcharts-global.js'])
 
+<!-- AI Chat sidebar -->
+@vite(['resources/scripts/pages/ai-chat.js'])
+
 @yield('scripts')
 @stack('scripts')

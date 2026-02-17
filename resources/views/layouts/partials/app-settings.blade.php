@@ -152,6 +152,17 @@
                 <label for="option9" data-prefix="Storm"
                        style="background: linear-gradient(135deg, #2F4F4F, #3B5360, #4B6A6E, #5A7980, #A9A9A9, #FFD700);"></label>
 
+                @php
+                    $settingsCustomThemeName = \App\Models\AppSetting::get('branding_custom_theme_name');
+                    $settingsCustomCssPath = \App\Models\AppSetting::get('branding_custom_css_path');
+                @endphp
+                @if($settingsCustomThemeName && $settingsCustomCssPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($settingsCustomCssPath))
+                <!-- Custom Theme -->
+                <input type="radio" id="optionCustom" name="options" data-action="theme-style" data-theme-style="{{ \Illuminate\Support\Facades\Storage::url($settingsCustomCssPath) }}">
+                <label for="optionCustom" data-prefix="{{ $settingsCustomThemeName }}"
+                       style="background: linear-gradient(135deg, var(--bs-primary), var(--bs-info), var(--bs-success));"></label>
+                @endif
+
             </div>
         </div>
 

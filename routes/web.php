@@ -12,6 +12,8 @@ use App\Http\Controllers\ApiTokenController;
 use App\Http\Controllers\BenchmarkController;
 use App\Http\Controllers\BlueprintAssignmentController;
 use App\Http\Controllers\BlueprintController;
+use App\Http\Controllers\BrandingController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CompetencyMatrixController;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\ContactController;
@@ -47,7 +49,9 @@ use App\Http\Controllers\SalesforceCredentialController;
 use App\Http\Controllers\ScorecardController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SolutionLifecycleController;
+use App\Http\Controllers\SystemStatusController;
 use App\Http\Controllers\TaskBoardController;
+use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -166,9 +170,9 @@ Route::middleware(['auth'])->group(function () {
     | Analysis & Insights
     |--------------------------------------------------------------------------
     */
-    Route::get('/analysis', [PartnerController::class, 'analysis'])->name('analysis.index');
-    Route::get('/guided-analysis', [PartnerController::class, 'guidedAnalysis'])->name('analysis.guided');
-    Route::get('/partner-coach', [PartnerController::class, 'partnerCoach'])->name('analysis.coach');
+    Route::get('/custom-filters', [PartnerController::class, 'analysis'])->name('custom-filters.index');
+    Route::get('/wizard', [PartnerController::class, 'guidedAnalysis'])->name('wizard.index');
+    Route::get('/coach', [PartnerController::class, 'partnerCoach'])->name('coach.index');
 
     /*
     |--------------------------------------------------------------------------
@@ -177,6 +181,9 @@ Route::middleware(['auth'])->group(function () {
     */
     // Global Search
     Route::get('/api/search', [SearchController::class, 'search'])->name('api.search');
+
+    // AI Chat
+    Route::post('/api/chat', [ChatController::class, 'stream'])->name('api.chat');
 
     Route::prefix('api')->name('api.')->group(function () {
         Route::get('/filter-data/psm-partner-mapping', [FilterDataController::class, 'psmPartnerMapping'])->name('filter-data.psm-partner-mapping');
@@ -350,6 +357,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/configuration', [ConfigurationController::class, 'update'])->name('configuration.update');
         Route::put('/configuration/navigation', [ConfigurationController::class, 'updateNavigation'])->name('configuration.update-navigation');
         Route::put('/configuration/dev-focus', [ConfigurationController::class, 'updateDevFocus'])->name('configuration.update-dev-focus');
+        Route::put('/configuration/ai', [ConfigurationController::class, 'updateAi'])->name('configuration.update-ai');
 
         // Blueprint CRUD
         Route::resource('blueprints', BlueprintController::class);
@@ -405,6 +413,15 @@ Route::middleware(['auth'])->group(function () {
         // Anaplan Version Overview
         Route::get('/anaplan-overview', [AnaplanOverviewController::class, 'index'])->name('admin.anaplan-overview');
         Route::put('/anaplan-overview/version-config', [AnaplanOverviewController::class, 'updateVersionConfig'])->name('admin.anaplan-overview.update-version');
+
+        // System Status & Updates
+        Route::get('/system-status', [SystemStatusController::class, 'index'])->name('admin.system-status');
+        Route::get('/system-update', [UpdateController::class, 'show'])->name('admin.update');
+        Route::post('/system-update/accept', [UpdateController::class, 'accept'])->name('admin.update.accept');
+
+        // Branding
+        Route::get('/branding', [BrandingController::class, 'index'])->name('admin.branding');
+        Route::put('/branding', [BrandingController::class, 'update'])->name('admin.branding.update');
     });
 
     /*

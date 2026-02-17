@@ -304,8 +304,8 @@
                             <a href="{{ route('partners.my') }}" class="btn btn-primary">
                                 <i class="fal fa-handshake me-1"></i> View All Partners
                             </a>
-                            <a href="{{ route('analysis.index') }}" class="btn btn-info">
-                                <i class="fal fa-chart-line me-1"></i> Analysis & Insights
+                            <a href="{{ route('custom-filters.index') }}" class="btn btn-info">
+                                <i class="fal fa-chart-line me-1"></i> Custom Filters
                             </a>
                             <a href="{{ route('imports.index') }}" class="btn btn-secondary">
                                 <i class="fal fa-upload me-1"></i> Import Data
