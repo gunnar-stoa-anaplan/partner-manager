@@ -97,6 +97,83 @@
     </div>
 
     <div class="col-xl-4">
+        {{-- AI Assistant --}}
+        <div class="card shadow-0 mb-g">
+            <div class="card-header">
+                <div class="card-title">AI Assistant</div>
+            </div>
+            <div class="card-body">
+                <p class="text-muted fs-sm mb-3">Configure the AI service that powers the chat assistant. When no provider is configured, the built-in simulated assistant is used.</p>
+
+                <form action="{{ route('configuration.update-ai') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+
+                    @php
+                        $aiProvider = old('ai_provider', $settings['ai_provider'] ?? '');
+                        $aiModel = old('ai_model', $settings['ai_model'] ?? '');
+                        $aiKeySet = !empty($settings['ai_api_key']);
+                        $providers = [
+                            '' => 'Simulated (built-in)',
+                            'openai' => 'OpenAI',
+                            'anthropic' => 'Anthropic',
+                            'azure_openai' => 'Azure OpenAI',
+                        ];
+                    @endphp
+
+                    <div class="mb-3">
+                        <label for="ai_provider" class="form-label">Provider</label>
+                        <select class="form-select @error('ai_provider') is-invalid @enderror"
+                                id="ai_provider" name="ai_provider">
+                            @foreach($providers as $value => $label)
+                                <option value="{{ $value }}" {{ $aiProvider === $value ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('ai_provider')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ai_api_key" class="form-label">API Key</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control @error('ai_api_key') is-invalid @enderror"
+                                   id="ai_api_key" name="ai_api_key"
+                                   placeholder="{{ $aiKeySet ? '••••••••••••••••' : 'Not set' }}"
+                                   autocomplete="off">
+                            @if($aiKeySet)
+                                <span class="input-group-text text-success" title="Key is configured">
+                                    <svg class="sa-icon sa-icon-xs"><use href="/icons/sprite.svg#check"></use></svg>
+                                </span>
+                            @endif
+                        </div>
+                        @error('ai_api_key')
+                            <div class="text-danger fs-sm mt-1">{{ $message }}</div>
+                        @enderror
+                        <small class="form-text text-muted">Leave blank to keep the current key. Stored encrypted.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ai_model" class="form-label">Model</label>
+                        <input type="text" class="form-control @error('ai_model') is-invalid @enderror"
+                               id="ai_model" name="ai_model"
+                               value="{{ $aiModel }}"
+                               placeholder="e.g. gpt-4o, claude-sonnet-4-5-20250929">
+                        @error('ai_model')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="form-text text-muted">The model identifier for the selected provider.</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#save"></use></svg>
+                        Save AI Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {{-- Dev Focus --}}
         <div class="card shadow-0 mb-g">
             <div class="card-header">
                 <div class="card-title">

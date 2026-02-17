@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Contracts\ChatServiceInterface;
+use App\Models\AppSetting;
 use App\Models\Partner;
 use App\Models\User;
 use App\Services\ChatContextService;
@@ -167,5 +168,94 @@ class ChatTest extends TestCase
     {
         $service = app(ChatServiceInterface::class);
         $this->assertInstanceOf(SimulatedChatService::class, $service);
+    }
+
+    // ─── AI Configuration ────────────────────────────────────────
+
+    public function test_guest_cannot_update_ai_config(): void
+    {
+        $response = $this->put(route('configuration.update-ai'), [
+            'ai_provider' => 'openai',
+        ]);
+
+        $response->assertRedirect(route('login'));
+    }
+
+    public function test_admin_can_set_ai_provider(): void
+    {
+        $response = $this->actingAs($this->admin)
+            ->put(route('configuration.update-ai'), [
+                'ai_provider' => 'openai',
+                'ai_model' => 'gpt-4o',
+            ]);
+
+        $response->assertRedirect(route('configuration.index'));
+        $response->assertSessionHas('success');
+        $this->assertEquals('openai', AppSetting::get('ai_provider'));
+        $this->assertEquals('gpt-4o', AppSetting::get('ai_model'));
+    }
+
+    public function test_admin_can_set_ai_api_key_encrypted(): void
+    {
+        $this->actingAs($this->admin)
+            ->put(route('configuration.update-ai'), [
+                'ai_provider' => 'anthropic',
+                'ai_api_key' => 'sk-ant-test-key-123',
+                'ai_model' => 'claude-sonnet-4-5-20250929',
+            ]);
+
+        // Raw value in DB should not be the plaintext key
+        $raw = AppSetting::get('ai_api_key');
+        $this->assertNotEquals('sk-ant-test-key-123', $raw);
+        $this->assertNotEmpty($raw);
+
+        // Decrypted value should match
+        $this->assertEquals('sk-ant-test-key-123', AppSetting::getEncrypted('ai_api_key'));
+    }
+
+    public function test_blank_api_key_preserves_existing(): void
+    {
+        AppSetting::setEncrypted('ai_api_key', 'existing-key');
+
+        $this->actingAs($this->admin)
+            ->put(route('configuration.update-ai'), [
+                'ai_provider' => 'openai',
+                'ai_api_key' => '',
+                'ai_model' => 'gpt-4o',
+            ]);
+
+        $this->assertEquals('existing-key', AppSetting::getEncrypted('ai_api_key'));
+    }
+
+    public function test_ai_provider_validation_rejects_invalid(): void
+    {
+        $response = $this->actingAs($this->admin)
+            ->put(route('configuration.update-ai'), [
+                'ai_provider' => 'invalid_provider',
+            ]);
+
+        $response->assertSessionHasErrors('ai_provider');
+    }
+
+    public function test_simulated_provider_clears_provider_setting(): void
+    {
+        AppSetting::set('ai_provider', 'openai');
+
+        $this->actingAs($this->admin)
+            ->put(route('configuration.update-ai'), [
+                'ai_provider' => '',
+            ]);
+
+        $this->assertEquals('', AppSetting::get('ai_provider'));
+    }
+
+    public function test_configuration_page_shows_ai_card(): void
+    {
+        $response = $this->actingAs($this->admin)
+            ->get(route('configuration.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('AI Assistant');
+        $response->assertSee('Provider');
     }
 }

@@ -357,6 +357,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/configuration', [ConfigurationController::class, 'update'])->name('configuration.update');
         Route::put('/configuration/navigation', [ConfigurationController::class, 'updateNavigation'])->name('configuration.update-navigation');
         Route::put('/configuration/dev-focus', [ConfigurationController::class, 'updateDevFocus'])->name('configuration.update-dev-focus');
+        Route::put('/configuration/ai', [ConfigurationController::class, 'updateAi'])->name('configuration.update-ai');
 
         // Blueprint CRUD
         Route::resource('blueprints', BlueprintController::class);

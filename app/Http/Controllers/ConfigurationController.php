@@ -53,6 +53,32 @@ class ConfigurationController extends Controller
         return redirect()->route('configuration.index')->with('success', 'Navigation visibility updated successfully.');
     }
 
+    public function updateAi(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $validated = $request->validate([
+            'ai_provider' => 'nullable|string|in:,openai,anthropic,azure_openai',
+            'ai_api_key' => 'nullable|string|max:500',
+            'ai_model' => 'nullable|string|max:100',
+        ]);
+
+        AppSetting::set('ai_provider', $validated['ai_provider'] ?? '');
+        AppSetting::set('ai_model', $validated['ai_model'] ?? '');
+
+        // Only update the key if a new one was provided (blank means keep existing)
+        if (! empty($validated['ai_api_key'])) {
+            AppSetting::setEncrypted('ai_api_key', $validated['ai_api_key']);
+        }
+
+        $providerLabel = match ($validated['ai_provider'] ?? '') {
+            'openai' => 'OpenAI',
+            'anthropic' => 'Anthropic',
+            'azure_openai' => 'Azure OpenAI',
+            default => 'Simulated (built-in)',
+        };
+
+        return redirect()->route('configuration.index')->with('success', "AI Assistant set to: {$providerLabel}");
+    }
+
     public function updateDevFocus(Request $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
