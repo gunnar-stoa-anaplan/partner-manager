@@ -1602,7 +1602,17 @@ class PartnerController extends Controller
         $isConfigured = app(\App\Services\AnaplanApiService::class)->isConfigured();
         $versionConfigs = \App\Models\AnaplanVersionConfig::all()->keyBy('product_area');
 
-        return compact('workspaces', 'totalModels', 'activeModels', 'totalMemory', 'lastSync', 'isConfigured', 'versionConfigs');
+        $now = now();
+        $allActiveModels = $workspaces->flatMap(fn ($ws) => $ws->models)->where('active_state', '!=', 'ARCHIVED');
+        $modelActivity = [
+            'under_1_month' => $allActiveModels->filter(fn ($m) => $m->last_modified_in_anaplan_at && $m->last_modified_in_anaplan_at->gte($now->copy()->subMonth()))->count(),
+            '1_to_6_months' => $allActiveModels->filter(fn ($m) => $m->last_modified_in_anaplan_at && $m->last_modified_in_anaplan_at->lt($now->copy()->subMonth()) && $m->last_modified_in_anaplan_at->gte($now->copy()->subMonths(6)))->count(),
+            '6_to_12_months' => $allActiveModels->filter(fn ($m) => $m->last_modified_in_anaplan_at && $m->last_modified_in_anaplan_at->lt($now->copy()->subMonths(6)) && $m->last_modified_in_anaplan_at->gte($now->copy()->subYear()))->count(),
+            'over_12_months' => $allActiveModels->filter(fn ($m) => $m->last_modified_in_anaplan_at && $m->last_modified_in_anaplan_at->lt($now->copy()->subYear()))->count(),
+            'never' => $allActiveModels->filter(fn ($m) => ! $m->last_modified_in_anaplan_at)->count(),
+        ];
+
+        return compact('workspaces', 'totalModels', 'activeModels', 'totalMemory', 'lastSync', 'isConfigured', 'versionConfigs', 'modelActivity');
     }
 
     private function portalUsersTabData(Partner $partner): array

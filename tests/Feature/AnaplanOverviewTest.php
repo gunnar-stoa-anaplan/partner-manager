@@ -30,7 +30,7 @@ class AnaplanOverviewTest extends TestCase
 
     public function test_admin_can_view_anaplan_overview(): void
     {
-        $response = $this->actingAs($this->admin)->get(route('admin.anaplan-overview'));
+        $response = $this->actingAs($this->admin)->get(route('admin.provisioning-summary'));
 
         $response->assertOk();
         $response->assertViewHas('productAreas');
@@ -41,7 +41,7 @@ class AnaplanOverviewTest extends TestCase
 
     public function test_non_admin_cannot_view_anaplan_overview(): void
     {
-        $response = $this->actingAs($this->psm)->get(route('admin.anaplan-overview'));
+        $response = $this->actingAs($this->psm)->get(route('admin.provisioning-summary'));
 
         $response->assertForbidden();
     }
@@ -54,7 +54,7 @@ class AnaplanOverviewTest extends TestCase
             'updated_by' => $this->admin->id,
         ]);
 
-        $response = $this->actingAs($this->admin)->get(route('admin.anaplan-overview'));
+        $response = $this->actingAs($this->admin)->get(route('admin.provisioning-summary'));
 
         $response->assertOk();
         $versionConfigs = $response->viewData('versionConfigs');
@@ -70,7 +70,7 @@ class AnaplanOverviewTest extends TestCase
         AnaplanWorkspace::factory()->create(['partner_id' => $partner1->id]);
         AnaplanWorkspace::factory()->create(['partner_id' => $partner2->id]);
 
-        $response = $this->actingAs($this->admin)->get(route('admin.anaplan-overview'));
+        $response = $this->actingAs($this->admin)->get(route('admin.provisioning-summary'));
 
         $response->assertOk();
         $this->assertEquals(2, $response->viewData('totalPartners'));
@@ -83,7 +83,7 @@ class AnaplanOverviewTest extends TestCase
         AnaplanModel::factory()->count(3)->create(['anaplan_workspace_id' => $workspace->id, 'active_state' => 'PRODUCTION']);
         AnaplanModel::factory()->archived()->create(['anaplan_workspace_id' => $workspace->id]);
 
-        $response = $this->actingAs($this->admin)->get(route('admin.anaplan-overview'));
+        $response = $this->actingAs($this->admin)->get(route('admin.provisioning-summary'));
 
         $response->assertOk();
         $this->assertEquals(3, $response->viewData('totalModels'));
@@ -93,7 +93,7 @@ class AnaplanOverviewTest extends TestCase
     {
         AnaplanWorkspace::factory()->unassigned()->create();
 
-        $response = $this->actingAs($this->admin)->get(route('admin.anaplan-overview'));
+        $response = $this->actingAs($this->admin)->get(route('admin.provisioning-summary'));
 
         $response->assertOk();
         $this->assertEquals(0, $response->viewData('totalPartners'));
@@ -118,7 +118,7 @@ class AnaplanOverviewTest extends TestCase
             'current_version' => 'V2.0',
         ]);
 
-        $response = $this->actingAs($this->admin)->get(route('admin.anaplan-overview'));
+        $response = $this->actingAs($this->admin)->get(route('admin.provisioning-summary'));
 
         $stats = $response->viewData('productAreaStats');
         $this->assertArrayHasKey('Finance', $stats);
@@ -150,7 +150,7 @@ class AnaplanOverviewTest extends TestCase
             'current_version' => 'V2.0',
         ]);
 
-        $response = $this->actingAs($this->admin)->get(route('admin.anaplan-overview'));
+        $response = $this->actingAs($this->admin)->get(route('admin.provisioning-summary'));
 
         $stats = $response->viewData('productAreaStats');
         $this->assertEquals(1, $stats['Finance']['outdated_count']);
@@ -176,7 +176,7 @@ class AnaplanOverviewTest extends TestCase
             'current_version' => 'V2.0',
         ]);
 
-        $response = $this->actingAs($this->admin)->get(route('admin.anaplan-overview'));
+        $response = $this->actingAs($this->admin)->get(route('admin.provisioning-summary'));
 
         $stats = $response->viewData('productAreaStats');
         $this->assertEquals(0, $stats['Finance']['outdated_count']);
@@ -186,7 +186,7 @@ class AnaplanOverviewTest extends TestCase
 
     public function test_admin_can_update_version_config(): void
     {
-        $response = $this->actingAs($this->admin)->put(route('admin.anaplan-overview.update-version'), [
+        $response = $this->actingAs($this->admin)->put(route('admin.provisioning-summary.update-version'), [
             'product_area' => 'Finance',
             'current_version' => 'V2.0',
         ]);
@@ -203,7 +203,7 @@ class AnaplanOverviewTest extends TestCase
 
     public function test_version_config_update_requires_valid_version(): void
     {
-        $response = $this->actingAs($this->admin)->put(route('admin.anaplan-overview.update-version'), [
+        $response = $this->actingAs($this->admin)->put(route('admin.provisioning-summary.update-version'), [
             'product_area' => 'Finance',
             'current_version' => 'InvalidVersion',
         ]);
@@ -213,7 +213,7 @@ class AnaplanOverviewTest extends TestCase
 
     public function test_version_config_update_requires_product_area(): void
     {
-        $response = $this->actingAs($this->admin)->put(route('admin.anaplan-overview.update-version'), [
+        $response = $this->actingAs($this->admin)->put(route('admin.provisioning-summary.update-version'), [
             'current_version' => 'V2.0',
         ]);
 
@@ -228,7 +228,7 @@ class AnaplanOverviewTest extends TestCase
             'updated_by' => $this->admin->id,
         ]);
 
-        $this->actingAs($this->admin)->put(route('admin.anaplan-overview.update-version'), [
+        $this->actingAs($this->admin)->put(route('admin.provisioning-summary.update-version'), [
             'product_area' => 'Finance',
             'current_version' => 'V2.0',
         ]);
@@ -242,7 +242,7 @@ class AnaplanOverviewTest extends TestCase
 
     public function test_non_admin_cannot_update_version_config(): void
     {
-        $response = $this->actingAs($this->psm)->put(route('admin.anaplan-overview.update-version'), [
+        $response = $this->actingAs($this->psm)->put(route('admin.provisioning-summary.update-version'), [
             'product_area' => 'Finance',
             'current_version' => 'V2.0',
         ]);

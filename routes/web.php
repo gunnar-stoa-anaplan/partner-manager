@@ -405,14 +405,14 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/labs/{lab}/participants', [LabController::class, 'addParticipant'])->name('labs.participants.store');
         Route::delete('/lab-participants/{participant}', [LabController::class, 'removeParticipant'])->name('lab-participants.destroy');
 
-        // Anaplan Provisioning
-        Route::get('/anaplan-provisioning', [AnaplanProvisioningController::class, 'index'])->name('admin.anaplan-provisioning.index');
-        Route::put('/anaplan-provisioning/workspaces/{workspace}/assign', [AnaplanProvisioningController::class, 'assignPartner'])->name('admin.anaplan-provisioning.assign');
-        Route::post('/anaplan-provisioning/sync', [AnaplanProvisioningController::class, 'sync'])->name('admin.anaplan-provisioning.sync');
+        // Provisioning
+        Route::get('/provisioning-workspaces', [AnaplanProvisioningController::class, 'index'])->name('admin.provisioning-workspaces.index');
+        Route::put('/provisioning-workspaces/{workspace}/assign', [AnaplanProvisioningController::class, 'assignPartner'])->name('admin.provisioning-workspaces.assign');
+        Route::post('/provisioning-workspaces/sync', [AnaplanProvisioningController::class, 'sync'])->name('admin.provisioning-workspaces.sync');
 
-        // Anaplan Version Overview
-        Route::get('/anaplan-overview', [AnaplanOverviewController::class, 'index'])->name('admin.anaplan-overview');
-        Route::put('/anaplan-overview/version-config', [AnaplanOverviewController::class, 'updateVersionConfig'])->name('admin.anaplan-overview.update-version');
+        // Provisioning Summary
+        Route::get('/provisioning-summary', [AnaplanOverviewController::class, 'index'])->name('admin.provisioning-summary');
+        Route::put('/provisioning-summary/version-config', [AnaplanOverviewController::class, 'updateVersionConfig'])->name('admin.provisioning-summary.update-version');
 
         // System Status & Updates
         Route::get('/system-status', [SystemStatusController::class, 'index'])->name('admin.system-status');

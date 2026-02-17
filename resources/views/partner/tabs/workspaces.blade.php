@@ -9,7 +9,7 @@
     <svg class="sa-icon sa-icon-xl text-muted mb-3" style="width: 48px; height: 48px;"><use href="/icons/sprite.svg#server"></use></svg>
     <p class="text-muted">No Anaplan workspaces have been assigned to this partner.</p>
     @if(auth()->user()->role === 'admin')
-    <a href="{{ route('admin.anaplan-provisioning.index') }}" class="btn btn-outline-primary btn-sm">Manage Workspaces</a>
+    <a href="{{ route('admin.provisioning-workspaces.index') }}" class="btn btn-outline-primary btn-sm">Manage Workspaces</a>
     @endif
 </div>
 @else
@@ -136,6 +136,93 @@
         </div>
     </div>
 </div>
+
+{{-- Model Activity Distribution --}}
+@php
+    $hasActivityData = array_sum($modelActivity) > 0;
+@endphp
+@if($hasActivityData)
+<div class="row mb-3">
+    <div class="col-xl-6 mb-g">
+        <div class="card shadow-0 h-100">
+            <div class="card-header py-2">
+                <div class="card-title fs-sm">Model Activity Distribution</div>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 250px;">
+                <div id="model-activity-chart" style="width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-6 mb-g">
+        <div class="card shadow-0 h-100">
+            <div class="card-header py-2">
+                <div class="card-title fs-sm">Activity Breakdown</div>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm m-0">
+                    <tbody>
+                        <tr>
+                            <td><span class="badge" style="background-color: #28a745;">&#9679;</span> Modified within 1 month</td>
+                            <td class="text-end fw-bold">{{ $modelActivity['under_1_month'] }}</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge" style="background-color: #33b5e5;">&#9679;</span> 1–6 months ago</td>
+                            <td class="text-end fw-bold">{{ $modelActivity['1_to_6_months'] }}</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge" style="background-color: #ffc107; color: #212529;">&#9679;</span> 6–12 months ago</td>
+                            <td class="text-end fw-bold">{{ $modelActivity['6_to_12_months'] }}</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge" style="background-color: #dc3545;">&#9679;</span> Over 12 months ago</td>
+                            <td class="text-end fw-bold">{{ $modelActivity['over_12_months'] }}</td>
+                        </tr>
+                        @if($modelActivity['never'] > 0)
+                        <tr>
+                            <td><span class="badge bg-secondary">&#9679;</span> No data</td>
+                            <td class="text-end fw-bold">{{ $modelActivity['never'] }}</td>
+                        </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var activityData = @json($modelActivity);
+    var el = document.querySelector('#model-activity-chart');
+    if (!el) return;
+
+    var series = [activityData.under_1_month, activityData['1_to_6_months'], activityData['6_to_12_months'], activityData.over_12_months];
+    var labels = ['< 1 month', '1–6 months', '6–12 months', '> 12 months'];
+    var colors = ['#28a745', '#33b5e5', '#ffc107', '#dc3545'];
+
+    if (activityData.never > 0) {
+        series.push(activityData.never);
+        labels.push('No data');
+        colors.push('#868e96');
+    }
+
+    new ApexCharts(el, {
+        chart: { type: 'donut', height: 240, fontFamily: 'inherit' },
+        series: series,
+        labels: labels,
+        colors: colors,
+        plotOptions: { pie: { donut: { size: '55%', labels: {
+            show: true,
+            total: { show: true, label: 'Models', formatter: function(w) {
+                return w.globals.seriesTotals.reduce(function(a, b) { return a + b; }, 0);
+            }}
+        }}}},
+        legend: { position: 'bottom', fontSize: '11px' },
+        dataLabels: { enabled: true, formatter: function(val) { return val.toFixed(0) + '%'; } },
+        stroke: { width: 2 }
+    }).render();
+});
+</script>
+@endif
 
 {{-- Per Workspace Cards --}}
 @foreach($workspaces as $workspace)

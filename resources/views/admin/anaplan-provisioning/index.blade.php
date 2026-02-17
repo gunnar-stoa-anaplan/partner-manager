@@ -59,6 +59,73 @@
     </div>
 </div>
 
+{{-- Unassigned Workspaces --}}
+@php $unassignedWorkspaces = $workspaces->whereNull('partner_id'); @endphp
+@if($unassignedWorkspaces->isNotEmpty())
+<div class="card shadow-0 mb-g border-warning">
+    <div class="card-header py-2 bg-warning bg-opacity-10">
+        <div class="card-title fs-sm text-warning">
+            <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#alert-triangle"></use></svg>
+            {{ $unassignedWorkspaces->count() }} Unassigned {{ Str::plural('Workspace', $unassignedWorkspaces->count()) }}
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover m-0">
+                <thead>
+                    <tr>
+                        <th>Workspace</th>
+                        <th>Product Area</th>
+                        <th class="text-center">Models</th>
+                        <th class="text-center">Storage</th>
+                        <th>Assign Partner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($unassignedWorkspaces as $ws)
+                    <tr>
+                        <td>
+                            <strong>{{ $ws->name }}</strong>
+                            <br><small class="text-muted font-monospace">{{ $ws->anaplan_id }}</small>
+                        </td>
+                        <td>
+                            @if($ws->product_area)
+                            <span class="badge bg-info bg-opacity-25 text-info">{{ $ws->product_area }}</span>
+                            @else
+                            <span class="text-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-info">{{ $ws->models->where('active_state', '!=', 'ARCHIVED')->count() }}</span>
+                        </td>
+                        <td class="text-center">
+                            @if($ws->size_allowance)
+                            <small class="text-muted">{{ $ws->formattedCurrentSize() }} / {{ $ws->formattedSizeAllowance() }}</small>
+                            @else
+                            <span class="text-muted">—</span>
+                            @endif
+                        </td>
+                        <td>
+                            <form action="{{ route('admin.provisioning-workspaces.assign', $ws) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <select name="partner_id" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 180px;">
+                                    <option value="">— Select Partner —</option>
+                                    @foreach($partners as $p)
+                                    <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Sync + Workspaces Table --}}
 <div class="card shadow-0 mb-g">
     <div class="card-header d-flex align-items-center">
@@ -67,7 +134,7 @@
             @if($lastSync)
             <small class="text-muted me-2">Last sync: {{ $lastSync->diffForHumans() }}</small>
             @endif
-            <form action="{{ route('admin.anaplan-provisioning.sync') }}" method="POST" class="d-inline">
+            <form action="{{ route('admin.provisioning-workspaces.sync') }}" method="POST" class="d-inline">
                 @csrf
                 <button type="submit" class="btn btn-primary btn-sm" {{ !$isConfigured ? 'disabled' : '' }} onclick="this.disabled=true; this.innerHTML='<span class=\'spinner-border spinner-border-sm me-1\'></span> Syncing...'; this.form.submit();">
                     <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#refresh-cw"></use></svg>
@@ -104,7 +171,7 @@
                             @endif
                         </td>
                         <td>
-                            <form action="{{ route('admin.anaplan-provisioning.assign', $workspace) }}" method="POST">
+                            <form action="{{ route('admin.provisioning-workspaces.assign', $workspace) }}" method="POST">
                                 @csrf
                                 @method('PUT')
                                 <select name="partner_id" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 180px;">

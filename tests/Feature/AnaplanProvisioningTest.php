@@ -30,7 +30,7 @@ class AnaplanProvisioningTest extends TestCase
 
     public function test_admin_can_view_provisioning_index(): void
     {
-        $response = $this->actingAs($this->admin)->get(route('admin.anaplan-provisioning.index'));
+        $response = $this->actingAs($this->admin)->get(route('admin.provisioning-workspaces.index'));
 
         $response->assertOk();
         $response->assertViewHas('workspaces');
@@ -42,7 +42,7 @@ class AnaplanProvisioningTest extends TestCase
 
     public function test_non_admin_cannot_view_provisioning(): void
     {
-        $response = $this->actingAs($this->psm)->get(route('admin.anaplan-provisioning.index'));
+        $response = $this->actingAs($this->psm)->get(route('admin.provisioning-workspaces.index'));
 
         $response->assertForbidden();
     }
@@ -52,7 +52,7 @@ class AnaplanProvisioningTest extends TestCase
         AnaplanWorkspace::factory()->create(['name' => 'Zebra Workspace']);
         AnaplanWorkspace::factory()->create(['name' => 'Alpha Workspace']);
 
-        $response = $this->actingAs($this->admin)->get(route('admin.anaplan-provisioning.index'));
+        $response = $this->actingAs($this->admin)->get(route('admin.provisioning-workspaces.index'));
 
         $workspaces = $response->viewData('workspaces');
         $this->assertEquals('Alpha Workspace', $workspaces->first()->name);
@@ -65,7 +65,7 @@ class AnaplanProvisioningTest extends TestCase
         AnaplanWorkspace::factory()->unassigned()->create();
         AnaplanWorkspace::factory()->unassigned()->create();
 
-        $response = $this->actingAs($this->admin)->get(route('admin.anaplan-provisioning.index'));
+        $response = $this->actingAs($this->admin)->get(route('admin.provisioning-workspaces.index'));
 
         $this->assertEquals(2, $response->viewData('unassignedCount'));
     }
@@ -77,7 +77,7 @@ class AnaplanProvisioningTest extends TestCase
         AnaplanModel::factory()->count(3)->create(['anaplan_workspace_id' => $workspace->id, 'active_state' => 'PRODUCTION']);
         AnaplanModel::factory()->archived()->create(['anaplan_workspace_id' => $workspace->id]);
 
-        $response = $this->actingAs($this->admin)->get(route('admin.anaplan-provisioning.index'));
+        $response = $this->actingAs($this->admin)->get(route('admin.provisioning-workspaces.index'));
 
         $this->assertEquals(4, $response->viewData('totalModels'));
         $this->assertEquals(3, $response->viewData('activeModels'));
@@ -91,7 +91,7 @@ class AnaplanProvisioningTest extends TestCase
         $partner = Partner::factory()->create(['user_id' => $this->psm->id]);
 
         $response = $this->actingAs($this->admin)->put(
-            route('admin.anaplan-provisioning.assign', $workspace),
+            route('admin.provisioning-workspaces.assign', $workspace),
             ['partner_id' => $partner->id]
         );
 
@@ -109,7 +109,7 @@ class AnaplanProvisioningTest extends TestCase
         $workspace = AnaplanWorkspace::factory()->create();
 
         $response = $this->actingAs($this->admin)->put(
-            route('admin.anaplan-provisioning.assign', $workspace),
+            route('admin.provisioning-workspaces.assign', $workspace),
             ['partner_id' => null]
         );
 
@@ -127,7 +127,7 @@ class AnaplanProvisioningTest extends TestCase
         $workspace = AnaplanWorkspace::factory()->unassigned()->create();
 
         $response = $this->actingAs($this->admin)->put(
-            route('admin.anaplan-provisioning.assign', $workspace),
+            route('admin.provisioning-workspaces.assign', $workspace),
             ['partner_id' => 99999]
         );
 
@@ -140,7 +140,7 @@ class AnaplanProvisioningTest extends TestCase
         $partner = Partner::factory()->create(['user_id' => $this->psm->id]);
 
         $response = $this->actingAs($this->psm)->put(
-            route('admin.anaplan-provisioning.assign', $workspace),
+            route('admin.provisioning-workspaces.assign', $workspace),
             ['partner_id' => $partner->id]
         );
 
@@ -155,7 +155,7 @@ class AnaplanProvisioningTest extends TestCase
             $mock->shouldReceive('isConfigured')->andReturn(false);
         });
 
-        $response = $this->actingAs($this->admin)->post(route('admin.anaplan-provisioning.sync'));
+        $response = $this->actingAs($this->admin)->post(route('admin.provisioning-workspaces.sync'));
 
         $response->assertRedirect();
         $response->assertSessionHas('error');
@@ -174,7 +174,7 @@ class AnaplanProvisioningTest extends TestCase
             ]);
         });
 
-        $response = $this->actingAs($this->admin)->post(route('admin.anaplan-provisioning.sync'));
+        $response = $this->actingAs($this->admin)->post(route('admin.provisioning-workspaces.sync'));
 
         $response->assertRedirect();
         $response->assertSessionHas('success');
@@ -193,7 +193,7 @@ class AnaplanProvisioningTest extends TestCase
             ]);
         });
 
-        $response = $this->actingAs($this->admin)->post(route('admin.anaplan-provisioning.sync'));
+        $response = $this->actingAs($this->admin)->post(route('admin.provisioning-workspaces.sync'));
 
         $response->assertRedirect();
         $response->assertSessionHas('warning');
@@ -201,7 +201,7 @@ class AnaplanProvisioningTest extends TestCase
 
     public function test_non_admin_cannot_trigger_sync(): void
     {
-        $response = $this->actingAs($this->psm)->post(route('admin.anaplan-provisioning.sync'));
+        $response = $this->actingAs($this->psm)->post(route('admin.provisioning-workspaces.sync'));
 
         $response->assertForbidden();
     }
