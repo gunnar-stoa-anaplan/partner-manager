@@ -190,7 +190,7 @@
     </div>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
     var activityData = @json($modelActivity);
     var el = document.querySelector('#model-activity-chart');
     if (!el) return;
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dataLabels: { enabled: true, formatter: function(val) { return val.toFixed(0) + '%'; } },
         stroke: { width: 2 }
     }).render();
-});
+})();
 </script>
 @endif
 
