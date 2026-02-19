@@ -15,6 +15,10 @@
 
     @include('layouts.partials/app-update-banner')
 
+    @include('layouts.partials/app-license-banner')
+
+    @include('layouts.partials/app-impersonation-banner')
+
     <main class="app-body">
 
         <div class="app-content">

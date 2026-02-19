@@ -355,11 +355,15 @@
         </div>
         <div class="col-lg-8">
             <div class="card shadow-0 h-100">
-                <div class="card-header">
-                    <div class="card-title">All Users</div>
+                <div class="card-header d-flex align-items-center">
+                    <div class="card-title flex-grow-1">All Users</div>
                     @if($recentUsers->count() > 0)
-                    <span class="badge bg-success ms-2">{{ $recentUsers->count() }} new (30 days)</span>
+                    <span class="badge bg-success me-2">{{ $recentUsers->count() }} new (30 days)</span>
                     @endif
+                    <a href="{{ route('users.index') }}" class="btn btn-sm btn-outline-primary">
+                        <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#settings"></use></svg>
+                        Manage Users
+                    </a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -371,6 +375,7 @@
                                     <th>Role</th>
                                     <th class="text-center">Partners</th>
                                     <th>Joined</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -397,9 +402,22 @@
                                     </td>
                                     <td class="text-center">{{ $u->partners_count }}</td>
                                     <td class="text-nowrap">{{ $u->created_at->format('M j, Y') }}</td>
+                                    <td class="text-center text-nowrap">
+                                        @if($u->id !== auth()->id())
+                                            <form action="{{ route('impersonate.start', $u) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-info" title="Login as {{ $u->name }}">
+                                                    <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#log-in"></use></svg>
+                                                </button>
+                                            </form>
+                                        @endif
+                                        <a href="{{ route('users.edit', $u) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#edit"></use></svg>
+                                        </a>
+                                    </td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="5" class="text-center py-4 text-muted">No users</td></tr>
+                                <tr><td colspan="6" class="text-center py-4 text-muted">No users</td></tr>
                                 @endforelse
                             </tbody>
                         </table>

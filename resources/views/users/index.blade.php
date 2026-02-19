@@ -72,6 +72,14 @@
                                     </td>
                                     <td>{{ $user->created_at->format('M d, Y') }}</td>
                                     <td class="text-nowrap">
+                                        @if($user->id !== auth()->id())
+                                            <form action="{{ route('impersonate.start', $user) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-info" title="Login as {{ $user->name }}">
+                                                    <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#log-in"></use></svg>
+                                                </button>
+                                            </form>
+                                        @endif
                                         <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-outline-primary" title="Edit User">
                                             <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#edit"></use></svg>
                                         </a>
