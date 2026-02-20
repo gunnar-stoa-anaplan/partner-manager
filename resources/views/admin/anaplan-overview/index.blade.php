@@ -1,7 +1,7 @@
-@extends('layouts.vertical', ['pageTitle' => 'Anaplan Version Overview'])
+@extends('layouts.vertical', ['pageTitle' => 'Provisioning Summary'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Anaplan Version Overview', 'pageSubTitle1' => 'System', 'pageSubTitle1Url' => route('admin.dashboard')])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Provisioning Summary', 'pageSubTitle1' => 'Provisioning', 'pageSubTitle1Url' => route('admin.provisioning-summary')])
 @endsection
 
 @section('content')
@@ -59,47 +59,48 @@
     </div>
 </div>
 
-{{-- Version Configuration --}}
-<div class="card shadow-0 mb-g">
-    <div class="card-header">
-        <div class="card-title">
-            <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#settings"></use></svg>
-            Version Configuration
-        </div>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            @foreach($productAreas as $area)
-            <div class="col-md-6 mb-3">
-                <form action="{{ route('admin.anaplan-overview.update-version') }}" method="POST" class="d-flex align-items-end gap-2">
+{{-- Application Versions --}}
+<h5 class="fw-bold mb-3">
+    <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#pie-chart"></use></svg>
+    Application Versions
+</h5>
+<div class="row mb-3">
+    @foreach($productAreas as $area)
+    @php $stats = $productAreaStats[$area]; @endphp
+    <div class="col-sm-6 col-xl-3 mb-g">
+        <div class="card shadow-0 h-100">
+            <div class="card-header py-2">
+                <div class="card-title fs-sm">{{ $area }}</div>
+            </div>
+            <div class="card-body text-center px-2 py-3">
+                <div id="version-chart-{{ Str::slug($area) }}" style="min-height:180px"></div>
+
+                <form action="{{ route('admin.provisioning-summary.update-version') }}" method="POST" class="d-flex align-items-center gap-2 mt-3">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="product_area" value="{{ $area }}">
-                    <div class="flex-grow-1">
-                        <label class="form-label fw-bold">{{ $area }} — Current Version</label>
-                        <select name="current_version" class="form-select form-select-sm">
-                            @foreach(\App\Models\AnaplanModel::VERSIONS as $version)
-                                @if(!in_array($version, ['Other', 'Demo', 'Base']))
-                                <option value="{{ $version }}" {{ (isset($versionConfigs[$area]) && $versionConfigs[$area]->current_version === $version) ? 'selected' : '' }}>
-                                    {{ $version }}
-                                </option>
-                                @endif
-                            @endforeach
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-sm btn-outline-primary">Save</button>
+                    <select name="current_version" class="form-select form-select-sm">
+                        @foreach(\App\Models\AnaplanModel::VERSIONS as $version)
+                            @if(!in_array($version, ['Other', 'Demo', 'Base']))
+                            <option value="{{ $version }}" {{ (isset($versionConfigs[$area]) && $versionConfigs[$area]->current_version === $version) ? 'selected' : '' }}>
+                                {{ $version }}
+                            </option>
+                            @endif
+                        @endforeach
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-outline-primary flex-shrink-0">Save</button>
                 </form>
                 @if(isset($versionConfigs[$area]))
-                <small class="text-muted">Last updated {{ $versionConfigs[$area]->updated_at->diffForHumans() }}
+                <small class="text-muted d-block mt-1">Updated {{ $versionConfigs[$area]->updated_at->diffForHumans() }}
                     @if($versionConfigs[$area]->updatedByUser) by {{ $versionConfigs[$area]->updatedByUser->name }} @endif
                 </small>
                 @else
-                <small class="text-muted">Not configured — set the current version above</small>
+                <small class="text-muted d-block mt-1">Not configured</small>
                 @endif
             </div>
-            @endforeach
         </div>
     </div>
+    @endforeach
 </div>
 
 {{-- Product Area Tabs --}}
@@ -303,6 +304,46 @@
     @vite(['resources/scripts/pages/table-init.js'])
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Application Versions donut charts
+        @php
+            $versionChartData = [];
+            foreach ($productAreas as $a) {
+                $slug = \Illuminate\Support\Str::slug($a);
+                $versionChartData[$slug] = [
+                    'current' => $productAreaStats[$a]['total_partners'] - $productAreaStats[$a]['outdated_count'],
+                    'outdated' => $productAreaStats[$a]['outdated_count'],
+                    'total' => $productAreaStats[$a]['total_partners'],
+                ];
+            }
+        @endphp
+        var versionData = @json($versionChartData);
+
+        Object.keys(versionData).forEach(function(slug) {
+            var d = versionData[slug];
+            var el = document.querySelector('#version-chart-' + slug);
+            if (!el) return;
+            if (d.total === 0) {
+                el.innerHTML = '<div class="text-muted py-4">No data</div>';
+                return;
+            }
+            new ApexCharts(el, {
+                chart: { type: 'donut', height: 180, fontFamily: 'inherit' },
+                series: [d.current, d.outdated],
+                labels: ['Current', 'Not Current'],
+                colors: ['#28a745', '#dc3545'],
+                plotOptions: { pie: { donut: { size: '60%', labels: {
+                    show: true,
+                    total: { show: true, label: 'Partners', formatter: function(w) {
+                        return w.globals.seriesTotals.reduce(function(a, b) { return a + b; }, 0);
+                    }}
+                }}}},
+                legend: { position: 'bottom', fontSize: '11px' },
+                dataLabels: { enabled: true, formatter: function(val) { return val.toFixed(0) + '%'; } },
+                stroke: { width: 2 }
+            }).render();
+        });
+
+        // SmartTables for partner tables
         @foreach($productAreas as $area)
         if (window.SmartTables && document.querySelector('#partners-{{ Str::slug($area) }} tbody tr td:not([colspan])')) {
             new window.SmartTables('partners-{{ Str::slug($area) }}', {

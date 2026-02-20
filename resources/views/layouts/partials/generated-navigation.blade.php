@@ -536,12 +536,12 @@
         </a>
         <ul>
             <li>
-                <a href="{{ route('admin.anaplan-overview') }}">
+                <a href="{{ route('admin.provisioning-summary') }}">
                     <span class="nav-link-text">Dashboard</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.anaplan-provisioning.index') }}">
+                <a href="{{ route('admin.provisioning-workspaces.index') }}">
                     <span class="nav-link-text">Workspaces</span>
                 </a>
             </li>
