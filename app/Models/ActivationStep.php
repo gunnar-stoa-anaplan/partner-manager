@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Enums\StepType;
+use App\Enums\TrainingPhase;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ActivationStep extends Model
@@ -21,9 +23,14 @@ class ActivationStep extends Model
         'order',
         'name',
         'description',
+        'content_body',
+        'objectives',
+        'tour_route',
+        'tour_steps',
         'step_type',
         'criteria',
         'is_required',
+        'phase',
     ];
 
     /**
@@ -34,7 +41,10 @@ class ActivationStep extends Model
         return [
             'step_type' => StepType::class,
             'criteria' => 'array',
+            'objectives' => 'array',
+            'tour_steps' => 'array',
             'is_required' => 'boolean',
+            'phase' => TrainingPhase::class,
         ];
     }
 
@@ -43,8 +53,14 @@ class ActivationStep extends Model
         return $this->belongsTo(ActivationPath::class);
     }
 
-    public function progress(): HasOne
+    public function allProgress(): HasMany
     {
-        return $this->hasOne(StepProgress::class, 'activation_step_id');
+        return $this->hasMany(StepProgress::class, 'activation_step_id');
+    }
+
+    public function progressFor(User $user): HasOne
+    {
+        return $this->hasOne(StepProgress::class, 'activation_step_id')
+            ->where('user_id', $user->id);
     }
 }

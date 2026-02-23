@@ -129,8 +129,17 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <label class="form-label fs-sm">Target Value</label>
+                    <div class="col-md-1">
+                        <label class="form-label fs-sm">Phase</label>
+                        <select name="phase" class="form-select form-select-sm">
+                            <option value="">None</option>
+                            @foreach($trainingPhases as $phase)
+                            <option value="{{ $phase->value }}">{{ ucfirst($phase->value) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label fs-sm">Target</label>
                         <input type="number" name="target_value" class="form-control form-control-sm" value="1" step="0.01" min="0" required>
                     </div>
                     <div class="col-md-3">
@@ -153,10 +162,11 @@
     <div class="card-body p-0">
         @forelse($path->steps as $step)
         @php
-            $done = $step->progress?->completed;
-            $currentVal = (float) ($step->progress?->current_value ?? 0);
+            $completedUsers = $step->allProgress->where('completed', true)->count();
+            $totalAssigned = $path->users->count();
+            $done = $completedUsers > 0 && $completedUsers >= $totalAssigned;
             $targetVal = (float) ($step->criteria['target'] ?? 1);
-            $stepPercent = $targetVal > 0 ? min(100, ($currentVal / $targetVal) * 100) : 0;
+            $stepPercent = $totalAssigned > 0 ? min(100, ($completedUsers / $totalAssigned) * 100) : 0;
         @endphp
         <div class="p-3 {{ !$loop->last ? 'border-bottom' : '' }}">
             <div class="d-flex justify-content-between align-items-start mb-2">
@@ -178,6 +188,9 @@
                         @endif
                         <br>
                         <span class="badge bg-body-secondary text-body small">{{ str_replace('_', ' ', $step->step_type->value) }}</span>
+                        @if($step->phase)
+                        <span class="badge bg-primary text-white small ms-1">{{ ucfirst($step->phase->value) }}</span>
+                        @endif
                         <span class="text-muted small ms-1">Target: {{ number_format($targetVal, 0) }}</span>
                         @if($step->description)
                         <br><small class="text-muted">{{ $step->description }}</small>
@@ -203,13 +216,13 @@
             </div>
 
             {{-- Progress bar --}}
-            @if(!$done && $step->progress)
+            @if(!$done && $step->allProgress->isNotEmpty())
             <div class="ms-5">
                 <div class="progress mt-1" style="height: 4px;">
                     <div class="progress-bar bg-info" style="width: {{ $stepPercent }}%"></div>
                 </div>
                 <span class="text-muted" style="font-size:0.7rem">
-                    {{ number_format($currentVal, 0) }} / {{ number_format($targetVal, 0) }}
+                    {{ $completedUsers }} / {{ $totalAssigned }} users
                 </span>
             </div>
             @endif
@@ -223,7 +236,7 @@
                             <label class="form-label fs-sm">Order</label>
                             <input type="number" name="order" class="form-control form-control-sm" value="{{ $step->order }}" min="1" required>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label fs-sm">Name</label>
                             <input type="text" name="name" class="form-control form-control-sm" value="{{ $step->name }}" required>
                         </div>
@@ -235,7 +248,16 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
+                            <label class="form-label fs-sm">Phase</label>
+                            <select name="phase" class="form-select form-select-sm">
+                                <option value="">None</option>
+                                @foreach($trainingPhases as $phase)
+                                <option value="{{ $phase->value }}" {{ $step->phase === $phase ? 'selected' : '' }}>{{ ucfirst($phase->value) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-1">
                             <label class="form-label fs-sm">Target</label>
                             <input type="number" name="target_value" class="form-control form-control-sm" value="{{ $targetVal }}" step="0.01" min="0" required>
                         </div>
@@ -249,6 +271,36 @@
                                 <label class="form-check-label fs-sm">Req</label>
                             </div>
                             <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                        </div>
+                    </div>
+
+                    {{-- Tell: Content & Objectives --}}
+                    <div class="row g-2 mt-2">
+                        <div class="col-md-8">
+                            <label class="form-label fs-sm">Content (Markdown — for Tell steps)</label>
+                            <textarea name="content_body" class="form-control form-control-sm" rows="4" placeholder="Feature explanation in Markdown...">{{ $step->content_body }}</textarea>
+                        </div>
+                        <div class="col-md-4" x-data="{ objectives: {{ json_encode($step->objectives ?? []) }} }">
+                            <label class="form-label fs-sm">Objectives</label>
+                            <template x-for="(obj, i) in objectives" :key="i">
+                                <div class="input-group input-group-sm mb-1">
+                                    <input type="text" :name="'objectives['+i+']'" x-model="objectives[i]" class="form-control form-control-sm" placeholder="Objective...">
+                                    <button type="button" class="btn btn-outline-danger btn-sm" @click="objectives.splice(i, 1)">&times;</button>
+                                </div>
+                            </template>
+                            <button type="button" class="btn btn-outline-secondary btn-sm mt-1" @click="objectives.push('')">+ Add Objective</button>
+                        </div>
+                    </div>
+
+                    {{-- Show: Tour Definition --}}
+                    <div class="row g-2 mt-2">
+                        <div class="col-md-4">
+                            <label class="form-label fs-sm">Tour Route Name (for Show steps)</label>
+                            <input type="text" name="tour_route" class="form-control form-control-sm" value="{{ $step->tour_route }}" placeholder="e.g. blueprints.index">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fs-sm">Tour Steps (JSON)</label>
+                            <textarea name="tour_steps" class="form-control form-control-sm" rows="3" placeholder='[{"target":"#selector","title":"Title","text":"Description","position":"bottom"}]'>{{ $step->tour_steps ? json_encode($step->tour_steps, JSON_PRETTY_PRINT) : '' }}</textarea>
                         </div>
                     </div>
                 </form>
