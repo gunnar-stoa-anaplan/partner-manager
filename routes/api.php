@@ -1,14 +1,20 @@
 <?php
 
+use App\Http\Controllers\Api\InternalActivationAggregateController;
 use App\Http\Controllers\Api\InternalMetricsController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\InternalSignalAggregateController;
+use App\Http\Controllers\Api\V1\EnablementController;
 use App\Http\Controllers\Api\V1\ImportController;
 use App\Http\Controllers\Api\V1\PartnerController;
-use App\Http\Controllers\Api\V1\EnablementController;
 use App\Http\Controllers\Api\V1\TokenController;
+use Illuminate\Support\Facades\Route;
 
 // --- Internal (agent-only, no auth) ---
 Route::get('/internal/metrics', InternalMetricsController::class);
+Route::get('/internal/signal-aggregate', InternalSignalAggregateController::class);
+Route::post('/internal/signal-benchmarks', [InternalSignalAggregateController::class, 'storeBenchmarks']);
+Route::get('/internal/activation-aggregate', InternalActivationAggregateController::class);
+Route::post('/internal/activation-benchmarks', [InternalActivationAggregateController::class, 'storeBenchmarks']);
 
 Route::middleware('auth:sanctum')->group(function () {
 

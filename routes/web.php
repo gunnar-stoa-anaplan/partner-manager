@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActionPlanController;
+use App\Http\Controllers\Admin\ActivationBenchmarkController;
 use App\Http\Controllers\Admin\FeatureActivationController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AlertController;
@@ -483,8 +484,10 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/activation/paths/{path}/assignments', [FeatureActivationController::class, 'assignments'])->name('admin.activation.paths.assignments');
         Route::post('/activation/paths/{path}/assignments', [FeatureActivationController::class, 'assignUsers'])->name('admin.activation.paths.assign-users');
+        Route::post('/activation/paths/{path}/assignments/role', [FeatureActivationController::class, 'assignRole'])->name('admin.activation.paths.assign-role');
         Route::delete('/activation/paths/{path}/assignments/{user}', [FeatureActivationController::class, 'unassignUser'])->name('admin.activation.paths.unassign-user');
         Route::get('/activation/users/{user}/progress', [FeatureActivationController::class, 'userProgress'])->name('admin.activation.user-progress');
+        Route::get('/activation/benchmarks', ActivationBenchmarkController::class)->name('admin.activation.benchmarks');
     });
 
     /*
