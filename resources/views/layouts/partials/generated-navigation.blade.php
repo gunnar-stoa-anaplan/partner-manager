@@ -84,7 +84,7 @@
             <span class="nav-link-text">Partners</span>
         </a>
         <ul>
-            @if($registry->isEnabled('partner_management_user'))
+            @if($registry->isAccessible('partner_management_user'))
             <li>
                 <a href="{{ route('dashboard') }}">
                     <span class="nav-link-text">Dashboard</span>
@@ -96,7 +96,7 @@
                 </a>
             </li>
             @endif
-            @if($show('analysis') && $registry->isEnabled('analytics'))
+            @if($show('analysis') && $registry->isAccessible('analytics'))
             @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
             <li>
                 <a href="{{ route('custom-filters.index') }}">
@@ -125,7 +125,7 @@
 
     @if($show('goals_scorecards'))
 
-    @if($registry->isEnabled('analytics'))
+    @if($registry->isAccessible('analytics'))
     <li>
         <a href="{{ route('plan.scorecard.index') }}">
             <svg class="sa-icon">
@@ -136,7 +136,7 @@
     </li>
     @endif
 
-    @if($registry->isEnabled('enablement_user'))
+    @if($registry->isAccessible('enablement_user'))
     <li>
         <a href="{{ route('plan.competency-matrix.index') }}">
             <svg class="sa-icon">
@@ -147,7 +147,7 @@
     </li>
     @endif
 
-    @if($registry->isEnabled('action_plans_user'))
+    @if($registry->isAccessible('action_plans_user'))
     <li>
         <a href="{{ route('plan.tasks.index') }}">
             <svg class="sa-icon">
@@ -158,7 +158,7 @@
     </li>
     @endif
 
-    @if($registry->isEnabled('goals_targets_user'))
+    @if($registry->isAccessible('goals_targets_user'))
     <li>
         <a href="{{ route('plan.goals.index') }}">
             <svg class="sa-icon">
@@ -169,7 +169,7 @@
     </li>
     @endif
 
-    @if($registry->isEnabled('action_plans_user'))
+    @if($registry->isAccessible('action_plans_user'))
     <li>
         <a href="{{ route('plan.action-plans.index') }}">
             <svg class="sa-icon">
@@ -188,7 +188,7 @@
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_engage'] ?? '1') === '1')
     <li class="nav-title"><span>Engage</span></li>
 
-    @if($show('projects') && $registry->isEnabled('project_health_user'))
+    @if($show('projects') && $registry->isAccessible('project_health_user'))
     <li class="nav-item">
         <a href="#" title="Project Health" data-filter-tags>
             <svg class="sa-icon">
@@ -211,7 +211,7 @@
     </li>
     @endif
 
-    @if($show('enablement_events') && $registry->isEnabled('enablement_user'))
+    @if($show('enablement_events') && $registry->isAccessible('enablement_user'))
     <li class="nav-item">
         <a href="#" title="Field Engagements" data-filter-tags>
             <svg class="sa-icon">
@@ -234,7 +234,7 @@
     </li>
     @endif
 
-    @if($show('field_enablement') && $registry->isEnabled('enablement_user'))
+    @if($show('field_enablement') && $registry->isAccessible('enablement_user'))
     <li class="nav-item">
         <a href="#" title="Field Enablement" data-filter-tags>
             <svg class="sa-icon">
@@ -274,7 +274,7 @@
     </li>
     @endif
 
-    @if($show('deal_registration') && $registry->isEnabled('deal_registration_user'))
+    @if($show('deal_registration') && $registry->isAccessible('deal_registration_user'))
     <li>
         <a href="{{ route('engage.solutions.index') }}">
             <svg class="sa-icon">
@@ -340,7 +340,7 @@
     @endif
 
     {{-- Business Development --}}
-    @if($show('deal_registration') && $registry->isEnabled('deal_registration_user'))
+    @if($show('deal_registration') && $registry->isAccessible('deal_registration_user'))
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_business_dev'] ?? '1') === '1')
     <li class="nav-item">
         <a href="#" title="Business Development" data-filter-tags>
@@ -376,7 +376,7 @@
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_measure'] ?? '1') === '1')
     <li class="nav-title"><span>Measure</span></li>
 
-    @if($show('measure') && $registry->isEnabled('analytics'))
+    @if($show('measure') && $registry->isAccessible('analytics'))
     <li>
         <a href="{{ route('partners.full-summary') }}">
             <svg class="sa-icon">
@@ -442,7 +442,7 @@
     </li>
     @endif
 
-    @if($show('goals_scorecards') && $registry->isEnabled('benchmark_user'))
+    @if($show('goals_scorecards') && $registry->isAccessible('benchmark_user'))
     <li>
         <a href="{{ route('measure.benchmarks.index') }}">
             <svg class="sa-icon">
@@ -460,7 +460,7 @@
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_act'] ?? '1') === '1')
     <li class="nav-title"><span>Act</span></li>
 
-    @if($show('health_alerts') && $registry->isEnabled('enablement_user'))
+    @if($show('health_alerts') && $registry->isAccessible('enablement_user'))
     <li>
         <a href="{{ route('act.health.index') }}">
             <svg class="sa-icon">
@@ -479,7 +479,7 @@
         </a>
     </li>
 
-    @if($registry->isEnabled('qbr_user'))
+    @if($registry->isAccessible('qbr_user'))
     <li>
         <a href="{{ route('act.qbr.index') }}">
             <svg class="sa-icon">
@@ -499,7 +499,7 @@
     @if($show('goals_scorecards', 'partner_paths', 'deal_registration', 'anaplan', 'blueprints', 'enablement_events', 'labs', 'launch_programs'))
     <li class="nav-title"><span>Partner Administration</span></li>
 
-    @if($show('goals_scorecards') && $registry->isEnabled('goals_targets_admin'))
+    @if($show('goals_scorecards') && $registry->isAccessible('goals_targets_admin'))
     <li class="nav-item">
         <a href="#" title="Goals" data-filter-tags>
             <svg class="sa-icon">
@@ -571,7 +571,7 @@
     </li>
     @endif
 
-    @if($show('deal_registration') && $registry->isEnabled('deal_registration_admin'))
+    @if($show('deal_registration') && $registry->isAccessible('deal_registration_admin'))
     <li class="nav-item">
         <a href="#" title="Lead Assignment" data-filter-tags>
             <svg class="sa-icon">
@@ -599,7 +599,7 @@
     </li>
     @endif
 
-    @if($show('anaplan') && $registry->isEnabled('provisioning_admin'))
+    @if($show('anaplan') && $registry->isAccessible('provisioning_admin'))
     <li class="nav-item">
         <a href="#" title="Provisioning" data-filter-tags>
             <svg class="sa-icon">
@@ -622,7 +622,7 @@
     </li>
     @endif
 
-    @if($show('blueprints', 'enablement_events') && $registry->isEnabled('enablement_admin'))
+    @if($show('blueprints', 'enablement_events') && $registry->isAccessible('enablement_admin'))
     <li class="nav-item">
         <a href="#" title="Enablement" data-filter-tags>
             <svg class="sa-icon">
@@ -655,7 +655,7 @@
     </li>
     @endif
 
-    @if($show('labs') && $registry->isEnabled('enablement_admin'))
+    @if($show('labs') && $registry->isAccessible('enablement_admin'))
     <li class="nav-item">
         <a href="#" title="Workshops" data-filter-tags>
             <svg class="sa-icon">
@@ -678,7 +678,7 @@
     </li>
     @endif
 
-    @if($show('launch_programs') && $registry->isEnabled('launch_programs_admin'))
+    @if($show('launch_programs') && $registry->isAccessible('launch_programs_admin'))
     <li class="nav-item">
         <a href="#" title="Launch Programs" data-filter-tags>
             <svg class="sa-icon">

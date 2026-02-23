@@ -1,7 +1,12 @@
 @extends('layouts.vertical', ['pageTitle' => 'Activation Log'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Activation Log', 'pageSubTitle1' => 'Feature Activation', 'pageSubText' => 'Recent feature flag changes stored by Pennant'])
+    @include('layouts.partials/app-pagetitle', [
+        'pageTitle' => 'Activation Log',
+        'pageSubTitle1' => 'Feature Activation',
+        'pageSubTitle1Url' => route('admin.activation.paths'),
+        'pageSubText' => 'Recent feature flag changes stored by Pennant',
+    ])
 @endsection
 
 @section('content')

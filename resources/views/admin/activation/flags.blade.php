@@ -1,7 +1,12 @@
 @extends('layouts.vertical', ['pageTitle' => 'Feature Flags'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Feature Flags', 'pageSubTitle1' => 'Feature Activation', 'pageSubText' => 'Toggle modules on or off via Pennant feature flags'])
+    @include('layouts.partials/app-pagetitle', [
+        'pageTitle' => 'Feature Flags',
+        'pageSubTitle1' => 'Feature Activation',
+        'pageSubTitle1Url' => route('admin.activation.paths'),
+        'pageSubText' => 'Toggle modules on or off via Pennant feature flags',
+    ])
 @endsection
 
 @section('content')

@@ -3,8 +3,12 @@
 @section('page-title')
     @include('layouts.partials/app-pagetitle', [
         'pageTitle' => 'User Assignments',
-        'pageSubTitle1' => $path->name,
-        'pageSubTitle1Url' => route('admin.activation.paths.show', $path),
+        'pageSubTitle1' => 'Feature Activation',
+        'pageSubTitle1Url' => route('admin.activation.paths'),
+        'pageSubTitle2' => 'Activation Paths',
+        'pageSubTitle2Url' => route('admin.activation.paths'),
+        'pageSubTitle3' => $path->name,
+        'pageSubTitle3Url' => route('admin.activation.paths.show', $path),
         'pageSubText' => 'Manage which users are assigned to this activation path',
     ])
 @endsection
@@ -29,10 +33,39 @@
     </div>
 @endif
 
-{{-- Assign Users --}}
+{{-- Assign by Role --}}
 <div class="card shadow-0 mb-g">
     <div class="card-header">
-        <div class="card-title mb-0">Assign Users</div>
+        <div class="card-title mb-0">Assign by Role</div>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ route('admin.activation.paths.assign-role', $path) }}">
+            @csrf
+            <div class="row align-items-end">
+                <div class="col-auto">
+                    <label class="form-label">Role</label>
+                    <select name="role" class="form-select" required>
+                        <option value="">Select a role…</option>
+                        @foreach($roles as $role)
+                            <option value="{{ $role }}">{{ ucfirst($role) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i data-feather="users" class="icon-inline"></i> Assign All Users with Role
+                    </button>
+                </div>
+            </div>
+            <div class="form-text mt-2">Assigns every user with the selected role who is not already on this path.</div>
+        </form>
+    </div>
+</div>
+
+{{-- Assign Individual Users --}}
+<div class="card shadow-0 mb-g">
+    <div class="card-header">
+        <div class="card-title mb-0">Assign Individual Users</div>
     </div>
     <div class="card-body">
         @if($availableUsers->isEmpty())

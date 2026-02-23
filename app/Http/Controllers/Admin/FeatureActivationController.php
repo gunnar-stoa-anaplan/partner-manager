@@ -348,11 +348,39 @@ class FeatureActivationController extends Controller
             $q->where('activation_path_id', $path->id);
         })->orderBy('name')->get();
 
-        return view('admin.activation.assignments', compact('path', 'availableUsers'));
+        $roles = User::query()->distinct()->pluck('role')->sort()->values();
+
+        return view('admin.activation.assignments', compact('path', 'availableUsers', 'roles'));
     }
 
     /**
-     * Assign users to an activation path.
+     * Assign all users with a given role to an activation path.
+     */
+    public function assignRole(Request $request, ActivationPath $path, ActivationService $service): RedirectResponse
+    {
+        $validated = $request->validate([
+            'role' => 'required|string',
+        ]);
+
+        $users = User::where('role', $validated['role'])
+            ->whereDoesntHave('activationPaths', function ($q) use ($path) {
+                $q->where('activation_path_id', $path->id);
+            })
+            ->get();
+
+        if ($users->isEmpty()) {
+            return redirect()->route('admin.activation.paths.assignments', $path)
+                ->with('success', 'No new users with the '.ucfirst($validated['role']).' role to assign.');
+        }
+
+        $service->bulkAssignPath($path, $users, $request->user());
+
+        return redirect()->route('admin.activation.paths.assignments', $path)
+            ->with('success', $users->count().' '.ucfirst($validated['role']).' user(s) assigned.');
+    }
+
+    /**
+     * Assign individual users to an activation path.
      */
     public function assignUsers(Request $request, ActivationPath $path, ActivationService $service): RedirectResponse
     {

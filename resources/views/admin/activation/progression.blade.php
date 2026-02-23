@@ -1,7 +1,12 @@
 @extends('layouts.vertical', ['pageTitle' => 'Activation Progression'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Activation Progression', 'pageSubTitle1' => 'Feature Activation', 'pageSubText' => 'Track achievement-based progress toward feature unlocks'])
+    @include('layouts.partials/app-pagetitle', [
+        'pageTitle' => 'Activation Progression',
+        'pageSubTitle1' => 'Feature Activation',
+        'pageSubTitle1Url' => route('admin.activation.paths'),
+        'pageSubText' => 'Track achievement-based progress toward feature unlocks',
+    ])
 @endsection
 
 @section('content')
