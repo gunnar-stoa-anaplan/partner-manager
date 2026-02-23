@@ -47,9 +47,29 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
+    pm-agent:
+        build:
+            context: ../pm-agent
+            dockerfile: Dockerfile
+        image: partner-manager-3-pm-agent
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./docker/agent/config.yaml:/etc/pm-agent/config.yaml:ro
+            - agent-status:/var/lib/pm-agent/status
+        networks:
+            sail:
+            pm-shared:
+                aliases:
+                    - pm-agent
+        depends_on:
+            - laravel.test
 networks:
     sail:
         driver: bridge
+    pm-shared:
+        external: true
 volumes:
     sail-mysql:
+        driver: local
+    agent-status:
         driver: local

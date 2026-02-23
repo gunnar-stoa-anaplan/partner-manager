@@ -86,9 +86,22 @@ Route::middleware(['auth'])->group(function () {
         return view('welcome', ['data' => '']);
     })->name('welcome');
 
+    /*
+    |--------------------------------------------------------------------------
+    | My Training (Tell / Show / Do)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('training')->name('training.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\TrainingController::class, 'index'])->name('index');
+        Route::get('/paths/{path}', [\App\Http\Controllers\TrainingController::class, 'show'])->name('path');
+        Route::get('/steps/{step}', [\App\Http\Controllers\TrainingController::class, 'step'])->name('step');
+        Route::post('/steps/{step}/complete', [\App\Http\Controllers\TrainingController::class, 'completeStep'])->name('step.complete');
+        Route::get('/steps/{step}/tour-data', [\App\Http\Controllers\TrainingController::class, 'tourData'])->name('step.tour-data');
+    });
+
     Route::get('/dashboard', function () {
         return view('index');
-    })->name('dashboard');
+    })->name('dashboard')->middleware('module:partner_management_user');
 
     /*
     |--------------------------------------------------------------------------
@@ -225,7 +238,7 @@ Route::middleware(['auth'])->group(function () {
     | Partner Assignments and Selection
     |--------------------------------------------------------------------------
     */
-    Route::get('/my-partners', [PartnerController::class, 'myPartners'])->name('partners.my');
+    Route::get('/my-partners', [PartnerController::class, 'myPartners'])->name('partners.my')->middleware('module:partner_management_user');
     Route::get('/partners/{id}', [PartnerController::class, 'show'])->name('partners.show');
     Route::get('/partners/{id}/summary', [PartnerController::class, 'summary'])->name('partners.summary');
     Route::get('/partners/{id}/insights', [PartnerController::class, 'insights'])->name('partners.insights');
@@ -375,6 +388,7 @@ Route::middleware(['auth'])->group(function () {
             // Blueprint CRUD
             Route::resource('blueprints', BlueprintController::class);
             Route::post('/blueprints/{blueprint}/duplicate', [BlueprintController::class, 'duplicate'])->name('blueprints.duplicate');
+            Route::get('/blueprints/{blueprint}/export', [BlueprintController::class, 'export'])->name('blueprints.export');
             Route::post('/blueprints/{blueprint}/outcomes', [BlueprintController::class, 'addOutcome'])->name('blueprints.outcomes.store');
             Route::put('/blueprint-outcomes/{outcome}', [BlueprintController::class, 'updateOutcome'])->name('blueprint-outcomes.update');
             Route::delete('/blueprint-outcomes/{outcome}', [BlueprintController::class, 'destroyOutcome'])->name('blueprint-outcomes.destroy');
@@ -444,13 +458,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/branding', [BrandingController::class, 'index'])->name('admin.branding');
         Route::put('/branding', [BrandingController::class, 'update'])->name('admin.branding.update');
 
-        // Feature Activation
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Feature Activation (admin + authorized CoE)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['can:manage-activation'])->group(function () {
         Route::get('/activation/flags', [FeatureActivationController::class, 'flags'])->name('admin.activation.flags');
         Route::post('/activation/toggle', [FeatureActivationController::class, 'toggle'])->name('admin.activation.toggle');
         Route::get('/activation/progression', [FeatureActivationController::class, 'progression'])->name('admin.activation.progression');
         Route::get('/activation/log', [FeatureActivationController::class, 'log'])->name('admin.activation.log');
 
-        // Activation Paths & Steps
         Route::get('/activation/paths', [FeatureActivationController::class, 'paths'])->name('admin.activation.paths');
         Route::post('/activation/paths', [FeatureActivationController::class, 'storePath'])->name('admin.activation.paths.store');
         Route::get('/activation/paths/{path}', [FeatureActivationController::class, 'showPath'])->name('admin.activation.paths.show');
@@ -460,6 +480,11 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/activation/steps/{step}', [FeatureActivationController::class, 'updateStep'])->name('admin.activation.steps.update');
         Route::delete('/activation/steps/{step}', [FeatureActivationController::class, 'destroyStep'])->name('admin.activation.steps.destroy');
         Route::post('/activation/steps/{step}/toggle-progress', [FeatureActivationController::class, 'toggleStepProgress'])->name('admin.activation.steps.toggle-progress');
+
+        Route::get('/activation/paths/{path}/assignments', [FeatureActivationController::class, 'assignments'])->name('admin.activation.paths.assignments');
+        Route::post('/activation/paths/{path}/assignments', [FeatureActivationController::class, 'assignUsers'])->name('admin.activation.paths.assign-users');
+        Route::delete('/activation/paths/{path}/assignments/{user}', [FeatureActivationController::class, 'unassignUser'])->name('admin.activation.paths.unassign-user');
+        Route::get('/activation/users/{user}/progress', [FeatureActivationController::class, 'userProgress'])->name('admin.activation.user-progress');
     });
 
     /*
@@ -474,19 +499,25 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/paths/{enrollment}', [PartnerPathController::class, 'show'])->name('paths.show');
         Route::post('/paths/{enrollment}/advance', [PartnerPathController::class, 'advanceStage'])->name('paths.advance');
 
-        // Scorecard
-        Route::get('/scorecard', [ScorecardController::class, 'index'])->name('scorecard.index');
-        Route::get('/scorecard/{partner}', [ScorecardController::class, 'show'])->name('scorecard.show');
+        // Scorecard (gated by analytics feature flag)
+        Route::middleware('module:analytics')->group(function () {
+            Route::get('/scorecard', [ScorecardController::class, 'index'])->name('scorecard.index');
+            Route::get('/scorecard/{partner}', [ScorecardController::class, 'show'])->name('scorecard.show');
+        });
 
-        // Competency Matrix
-        Route::get('/competency-matrix', [CompetencyMatrixController::class, 'index'])->name('competency-matrix.index');
-        Route::get('/competency-matrix/{partner}', [CompetencyMatrixController::class, 'show'])->name('competency-matrix.show');
+        // Competency Matrix (gated by enablement_user feature flag)
+        Route::middleware('module:enablement_user')->group(function () {
+            Route::get('/competency-matrix', [CompetencyMatrixController::class, 'index'])->name('competency-matrix.index');
+            Route::get('/competency-matrix/{partner}', [CompetencyMatrixController::class, 'show'])->name('competency-matrix.show');
+        });
 
-        // Task Board
-        Route::get('/tasks', [TaskBoardController::class, 'index'])->name('tasks.index');
-        Route::post('/tasks', [TaskBoardController::class, 'store'])->name('tasks.store');
-        Route::put('/tasks/{task}/status', [TaskBoardController::class, 'updateStatus'])->name('tasks.update-status');
-        Route::post('/tasks/{task}/comments', [TaskBoardController::class, 'addComment'])->name('tasks.comments.store');
+        // Task Board (gated by action_plans_user feature flag)
+        Route::middleware('module:action_plans_user')->group(function () {
+            Route::get('/tasks', [TaskBoardController::class, 'index'])->name('tasks.index');
+            Route::post('/tasks', [TaskBoardController::class, 'store'])->name('tasks.store');
+            Route::put('/tasks/{task}/status', [TaskBoardController::class, 'updateStatus'])->name('tasks.update-status');
+            Route::post('/tasks/{task}/comments', [TaskBoardController::class, 'addComment'])->name('tasks.comments.store');
+        });
 
         // Goals & Targets (gated by goals_targets_user feature flag)
         Route::middleware('module:goals_targets_user')->group(function () {
@@ -557,9 +588,11 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('act')->name('act.')->group(function () {
-        // Partner Health
-        Route::get('/health', [HealthDashboardController::class, 'index'])->name('health.index');
-        Route::get('/health/{partner}', [HealthDashboardController::class, 'show'])->name('health.show');
+        // Partner Health (gated by enablement_user feature flag)
+        Route::middleware('module:enablement_user')->group(function () {
+            Route::get('/health', [HealthDashboardController::class, 'index'])->name('health.index');
+            Route::get('/health/{partner}', [HealthDashboardController::class, 'show'])->name('health.show');
+        });
 
         // Alerts & Recommendations
         Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');

@@ -1,10 +1,14 @@
 <?php
 
+use App\Http\Controllers\Api\InternalMetricsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\ImportController;
 use App\Http\Controllers\Api\V1\PartnerController;
 use App\Http\Controllers\Api\V1\EnablementController;
 use App\Http\Controllers\Api\V1\TokenController;
+
+// --- Internal (agent-only, no auth) ---
+Route::get('/internal/metrics', InternalMetricsController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
 

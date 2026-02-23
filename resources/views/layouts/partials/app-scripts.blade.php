@@ -12,5 +12,8 @@
 <!-- AI Chat sidebar -->
 @vite(['resources/scripts/pages/ai-chat.js'])
 
+<!-- Shepherd.js guided tour runner -->
+@vite(['resources/scripts/pages/training/tour-runner.js'])
+
 @yield('scripts')
 @stack('scripts')

@@ -19,6 +19,25 @@
     </li>
 
     @auth
+    @php
+        $pendingTrainingCount = auth()->user()->activationPaths()
+            ->wherePivotNull('completed_at')
+            ->count();
+    @endphp
+    @if($pendingTrainingCount > 0)
+    <li>
+        <a href="{{ route('training.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#book-open"></use>
+            </svg>
+            <span class="nav-link-text">My Training</span>
+            <span class="badge bg-warning text-dark rounded-pill ms-1">{{ $pendingTrainingCount }}</span>
+        </a>
+    </li>
+    @endif
+    @endauth
+
+    @auth
     @if(app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
     <li class="nav-item">
         <a href="#" title="Idea Room" data-filter-tags>
@@ -65,6 +84,7 @@
             <span class="nav-link-text">Partners</span>
         </a>
         <ul>
+            @if($registry->isEnabled('partner_management_user'))
             <li>
                 <a href="{{ route('dashboard') }}">
                     <span class="nav-link-text">Dashboard</span>
@@ -75,6 +95,7 @@
                     <span class="nav-link-text">My Partners</span>
                 </a>
             </li>
+            @endif
             @if($show('analysis') && $registry->isEnabled('analytics'))
             @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
             <li>
@@ -103,6 +124,8 @@
     <li class="nav-title"><span>Plan</span></li>
 
     @if($show('goals_scorecards'))
+
+    @if($registry->isEnabled('analytics'))
     <li>
         <a href="{{ route('plan.scorecard.index') }}">
             <svg class="sa-icon">
@@ -111,7 +134,9 @@
             <span class="nav-link-text">Scorecard</span>
         </a>
     </li>
+    @endif
 
+    @if($registry->isEnabled('enablement_user'))
     <li>
         <a href="{{ route('plan.competency-matrix.index') }}">
             <svg class="sa-icon">
@@ -120,7 +145,9 @@
             <span class="nav-link-text">Competency Matrix</span>
         </a>
     </li>
+    @endif
 
+    @if($registry->isEnabled('action_plans_user'))
     <li>
         <a href="{{ route('plan.tasks.index') }}">
             <svg class="sa-icon">
@@ -129,6 +156,7 @@
             <span class="nav-link-text">Task Board</span>
         </a>
     </li>
+    @endif
 
     @if($registry->isEnabled('goals_targets_user'))
     <li>
@@ -432,7 +460,7 @@
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_act'] ?? '1') === '1')
     <li class="nav-title"><span>Act</span></li>
 
-    @if($show('health_alerts'))
+    @if($show('health_alerts') && $registry->isEnabled('enablement_user'))
     <li>
         <a href="{{ route('act.health.index') }}">
             <svg class="sa-icon">
@@ -754,37 +782,6 @@
     </li>
     @endif
 
-    <li class="nav-item">
-        <a href="#" title="Feature Activation" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#unlock"></use>
-            </svg>
-            <span class="nav-link-text">Feature Activation</span>
-        </a>
-        <ul>
-            <li>
-                <a href="{{ route('admin.activation.flags') }}">
-                    <span class="nav-link-text">Feature Flags</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.activation.paths') }}">
-                    <span class="nav-link-text">Activation Paths</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.activation.progression') }}">
-                    <span class="nav-link-text">Progression Dashboard</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.activation.log') }}">
-                    <span class="nav-link-text">Activation Log</span>
-                </a>
-            </li>
-        </ul>
-    </li>
-
     @if(app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
     <li class="nav-item">
         <a href="#" title="Idea Room" data-filter-tags>
@@ -810,5 +807,41 @@
     @endif
 
     @endif
+
+    {{-- Feature Activation — visible to admin and authorized CoE --}}
+    @can('manage-activation')
+    <li class="nav-title"><span>Feature Activation</span></li>
+    <li class="nav-item">
+        <a href="#" title="Feature Activation" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#unlock"></use>
+            </svg>
+            <span class="nav-link-text">Activation</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('admin.activation.flags') }}">
+                    <span class="nav-link-text">Feature Flags</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.activation.paths') }}">
+                    <span class="nav-link-text">Activation Paths</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.activation.progression') }}">
+                    <span class="nav-link-text">Progression Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.activation.log') }}">
+                    <span class="nav-link-text">Activation Log</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endcan
+
     @endauth
 </ul>

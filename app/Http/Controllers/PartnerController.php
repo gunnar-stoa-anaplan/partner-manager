@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\StepType;
 use App\Helpers\FiscalYearHelper;
 use App\Models\Blueprint;
 use App\Models\Certification;
@@ -18,6 +19,7 @@ use App\Models\PartnerPathEnrollment;
 use App\Models\PartnerScorecard;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\ActivationTracker;
 use App\Services\GateEvaluationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -77,6 +79,8 @@ class PartnerController extends Controller
         $partner = Partner::with(['projects', 'contacts', 'opportunities', 'leads', 'certifications', 'anaplanWorkspaces'])
             ->findOrFail($id);
         $this->authorizePartnerAccess($partner);
+
+        app(ActivationTracker::class)->track(auth()->user(), 'partner_management_user', StepType::UsageThreshold);
 
         // KPI metrics (always visible above tabs)
         $activeProjects = $partner->projects->whereNotIn('status', ['Completed'])->count();
@@ -1377,6 +1381,8 @@ class PartnerController extends Controller
         $partner->update([
             'user_id' => $request->user_id,
         ]);
+
+        app(ActivationTracker::class)->track(auth()->user(), 'partner_management_user', StepType::FeatureUsage);
 
         return redirect()->route('partners.index')->with('success', 'Partner assignment updated successfully.');
     }
