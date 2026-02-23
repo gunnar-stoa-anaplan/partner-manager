@@ -5,6 +5,7 @@
      */
     $focused = !empty($devFocus);
     $show = fn(string ...$features) => !$focused || in_array($devFocus, $features);
+    $registry = app(\App\Services\ModuleRegistry::class);
 @endphp
 <ul id="js-nav-menu" class="nav-menu">
 
@@ -18,6 +19,44 @@
     </li>
 
     @auth
+    @if(app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
+    <li class="nav-item">
+        <a href="#" title="Idea Room" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#star"></use>
+            </svg>
+            <span class="nav-link-text">Idea Room</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('idea_room.dashboard') }}">
+                    <span class="nav-link-text">Gallery</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('idea_room.rooms') }}">
+                    <span class="nav-link-text">Idea Rooms</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('idea_room.ideas') }}">
+                    <span class="nav-link-text">Ideas</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('idea_room.whiteboard') }}">
+                    <span class="nav-link-text">Whiteboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('idea_room.constellation') }}">
+                    <span class="nav-link-text">Constellation</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
     <li class="nav-item">
         <a href="#" title="Partners" data-filter-tags>
             <svg class="sa-icon">
@@ -36,7 +75,7 @@
                     <span class="nav-link-text">My Partners</span>
                 </a>
             </li>
-            @if($show('analysis'))
+            @if($show('analysis') && $registry->isEnabled('analytics'))
             @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
             <li>
                 <a href="{{ route('custom-filters.index') }}">
@@ -91,6 +130,7 @@
         </a>
     </li>
 
+    @if($registry->isEnabled('goals_targets_user'))
     <li>
         <a href="{{ route('plan.goals.index') }}">
             <svg class="sa-icon">
@@ -99,7 +139,9 @@
             <span class="nav-link-text">Goals & Targets</span>
         </a>
     </li>
+    @endif
 
+    @if($registry->isEnabled('action_plans_user'))
     <li>
         <a href="{{ route('plan.action-plans.index') }}">
             <svg class="sa-icon">
@@ -111,13 +153,14 @@
     @endif
     @endif
     @endif
+    @endif
 
     {{-- Engage Section --}}
     @if($show('deal_registration', 'enablement_events', 'projects'))
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_engage'] ?? '1') === '1')
     <li class="nav-title"><span>Engage</span></li>
 
-    @if($show('projects'))
+    @if($show('projects') && $registry->isEnabled('project_health_user'))
     <li class="nav-item">
         <a href="#" title="Project Health" data-filter-tags>
             <svg class="sa-icon">
@@ -140,7 +183,7 @@
     </li>
     @endif
 
-    @if($show('enablement_events'))
+    @if($show('enablement_events') && $registry->isEnabled('enablement_user'))
     <li class="nav-item">
         <a href="#" title="Field Engagements" data-filter-tags>
             <svg class="sa-icon">
@@ -163,7 +206,7 @@
     </li>
     @endif
 
-    @if($show('field_enablement'))
+    @if($show('field_enablement') && $registry->isEnabled('enablement_user'))
     <li class="nav-item">
         <a href="#" title="Field Enablement" data-filter-tags>
             <svg class="sa-icon">
@@ -203,7 +246,7 @@
     </li>
     @endif
 
-    @if($show('deal_registration'))
+    @if($show('deal_registration') && $registry->isEnabled('deal_registration_user'))
     <li>
         <a href="{{ route('engage.solutions.index') }}">
             <svg class="sa-icon">
@@ -269,7 +312,7 @@
     @endif
 
     {{-- Business Development --}}
-    @if($show('deal_registration'))
+    @if($show('deal_registration') && $registry->isEnabled('deal_registration_user'))
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_business_dev'] ?? '1') === '1')
     <li class="nav-item">
         <a href="#" title="Business Development" data-filter-tags>
@@ -305,7 +348,7 @@
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_measure'] ?? '1') === '1')
     <li class="nav-title"><span>Measure</span></li>
 
-    @if($show('measure'))
+    @if($show('measure') && $registry->isEnabled('analytics'))
     <li>
         <a href="{{ route('partners.full-summary') }}">
             <svg class="sa-icon">
@@ -371,7 +414,7 @@
     </li>
     @endif
 
-    @if($show('goals_scorecards'))
+    @if($show('goals_scorecards') && $registry->isEnabled('benchmark_user'))
     <li>
         <a href="{{ route('measure.benchmarks.index') }}">
             <svg class="sa-icon">
@@ -408,6 +451,7 @@
         </a>
     </li>
 
+    @if($registry->isEnabled('qbr_user'))
     <li>
         <a href="{{ route('act.qbr.index') }}">
             <svg class="sa-icon">
@@ -416,6 +460,7 @@
             <span class="nav-link-text">QBR Workbench</span>
         </a>
     </li>
+    @endif
     @endif
 
     @endif
@@ -426,7 +471,7 @@
     @if($show('goals_scorecards', 'partner_paths', 'deal_registration', 'anaplan', 'blueprints', 'enablement_events', 'labs', 'launch_programs'))
     <li class="nav-title"><span>Partner Administration</span></li>
 
-    @if($show('goals_scorecards'))
+    @if($show('goals_scorecards') && $registry->isEnabled('goals_targets_admin'))
     <li class="nav-item">
         <a href="#" title="Goals" data-filter-tags>
             <svg class="sa-icon">
@@ -498,7 +543,7 @@
     </li>
     @endif
 
-    @if($show('deal_registration'))
+    @if($show('deal_registration') && $registry->isEnabled('deal_registration_admin'))
     <li class="nav-item">
         <a href="#" title="Lead Assignment" data-filter-tags>
             <svg class="sa-icon">
@@ -526,7 +571,7 @@
     </li>
     @endif
 
-    @if($show('anaplan'))
+    @if($show('anaplan') && $registry->isEnabled('provisioning_admin'))
     <li class="nav-item">
         <a href="#" title="Provisioning" data-filter-tags>
             <svg class="sa-icon">
@@ -549,7 +594,7 @@
     </li>
     @endif
 
-    @if($show('blueprints', 'enablement_events'))
+    @if($show('blueprints', 'enablement_events') && $registry->isEnabled('enablement_admin'))
     <li class="nav-item">
         <a href="#" title="Enablement" data-filter-tags>
             <svg class="sa-icon">
@@ -582,7 +627,7 @@
     </li>
     @endif
 
-    @if($show('labs'))
+    @if($show('labs') && $registry->isEnabled('enablement_admin'))
     <li class="nav-item">
         <a href="#" title="Workshops" data-filter-tags>
             <svg class="sa-icon">
@@ -605,7 +650,7 @@
     </li>
     @endif
 
-    @if($show('launch_programs'))
+    @if($show('launch_programs') && $registry->isEnabled('launch_programs_admin'))
     <li class="nav-item">
         <a href="#" title="Launch Programs" data-filter-tags>
             <svg class="sa-icon">
@@ -706,6 +751,60 @@
             <span class="nav-link-text">Telescope</span>
             <span class="dl-ref badge badge-info">live</span>
         </a>
+    </li>
+    @endif
+
+    <li class="nav-item">
+        <a href="#" title="Feature Activation" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#unlock"></use>
+            </svg>
+            <span class="nav-link-text">Feature Activation</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('admin.activation.flags') }}">
+                    <span class="nav-link-text">Feature Flags</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.activation.paths') }}">
+                    <span class="nav-link-text">Activation Paths</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.activation.progression') }}">
+                    <span class="nav-link-text">Progression Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.activation.log') }}">
+                    <span class="nav-link-text">Activation Log</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+
+    @if(app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
+    <li class="nav-item">
+        <a href="#" title="Idea Room" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#star"></use>
+            </svg>
+            <span class="nav-link-text">Idea Room</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('idea_room.admin.settings') }}">
+                    <span class="nav-link-text">Settings</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('idea_room.admin.themes.index') }}">
+                    <span class="nav-link-text">Gallery Themes</span>
+                </a>
+            </li>
+        </ul>
     </li>
     @endif
     @endif

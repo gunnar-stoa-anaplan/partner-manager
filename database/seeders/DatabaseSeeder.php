@@ -63,6 +63,10 @@ class DatabaseSeeder extends Seeder
             SupportCaseSeeder::class,          // support cases
             PartnerAlertSeeder::class,         // alerts across all types
             QbrSessionSeeder::class,           // QBR sessions + 9 sections each
+
+            // === Idea Room ===
+            GalleryThemeSeeder::class,         // gallery wall templates + frame slots
+            IdeaRoomSeeder::class,             // ideas, buckets, tags, edges, rooms
         ]);
     }
 }
