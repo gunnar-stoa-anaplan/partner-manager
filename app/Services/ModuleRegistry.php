@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Auth;
 use Laravel\Pennant\Feature;
 
 class ModuleRegistry
@@ -33,12 +34,12 @@ class ModuleRegistry
             return false;
         }
 
-        // In local/testing, trust the config flag (skip Pennant for dev convenience)
-        if (app()->environment('local', 'testing')) {
+        // Admins bypass Pennant — they always see all modules
+        if (Auth::check() && Auth::user()->role === 'admin') {
             return true;
         }
 
-        // Production: check Pennant (scope = null for single-tenant instances)
+        // Check Pennant (scope = null for single-tenant instances)
         return Feature::for(null)->active($slug);
     }
 

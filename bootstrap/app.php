@@ -17,6 +17,29 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->prefix('portal')
                 ->name('portal.')
                 ->group(base_path('routes/portal.php'));
+
+            // Load module route files (web)
+            foreach (['integration-hub', 'strategy', 'idea-room'] as $mod) {
+                $slug = str_replace('-', '_', $mod);
+                $file = base_path("routes/modules/{$mod}.php");
+
+                if (file_exists($file)) {
+                    Route::middleware(['web', 'auth', "module:{$slug}"])
+                        ->prefix($mod)
+                        ->name("{$slug}.")
+                        ->group($file);
+                }
+            }
+
+            // Load module API route files
+            $ideaRoomApi = base_path('routes/modules/idea-room-api.php');
+
+            if (file_exists($ideaRoomApi)) {
+                Route::middleware(['web', 'auth', 'module:idea_room'])
+                    ->prefix('api/v1/idea-room')
+                    ->name('idea_room.api.')
+                    ->group($ideaRoomApi);
+            }
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -26,6 +49,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'portal' => \App\Http\Middleware\PortalAuth::class,
             'portal.role' => \App\Http\Middleware\PortalRole::class,
             'portal.can' => \App\Http\Middleware\PortalCan::class,
+            'module' => \App\Http\Middleware\EnsureModuleEnabled::class,
         ]);
         $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
