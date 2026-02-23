@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActionPlanController;
+use App\Http\Controllers\Admin\FeatureActivationController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AnaplanOverviewController;
@@ -422,6 +423,12 @@ Route::middleware(['auth'])->group(function () {
         // Branding
         Route::get('/branding', [BrandingController::class, 'index'])->name('admin.branding');
         Route::put('/branding', [BrandingController::class, 'update'])->name('admin.branding.update');
+
+        // Feature Activation
+        Route::get('/activation/flags', [FeatureActivationController::class, 'flags'])->name('admin.activation.flags');
+        Route::post('/activation/toggle', [FeatureActivationController::class, 'toggle'])->name('admin.activation.toggle');
+        Route::get('/activation/progression', [FeatureActivationController::class, 'progression'])->name('admin.activation.progression');
+        Route::get('/activation/log', [FeatureActivationController::class, 'log'])->name('admin.activation.log');
     });
 
     /*

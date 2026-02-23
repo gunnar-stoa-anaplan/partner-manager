@@ -18,6 +18,44 @@
     </li>
 
     @auth
+    @if(app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
+    <li class="nav-item">
+        <a href="#" title="Idea Room" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#star"></use>
+            </svg>
+            <span class="nav-link-text">Idea Room</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('idea_room.dashboard') }}">
+                    <span class="nav-link-text">Gallery</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('idea_room.rooms') }}">
+                    <span class="nav-link-text">Idea Rooms</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('idea_room.ideas') }}">
+                    <span class="nav-link-text">Ideas</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('idea_room.whiteboard') }}">
+                    <span class="nav-link-text">Whiteboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('idea_room.constellation') }}">
+                    <span class="nav-link-text">Constellation</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
     <li class="nav-item">
         <a href="#" title="Partners" data-filter-tags>
             <svg class="sa-icon">
@@ -706,6 +744,55 @@
             <span class="nav-link-text">Telescope</span>
             <span class="dl-ref badge badge-info">live</span>
         </a>
+    </li>
+    @endif
+
+    <li class="nav-item">
+        <a href="#" title="Feature Activation" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#unlock"></use>
+            </svg>
+            <span class="nav-link-text">Feature Activation</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('admin.activation.flags') }}">
+                    <span class="nav-link-text">Feature Flags</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.activation.progression') }}">
+                    <span class="nav-link-text">Progression Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.activation.log') }}">
+                    <span class="nav-link-text">Activation Log</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+
+    @if(app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
+    <li class="nav-item">
+        <a href="#" title="Idea Room" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#star"></use>
+            </svg>
+            <span class="nav-link-text">Idea Room</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('idea_room.admin.settings') }}">
+                    <span class="nav-link-text">Settings</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('idea_room.admin.themes.index') }}">
+                    <span class="nav-link-text">Gallery Themes</span>
+                </a>
+            </li>
+        </ul>
     </li>
     @endif
     @endif
