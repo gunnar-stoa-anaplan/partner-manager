@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 820" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrowDark" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#374151"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <rect width="1100" height="820" fill="#f8fafc" rx="12"/>
+
+  <!-- INTERNAL USE ONLY banner -->
+  <rect x="0" y="0" width="1100" height="24" rx="12" fill="#dc2626"/>
+  <text x="550" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">INTERNAL USE ONLY &#8212; Client Self-Hosted / On-Prem Deployment Architecture</text>
+
+  <!-- Title -->
+  <text x="550" y="52" text-anchor="middle" font-size="18" font-weight="700" fill="#111827">Client On-Premises Deployment</text>
+  <text x="550" y="70" text-anchor="middle" font-size="11" fill="#6b7280">Docker Compose-based deployment within the customer&#x27;s infrastructure / data warehouse</text>
+
+  <!-- CLIENT INFRASTRUCTURE BOUNDARY -->
+  <rect x="30" y="90" width="750" height="700" rx="12" fill="#fff" stroke="#374151" stroke-width="2" stroke-dasharray="8,4"/>
+  <text x="50" y="112" font-size="12" font-weight="700" fill="#374151">Customer Data Center / Cloud VPC</text>
+
+  <!-- Docker Host -->
+  <rect x="50" y="130" width="710" height="640" rx="10" fill="#f3f4f6" stroke="#6b7280" stroke-width="1.5"/>
+  <text x="70" y="152" font-size="11" font-weight="700" fill="#374151">Docker Host (docker-compose.yml)</text>
+
+  <!-- Sail Network -->
+  <rect x="70" y="165" width="450" height="580" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="90" y="184" font-size="10" font-weight="600" fill="#2563eb">sail network (bridge)</text>
+
+  <!-- Laravel App Container -->
+  <rect x="90" y="195" width="410" height="240" rx="8" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="90" y="195" width="410" height="30" rx="8" fill="#2563eb"/>
+  <rect x="90" y="218" width="410" height="7" fill="#2563eb"/>
+  <text x="295" y="216" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">app (Partner Manager 3)</text>
+
+  <!-- Internal components -->
+  <rect x="110" y="235" width="180" height="50" rx="6" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="200" y="256" text-anchor="middle" font-size="10" font-weight="600" fill="#1e40af">Nginx (port 80)</text>
+  <text x="200" y="272" text-anchor="middle" font-size="9" fill="#6b7280">Reverse proxy, gzip, static cache</text>
+
+  <rect x="310" y="235" width="180" height="50" rx="6" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="400" y="256" text-anchor="middle" font-size="10" font-weight="600" fill="#1e40af">PHP-FPM 8.4</text>
+  <text x="400" y="272" text-anchor="middle" font-size="9" fill="#6b7280">OPCache, 256MB, port 9000</text>
+
+  <rect x="110" y="295" width="180" height="50" rx="6" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+  <text x="200" y="316" text-anchor="middle" font-size="10" font-weight="600" fill="#166534">Supervisord</text>
+  <text x="200" y="332" text-anchor="middle" font-size="9" fill="#6b7280">php-fpm + nginx + scheduler</text>
+
+  <rect x="310" y="295" width="180" height="50" rx="6" fill="#faf5ff" stroke="#c084fc" stroke-width="1"/>
+  <text x="400" y="316" text-anchor="middle" font-size="10" font-weight="600" fill="#7c3aed">Laravel Scheduler</text>
+  <text x="400" y="332" text-anchor="middle" font-size="9" fill="#6b7280">schedule:run every 60s</text>
+
+  <!-- Scheduled tasks -->
+  <rect x="110" y="355" width="380" height="70" rx="6" fill="#f8fafc" stroke="#d1d5db" stroke-width="1"/>
+  <text x="120" y="374" font-size="10" font-weight="600" fill="#374151">Scheduled Tasks:</text>
+  <text x="120" y="392" font-size="9" fill="#6b7280">04:00 &#8212; anaplan:sync --skip-modules</text>
+  <text x="120" y="406" font-size="9" fill="#6b7280">05:00 &#8212; signal:process --cadence=daily</text>
+  <text x="320" y="392" font-size="9" fill="#6b7280">Mon 06:00 &#8212; anaplan:sync --with-notifications</text>
+  <text x="320" y="406" font-size="9" fill="#6b7280">Mon 07:00 &#8212; signal:process --cadence=weekly</text>
+
+  <!-- MySQL Container -->
+  <rect x="90" y="455" width="200" height="100" rx="8" fill="#fff" stroke="#d97706" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="90" y="455" width="200" height="28" rx="8" fill="#d97706"/>
+  <rect x="90" y="476" width="200" height="7" fill="#d97706"/>
+  <text x="190" y="476" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">MySQL 8.0</text>
+  <text x="106" y="502" font-size="9" fill="#374151">Port: 3306</text>
+  <text x="106" y="518" font-size="9" fill="#374151">Volume: sail-mysql (persistent)</text>
+  <text x="106" y="534" font-size="9" fill="#374151">utf8mb4, strict mode, FK constraints</text>
+  <text x="106" y="548" font-size="9" fill="#6b7280">Health check: mysqladmin ping</text>
+
+  <!-- Queue/Cache note -->
+  <rect x="310" y="455" width="190" height="100" rx="8" fill="#fff" stroke="#6b7280" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="310" y="455" width="190" height="28" rx="8" fill="#6b7280"/>
+  <rect x="310" y="476" width="190" height="7" fill="#6b7280"/>
+  <text x="405" y="476" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Queue &#38; Cache</text>
+  <text x="326" y="502" font-size="9" fill="#374151">Queue driver: database</text>
+  <text x="326" y="518" font-size="9" fill="#374151">Cache store: database</text>
+  <text x="326" y="534" font-size="9" fill="#374151">Failed jobs: database-uuids</text>
+  <text x="326" y="548" font-size="9" fill="#6b7280">Upgradeable to Redis</text>
+
+  <!-- pm-shared Network -->
+  <rect x="540" y="165" width="210" height="580" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="560" y="184" font-size="10" font-weight="600" fill="#92400e">pm-shared network (ext)</text>
+
+  <!-- PM-Agent Container -->
+  <rect x="555" y="195" width="180" height="340" rx="8" fill="#fff" stroke="#d97706" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="555" y="195" width="180" height="28" rx="8" fill="#d97706"/>
+  <rect x="555" y="218" width="180" height="7" fill="#d97706"/>
+  <text x="645" y="216" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">pm-agent (Go)</text>
+
+  <rect x="570" y="235" width="150" height="26" rx="4" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+  <text x="645" y="253" text-anchor="middle" font-size="9" font-weight="600" fill="#92400e">Heartbeat Loop (30s)</text>
+
+  <rect x="570" y="267" width="150" height="26" rx="4" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+  <text x="645" y="285" text-anchor="middle" font-size="9" font-weight="600" fill="#92400e">Health Collector</text>
+
+  <rect x="570" y="299" width="150" height="26" rx="4" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+  <text x="645" y="317" text-anchor="middle" font-size="9" font-weight="600" fill="#92400e">Command Executor</text>
+
+  <rect x="570" y="331" width="150" height="26" rx="4" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+  <text x="645" y="349" text-anchor="middle" font-size="9" font-weight="600" fill="#92400e">Signal Relay</text>
+
+  <rect x="570" y="363" width="150" height="26" rx="4" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+  <text x="645" y="381" text-anchor="middle" font-size="9" font-weight="600" fill="#92400e">Docker Client</text>
+
+  <rect x="570" y="395" width="150" height="26" rx="4" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+  <text x="645" y="413" text-anchor="middle" font-size="9" font-weight="600" fill="#92400e">Status Writer</text>
+
+  <!-- mTLS badge on agent -->
+  <rect x="570" y="430" width="150" height="24" rx="4" fill="#dc2626"/>
+  <text x="645" y="447" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">mTLS 1.3 Client</text>
+
+  <!-- Agent volumes -->
+  <text x="560" y="476" font-size="9" font-weight="600" fill="#374151">Mounted Volumes:</text>
+  <text x="560" y="492" font-size="8" fill="#6b7280">/var/run/docker.sock (RO)</text>
+  <text x="560" y="506" font-size="8" fill="#6b7280">/etc/pm-agent/config.yaml (RO)</text>
+  <text x="560" y="520" font-size="8" fill="#6b7280">/etc/pm-agent/certs/ (RO)</text>
+
+  <!-- Shared status volume -->
+  <rect x="90" y="575" width="410" height="50" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="295" y="596" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">Shared Volume: agent-status</text>
+  <text x="295" y="614" text-anchor="middle" font-size="9" fill="#6b7280">license-status.json &#8212; written by agent, read by PM3 for license enforcement</text>
+
+  <!-- Connection arrows within Docker -->
+  <line x1="500" y1="310" x2="553" y2="310" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <text x="526" y="304" text-anchor="middle" font-size="8" fill="#2563eb">HTTP</text>
+
+  <!-- Persistent volumes -->
+  <rect x="90" y="645" width="200" height="80" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+  <text x="110" y="666" font-size="10" font-weight="600" fill="#374151">Persistent Volumes</text>
+  <text x="110" y="684" font-size="9" fill="#6b7280">sail-mysql: Database files</text>
+  <text x="110" y="700" font-size="9" fill="#6b7280">agent-status: License status</text>
+  <text x="110" y="716" font-size="9" fill="#6b7280">storage/: App uploads, logs</text>
+
+  <!-- Exposed ports -->
+  <rect x="310" y="645" width="190" height="80" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+  <text x="330" y="666" font-size="10" font-weight="600" fill="#374151">Exposed Ports</text>
+  <text x="330" y="684" font-size="9" fill="#6b7280">80 (HTTP) &#8594; laravel.test</text>
+  <text x="330" y="700" font-size="9" fill="#6b7280">443 (HTTPS) &#8594; optional TLS</text>
+  <text x="330" y="716" font-size="9" fill="#6b7280">5173 (Vite) &#8594; dev only</text>
+
+  <!-- CONTROL PLANE (right side - external) -->
+  <rect x="820" y="90" width="250" height="700" rx="10" fill="#fff" stroke="#059669" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="820" y="90" width="250" height="30" rx="10" fill="#059669"/>
+  <rect x="820" y="114" width="250" height="6" fill="#059669"/>
+  <text x="945" y="111" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Control Plane (SaaS)</text>
+
+  <text x="840" y="140" font-size="10" font-weight="600" fill="#374151">Agent API Endpoints:</text>
+  <rect x="840" y="148" width="210" height="22" rx="3" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+  <text x="850" y="164" font-size="8" fill="#166534">POST /api/v1/agent/heartbeat</text>
+  <rect x="840" y="174" width="210" height="22" rx="3" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+  <text x="850" y="190" font-size="8" fill="#166534">POST /api/v1/agent/signals/aggregate</text>
+  <rect x="840" y="200" width="210" height="22" rx="3" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+  <text x="850" y="216" font-size="8" fill="#166534">GET /api/v1/agent/signals/benchmarks</text>
+  <rect x="840" y="226" width="210" height="22" rx="3" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+  <text x="850" y="242" font-size="8" fill="#166534">POST /api/v1/agent/certificates/*</text>
+  <rect x="840" y="252" width="210" height="22" rx="3" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+  <text x="850" y="268" font-size="8" fill="#166534">POST /api/v1/agent/commands/*/report</text>
+
+  <text x="840" y="300" font-size="10" font-weight="600" fill="#374151">Responses Include:</text>
+  <text x="840" y="318" font-size="9" fill="#6b7280">&#8226; License status &#38; tier</text>
+  <text x="840" y="334" font-size="9" fill="#6b7280">&#8226; Pending commands</text>
+  <text x="840" y="350" font-size="9" fill="#6b7280">&#8226; Feature entitlements</text>
+  <text x="840" y="366" font-size="9" fill="#6b7280">&#8226; Expiry warnings</text>
+
+  <text x="840" y="396" font-size="10" font-weight="600" fill="#374151">Command Types:</text>
+  <text x="840" y="414" font-size="9" fill="#6b7280">&#8226; deploy (pull + restart)</text>
+  <text x="840" y="430" font-size="9" fill="#6b7280">&#8226; restart (container restart)</text>
+  <text x="840" y="446" font-size="9" fill="#6b7280">&#8226; push_signals (relay aggregate)</text>
+  <text x="840" y="462" font-size="9" fill="#6b7280">&#8226; fetch_benchmarks (pull cohort)</text>
+
+  <text x="840" y="492" font-size="10" font-weight="600" fill="#374151">Services:</text>
+  <text x="840" y="510" font-size="9" fill="#6b7280">&#8226; HeartbeatService</text>
+  <text x="840" y="526" font-size="9" fill="#6b7280">&#8226; CertificateService (CA)</text>
+  <text x="840" y="542" font-size="9" fill="#6b7280">&#8226; LicenseService</text>
+  <text x="840" y="558" font-size="9" fill="#6b7280">&#8226; DeploymentService</text>
+  <text x="840" y="574" font-size="9" fill="#6b7280">&#8226; SignalIngestionService</text>
+  <text x="840" y="590" font-size="9" fill="#6b7280">&#8226; BenchmarkComputationService</text>
+
+  <!-- mTLS arrow from agent to control plane -->
+  <line x1="735" y1="310" x2="818" y2="310" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrowDark)"/>
+  <rect x="744" y="294" width="60" height="16" rx="3" fill="#dc2626"/>
+  <text x="774" y="305" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">mTLS</text>
+
+  <!-- Internet boundary -->
+  <rect x="780" y="280" width="30" height="60" rx="4" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+  <text x="795" y="314" text-anchor="middle" font-size="16" fill="#6b7280">&#9729;</text>
+
+  <!-- Users accessing PM3 -->
+  <rect x="820" y="640" width="250" height="140" rx="8" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+  <text x="840" y="664" font-size="10" font-weight="600" fill="#374151">Client Users Access PM3:</text>
+  <text x="840" y="684" font-size="9" fill="#6b7280">&#8226; Browser &#8594; :80 or :443 (HTTPS)</text>
+  <text x="840" y="700" font-size="9" fill="#6b7280">&#8226; Internal network or VPN</text>
+  <text x="840" y="716" font-size="9" fill="#6b7280">&#8226; SSO integration (optional)</text>
+  <text x="840" y="736" font-size="9" fill="#374151" font-weight="600">Data stays within client infra</text>
+  <text x="840" y="752" font-size="9" fill="#374151" font-weight="600">Only anonymized signals leave</text>
+  <text x="840" y="768" font-size="9" fill="#6b7280">(if opted-in via admin config)</text>
+
+  <!-- Footer -->
+  <text x="550" y="812" text-anchor="middle" font-size="9" fill="#9ca3af">INTERNAL &#8212; Self-Hosted Deployment: client retains full data sovereignty, only anonymized signal aggregates leave the environment</text>
+</svg>

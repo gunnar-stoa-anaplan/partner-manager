@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrowDark" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#374151"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#7c3aed"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="900" fill="#f8fafc" rx="12"/>
+
+  <!-- INTERNAL USE ONLY banner -->
+  <rect x="0" y="0" width="1200" height="24" rx="12" fill="#dc2626"/>
+  <text x="600" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">INTERNAL USE ONLY &#8212; Combined System Architecture Overview</text>
+
+  <!-- Title -->
+  <text x="600" y="52" text-anchor="middle" font-size="18" font-weight="700" fill="#111827">Partner Manager Platform &#8212; Complete System Architecture</text>
+  <text x="600" y="70" text-anchor="middle" font-size="11" fill="#6b7280">Control Plane (center) manages multiple client deployments (self-hosted &#38; hosted) via pm-agent sidecar</text>
+
+  <!-- =================== CONTROL PLANE (center) =================== -->
+  <rect x="370" y="90" width="460" height="340" rx="12" fill="#fff" stroke="#059669" stroke-width="3" filter="url(#shadow)"/>
+  <rect x="370" y="90" width="460" height="36" rx="12" fill="#059669"/>
+  <rect x="370" y="120" width="460" height="6" fill="#059669"/>
+  <text x="600" y="114" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">CONTROL PLANE</text>
+
+  <!-- CP inner sections -->
+  <rect x="390" y="140" width="200" height="55" rx="6" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+  <text x="490" y="162" text-anchor="middle" font-size="10" font-weight="600" fill="#166534">Fleet Dashboard</text>
+  <text x="490" y="178" text-anchor="middle" font-size="8" fill="#6b7280">Instances, Orders, Licenses, Signals</text>
+
+  <rect x="610" y="140" width="200" height="55" rx="6" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+  <text x="710" y="162" text-anchor="middle" font-size="10" font-weight="600" fill="#166534">Agent API (mTLS)</text>
+  <text x="710" y="178" text-anchor="middle" font-size="8" fill="#6b7280">Heartbeat, Commands, Signals, Certs</text>
+
+  <rect x="390" y="205" width="130" height="40" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+  <text x="455" y="230" text-anchor="middle" font-size="9" font-weight="600" fill="#166534">HeartbeatSvc</text>
+
+  <rect x="530" y="205" width="130" height="40" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+  <text x="595" y="230" text-anchor="middle" font-size="9" font-weight="600" fill="#166534">LicenseSvc</text>
+
+  <rect x="670" y="205" width="130" height="40" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+  <text x="735" y="230" text-anchor="middle" font-size="9" font-weight="600" fill="#166534">CertificateSvc (CA)</text>
+
+  <rect x="390" y="255" width="130" height="40" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+  <text x="455" y="280" text-anchor="middle" font-size="9" font-weight="600" fill="#166534">SignalIngestion</text>
+
+  <rect x="530" y="255" width="130" height="40" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+  <text x="595" y="280" text-anchor="middle" font-size="9" font-weight="600" fill="#166534">BenchmarkSvc</text>
+
+  <rect x="670" y="255" width="130" height="40" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+  <text x="735" y="280" text-anchor="middle" font-size="9" font-weight="600" fill="#166534">DeploymentSvc</text>
+
+  <!-- CP Data stores -->
+  <rect x="390" y="305" width="420" height="50" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+  <text x="410" y="324" font-size="9" font-weight="600" fill="#374151">Data:</text>
+  <text x="450" y="324" font-size="8" fill="#6b7280">instances, certificates, heartbeats, commands, deployments, releases</text>
+  <text x="410" y="340" font-size="8" fill="#6b7280">orders, licenses, entitlements, products, packages | signal_aggregates, instance_profiles, cohort_benchmarks | aws_resources</text>
+
+  <!-- CP tech note -->
+  <rect x="390" y="365" width="420" height="24" rx="4" fill="#059669" opacity="0.1"/>
+  <text x="600" y="381" text-anchor="middle" font-size="9" fill="#059669">PHP 8.4 &#8226; SQLite (dev) / PostgreSQL (prod) &#8226; Port 8081 &#8226; pm-shared network</text>
+
+  <!-- AWS INFRASTRUCTURE (top right) -->
+  <rect x="870" y="90" width="300" height="165" rx="10" fill="#fff" stroke="#f97316" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="870" y="90" width="300" height="28" rx="10" fill="#f97316"/>
+  <rect x="870" y="112" width="300" height="6" fill="#f97316"/>
+  <text x="1020" y="110" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">AWS (Hosted Provisioning)</text>
+
+  <g font-size="9">
+    <rect x="890" y="130" width="80" height="22" rx="3" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+    <text x="930" y="145" text-anchor="middle" fill="#92400e">ECS Fargate</text>
+    <rect x="980" y="130" width="80" height="22" rx="3" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+    <text x="1020" y="145" text-anchor="middle" fill="#92400e">RDS PgSQL</text>
+    <rect x="1070" y="130" width="80" height="22" rx="3" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+    <text x="1110" y="145" text-anchor="middle" fill="#92400e">S3 Buckets</text>
+    <rect x="890" y="160" width="80" height="22" rx="3" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+    <text x="930" y="175" text-anchor="middle" fill="#92400e">ALB</text>
+    <rect x="980" y="160" width="80" height="22" rx="3" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+    <text x="1020" y="175" text-anchor="middle" fill="#92400e">Route53</text>
+    <rect x="1070" y="160" width="80" height="22" rx="3" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+    <text x="1110" y="175" text-anchor="middle" fill="#92400e">ACM</text>
+    <rect x="890" y="190" width="80" height="22" rx="3" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+    <text x="930" y="205" text-anchor="middle" fill="#92400e">CloudWatch</text>
+    <rect x="980" y="190" width="80" height="22" rx="3" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+    <text x="1020" y="205" text-anchor="middle" fill="#92400e">ECR</text>
+    <rect x="1070" y="190" width="80" height="22" rx="3" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+    <text x="1110" y="205" text-anchor="middle" fill="#92400e">IAM / STS</text>
+  </g>
+  <text x="1020" y="240" text-anchor="middle" font-size="8" fill="#6b7280">Provisioned per order via ProvisionHostedInstance job</text>
+
+  <!-- Arrow CP -> AWS -->
+  <line x1="830" y1="175" x2="868" y2="175" stroke="#f97316" stroke-width="1.5" marker-end="url(#arrowDark)"/>
+
+  <!-- =================== CLIENT INSTANCE A (Self-Hosted - left) =================== -->
+  <rect x="30" y="460" width="340" height="400" rx="10" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="30" y="460" width="340" height="32" rx="10" fill="#374151"/>
+  <rect x="30" y="486" width="340" height="6" fill="#374151"/>
+  <text x="200" y="482" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">CLIENT A &#8212; Self-Hosted (On-Prem)</text>
+
+  <rect x="50" y="505" width="300" height="32" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+  <text x="200" y="526" text-anchor="middle" font-size="10" font-weight="600" fill="#1e40af">Customer Data Center / VPC</text>
+
+  <!-- PM3 App -->
+  <rect x="50" y="548" width="180" height="100" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="140" y="568" text-anchor="middle" font-size="10" font-weight="600" fill="#1e40af">Partner Manager 3</text>
+  <text x="64" y="586" font-size="8" fill="#6b7280">PHP 8.4 + PHP-FPM</text>
+  <text x="64" y="600" font-size="8" fill="#6b7280">Signal Engine (8 proc.)</text>
+  <text x="64" y="614" font-size="8" fill="#6b7280">Scheduler, Queue</text>
+  <text x="64" y="628" font-size="8" fill="#6b7280">HTTP :80 /:443</text>
+  <text x="64" y="642" font-size="8" fill="#6b7280">Roles: admin,psm,coe,int</text>
+
+  <!-- Agent -->
+  <rect x="240" y="548" width="110" height="100" rx="6" fill="#fff7ed" stroke="#d97706" stroke-width="1.5"/>
+  <text x="295" y="568" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">pm-agent</text>
+  <text x="250" y="586" font-size="8" fill="#6b7280">Go sidecar</text>
+  <text x="250" y="600" font-size="8" fill="#6b7280">Heartbeat 30s</text>
+  <text x="250" y="614" font-size="8" fill="#6b7280">Signal relay</text>
+  <text x="250" y="628" font-size="8" fill="#6b7280">Docker socket</text>
+  <text x="250" y="642" font-size="8" fill="#6b7280">mTLS client</text>
+
+  <!-- MySQL -->
+  <rect x="50" y="660" width="120" height="50" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+  <text x="110" y="682" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">MySQL 8.0</text>
+  <text x="110" y="700" text-anchor="middle" font-size="8" fill="#6b7280">Persistent volume</text>
+
+  <!-- Shared volume -->
+  <rect x="180" y="660" width="170" height="50" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+  <text x="265" y="682" text-anchor="middle" font-size="9" font-weight="600" fill="#374151">Shared Volumes</text>
+  <text x="265" y="698" text-anchor="middle" font-size="8" fill="#6b7280">license-status.json, docker.sock</text>
+
+  <!-- Users A -->
+  <rect x="50" y="725" width="300" height="40" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+  <text x="200" y="744" text-anchor="middle" font-size="9" font-weight="600" fill="#374151">Client A Users (Internal Network / VPN)</text>
+  <text x="200" y="758" text-anchor="middle" font-size="8" fill="#6b7280">Data sovereignty: all data stays on-prem. Only opt-in anonymized signals leave.</text>
+
+  <!-- Docker tag -->
+  <rect x="50" y="775" width="300" height="22" rx="4" fill="#374151"/>
+  <text x="200" y="790" text-anchor="middle" font-size="8" font-weight="600" fill="#fff">Docker Compose: laravel.test + mysql + pm-agent | sail + pm-shared networks</text>
+
+  <!-- Arrow PM3 -> Agent -->
+  <line x1="230" y1="598" x2="238" y2="598" stroke="#374151" stroke-width="1"/>
+
+  <!-- =================== CLIENT INSTANCE B (Hosted - right) =================== -->
+  <rect x="830" y="460" width="340" height="400" rx="10" fill="#fff" stroke="#7c3aed" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="830" y="460" width="340" height="32" rx="10" fill="#374151"/>
+  <rect x="830" y="486" width="340" height="6" fill="#374151"/>
+  <text x="1000" y="482" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">CLIENT B &#8212; Hosted (SaaS / AWS)</text>
+
+  <rect x="850" y="505" width="300" height="32" rx="6" fill="#faf5ff" stroke="#c084fc" stroke-width="1"/>
+  <text x="1000" y="526" text-anchor="middle" font-size="10" font-weight="600" fill="#7c3aed">AWS VPC (Isolated per Client)</text>
+
+  <!-- PM3 App (hosted) -->
+  <rect x="850" y="548" width="180" height="100" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="940" y="568" text-anchor="middle" font-size="10" font-weight="600" fill="#1e40af">Partner Manager 3</text>
+  <text x="864" y="586" font-size="8" fill="#6b7280">ECS Fargate task</text>
+  <text x="864" y="600" font-size="8" fill="#6b7280">Nginx + PHP-FPM + Supervisor</text>
+  <text x="864" y="614" font-size="8" fill="#6b7280">ALB &#8594; custom domain</text>
+  <text x="864" y="628" font-size="8" fill="#6b7280">ACM TLS certificate</text>
+  <text x="864" y="642" font-size="8" fill="#6b7280">Roles: admin,psm,coe,int</text>
+
+  <!-- Agent (hosted) -->
+  <rect x="1040" y="548" width="110" height="100" rx="6" fill="#fff7ed" stroke="#d97706" stroke-width="1.5"/>
+  <text x="1095" y="568" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">pm-agent</text>
+  <text x="1050" y="586" font-size="8" fill="#6b7280">ECS sidecar</text>
+  <text x="1050" y="600" font-size="8" fill="#6b7280">Heartbeat 30s</text>
+  <text x="1050" y="614" font-size="8" fill="#6b7280">Signal relay</text>
+  <text x="1050" y="628" font-size="8" fill="#6b7280">Deploy cmds</text>
+  <text x="1050" y="642" font-size="8" fill="#6b7280">mTLS client</text>
+
+  <!-- RDS -->
+  <rect x="850" y="660" width="120" height="50" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+  <text x="910" y="682" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">RDS PgSQL</text>
+  <text x="910" y="700" text-anchor="middle" font-size="8" fill="#6b7280">Encrypted, backups</text>
+
+  <!-- S3 -->
+  <rect x="980" y="660" width="170" height="50" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+  <text x="1065" y="682" text-anchor="middle" font-size="9" font-weight="600" fill="#374151">S3 + CloudWatch</text>
+  <text x="1065" y="698" text-anchor="middle" font-size="8" fill="#6b7280">Storage, logs (30d retention)</text>
+
+  <!-- Users B -->
+  <rect x="850" y="725" width="300" height="40" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+  <text x="1000" y="744" text-anchor="middle" font-size="9" font-weight="600" fill="#374151">Client B Users (Internet / HTTPS)</text>
+  <text x="1000" y="758" text-anchor="middle" font-size="8" fill="#6b7280">{client-b}.partner-manager.app &#8594; ALB &#8594; ECS task</text>
+
+  <!-- Hosted tag -->
+  <rect x="850" y="775" width="300" height="22" rx="4" fill="#374151"/>
+  <text x="1000" y="790" text-anchor="middle" font-size="8" font-weight="600" fill="#fff">ECS Task: app (essential) + agent (essential) | Shared task network | Fargate</text>
+
+  <!-- Arrow PM3 -> Agent -->
+  <line x1="1030" y1="598" x2="1038" y2="598" stroke="#374151" stroke-width="1"/>
+
+  <!-- =================== MORE CLIENTS (center bottom) =================== -->
+  <rect x="430" y="480" width="340" height="50" rx="8" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="600" y="504" text-anchor="middle" font-size="11" font-weight="600" fill="#6b7280">Client C, D, E ... N</text>
+  <text x="600" y="522" text-anchor="middle" font-size="9" fill="#9ca3af">Each client = isolated PM3 + agent, self-hosted or hosted</text>
+
+  <!-- =================== COMMUNICATION ARROWS =================== -->
+  <!-- Client A agent -> CP -->
+  <path d="M 295 548 L 295 440 L 600 440 L 600 430" stroke="#dc2626" stroke-width="2" fill="none" marker-end="url(#arrowRed)"/>
+  <rect x="380" y="430" width="60" height="16" rx="3" fill="#dc2626"/>
+  <text x="410" y="441" text-anchor="middle" font-size="7" font-weight="700" fill="#fff">mTLS</text>
+
+  <!-- Client B agent -> CP -->
+  <path d="M 1095 548 L 1095 440 L 600 440 L 600 430" stroke="#dc2626" stroke-width="2" fill="none"/>
+
+  <!-- More clients -> CP -->
+  <line x1="600" y1="480" x2="600" y2="440" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <!-- Signal flow labels -->
+  <rect x="430" y="545" width="340" height="70" rx="8" fill="#faf5ff" stroke="#c084fc" stroke-width="1.5"/>
+  <text x="600" y="565" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">Signal Network Flow</text>
+  <text x="600" y="582" text-anchor="middle" font-size="9" fill="#6b7280">PM3 &#8594; Aggregate &#8594; Agent &#8594; CP &#8594; Cohort Benchmark</text>
+  <text x="600" y="598" text-anchor="middle" font-size="9" fill="#6b7280">CP &#8594; Benchmark &#8594; Agent &#8594; PM3 (bidirectional)</text>
+  <text x="600" y="610" text-anchor="middle" font-size="8" fill="#9ca3af">Min 5 opted-in instances per cohort &#8226; Privacy-preserving &#8226; No raw data shared</text>
+
+  <!-- License flow -->
+  <rect x="430" y="630" width="340" height="50" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="600" y="650" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">License Enforcement</text>
+  <text x="600" y="666" text-anchor="middle" font-size="9" fill="#6b7280">CP evaluates limits &#8594; Agent writes license-status.json &#8594; PM3 reads</text>
+  <text x="600" y="678" text-anchor="middle" font-size="8" fill="#9ca3af">Tiers, entitlements, feature flags, partner/user limits, expiry warnings</text>
+
+  <!-- Deploy flow -->
+  <rect x="430" y="695" width="340" height="50" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="600" y="715" text-anchor="middle" font-size="10" font-weight="700" fill="#166534">Remote Management</text>
+  <text x="600" y="731" text-anchor="middle" font-size="9" fill="#6b7280">CP queues commands &#8594; Agent receives in heartbeat response</text>
+  <text x="600" y="743" text-anchor="middle" font-size="8" fill="#9ca3af">deploy (image pull + restart) &#8226; restart &#8226; push_signals &#8226; fetch_benchmarks</text>
+
+  <!-- =================== KEY METRICS (bottom) =================== -->
+  <rect x="30" y="810" width="1140" height="70" rx="8" fill="#111827"/>
+  <text x="600" y="832" text-anchor="middle" font-size="12" font-weight="700" fill="#e5e7eb">Key System Metrics</text>
+  <text x="130" y="854" text-anchor="middle" font-size="10" fill="#9ca3af">Heartbeat: 30s</text>
+  <text x="290" y="854" text-anchor="middle" font-size="10" fill="#9ca3af">Signals: 73+ types</text>
+  <text x="450" y="854" text-anchor="middle" font-size="10" fill="#9ca3af">Processors: 8</text>
+  <text x="590" y="854" text-anchor="middle" font-size="10" fill="#9ca3af">Roles: 5</text>
+  <text x="720" y="854" text-anchor="middle" font-size="10" fill="#9ca3af">Min Cohort: 5</text>
+  <text x="870" y="854" text-anchor="middle" font-size="10" fill="#9ca3af">mTLS: TLS 1.3</text>
+  <text x="1040" y="854" text-anchor="middle" font-size="10" fill="#9ca3af">Cert: 365d validity</text>
+  <text x="130" y="870" text-anchor="middle" font-size="9" fill="#6b7280">polling interval</text>
+  <text x="290" y="870" text-anchor="middle" font-size="9" fill="#6b7280">across 6 channels</text>
+  <text x="450" y="870" text-anchor="middle" font-size="9" fill="#6b7280">daily + weekly</text>
+  <text x="590" y="870" text-anchor="middle" font-size="9" fill="#6b7280">admin/psm/coe/int/partner</text>
+  <text x="720" y="870" text-anchor="middle" font-size="9" fill="#6b7280">opted-in for benchmark</text>
+  <text x="870" y="870" text-anchor="middle" font-size="9" fill="#6b7280">mutual authentication</text>
+  <text x="1040" y="870" text-anchor="middle" font-size="9" fill="#6b7280">auto-renewal</text>
+</svg>

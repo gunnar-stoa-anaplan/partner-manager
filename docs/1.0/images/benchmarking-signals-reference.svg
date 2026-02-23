@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 920" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#7c3aed"/>
+    </marker>
+  </defs>
+
+  <rect width="1100" height="920" fill="#f8fafc" rx="12"/>
+
+  <!-- Title -->
+  <text x="550" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Benchmarking Signals &#38; Metrics Reference</text>
+  <text x="550" y="56" text-anchor="middle" font-size="11" fill="#6b7280">What gets shared, how cohorts are formed, and what benchmarks are computed &#8212; privacy-preserving, anonymized aggregates only</text>
+
+  <!-- WHAT GETS SHARED (Signal Aggregate Payload) -->
+  <rect x="30" y="75" width="520" height="490" rx="10" fill="#fff" stroke="#7c3aed" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="30" y="75" width="520" height="34" rx="10" fill="#7c3aed"/>
+  <rect x="30" y="103" width="520" height="6" fill="#7c3aed"/>
+  <text x="290" y="98" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Signal Aggregate Payload (Shared with Control Plane)</text>
+
+  <!-- Profile section -->
+  <rect x="50" y="120" width="480" height="24" rx="4" fill="#faf5ff" stroke="#c084fc" stroke-width="1"/>
+  <text x="290" y="137" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">INSTANCE PROFILE (Cohort Classification)</text>
+
+  <g font-size="9" fill="#374151">
+    <rect x="50" y="150" width="230" height="26" rx="4" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="60" y="168" font-weight="600">partner_count_range</text>
+    <text x="210" y="168" fill="#6b7280">1-10, 10-50, 50-200, 200+</text>
+
+    <rect x="290" y="150" width="240" height="26" rx="4" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="300" y="168" font-weight="600">acv_range</text>
+    <text x="385" y="168" fill="#6b7280">0-100k, 100k-500k, 500k-2m, 2m+</text>
+
+    <rect x="50" y="182" width="230" height="26" rx="4" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="60" y="200" font-weight="600">offering_type</text>
+    <text x="175" y="200" fill="#6b7280">Implementation, Reseller, ...</text>
+
+    <rect x="290" y="182" width="240" height="26" rx="4" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="300" y="200" font-weight="600">gtm_model</text>
+    <text x="390" y="200" fill="#6b7280">Direct, Indirect, Hybrid</text>
+
+    <rect x="50" y="214" width="230" height="26" rx="4" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="60" y="232" font-weight="600">geo_scope</text>
+    <text x="160" y="232" fill="#6b7280">Global, Regional, Local</text>
+
+    <rect x="290" y="214" width="240" height="26" rx="4" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="300" y="232" font-weight="600">industry</text>
+    <text x="375" y="232" fill="#6b7280">Technology, Finance, ...</text>
+
+    <rect x="50" y="246" width="230" height="26" rx="4" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="60" y="264" font-weight="600">maturity</text>
+    <text x="140" y="264" fill="#6b7280">Startup, Growth, Mature</text>
+
+    <rect x="290" y="246" width="240" height="26" rx="4" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="300" y="264" font-weight="600">certification_density</text>
+    <text x="445" y="264" fill="#6b7280">active certs / partners</text>
+  </g>
+
+  <!-- Signal Counts -->
+  <rect x="50" y="284" width="480" height="24" rx="4" fill="#fef2f2" stroke="#fca5a5" stroke-width="1"/>
+  <text x="290" y="301" text-anchor="middle" font-size="10" font-weight="700" fill="#dc2626">SIGNAL COUNTS (by Channel)</text>
+
+  <g font-size="9" fill="#374151">
+    <rect x="50" y="314" width="155" height="26" rx="4" fill="#fef2f2" stroke="#fecaca" stroke-width="1"/>
+    <circle cx="62" cy="327" r="5" fill="#dc2626"/>
+    <text x="74" y="331" font-weight="600">risk</text>
+    <text x="105" y="331" fill="#6b7280">critical threats</text>
+
+    <rect x="215" y="314" width="155" height="26" rx="4" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+    <circle cx="227" cy="327" r="5" fill="#ea580c"/>
+    <text x="239" y="331" font-weight="600">trend</text>
+    <text x="276" y="331" fill="#6b7280">7/30d patterns</text>
+
+    <rect x="380" y="314" width="150" height="26" rx="4" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1"/>
+    <circle cx="392" cy="327" r="5" fill="#7c3aed"/>
+    <text x="404" y="331" font-weight="600">anomaly</text>
+    <text x="456" y="331" fill="#6b7280">unusual</text>
+
+    <rect x="50" y="346" width="155" height="26" rx="4" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <circle cx="62" cy="359" r="5" fill="#059669"/>
+    <text x="74" y="363" font-weight="600">recommendation</text>
+
+    <rect x="215" y="346" width="155" height="26" rx="4" fill="#ecfeff" stroke="#a5f3fc" stroke-width="1"/>
+    <circle cx="227" cy="359" r="5" fill="#0891b2"/>
+    <text x="239" y="363" font-weight="600">benchmark</text>
+    <text x="300" y="363" fill="#6b7280">cohort</text>
+
+    <rect x="380" y="346" width="150" height="26" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+    <circle cx="392" cy="359" r="5" fill="#16a34a"/>
+    <text x="404" y="363" font-weight="600">opportunity</text>
+    <text x="472" y="363" fill="#6b7280">growth</text>
+  </g>
+
+  <text x="60" y="392" font-size="9" fill="#374151" font-weight="600">+ total_active_signals</text>
+  <text x="240" y="392" font-size="9" fill="#374151" font-weight="600">+ critical_severity_count</text>
+
+  <!-- Health Distribution -->
+  <rect x="50" y="408" width="480" height="24" rx="4" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+  <text x="290" y="425" text-anchor="middle" font-size="10" font-weight="700" fill="#059669">HEALTH DISTRIBUTION</text>
+
+  <g font-size="9">
+    <rect x="50" y="438" width="115" height="30" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+    <text x="107" y="458" text-anchor="middle" font-weight="600" fill="#059669">Healthy (70+)</text>
+
+    <rect x="175" y="438" width="115" height="30" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+    <text x="232" y="458" text-anchor="middle" font-weight="600" fill="#2563eb">Watch (50-69)</text>
+
+    <rect x="300" y="438" width="115" height="30" rx="4" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+    <text x="357" y="458" text-anchor="middle" font-weight="600" fill="#ea580c">At Risk (30-49)</text>
+
+    <rect x="425" y="438" width="105" height="30" rx="4" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="477" y="458" text-anchor="middle" font-weight="600" fill="#dc2626">Critical (&lt;30)</text>
+  </g>
+
+  <!-- Portfolio Metrics -->
+  <rect x="50" y="480" width="480" height="24" rx="4" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="290" y="497" text-anchor="middle" font-size="10" font-weight="700" fill="#2563eb">PORTFOLIO METRICS</text>
+
+  <g font-size="9" fill="#374151">
+    <text x="60" y="524" font-weight="600">partner_count</text>
+    <text x="175" y="524" fill="#6b7280">Total managed partners</text>
+    <text x="300" y="524" font-weight="600">avg_pipeline_coverage</text>
+    <text x="445" y="524" fill="#6b7280">Open / 12m closed won</text>
+    <text x="60" y="542" font-weight="600">avg_win_rate</text>
+    <text x="175" y="542" fill="#6b7280">Won / total closed &#215; 100</text>
+    <text x="300" y="542" font-weight="600">avg_health_score</text>
+    <text x="445" y="542" fill="#6b7280">Mean across portfolio</text>
+    <text x="60" y="560" font-weight="600">certification_density</text>
+    <text x="195" y="560" fill="#6b7280">Certs / partner count</text>
+    <text x="300" y="560" font-weight="600">avg_active_signals</text>
+    <text x="445" y="560" fill="#6b7280">Per partner average</text>
+  </g>
+
+  <!-- COHORT FORMATION (top right) -->
+  <rect x="570" y="75" width="500" height="220" rx="10" fill="#fff" stroke="#0891b2" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="570" y="75" width="500" height="34" rx="10" fill="#0891b2"/>
+  <rect x="570" y="103" width="500" height="6" fill="#0891b2"/>
+  <text x="820" y="98" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Cohort Formation (BenchmarkComputationService)</text>
+
+  <text x="590" y="130" font-size="10" font-weight="600" fill="#374151">Instances are grouped into cohorts by 3 dimensions:</text>
+
+  <rect x="590" y="140" width="460" height="30" rx="4" fill="#ecfeff" stroke="#a5f3fc" stroke-width="1"/>
+  <text x="620" y="160" font-size="10" font-weight="700" fill="#0891b2">partner_count_range</text>
+  <text x="780" y="160" font-size="10" fill="#374151">+</text>
+  <text x="800" y="160" font-size="10" font-weight="700" fill="#0891b2">acv_range</text>
+  <text x="880" y="160" font-size="10" fill="#374151">+</text>
+  <text x="900" y="160" font-size="10" font-weight="700" fill="#0891b2">offering_type</text>
+
+  <text x="590" y="192" font-size="10" fill="#374151" font-weight="600">Rules:</text>
+  <text x="590" y="210" font-size="9" fill="#6b7280">&#8226; Minimum 5 opted-in instances required per cohort</text>
+  <text x="590" y="226" font-size="9" fill="#6b7280">&#8226; Only instances with opted_in = true in InstanceProfile are included</text>
+  <text x="590" y="242" font-size="9" fill="#6b7280">&#8226; Uses the most recent SignalAggregate per instance</text>
+  <text x="590" y="258" font-size="9" fill="#6b7280">&#8226; Cohort criteria stored as JSON: {partner_count_range, acv_range, offering_type}</text>
+  <text x="590" y="274" font-size="9" fill="#6b7280">&#8226; Recomputed periodically, stored with computed_date for time-series tracking</text>
+
+  <!-- BENCHMARK METRICS COMPUTED (right middle) -->
+  <rect x="570" y="310" width="500" height="255" rx="10" fill="#fff" stroke="#059669" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="570" y="310" width="500" height="34" rx="10" fill="#059669"/>
+  <rect x="570" y="338" width="500" height="6" fill="#059669"/>
+  <text x="820" y="333" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Benchmark Metrics Computed (per Cohort)</text>
+
+  <!-- Table header -->
+  <rect x="590" y="355" width="200" height="22" rx="3" fill="#059669"/>
+  <text x="690" y="370" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">Metric</text>
+  <rect x="800" y="355" width="250" height="22" rx="3" fill="#059669"/>
+  <text x="925" y="370" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">Statistical Measures</text>
+
+  <!-- Metric rows -->
+  <g font-size="9">
+    <rect x="590" y="381" width="200" height="26" rx="3" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="600" y="399" font-weight="600" fill="#166534">avg_health_score</text>
+    <rect x="800" y="381" width="250" height="26" rx="3" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="810" y="399" fill="#374151">p25, median, p75, mean</text>
+
+    <rect x="590" y="411" width="200" height="26" rx="3" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="600" y="429" font-weight="600" fill="#166534">avg_pipeline_coverage</text>
+    <rect x="800" y="411" width="250" height="26" rx="3" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="810" y="429" fill="#374151">p25, median, p75, mean</text>
+
+    <rect x="590" y="441" width="200" height="26" rx="3" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="600" y="459" font-weight="600" fill="#166534">avg_win_rate</text>
+    <rect x="800" y="441" width="250" height="26" rx="3" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="810" y="459" fill="#374151">p25, median, p75, mean</text>
+
+    <rect x="590" y="471" width="200" height="26" rx="3" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="600" y="489" font-weight="600" fill="#166534">certification_density</text>
+    <rect x="800" y="471" width="250" height="26" rx="3" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="810" y="489" fill="#374151">p25, median, p75, mean</text>
+
+    <rect x="590" y="501" width="200" height="26" rx="3" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="600" y="519" font-weight="600" fill="#166534">avg_active_signals</text>
+    <rect x="800" y="501" width="250" height="26" rx="3" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="810" y="519" fill="#374151">p25, median, p75, mean</text>
+
+    <rect x="590" y="531" width="460" height="24" rx="3" fill="#fefce8" stroke="#eab308" stroke-width="1"/>
+    <text x="820" y="548" text-anchor="middle" fill="#854d0e">Output: CohortBenchmark record &#8212; cohort_criteria, cohort_size, metrics (JSON), computed_date</text>
+  </g>
+
+  <!-- WHAT IS NOT SHARED (bottom left) -->
+  <rect x="30" y="585" width="520" height="140" rx="10" fill="#fff" stroke="#dc2626" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="30" y="585" width="520" height="34" rx="10" fill="#dc2626"/>
+  <rect x="30" y="613" width="520" height="6" fill="#dc2626"/>
+  <text x="290" y="608" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">NEVER Shared (Privacy Guarantees)</text>
+
+  <g font-size="10" fill="#374151">
+    <text x="50" y="640">&#10007; Partner names, IDs, or any identifying information</text>
+    <text x="50" y="660">&#10007; Individual partner health scores or signal details</text>
+    <text x="50" y="680">&#10007; Opportunity amounts, deal names, or pipeline specifics</text>
+    <text x="50" y="700">&#10007; Contact information, user names, or email addresses</text>
+    <text x="50" y="720">&#10007; Raw transaction data, project details, or certifications</text>
+  </g>
+
+  <!-- SIGNAL AGGREGATE FLOW (bottom) -->
+  <rect x="30" y="745" width="1040" height="46" rx="8" fill="#7c3aed" opacity="0.08"/>
+  <text x="550" y="774" text-anchor="middle" font-size="13" font-weight="700" fill="#7c3aed">END-TO-END FLOW</text>
+
+  <!-- Flow steps -->
+  <rect x="30" y="805" width="190" height="60" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="125" y="828" text-anchor="middle" font-size="10" font-weight="600" fill="#1e40af">Signal Engine</text>
+  <text x="125" y="844" text-anchor="middle" font-size="8" fill="#6b7280">8 processors &#8594; 73+ signals</text>
+  <text x="125" y="858" text-anchor="middle" font-size="8" fill="#6b7280">daily &#38; weekly cadence</text>
+
+  <rect x="240" y="805" width="190" height="60" rx="6" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="335" y="828" text-anchor="middle" font-size="10" font-weight="600" fill="#7c3aed">Aggregate Service</text>
+  <text x="335" y="844" text-anchor="middle" font-size="8" fill="#6b7280">Anonymize + summarize</text>
+  <text x="335" y="858" text-anchor="middle" font-size="8" fill="#6b7280">Guarded by opt-in toggle</text>
+
+  <rect x="450" y="805" width="190" height="60" rx="6" fill="#fff7ed" stroke="#d97706" stroke-width="1.5"/>
+  <text x="545" y="828" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">pm-agent Relay</text>
+  <text x="545" y="844" text-anchor="middle" font-size="8" fill="#6b7280">GET aggregate &#8594; POST to CP</text>
+  <text x="545" y="858" text-anchor="middle" font-size="8" fill="#6b7280">mTLS encrypted transit</text>
+
+  <rect x="660" y="805" width="190" height="60" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="755" y="828" text-anchor="middle" font-size="10" font-weight="600" fill="#166534">Benchmark Engine</text>
+  <text x="755" y="844" text-anchor="middle" font-size="8" fill="#6b7280">Group into cohorts (min 5)</text>
+  <text x="755" y="858" text-anchor="middle" font-size="8" fill="#6b7280">Compute p25/median/p75/mean</text>
+
+  <rect x="870" y="805" width="200" height="60" rx="6" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+  <text x="970" y="828" text-anchor="middle" font-size="10" font-weight="600" fill="#0891b2">Return to Client</text>
+  <text x="970" y="844" text-anchor="middle" font-size="8" fill="#6b7280">Agent GET benchmarks</text>
+  <text x="970" y="858" text-anchor="middle" font-size="8" fill="#6b7280">POST to PM3 for CoE use</text>
+
+  <!-- Flow arrows -->
+  <line x1="220" y1="835" x2="238" y2="835" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+  <line x1="430" y1="835" x2="448" y2="835" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+  <line x1="640" y1="835" x2="658" y2="835" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+  <line x1="850" y1="835" x2="868" y2="835" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+
+  <!-- Footer -->
+  <text x="550" y="912" text-anchor="middle" font-size="9" fill="#9ca3af">Signal Benchmarking Reference &#8212; anonymized, aggregate-only, privacy-preserving cohort analytics</text>
+</svg>

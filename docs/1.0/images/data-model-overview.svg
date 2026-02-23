@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 860" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrowGray" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#9ca3af"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="860" fill="#f8fafc" rx="12"/>
+
+  <!-- Title -->
+  <text x="600" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Data Model Overview</text>
+  <text x="600" y="56" text-anchor="middle" font-size="11" fill="#6b7280">Business-level entity relationships &#8212; Partner hub with 10+ connected entity types</text>
+
+  <!-- PARTNER (central hub) -->
+  <rect x="430" y="230" width="340" height="200" rx="10" fill="#fff" stroke="#2563eb" stroke-width="3" filter="url(#shadow)"/>
+  <rect x="430" y="230" width="340" height="34" rx="10" fill="#2563eb"/>
+  <rect x="430" y="256" width="340" height="8" fill="#2563eb"/>
+  <text x="600" y="254" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Partner</text>
+  <text x="448" y="284" font-size="10" fill="#374151" font-weight="600">Core Fields:</text>
+  <text x="448" y="300" font-size="9" fill="#6b7280">name, type, tier, stage, status</text>
+  <text x="448" y="316" font-size="9" fill="#6b7280">region, country, industry, website</text>
+  <text x="448" y="332" font-size="10" fill="#374151" font-weight="600">Key Relationships:</text>
+  <text x="448" y="348" font-size="9" fill="#6b7280">hasMany: Opportunities, Certifications, Contacts</text>
+  <text x="448" y="364" font-size="9" fill="#6b7280">hasMany: HealthSnapshots, Signals, Scorecards</text>
+  <text x="448" y="380" font-size="9" fill="#6b7280">hasMany: Alerts, PathEnrollments, Projects</text>
+  <text x="448" y="396" font-size="9" fill="#6b7280">belongsTo: User (primary PSM assigned)</text>
+  <text x="448" y="412" font-size="9" fill="#6b7280">hasOne: latestHealthSnapshot, latestScorecard</text>
+
+  <!-- OPPORTUNITY -->
+  <rect x="30" y="80" width="220" height="140" rx="8" fill="#fff" stroke="#059669" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="80" width="220" height="26" rx="8" fill="#059669"/>
+  <rect x="30" y="100" width="220" height="6" fill="#059669"/>
+  <text x="140" y="98" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Opportunity</text>
+  <text x="44" y="124" font-size="9" fill="#6b7280">name, stage, amount, close_date</text>
+  <text x="44" y="140" font-size="9" fill="#6b7280">revenue_type: sourced | influenced</text>
+  <text x="44" y="156" font-size="9" fill="#6b7280">product_area, fiscal_year/quarter</text>
+  <text x="44" y="172" font-size="9" fill="#6b7280">win_probability, notes</text>
+  <text x="44" y="190" font-size="9" fill="#374151" font-weight="600">hasMany: OpportunitySnapshot</text>
+  <text x="44" y="206" font-size="9" fill="#6b7280">(historical stage/amount tracking)</text>
+
+  <!-- CERTIFICATION -->
+  <rect x="30" y="240" width="220" height="120" rx="8" fill="#fff" stroke="#d97706" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="240" width="220" height="26" rx="8" fill="#d97706"/>
+  <rect x="30" y="260" width="220" height="6" fill="#d97706"/>
+  <text x="140" y="258" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Certification</text>
+  <text x="44" y="282" font-size="9" fill="#6b7280">type: model_builder, solution_architect,</text>
+  <text x="44" y="298" font-size="9" fill="#6b7280">administrator, data_integration, ...</text>
+  <text x="44" y="314" font-size="9" fill="#6b7280">status: active | expired | in_progress</text>
+  <text x="44" y="330" font-size="9" fill="#6b7280">product_area, expiry_date</text>
+  <text x="44" y="346" font-size="9" fill="#374151" font-weight="600">isExpiringSoon() scope helper</text>
+
+  <!-- HEALTH SNAPSHOT -->
+  <rect x="30" y="390" width="220" height="120" rx="8" fill="#fff" stroke="#dc2626" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="390" width="220" height="26" rx="8" fill="#dc2626"/>
+  <rect x="30" y="410" width="220" height="6" fill="#dc2626"/>
+  <text x="140" y="408" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">HealthSnapshot</text>
+  <text x="44" y="432" font-size="9" fill="#6b7280">score: decimal(5,1) &#8212; 0&#8211;100</text>
+  <text x="44" y="448" font-size="9" fill="#6b7280">risk_level: healthy | watch | at_risk | critical</text>
+  <text x="44" y="464" font-size="9" fill="#6b7280">dimensions: JSON {scorecard, pipeline, ...}</text>
+  <text x="44" y="480" font-size="9" fill="#6b7280">signals: JSON array of warning strings</text>
+  <text x="44" y="496" font-size="9" fill="#374151" font-weight="600">unique: [partner_id, snapshot_date]</text>
+
+  <!-- SIGNAL -->
+  <rect x="30" y="530" width="220" height="140" rx="8" fill="#fff" stroke="#7c3aed" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="530" width="220" height="26" rx="8" fill="#7c3aed"/>
+  <rect x="30" y="550" width="220" height="6" fill="#7c3aed"/>
+  <text x="140" y="548" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Signal</text>
+  <text x="44" y="572" font-size="9" fill="#6b7280">channel: risk | trend | anomaly | ...</text>
+  <text x="44" y="588" font-size="9" fill="#6b7280">severity: info | warning | critical | positive</text>
+  <text x="44" y="604" font-size="9" fill="#6b7280">title, description, recommended_action</text>
+  <text x="44" y="620" font-size="9" fill="#6b7280">confidence_score: 0&#8211;1.0</text>
+  <text x="44" y="636" font-size="9" fill="#6b7280">source_processor, correlation_id</text>
+  <text x="44" y="652" font-size="9" fill="#6b7280">status: active | acknowledged | resolved</text>
+  <text x="44" y="668" font-size="9" fill="#374151" font-weight="600">belongsTo: PartnerAlert (optional)</text>
+
+  <!-- SCORECARD -->
+  <rect x="950" y="80" width="220" height="140" rx="8" fill="#fff" stroke="#2563eb" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="950" y="80" width="220" height="26" rx="8" fill="#2563eb"/>
+  <rect x="950" y="100" width="220" height="6" fill="#2563eb"/>
+  <text x="1060" y="98" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">PartnerScorecard</text>
+  <text x="964" y="124" font-size="9" fill="#6b7280">overall_score: 0&#8211;100 (weighted)</text>
+  <text x="964" y="140" font-size="9" fill="#6b7280">certification_score, pipeline_score</text>
+  <text x="964" y="156" font-size="9" fill="#6b7280">delivery_score, engagement_score</text>
+  <text x="964" y="172" font-size="9" fill="#6b7280">growth_score, self_sufficiency_score</text>
+  <text x="964" y="190" font-size="9" fill="#6b7280">tier: Platinum | Gold | Silver | Bronze</text>
+  <text x="964" y="206" font-size="9" fill="#374151" font-weight="600">ScorecardWeight (configurable)</text>
+
+  <!-- CONTACT -->
+  <rect x="950" y="240" width="220" height="100" rx="8" fill="#fff" stroke="#0891b2" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="950" y="240" width="220" height="26" rx="8" fill="#0891b2"/>
+  <rect x="950" y="260" width="220" height="6" fill="#0891b2"/>
+  <text x="1060" y="258" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Contact</text>
+  <text x="964" y="282" font-size="9" fill="#6b7280">name, email, phone, title, role</text>
+  <text x="964" y="298" font-size="9" fill="#6b7280">contact_type: influencer | resource</text>
+  <text x="964" y="314" font-size="9" fill="#6b7280">is_primary flag</text>
+  <text x="964" y="330" font-size="9" fill="#374151" font-weight="600">hasMany: ContactInteraction</text>
+
+  <!-- PROJECT -->
+  <rect x="950" y="360" width="220" height="100" rx="8" fill="#fff" stroke="#059669" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="950" y="360" width="220" height="26" rx="8" fill="#059669"/>
+  <rect x="950" y="380" width="220" height="6" fill="#059669"/>
+  <text x="1060" y="378" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Project</text>
+  <text x="964" y="402" font-size="9" fill="#6b7280">name, status, product_area</text>
+  <text x="964" y="418" font-size="9" fill="#6b7280">customer_satisfaction: 1&#8211;5</text>
+  <text x="964" y="434" font-size="9" fill="#6b7280">start_date, end_date</text>
+  <text x="964" y="450" font-size="9" fill="#374151" font-weight="600">hasMany: ProjectMilestone</text>
+
+  <!-- PARTNER ALERT -->
+  <rect x="950" y="480" width="220" height="100" rx="8" fill="#fff" stroke="#dc2626" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="950" y="480" width="220" height="26" rx="8" fill="#dc2626"/>
+  <rect x="950" y="500" width="220" height="6" fill="#dc2626"/>
+  <text x="1060" y="498" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">PartnerAlert</text>
+  <text x="964" y="522" font-size="9" fill="#6b7280">type: certification_expiry, pipeline_risk, ...</text>
+  <text x="964" y="538" font-size="9" fill="#6b7280">severity: info | warning | critical | positive</text>
+  <text x="964" y="554" font-size="9" fill="#6b7280">status: active | acknowledged | resolved</text>
+  <text x="964" y="570" font-size="9" fill="#374151" font-weight="600">Bridged to Signal via AlertBridgeProcessor</text>
+
+  <!-- PATH ENROLLMENT -->
+  <rect x="950" y="600" width="220" height="100" rx="8" fill="#fff" stroke="#7c3aed" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="950" y="600" width="220" height="26" rx="8" fill="#7c3aed"/>
+  <rect x="950" y="620" width="220" height="6" fill="#7c3aed"/>
+  <text x="1060" y="618" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">PathEnrollment</text>
+  <text x="964" y="642" font-size="9" fill="#6b7280">status: active | withdrawn</text>
+  <text x="964" y="658" font-size="9" fill="#6b7280">current_stage_id (progression)</text>
+  <text x="964" y="674" font-size="9" fill="#374151" font-weight="600">hasMany: PartnerTask</text>
+  <text x="964" y="690" font-size="9" fill="#6b7280">(requirement_level: required | recommended)</text>
+
+  <!-- STRATEGY PLAN (bottom center) -->
+  <rect x="390" y="500" width="350" height="140" rx="8" fill="#fff" stroke="#7c3aed" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="390" y="500" width="350" height="30" rx="8" fill="#7c3aed"/>
+  <rect x="390" y="522" width="350" height="8" fill="#7c3aed"/>
+  <text x="565" y="520" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">StrategyPlan</text>
+  <text x="408" y="548" font-size="9" fill="#6b7280">name, fiscal_year, period_type, status</text>
+  <text x="408" y="566" font-size="9" fill="#374151" font-weight="600">hasMany:</text>
+  <text x="408" y="582" font-size="9" fill="#6b7280">Targets, Budgets, Initiatives, Assumptions, Reviews</text>
+  <text x="408" y="600" font-size="9" fill="#374151" font-weight="600">hasMany: Scenarios &#8594; Overrides</text>
+  <text x="408" y="618" font-size="9" fill="#6b7280">parent_plan_id (versioning chain)</text>
+  <text x="408" y="634" font-size="9" fill="#6b7280">NOT directly linked to Partner &#8212; portfolio-wide</text>
+
+  <!-- USER -->
+  <rect x="430" y="80" width="200" height="100" rx="8" fill="#fff" stroke="#374151" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="430" y="80" width="200" height="26" rx="8" fill="#374151"/>
+  <rect x="430" y="100" width="200" height="6" fill="#374151"/>
+  <text x="530" y="98" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">User</text>
+  <text x="444" y="122" font-size="9" fill="#6b7280">name, email, role</text>
+  <text x="444" y="138" font-size="9" fill="#6b7280">admin | psm | coe | integration | partner</text>
+  <text x="444" y="156" font-size="9" fill="#374151" font-weight="600">hasMany: assigned Partners (PSM)</text>
+  <text x="444" y="172" font-size="9" fill="#374151" font-weight="600">hasMany: StrategyPlans (creator)</text>
+
+  <!-- RELATIONSHIP LINES -->
+  <!-- User -> Partner -->
+  <line x1="530" y1="180" x2="530" y2="228" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+  <!-- Partner -> Opportunity -->
+  <line x1="430" y1="300" x2="252" y2="180" stroke="#9ca3af" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Partner -> Certification -->
+  <line x1="430" y1="330" x2="252" y2="300" stroke="#9ca3af" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Partner -> Health Snapshot -->
+  <line x1="430" y1="380" x2="252" y2="440" stroke="#9ca3af" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Partner -> Signal -->
+  <line x1="430" y1="410" x2="252" y2="580" stroke="#9ca3af" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Partner -> Scorecard -->
+  <line x1="770" y1="300" x2="948" y2="160" stroke="#9ca3af" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Partner -> Contact -->
+  <line x1="770" y1="320" x2="948" y2="290" stroke="#9ca3af" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Partner -> Project -->
+  <line x1="770" y1="360" x2="948" y2="400" stroke="#9ca3af" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Partner -> Alert -->
+  <line x1="770" y1="390" x2="948" y2="520" stroke="#9ca3af" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Partner -> Path Enrollment -->
+  <line x1="770" y1="420" x2="948" y2="640" stroke="#9ca3af" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Alert -> Signal bridge -->
+  <line x1="950" y1="570" x2="252" y2="600" stroke="#dc2626" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="600" y="580" text-anchor="middle" font-size="8" fill="#dc2626">AlertBridgeProcessor</text>
+
+  <!-- Legend -->
+  <rect x="30" y="730" width="1140" height="50" rx="6" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="50" y="752" font-size="10" font-weight="600" fill="#374151">Cardinality:</text>
+  <text x="140" y="752" font-size="10" fill="#6b7280">All arrows represent hasMany (1:M) relationships from Partner</text>
+  <text x="50" y="770" font-size="10" font-weight="600" fill="#374151">Note:</text>
+  <text x="94" y="770" font-size="10" fill="#6b7280">StrategyPlan is portfolio-wide (not per-partner). IntegrationConnection, FieldMapping, MappingTemplate are separate module entities not shown.</text>
+
+  <!-- Additional entities note -->
+  <rect x="30" y="790" width="1140" height="50" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+  <text x="50" y="812" font-size="10" font-weight="600" fill="#374151">Additional Entities (not shown for clarity):</text>
+  <text x="50" y="828" font-size="10" fill="#6b7280">PartnerAssignedGoal, EnablementEvent, EnablementRegistration, Blueprint, BlueprintEnrollment, PartnerPath, PathStage, PathGate, LaunchProgram, LaunchMilestone, DealRegistration, ActionPlan</text>
+
+  <!-- Footer -->
+  <text x="600" y="855" text-anchor="middle" font-size="9" fill="#9ca3af">Partner Manager 3 &#8212; Business Entity Relationship Model</text>
+</svg>

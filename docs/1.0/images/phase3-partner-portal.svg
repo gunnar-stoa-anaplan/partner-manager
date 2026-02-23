@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrowBi" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#d97706"/>
+    </marker>
+    <marker id="arrowLeft" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="560" fill="#f8fafc" rx="12"/>
+
+  <!-- Title -->
+  <text x="480" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Phase 3: Partner Portal</text>
+  <text x="480" y="58" text-anchor="middle" font-size="11" fill="#6b7280">Collaborative workspace where PSMs and partner contacts manage the relationship together</text>
+
+  <!-- PSM Side (left) -->
+  <rect x="40" y="85" width="260" height="420" rx="10" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="85" width="260" height="36" rx="10" fill="#2563eb"/>
+  <rect x="40" y="111" width="260" height="10" fill="#2563eb"/>
+  <text x="170" y="109" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">PSM (Internal)</text>
+
+  <g font-size="10" fill="#374151">
+    <rect x="55" y="130" width="230" height="40" rx="5" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+    <text x="75" y="147" font-weight="600" fill="#1e40af">Partner Profile Management</text>
+    <text x="75" y="163" fill="#6b7280" font-size="9">Overview, insights, history, tab navigation</text>
+
+    <rect x="55" y="178" width="230" height="40" rx="5" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+    <text x="75" y="195" font-weight="600" fill="#1e40af">Business Plan Creation</text>
+    <text x="75" y="211" fill="#6b7280" font-size="9">Joint plans with partner &#8212; publish &#38; track</text>
+
+    <rect x="55" y="226" width="230" height="40" rx="5" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+    <text x="75" y="243" font-weight="600" fill="#1e40af">QBR Session Management</text>
+    <text x="75" y="259" fill="#6b7280" font-size="9">Schedule, prepare, conduct, follow up</text>
+
+    <rect x="55" y="274" width="230" height="40" rx="5" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+    <text x="75" y="291" font-weight="600" fill="#1e40af">Deal Review &#38; Approval</text>
+    <text x="75" y="307" fill="#6b7280" font-size="9">Approve/reject partner deal registrations</text>
+
+    <rect x="55" y="322" width="230" height="40" rx="5" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+    <text x="75" y="339" font-weight="600" fill="#1e40af">Enablement Tracking</text>
+    <text x="75" y="355" fill="#6b7280" font-size="9">Monitor certifications, blueprints, events</text>
+
+    <rect x="55" y="370" width="230" height="40" rx="5" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+    <text x="75" y="387" font-weight="600" fill="#1e40af">Field Engagement</text>
+    <text x="75" y="403" fill="#6b7280" font-size="9">Log workshops, briefings, demos</text>
+
+    <rect x="55" y="418" width="230" height="40" rx="5" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+    <text x="75" y="435" font-weight="600" fill="#1e40af">Portal User Management</text>
+    <text x="75" y="451" fill="#6b7280" font-size="9">Create contacts, set roles, impersonate</text>
+  </g>
+
+  <!-- Shared Workspace (center) -->
+  <rect x="340" y="85" width="280" height="420" rx="10" fill="#fff" stroke="#d97706" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="340" y="85" width="280" height="36" rx="10" fill="#d97706"/>
+  <rect x="340" y="111" width="280" height="10" fill="#d97706"/>
+  <text x="480" y="109" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">Shared Workspace</text>
+
+  <g font-size="10" fill="#374151">
+    <rect x="358" y="130" width="244" height="50" rx="5" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="480" y="150" text-anchor="middle" font-weight="600" fill="#92400e">Deal Registration</text>
+    <text x="480" y="168" text-anchor="middle" fill="#6b7280" font-size="9">Partners submit &#8226; PSMs review &#8226; Track outcomes</text>
+
+    <rect x="358" y="188" width="244" height="50" rx="5" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="480" y="208" text-anchor="middle" font-weight="600" fill="#92400e">Project Delivery</text>
+    <text x="480" y="226" text-anchor="middle" fill="#6b7280" font-size="9">Resource assignment &#8226; Milestones &#8226; Risk tracking</text>
+
+    <rect x="358" y="246" width="244" height="50" rx="5" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="480" y="266" text-anchor="middle" font-weight="600" fill="#92400e">Solution Lifecycle</text>
+    <text x="480" y="284" text-anchor="middle" fill="#6b7280" font-size="9">Discovery &#8594; Evaluation &#8594; Implementation &#8594; Live</text>
+
+    <rect x="358" y="304" width="244" height="50" rx="5" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="480" y="324" text-anchor="middle" font-weight="600" fill="#92400e">Alerts &#38; Notifications</text>
+    <text x="480" y="342" text-anchor="middle" fill="#6b7280" font-size="9">Business updates &#8226; Risk alerts &#8226; Action items</text>
+
+    <rect x="358" y="362" width="244" height="50" rx="5" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="480" y="382" text-anchor="middle" font-weight="600" fill="#92400e">Enablement Events</text>
+    <text x="480" y="400" text-anchor="middle" fill="#6b7280" font-size="9">Registration &#8226; Attendance &#8226; Certification</text>
+
+    <rect x="358" y="420" width="244" height="50" rx="5" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="480" y="440" text-anchor="middle" font-weight="600" fill="#92400e">Business Plan</text>
+    <text x="480" y="458" text-anchor="middle" fill="#6b7280" font-size="9">Published plan &#8226; Progress tracking &#8226; Updates</text>
+  </g>
+
+  <!-- Bidirectional arrows PSM <-> Shared -->
+  <line x1="300" y1="200" x2="340" y2="200" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrowBi)"/>
+  <line x1="340" y1="300" x2="300" y2="300" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrowLeft)"/>
+  <line x1="300" y1="400" x2="340" y2="400" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrowBi)"/>
+
+  <!-- Partner Side (right) -->
+  <rect x="660" y="85" width="260" height="420" rx="10" fill="#fff" stroke="#059669" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="660" y="85" width="260" height="36" rx="10" fill="#059669"/>
+  <rect x="660" y="111" width="260" height="10" fill="#059669"/>
+  <text x="790" y="109" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">Partner (External)</text>
+
+  <g font-size="10" fill="#374151">
+    <rect x="675" y="130" width="230" height="40" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="695" y="147" font-weight="600" fill="#166534">Portal Dashboard</text>
+    <text x="695" y="163" fill="#6b7280" font-size="9">Overview of relationship &#38; key metrics</text>
+
+    <rect x="675" y="178" width="230" height="40" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="695" y="195" font-weight="600" fill="#166534">Submit Deal Registrations</text>
+    <text x="695" y="211" fill="#6b7280" font-size="9">Register new deals for approval</text>
+
+    <rect x="675" y="226" width="230" height="40" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="695" y="243" font-weight="600" fill="#166534">Assign Resources</text>
+    <text x="695" y="259" fill="#6b7280" font-size="9">Allocate consultants to active projects</text>
+
+    <rect x="675" y="274" width="230" height="40" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="695" y="291" font-weight="600" fill="#166534">View Business Plan</text>
+    <text x="695" y="307" fill="#6b7280" font-size="9">Review published plans &#38; progress</text>
+
+    <rect x="675" y="322" width="230" height="40" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="695" y="339" font-weight="600" fill="#166534">Respond to Alerts</text>
+    <text x="695" y="355" fill="#6b7280" font-size="9">Acknowledge, act on notifications</text>
+
+    <rect x="675" y="370" width="230" height="40" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="695" y="387" font-weight="600" fill="#166534">Enablement &#38; Certification</text>
+    <text x="695" y="403" fill="#6b7280" font-size="9">Register for events, track progress</text>
+
+    <rect x="675" y="418" width="230" height="40" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="695" y="435" font-weight="600" fill="#166534">Project Updates</text>
+    <text x="695" y="451" fill="#6b7280" font-size="9">Report milestones, flag risks</text>
+  </g>
+
+  <!-- Bidirectional arrows Shared <-> Partner -->
+  <line x1="620" y1="200" x2="660" y2="200" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrowBi)"/>
+  <line x1="660" y1="300" x2="620" y2="300" stroke="#059669" stroke-width="1.5"/>
+  <line x1="620" y1="400" x2="660" y2="400" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrowBi)"/>
+
+  <!-- Footer -->
+  <text x="480" y="530" text-anchor="middle" font-size="10" fill="#9ca3af">Portal access is role-gated. PSMs manage via impersonation. Partner contacts see only their assigned partner data.</text>
+  <text x="480" y="548" text-anchor="middle" font-size="10" fill="#9ca3af">All portal activity feeds back into Phase 2 processing &#8212; signals, health scores, and analytics update automatically.</text>
+</svg>

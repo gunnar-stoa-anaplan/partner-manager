@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 700" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+
+  <rect width="1100" height="700" fill="#f8fafc" rx="12"/>
+
+  <!-- Title -->
+  <text x="550" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Role-Based Access Map</text>
+  <text x="550" y="56" text-anchor="middle" font-size="11" fill="#6b7280">What each role sees and can do &#8212; restricted roles are limited to specific modules only</text>
+
+  <!-- Column headers (modules) -->
+  <g font-size="10" font-weight="600" fill="#fff">
+    <!-- Module labels across top -->
+    <rect x="215" y="70" width="90" height="28" rx="4" fill="#1e40af"/>
+    <text x="260" y="89" text-anchor="middle">Dashboard</text>
+
+    <rect x="310" y="70" width="90" height="28" rx="4" fill="#1e40af"/>
+    <text x="355" y="89" text-anchor="middle">Partners</text>
+
+    <rect x="405" y="70" width="90" height="28" rx="4" fill="#1e40af"/>
+    <text x="450" y="89" text-anchor="middle">Scorecard</text>
+
+    <rect x="500" y="70" width="90" height="28" rx="4" fill="#1e40af"/>
+    <text x="545" y="89" text-anchor="middle">Pipeline</text>
+
+    <rect x="595" y="70" width="90" height="28" rx="4" fill="#1e40af"/>
+    <text x="640" y="89" text-anchor="middle">Enablement</text>
+
+    <rect x="690" y="70" width="90" height="28" rx="4" fill="#1e40af"/>
+    <text x="735" y="89" text-anchor="middle">Signals</text>
+
+    <rect x="785" y="70" width="90" height="28" rx="4" fill="#1e40af"/>
+    <text x="830" y="89" text-anchor="middle">Strategy</text>
+
+    <rect x="880" y="70" width="90" height="28" rx="4" fill="#1e40af"/>
+    <text x="925" y="89" text-anchor="middle">Config</text>
+
+    <rect x="975" y="70" width="100" height="28" rx="4" fill="#1e40af"/>
+    <text x="1025" y="89" text-anchor="middle">Integrations</text>
+  </g>
+
+  <!-- ADMIN ROW -->
+  <rect x="20" y="108" width="185" height="80" rx="8" fill="#fff" stroke="#059669" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="20" y="108" width="185" height="26" rx="8" fill="#059669"/>
+  <rect x="20" y="126" width="185" height="8" fill="#059669"/>
+  <text x="112" y="128" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Admin</text>
+  <text x="30" y="152" font-size="9" fill="#374151">Full access to all modules</text>
+  <text x="30" y="166" font-size="9" fill="#374151">User management, provisioning</text>
+  <text x="30" y="180" font-size="9" fill="#374151">Configuration, impersonation</text>
+
+  <!-- Admin access indicators (all green) -->
+  <g font-size="18" fill="#059669">
+    <text x="260" y="156" text-anchor="middle">&#10003;</text>
+    <text x="355" y="156" text-anchor="middle">&#10003;</text>
+    <text x="450" y="156" text-anchor="middle">&#10003;</text>
+    <text x="545" y="156" text-anchor="middle">&#10003;</text>
+    <text x="640" y="156" text-anchor="middle">&#10003;</text>
+    <text x="735" y="156" text-anchor="middle">&#10003;</text>
+    <text x="830" y="156" text-anchor="middle">&#10003;</text>
+    <text x="925" y="156" text-anchor="middle">&#10003;</text>
+    <text x="1025" y="156" text-anchor="middle">&#10003;</text>
+  </g>
+
+  <!-- PSM ROW -->
+  <rect x="20" y="200" width="185" height="80" rx="8" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="20" y="200" width="185" height="26" rx="8" fill="#2563eb"/>
+  <rect x="20" y="218" width="185" height="8" fill="#2563eb"/>
+  <text x="112" y="220" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">PSM</text>
+  <text x="30" y="244" font-size="9" fill="#374151">Partner Success Manager</text>
+  <text x="30" y="258" font-size="9" fill="#374151">Day-to-day partner management</text>
+  <text x="30" y="272" font-size="9" fill="#374151">Workspaces, scorecards, deals</text>
+
+  <g font-size="18">
+    <text x="260" y="248" text-anchor="middle" fill="#059669">&#10003;</text>
+    <text x="355" y="248" text-anchor="middle" fill="#059669">&#10003;</text>
+    <text x="450" y="248" text-anchor="middle" fill="#059669">&#10003;</text>
+    <text x="545" y="248" text-anchor="middle" fill="#059669">&#10003;</text>
+    <text x="640" y="248" text-anchor="middle" fill="#059669">&#10003;</text>
+    <text x="735" y="248" text-anchor="middle" fill="#059669">&#10003;</text>
+    <text x="830" y="248" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="925" y="248" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="1025" y="248" text-anchor="middle" fill="#dc2626">&#10007;</text>
+  </g>
+
+  <!-- CoE ROW -->
+  <rect x="20" y="292" width="185" height="80" rx="8" fill="#fff" stroke="#7c3aed" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="20" y="292" width="185" height="26" rx="8" fill="#7c3aed"/>
+  <rect x="20" y="310" width="185" height="8" fill="#7c3aed"/>
+  <text x="112" y="312" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">CoE</text>
+  <text x="30" y="336" font-size="9" fill="#374151">Center of Excellence</text>
+  <text x="30" y="350" font-size="9" fill="#374151">Strategy planning &#38; governance</text>
+  <text x="30" y="364" font-size="9" fill="#374151">Restricted to Strategy module only</text>
+
+  <g font-size="18">
+    <text x="260" y="340" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="355" y="340" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="450" y="340" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="545" y="340" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="640" y="340" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="735" y="340" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="830" y="340" text-anchor="middle" fill="#059669">&#10003;</text>
+    <text x="925" y="340" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="1025" y="340" text-anchor="middle" fill="#dc2626">&#10007;</text>
+  </g>
+
+  <!-- Integration ROW -->
+  <rect x="20" y="384" width="185" height="80" rx="8" fill="#fff" stroke="#d97706" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="20" y="384" width="185" height="26" rx="8" fill="#d97706"/>
+  <rect x="20" y="402" width="185" height="8" fill="#d97706"/>
+  <text x="112" y="404" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Integration</text>
+  <text x="30" y="428" font-size="9" fill="#374151">Data integration specialist</text>
+  <text x="30" y="442" font-size="9" fill="#374151">Connectors, mappings, imports</text>
+  <text x="30" y="456" font-size="9" fill="#374151">Restricted to Integration Hub only</text>
+
+  <g font-size="18">
+    <text x="260" y="432" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="355" y="432" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="450" y="432" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="545" y="432" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="640" y="432" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="735" y="432" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="830" y="432" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="925" y="432" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="1025" y="432" text-anchor="middle" fill="#059669">&#10003;</text>
+  </g>
+
+  <!-- Partner ROW -->
+  <rect x="20" y="476" width="185" height="80" rx="8" fill="#fff" stroke="#0891b2" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="20" y="476" width="185" height="26" rx="8" fill="#0891b2"/>
+  <rect x="20" y="494" width="185" height="8" fill="#0891b2"/>
+  <text x="112" y="496" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Partner</text>
+  <text x="30" y="520" font-size="9" fill="#374151">External partner user</text>
+  <text x="30" y="534" font-size="9" fill="#374151">Portal access only &#8212; own data</text>
+  <text x="30" y="548" font-size="9" fill="#374151">View scorecards, tasks, blueprints</text>
+
+  <g font-size="18">
+    <text x="260" y="524" text-anchor="middle" fill="#d97706">&#9679;</text>
+    <text x="355" y="524" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="450" y="524" text-anchor="middle" fill="#d97706">&#9679;</text>
+    <text x="545" y="524" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="640" y="524" text-anchor="middle" fill="#d97706">&#9679;</text>
+    <text x="735" y="524" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="830" y="524" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="925" y="524" text-anchor="middle" fill="#dc2626">&#10007;</text>
+    <text x="1025" y="524" text-anchor="middle" fill="#dc2626">&#10007;</text>
+  </g>
+
+  <!-- Legend -->
+  <rect x="20" y="580" width="1060" height="100" rx="8" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="40" y="604" font-size="11" font-weight="700" fill="#374151">Legend</text>
+
+  <text x="50" y="626" font-size="16" fill="#059669">&#10003;</text>
+  <text x="70" y="626" font-size="10" fill="#374151">Full Access</text>
+
+  <text x="170" y="626" font-size="16" fill="#dc2626">&#10007;</text>
+  <text x="190" y="626" font-size="10" fill="#374151">No Access</text>
+
+  <text x="280" y="626" font-size="16" fill="#d97706">&#9679;</text>
+  <text x="300" y="626" font-size="10" fill="#374151">Limited (own data via portal)</text>
+
+  <text x="40" y="652" font-size="10" fill="#6b7280">Middleware enforcement: RedirectRestrictedRoles redirects CoE &#8594; /strategy, Integration &#8594; /integration-hub, Partner &#8594; /portal</text>
+  <text x="40" y="668" font-size="10" fill="#6b7280">Admin can impersonate any non-admin user to debug or assist. PSM has the widest operational access for day-to-day partner management.</text>
+
+  <!-- Footer -->
+  <text x="550" y="695" text-anchor="middle" font-size="9" fill="#9ca3af">Partner Manager &#8212; Role-Based Access Control Matrix</text>
+</svg>
