@@ -211,11 +211,67 @@ return [
         'enabled' => env('MODULE_BENCHMARK_USER', true),
     ],
 
+    'action_plans_admin' => [
+        'name' => 'Action Plans Administration',
+        'description' => 'Admin setup for action plan templates, categories, and assignment rules.',
+        'icon' => 'list',
+        'enabled' => env('MODULE_ACTION_PLANS_ADMIN', true),
+    ],
+
     'action_plans_user' => [
         'name' => 'Action Plans End User',
-        'description' => 'End-user access to create, manage, and track partner action plans.',
+        'description' => 'End-user access to create, manage, and track partner action plans and task board.',
         'icon' => 'list',
         'enabled' => env('MODULE_ACTION_PLANS_USER', true),
+    ],
+
+    'partner_portal_admin' => [
+        'name' => 'Partner Portal Administration',
+        'description' => 'Admin setup for partner portal configuration, branding, and access policies.',
+        'icon' => 'globe',
+        'enabled' => env('MODULE_PARTNER_PORTAL_ADMIN', true),
+    ],
+
+    'partner_portal_user' => [
+        'name' => 'Partner Portal End User',
+        'description' => 'End-user access to manage portal users and portal-facing views.',
+        'icon' => 'globe',
+        'enabled' => env('MODULE_PARTNER_PORTAL_USER', true),
+    ],
+
+    'partner_portal_partner_admin' => [
+        'name' => 'Partner Portal Partner Administration',
+        'description' => 'Partner-side admin access to configure their portal presence and team settings.',
+        'icon' => 'globe',
+        'enabled' => env('MODULE_PARTNER_PORTAL_PARTNER_ADMIN', true),
+    ],
+
+    'partner_portal_partner_user' => [
+        'name' => 'Partner Portal Partner End User',
+        'description' => 'Partner-side user access to the partner portal experience.',
+        'icon' => 'globe',
+        'enabled' => env('MODULE_PARTNER_PORTAL_PARTNER_USER', true),
+    ],
+
+    'partner_management_admin' => [
+        'name' => 'Partner Management Administration',
+        'description' => 'Administrative access to partner management, assignments, and partner CRUD.',
+        'icon' => 'briefcase',
+        'enabled' => env('MODULE_PARTNER_MANAGEMENT_ADMIN', true),
+    ],
+
+    'partner_management_user' => [
+        'name' => 'Partner Management End User',
+        'description' => 'End-user access to dashboard, my partners, and partner details.',
+        'icon' => 'briefcase',
+        'enabled' => env('MODULE_PARTNER_MANAGEMENT_USER', true),
+    ],
+
+    'feature_activation_coe' => [
+        'name' => 'Feature Activation (CoE)',
+        'description' => 'CoE access to feature flags, activation paths, and progression dashboard.',
+        'icon' => 'unlock',
+        'enabled' => env('MODULE_FEATURE_ACTIVATION_COE', true),
     ],
 
 ];

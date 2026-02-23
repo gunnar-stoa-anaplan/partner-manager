@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\ActivationPath;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Pennant\Feature;
 
@@ -18,6 +20,20 @@ class ModuleRegistry
     private ?array $licenseData = null;
 
     /**
+     * Per-request cache of completed feature slugs keyed by user ID.
+     *
+     * @var array<int, array<string, bool>>
+     */
+    private array $userCompletedSlugs = [];
+
+    /**
+     * Per-request cache of feature slugs that have an active path.
+     *
+     * @var array<string, bool>|null
+     */
+    private ?array $activePaths = null;
+
+    /**
      * Register a module and its navigation items.
      *
      * @param  array{name: string, description: string, icon: string, nav_section: string, nav_items: array<int, array<string, mixed>>}  $definition
@@ -27,20 +43,31 @@ class ModuleRegistry
         $this->modules[$slug] = $definition;
     }
 
-    public function isEnabled(string $slug): bool
+    public function isEnabled(string $slug, ?User $user = null): bool
     {
-        // Env override: if explicitly disabled in config, respect that
+        // 1. Env override: if explicitly disabled in config, respect that
         if (! config("modules.{$slug}.enabled", false)) {
             return false;
         }
 
-        // Admins bypass Pennant — they always see all modules
-        if (Auth::check() && Auth::user()->role === 'admin') {
+        // 2. Pennant (instance-level)
+        if (! Feature::for(null)->active($slug)) {
+            return false;
+        }
+
+        // 3. Per-user activation check
+        $user = $user ?? Auth::user();
+
+        if ($user === null) {
+            return false;
+        }
+
+        // No path defined for this slug = no user gating (allow)
+        if (! $this->hasActivePath($slug)) {
             return true;
         }
 
-        // Check Pennant (scope = null for single-tenant instances)
-        return Feature::for(null)->active($slug);
+        return $this->userHasCompleted($user, $slug);
     }
 
     /**
@@ -122,6 +149,39 @@ class ModuleRegistry
         }
 
         return null;
+    }
+
+    /**
+     * Check if an active activation path exists for this feature slug.
+     * Cached per-request to avoid repeated queries during nav rendering.
+     */
+    private function hasActivePath(string $slug): bool
+    {
+        if ($this->activePaths === null) {
+            $this->activePaths = ActivationPath::where('is_active', true)
+                ->pluck('feature_slug')
+                ->mapWithKeys(fn (string $s) => [$s => true])
+                ->all();
+        }
+
+        return $this->activePaths[$slug] ?? false;
+    }
+
+    /**
+     * Check if a user has completed the activation path for a feature slug.
+     * Cached per-request per-user to avoid N+1 during nav rendering.
+     */
+    private function userHasCompleted(User $user, string $slug): bool
+    {
+        if (! isset($this->userCompletedSlugs[$user->id])) {
+            $this->userCompletedSlugs[$user->id] = $user->activationPaths()
+                ->wherePivotNotNull('completed_at')
+                ->pluck('feature_slug')
+                ->mapWithKeys(fn (string $s) => [$s => true])
+                ->all();
+        }
+
+        return $this->userCompletedSlugs[$user->id][$slug] ?? false;
     }
 
     /**

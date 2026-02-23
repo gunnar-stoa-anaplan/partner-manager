@@ -4,7 +4,7 @@
 
     @php $customLogo = \App\Models\AppSetting::get('branding_logo_path'); @endphp
     @if($customLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($customLogo))
-        <img src="{{ \Illuminate\Support\Facades\Storage::url($customLogo) }}" alt="Logo" class="custom-logo" style="max-height: 40px;">
+        <img src="{{ \Illuminate\Support\Facades\Storage::url($customLogo) }}" alt="Logo" class="custom-logo">
     @else
         <svg class="custom-logo">
             <use href="/img/app-logo.svg#custom-logo"></use>

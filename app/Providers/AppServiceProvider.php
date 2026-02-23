@@ -4,10 +4,12 @@ namespace App\Providers;
 
 use App\Contracts\ChatServiceInterface;
 use App\Models\AppSetting;
+use App\Models\User;
 use App\Services\SimulatedChatService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Pennant\Feature;
 use Laravel\Pulse\Facades\Pulse;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +29,18 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::define('viewPulse', function ($user) {
             return $user->role === 'admin';
+        });
+
+        Gate::define('manage-activation', function (User $user) {
+            if ($user->role === 'admin') {
+                return true;
+            }
+
+            if ($user->role === 'coe') {
+                return Feature::for(null)->active('feature_activation_coe');
+            }
+
+            return false;
         });
 
         Pulse::user(fn ($user) => [

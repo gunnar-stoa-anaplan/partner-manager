@@ -22,3 +22,34 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Presentations & documents
+*.pptx
+*.PPTX
+*.potx
+
+# Data exports
+*.csv
+
+# Scratch scripts
+_w.py
+create_slides.py
+write_controllers.py
+write_views.py
+create_views.sh
+gen.sh
+mk.sh
+app/Services/_w.py
+app/Services/gen.py
+app/Services/writer.py
+app/Services/write_files.sh
+app/Services/test.txt
+app/Services/test99.txt
+app/Services/test_append.txt
+
+# Misc
+returndata.txt
+junk
+architecture.md
+storage/seeder_debug.json
+workspace_activity_report*.csv

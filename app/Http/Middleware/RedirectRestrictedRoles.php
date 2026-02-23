@@ -26,7 +26,7 @@ class RedirectRestrictedRoles
             'landing' => 'integration-hub.dashboard',
         ],
         'coe' => [
-            'prefixes' => ['strategy', 'logout', 'users/impersonate', 'welcome', 'livewire', '_boost'],
+            'prefixes' => ['strategy', 'activation', 'logout', 'users/impersonate', 'welcome', 'livewire', '_boost'],
             'landing' => 'strategy.dashboard',
         ],
     ];

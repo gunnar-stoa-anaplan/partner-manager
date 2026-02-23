@@ -51,6 +51,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'portal.can' => \App\Http\Middleware\PortalCan::class,
             'module' => \App\Http\Middleware\EnsureModuleEnabled::class,
         ]);
+        $middleware->web(append: [
+            \App\Http\Middleware\RedirectRestrictedRoles::class,
+        ]);
         $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);

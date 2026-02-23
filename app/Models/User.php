@@ -2,7 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\IdeaRoom\Bucket;
+use App\Models\IdeaRoom\Idea;
+use App\Models\IdeaRoom\Room;
+use App\Models\IdeaRoom\Snapshot;
+use App\Models\IdeaRoom\Tag;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -20,6 +27,8 @@ class User extends Authenticatable
         'password',
         'role',
         'avatar',
+        'preferences',
+        'timezone',
     ];
 
     /**
@@ -38,6 +47,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'preferences' => 'array',
         ];
     }
 
@@ -85,17 +95,62 @@ class User extends Authenticatable
         return $this->role === 'psm';
     }
 
+    // ── Activation Path relationships ────────────────────────────
+
+    public function activationPaths(): BelongsToMany
+    {
+        return $this->belongsToMany(ActivationPath::class)
+            ->withPivot('assigned_by', 'assigned_at', 'completed_at')
+            ->withTimestamps();
+    }
+
+    public function hasCompletedActivationFor(string $featureSlug): bool
+    {
+        return $this->activationPaths()
+            ->where('feature_slug', $featureSlug)
+            ->wherePivotNotNull('completed_at')
+            ->exists();
+    }
+
+    // ── Idea Room relationships ──────────────────────────────────
+
+    public function ideas(): HasMany
+    {
+        return $this->hasMany(Idea::class);
+    }
+
+    public function ideaBuckets(): HasMany
+    {
+        return $this->hasMany(Bucket::class);
+    }
+
+    public function ideaTags(): HasMany
+    {
+        return $this->hasMany(Tag::class);
+    }
+
+    public function ideaRooms(): HasMany
+    {
+        return $this->hasMany(Room::class);
+    }
+
+    public function ideaSnapshots(): HasMany
+    {
+        return $this->hasMany(Snapshot::class, 'created_by');
+    }
+
     /**
      * Get the user's avatar URL.
      */
     public function getAvatarUrlAttribute(): string
     {
         if ($this->avatar && \Storage::disk('public')->exists($this->avatar)) {
-            return asset('storage/' . $this->avatar);
+            return asset('storage/'.$this->avatar);
         }
 
         // Generate anonymous avatar with user's initials
         $name = urlencode($this->name);
+
         return "https://ui-avatars.com/api/?name={$name}&size=200&background=667eea&color=ffffff&bold=true";
     }
 }
