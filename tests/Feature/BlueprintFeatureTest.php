@@ -13,10 +13,11 @@ use App\Models\PartnerBlueprintAssignment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Traits\WithActivationSetup;
 
 class BlueprintFeatureTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithActivationSetup;
 
     private User $admin;
 
@@ -31,6 +32,7 @@ class BlueprintFeatureTest extends TestCase
         $this->admin = User::factory()->create(['role' => 'admin']);
         $this->psm = User::factory()->create(['role' => 'psm']);
         $this->partner = Partner::factory()->create(['user_id' => $this->psm->id]);
+        $this->activateModuleForUser('enablement_admin', $this->admin);
     }
 
     // ─── Admin CRUD ─────────────────────────────────────────────

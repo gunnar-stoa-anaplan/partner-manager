@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\StepType;
+use App\Enums\TrainingPhase;
 use App\Models\ActivationPath;
 use App\Models\ActivationStep;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -29,6 +30,17 @@ class ActivationStepFactory extends Factory
             'step_type' => fake()->randomElement(StepType::cases()),
             'criteria' => ['target' => fake()->numberBetween(1, 100)],
             'is_required' => true,
+            'phase' => null,
         ];
+    }
+
+    /**
+     * Set the training phase for this step.
+     */
+    public function withPhase(TrainingPhase $phase): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'phase' => $phase,
+        ]);
     }
 }

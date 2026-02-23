@@ -18,6 +18,7 @@ class StepProgress extends Model
      */
     protected $fillable = [
         'activation_step_id',
+        'user_id',
         'current_value',
         'target_value',
         'completed',
@@ -42,5 +43,10 @@ class StepProgress extends Model
     public function activationStep(): BelongsTo
     {
         return $this->belongsTo(ActivationStep::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

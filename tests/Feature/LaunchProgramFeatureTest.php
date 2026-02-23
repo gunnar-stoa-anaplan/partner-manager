@@ -13,6 +13,7 @@ use App\Models\Partner;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class LaunchProgramFeatureTest extends TestCase
@@ -28,6 +29,9 @@ class LaunchProgramFeatureTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Feature::for(null)->activate('launch_programs_admin');
+        Feature::for(null)->activate('launch_programs_user');
 
         $this->admin = User::factory()->create(['role' => 'admin']);
         $this->psm = User::factory()->create(['role' => 'psm']);

@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\ActivationStep;
 use App\Models\StepProgress;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -25,6 +26,7 @@ class StepProgressFactory extends Factory
 
         return [
             'activation_step_id' => ActivationStep::factory(),
+            'user_id' => User::factory(),
             'current_value' => $current,
             'target_value' => $target,
             'completed' => $current >= $target,

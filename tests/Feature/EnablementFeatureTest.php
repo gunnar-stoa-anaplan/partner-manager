@@ -11,6 +11,7 @@ use App\Models\Partner;
 use App\Models\PartnerBlueprintAssignment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class EnablementFeatureTest extends TestCase
@@ -26,6 +27,9 @@ class EnablementFeatureTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Feature::for(null)->activate('enablement_admin');
+        Feature::for(null)->activate('enablement_user');
 
         $this->admin = User::factory()->create(['role' => 'admin']);
         $this->psm = User::factory()->create(['role' => 'psm']);

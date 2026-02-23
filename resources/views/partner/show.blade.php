@@ -176,12 +176,14 @@
             </a>
         </li>
         @endif
+        @if($registry->isEnabled('partner_portal_user'))
         <li class="nav-item">
             <a class="nav-link" href="#portal-users" data-tab="portal-users" role="tab">
                 <i class="fal fa-user-shield me-1 d-none d-md-inline"></i> Portal Users
                 <span class="badge bg-info bg-opacity-25 text-info ms-1">{{ $partner->contacts->where('portal_access', true)->count() }}</span>
             </a>
         </li>
+        @endif
     </ul>
 
     {{-- Tab Content --}}
@@ -275,6 +277,7 @@
         </div>
         @endif
 
+        @if($registry->isEnabled('partner_portal_user'))
         {{-- Portal Users (AJAX) --}}
         <div class="tab-pane" id="tab-portal-users" style="display: none;">
             <div class="spinner-loader">
@@ -282,6 +285,7 @@
                 <p class="mt-2 text-muted">Loading portal users...</p>
             </div>
         </div>
+        @endif
     </div>
 @endsection
 

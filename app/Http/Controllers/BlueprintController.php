@@ -7,7 +7,10 @@ use App\Models\BlueprintContentItem;
 use App\Models\BlueprintOutcome;
 use App\Models\NotificationTemplate;
 use App\Models\User;
+use App\Services\BlueprintExportService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BlueprintController extends Controller
 {
@@ -90,6 +93,20 @@ class BlueprintController extends Controller
 
         return redirect()->route('blueprints.index')
             ->with('success', 'Blueprint deleted successfully.');
+    }
+
+    // ─── Export ────────────────────────────────────────────────
+
+    public function export(Blueprint $blueprint, BlueprintExportService $exportService): BinaryFileResponse
+    {
+        $blueprint->load(['outcomes.contentItems', 'assignments.partner', 'assignments.enrollments']);
+
+        $tempPath = $exportService->export($blueprint);
+        $filename = Str::slug($blueprint->name).'-blueprint.pptx';
+
+        return response()->download($tempPath, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        ])->deleteFileAfterSend();
     }
 
     // ─── Duplicate ──────────────────────────────────────────────

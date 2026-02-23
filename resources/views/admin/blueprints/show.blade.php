@@ -29,6 +29,9 @@
                         @endif
                     </div>
                     <div class="d-flex gap-2">
+                        <a href="{{ route('blueprints.export', $blueprint) }}" class="btn btn-sm btn-outline-success">
+                            <i class="fal fa-file-powerpoint me-1"></i> Export PPTX
+                        </a>
                         <a href="{{ route('blueprints.edit', $blueprint) }}" class="btn btn-sm btn-outline-primary">
                             <i class="fal fa-pencil me-1"></i> Edit
                         </a>

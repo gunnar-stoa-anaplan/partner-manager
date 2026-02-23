@@ -9,10 +9,11 @@ use App\Models\User;
 use App\Services\AnaplanApiService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Traits\WithActivationSetup;
 
 class AnaplanProvisioningTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithActivationSetup;
 
     private User $admin;
 
@@ -24,6 +25,7 @@ class AnaplanProvisioningTest extends TestCase
 
         $this->admin = User::factory()->create(['role' => 'admin']);
         $this->psm = User::factory()->create(['role' => 'psm']);
+        $this->activateModuleForUser('provisioning_admin', $this->admin);
     }
 
     // ─── Index ──────────────────────────────────────────────────────
