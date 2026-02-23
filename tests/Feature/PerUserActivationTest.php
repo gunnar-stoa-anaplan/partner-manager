@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\TrainingPhase;
 use App\Models\ActivationPath;
 use App\Models\ActivationStep;
 use App\Models\StepProgress;
@@ -86,15 +87,19 @@ class PerUserActivationTest extends TestCase
             'criteria' => ['target' => 1],
         ]);
 
-        // Assign user but don't complete
-        $path->users()->attach($this->admin->id, [
+        // Assign non-admin user but don't complete
+        $path->users()->attach($this->psm->id, [
             'assigned_by' => $this->admin->id,
             'assigned_at' => now(),
         ]);
 
         $registry = app(ModuleRegistry::class);
 
-        $this->assertFalse($registry->isEnabled('enablement_admin', $this->admin));
+        // Non-admin with incomplete path is blocked
+        $this->assertFalse($registry->isEnabled('enablement_admin', $this->psm));
+
+        // Admin always passes
+        $this->assertTrue($registry->isEnabled('enablement_admin', $this->admin));
     }
 
     public function test_user_allowed_with_completed_activation_path(): void
@@ -106,23 +111,25 @@ class PerUserActivationTest extends TestCase
         $this->assertTrue($registry->isEnabled('enablement_admin', $this->admin));
     }
 
-    public function test_route_blocked_with_incomplete_path(): void
+    public function test_non_admin_blocked_with_incomplete_tell(): void
     {
-        Feature::for(null)->activate('enablement_admin');
+        Feature::for(null)->activate('enablement_user');
 
         $path = ActivationPath::factory()->create([
-            'feature_slug' => 'enablement_admin',
+            'feature_slug' => 'enablement_user',
             'is_active' => true,
         ]);
 
         ActivationStep::factory()->create([
             'activation_path_id' => $path->id,
             'is_required' => true,
+            'phase' => TrainingPhase::Tell,
         ]);
 
-        $path->users()->attach($this->admin->id, ['assigned_by' => $this->admin->id]);
+        $path->users()->attach($this->psm->id, ['assigned_by' => $this->admin->id]);
 
-        $response = $this->actingAs($this->admin)->get(route('blueprints.index'));
+        // Non-admin assigned but Tell phase not completed — blocked
+        $response = $this->actingAs($this->psm)->get(route('influencers.index'));
 
         $response->assertForbidden();
     }
@@ -136,9 +143,9 @@ class PerUserActivationTest extends TestCase
         $response->assertOk();
     }
 
-    // ─── Admin bypass removed ──────────────────────────────────
+    // ─── Admin bypass ──────────────────────────────────────────
 
-    public function test_admin_blocked_when_path_exists_and_not_completed(): void
+    public function test_admin_bypasses_activation_gating(): void
     {
         Feature::for(null)->activate('enablement_admin');
 
@@ -150,14 +157,59 @@ class PerUserActivationTest extends TestCase
         ActivationStep::factory()->create([
             'activation_path_id' => $path->id,
             'is_required' => true,
+            'phase' => TrainingPhase::Tell,
         ]);
 
-        // Admin is assigned but has not completed
-        $path->users()->attach($this->admin->id, ['assigned_by' => $this->admin->id]);
-
+        // Admin has full visibility regardless of activation path status
         $response = $this->actingAs($this->admin)->get(route('blueprints.index'));
 
+        $response->assertOk();
+    }
+
+    public function test_module_accessible_once_tell_phase_completed(): void
+    {
+        Feature::for(null)->activate('enablement_user');
+
+        $path = ActivationPath::factory()->create([
+            'feature_slug' => 'enablement_user',
+            'is_active' => true,
+        ]);
+
+        $tellStep = ActivationStep::factory()->create([
+            'activation_path_id' => $path->id,
+            'order' => 1,
+            'is_required' => true,
+            'phase' => TrainingPhase::Tell,
+        ]);
+
+        // Also add a Show step (should not block module access)
+        ActivationStep::factory()->create([
+            'activation_path_id' => $path->id,
+            'order' => 2,
+            'is_required' => true,
+            'phase' => TrainingPhase::Show,
+        ]);
+
+        $path->users()->attach($this->psm->id, ['assigned_by' => $this->admin->id]);
+
+        // Before Tell — blocked
+        $response = $this->actingAs($this->psm)->get(route('influencers.index'));
         $response->assertForbidden();
+
+        // Complete the Tell step
+        StepProgress::factory()->create([
+            'activation_step_id' => $tellStep->id,
+            'user_id' => $this->psm->id,
+            'current_value' => 1,
+            'target_value' => 1,
+            'completed' => true,
+            'completed_at' => now(),
+        ]);
+
+        // Tell complete — non-admin now has module access for Show/Do training
+        $response = $this->actingAs($this->psm)->get(route('influencers.index'));
+
+        $response->assertOk();
     }
 
     // ─── Per-user isolation ────────────────────────────────────

@@ -25,6 +25,16 @@
                 </li>
             @endif
 
+            @if (!empty($pageSubTitle3))
+                <li class="breadcrumb-item">
+                    @if (!empty($pageSubTitle3Url))
+                        <a href="{{ $pageSubTitle3Url }}">{{ $pageSubTitle3 }}</a>
+                    @else
+                        {{ $pageSubTitle3 }}
+                    @endif
+                </li>
+            @endif
+
             <li class="breadcrumb-item active" aria-current="page">{{ $pageTitle }}</li>
         </ol>
     </nav>

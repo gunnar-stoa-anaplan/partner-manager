@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\TrainingPhase;
 use App\Models\ActivationPath;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -62,12 +63,71 @@ class ModuleRegistry
             return false;
         }
 
+        // Admins bypass per-user activation gating
+        if ($user->role === 'admin') {
+            return true;
+        }
+
         // No path defined for this slug = no user gating (allow)
         if (! $this->hasActivePath($slug)) {
             return true;
         }
 
         return $this->userHasCompleted($user, $slug);
+    }
+
+    /**
+     * Check if a module is accessible to the user — either fully enabled or
+     * the user has completed the Tell phase and reached Show/Do (needs real UI access).
+     */
+    public function isAccessible(string $slug, ?User $user = null): bool
+    {
+        if ($this->isEnabled($slug, $user)) {
+            return true;
+        }
+
+        $user = $user ?? Auth::user();
+
+        if ($user === null) {
+            return false;
+        }
+
+        return $this->userHasCompletedTellPhase($user, $slug);
+    }
+
+    /**
+     * Check if the user has completed all Tell-phase steps for this module's path.
+     * Once Tell is done they move to Show/Do which require real module access.
+     */
+    private function userHasCompletedTellPhase(User $user, string $slug): bool
+    {
+        $path = $user->activationPaths()
+            ->where('feature_slug', $slug)
+            ->first();
+
+        if ($path === null) {
+            return false;
+        }
+
+        $tellSteps = $path->steps()
+            ->where('phase', TrainingPhase::Tell)
+            ->where('is_required', true)
+            ->get();
+
+        // No Tell steps defined — path not fully configured yet, deny access
+        if ($tellSteps->isEmpty()) {
+            return false;
+        }
+
+        foreach ($tellSteps as $step) {
+            $progress = $step->progressFor($user)->first();
+
+            if (! $progress?->completed) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

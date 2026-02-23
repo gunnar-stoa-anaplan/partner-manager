@@ -5,6 +5,8 @@
         'pageTitle' => $path->name,
         'pageSubTitle1' => 'Feature Activation',
         'pageSubTitle1Url' => route('admin.activation.paths'),
+        'pageSubTitle2' => 'Activation Paths',
+        'pageSubTitle2Url' => route('admin.activation.paths'),
         'pageSubText' => 'Manage steps for this activation path',
     ])
 @endsection
@@ -69,6 +71,10 @@
         </form>
 
         <div class="d-flex gap-2 mt-2">
+            <a href="{{ route('admin.activation.paths.assignments', $path) }}" class="btn btn-sm btn-outline-primary">
+                <i data-feather="users" class="icon-inline"></i> Manage Assignments
+                <span class="badge bg-primary rounded-pill ms-1">{{ $path->users_count ?? $path->users->count() }}</span>
+            </a>
             <form action="{{ route('admin.activation.paths.destroy', $path) }}" method="POST" onsubmit="return confirm('Delete this activation path and all its steps?')">
                 @csrf @method('DELETE')
                 <button type="submit" class="btn btn-outline-danger btn-sm">Delete Path</button>

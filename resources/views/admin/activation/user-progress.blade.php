@@ -3,8 +3,10 @@
 @section('page-title')
     @include('layouts.partials/app-pagetitle', [
         'pageTitle' => $user->name,
-        'pageSubTitle1' => 'Activation Progress',
-        'pageSubTitle1Url' => route('admin.activation.progression'),
+        'pageSubTitle1' => 'Feature Activation',
+        'pageSubTitle1Url' => route('admin.activation.paths'),
+        'pageSubTitle2' => 'Activation Progression',
+        'pageSubTitle2Url' => route('admin.activation.progression'),
         'pageSubText' => 'View activation progress for this user across all assigned paths',
     ])
 @endsection
