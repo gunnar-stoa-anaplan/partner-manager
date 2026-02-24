@@ -12,6 +12,8 @@ Administrators have full access to the platform, including:
 - Path and stage configuration
 - User management
 - Blueprint and enablement event administration
+- Workshop lab creation and management
+- AI agent configuration and oversight (see **System Administration > AI Agents**)
 - Scorecard weight configuration
 - API token management
 - Anaplan provisioning
@@ -25,6 +27,7 @@ PSMs are the primary users of the platform. They can:
 - Conduct QBR sessions and path reviews
 - Access analytics and benchmarking for their portfolio
 - Register partners for enablement events
+- Use AI-powered partner insights and content generation (when AI Agents is enabled)
 
 ### Manager
 
@@ -67,3 +70,15 @@ Admins can impersonate a portal contact to see the portal from their perspective
 
 > [!NOTE]
 > Impersonation is logged and only available to admin users. It does not grant the admin the ability to perform actions as the contact — it only provides a read-only view of what the contact would see.
+
+## Feature-Level Gating
+
+In addition to role-based access, individual features are gated by feature flags that are activated through the Feature Activation system. Each feature has separate admin and end-user flags:
+
+| Feature | Admin Flag | End-User Flag |
+|---------|-----------|---------------|
+| Enablement Events | `enablement_events_admin` | `enablement_events_user` |
+| Workshop Labs | `workshop_labs_admin` | `workshop_labs_user` |
+| AI Agents | `ai_agents_admin` | `ai_agents_user` |
+
+Admin flags control access to creation and configuration screens. End-user flags control access to interactive features such as AI-powered content generation and partner insights. See [Feature Activation](provisioning.md) for how flags are progressively unlocked through activation paths.

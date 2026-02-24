@@ -14,6 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function () {
             Route::middleware('web')
+                ->prefix('docs')
+                ->name('docs.')
+                ->group(base_path('routes/docs.php'));
+
+            Route::middleware('web')
                 ->prefix('portal')
                 ->name('portal.')
                 ->group(base_path('routes/portal.php'));
@@ -31,6 +36,16 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
             }
 
+            // Knowledge Base (admin routes use knowledge_base_admin gate)
+            $knowledgeBaseWeb = base_path('routes/modules/knowledge-base.php');
+
+            if (file_exists($knowledgeBaseWeb)) {
+                Route::middleware(['web', 'auth', 'module:knowledge_base_admin'])
+                    ->prefix('knowledge-base')
+                    ->name('knowledge_base.')
+                    ->group($knowledgeBaseWeb);
+            }
+
             // Load module API route files
             $ideaRoomApi = base_path('routes/modules/idea-room-api.php');
 
@@ -39,6 +54,15 @@ return Application::configure(basePath: dirname(__DIR__))
                     ->prefix('api/v1/idea-room')
                     ->name('idea_room.api.')
                     ->group($ideaRoomApi);
+            }
+
+            $knowledgeBaseApi = base_path('routes/modules/knowledge-base-api.php');
+
+            if (file_exists($knowledgeBaseApi)) {
+                Route::middleware(['web', 'auth', 'module:knowledge_base_user'])
+                    ->prefix('api/v1/knowledge-base')
+                    ->name('knowledge_base.api.')
+                    ->group($knowledgeBaseApi);
             }
         },
     )

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Ai\Agents\LabDesigner;
 use App\Ai\Tools\LookupExistingLabs;
+use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\AnaplanModel;
 use App\Models\EnablementSession;
 use App\Models\Lab;
@@ -163,8 +164,9 @@ class LabDesignerTest extends TestCase
         $designer = new LabDesigner;
         $tools = iterator_to_array($designer->tools());
 
-        $this->assertCount(1, $tools);
+        $this->assertCount(2, $tools);
         $this->assertInstanceOf(LookupExistingLabs::class, $tools[0]);
+        $this->assertInstanceOf(SearchKnowledgeBase::class, $tools[1]);
     }
 
     public function test_lab_lookup_tool_returns_labs(): void

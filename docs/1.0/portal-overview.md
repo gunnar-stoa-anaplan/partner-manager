@@ -15,10 +15,10 @@ Depending on their role, a portal contact can:
 - **View their scorecard** — See how their organization is performing
 - **Track goals** — Monitor progress against fiscal-year targets
 - **Browse blueprints** — Follow learning paths and track completion
-- **Register for events** — Sign up for enablement sessions and workshops
+- **Register for events** — Sign up for enablement sessions and workshops (requires `enablement_events_user`)
 - **Submit deal registrations** — Register new opportunities for PSM approval
 - **View projects** — See delivery status and team composition
-- **Access labs** — Participate in hands-on training environments
+- **Access labs** — Participate in hands-on training environments (requires `workshop_labs_user`)
 - **Manage contacts** — Update their organization's contact directory
 
 ## Portal Dashboard

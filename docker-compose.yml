@@ -23,6 +23,7 @@ services:
             - sail
         depends_on:
             - mysql
+            - pgsql
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:
@@ -45,6 +46,30 @@ services:
                 - mysqladmin
                 - ping
                 - '-p${DB_PASSWORD}'
+            retries: 3
+            timeout: 5s
+    pgsql:
+        image: 'pgvector/pgvector:pg17'
+        ports:
+            - '${FORWARD_PG_PORT:-5432}:5432'
+        environment:
+            PGPASSWORD: '${KB_DB_PASSWORD:-password}'
+            POSTGRES_DB: '${KB_DB_DATABASE:-knowledge_base}'
+            POSTGRES_USER: '${KB_DB_USERNAME:-sail}'
+            POSTGRES_PASSWORD: '${KB_DB_PASSWORD:-password}'
+        volumes:
+            - 'sail-pgsql:/var/lib/postgresql/data'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - pg_isready
+                - '-q'
+                - '-d'
+                - '${KB_DB_DATABASE:-knowledge_base}'
+                - '-U'
+                - '${KB_DB_USERNAME:-sail}'
             retries: 3
             timeout: 5s
     pm-agent:
@@ -70,6 +95,8 @@ networks:
         external: true
 volumes:
     sail-mysql:
+        driver: local
+    sail-pgsql:
         driver: local
     agent-status:
         driver: local

@@ -4,7 +4,7 @@ The Enablement Calendar provides a centralized view of all scheduled enablement 
 
 ## Calendar View
 
-Navigate to **Administration > Enablement Calendar** to see the global calendar.
+Navigate to **Enablement > Enablement Calendar** to see the global calendar. The calendar and event management features require the `enablement_events_admin` feature flag.
 
 <!-- ![Enablement calendar](images/enablement-calendar.png) -->
 

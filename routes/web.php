@@ -4,6 +4,7 @@ use App\Http\Controllers\ActionPlanController;
 use App\Http\Controllers\Admin\ActivationBenchmarkController;
 use App\Http\Controllers\Admin\FeatureActivationController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AiAgentsController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AnaplanOverviewController;
 use App\Http\Controllers\AnaplanProvisioningController;
@@ -385,8 +386,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/configuration/dev-focus', [ConfigurationController::class, 'updateDevFocus'])->name('configuration.update-dev-focus');
         Route::put('/configuration/ai', [ConfigurationController::class, 'updateAi'])->name('configuration.update-ai');
 
-        // Enablement Admin (gated by enablement_admin feature flag)
-        Route::middleware('module:enablement_admin')->group(function () {
+        // Enablement Events Admin (gated by enablement_events_admin feature flag)
+        Route::middleware('module:enablement_events_admin')->group(function () {
             // Blueprint CRUD
             Route::resource('blueprints', BlueprintController::class);
             Route::post('/blueprints/{blueprint}/duplicate', [BlueprintController::class, 'duplicate'])->name('blueprints.duplicate');
@@ -427,8 +428,8 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'destroyMilestone'])->name('admin.launch-program-milestones.destroy');
         });
 
-        // Workshop Labs (gated by enablement_admin feature flag)
-        Route::middleware('module:enablement_admin')->group(function () {
+        // Workshop Labs (gated by workshop_labs_admin feature flag)
+        Route::middleware('module:workshop_labs_admin')->group(function () {
             Route::post('/labs/generate', [LabController::class, 'generate'])->name('labs.generate');
             Route::resource('labs', LabController::class);
             Route::post('/labs/{lab}/publish', [LabController::class, 'publish'])->name('labs.publish');
@@ -451,6 +452,11 @@ Route::middleware(['auth'])->group(function () {
             // Provisioning Summary
             Route::get('/provisioning-summary', [AnaplanOverviewController::class, 'index'])->name('admin.provisioning-summary');
             Route::put('/provisioning-summary/version-config', [AnaplanOverviewController::class, 'updateVersionConfig'])->name('admin.provisioning-summary.update-version');
+        });
+
+        // AI Agents Admin (gated by ai_agents_admin feature flag)
+        Route::middleware('module:ai_agents_admin')->group(function () {
+            Route::get('/ai-agents', [AiAgentsController::class, 'index'])->name('admin.ai-agents.index');
         });
 
         // System Status & Updates

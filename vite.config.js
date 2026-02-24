@@ -39,6 +39,7 @@ export default defineConfig({
                 'resources/webfonts/smartadmin/sa-icons.scss',
                 // App CSS
                 'resources/sass/smartapp.scss',
+                'resources/sass/docs.scss',
                 ...getFilesFlat('resources/sass/themes'),
                 // App JS
                 ...getFilesRecursive('resources/scripts', ['.js'], ['smarttable']),

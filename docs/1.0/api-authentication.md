@@ -4,7 +4,22 @@ The Partner Manager API uses **Laravel Sanctum** bearer tokens for authenticatio
 
 ## Creating a Token
 
-Admins can create API tokens from the Partner Manager interface:
+### Via API (Login Endpoint)
+
+External integrations can obtain a token programmatically by calling the login endpoint:
+
+```bash
+curl -X POST https://your-instance.example.com/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"email": "user@example.com", "password": "your-password", "device_name": "My Integration", "abilities": ["partners:read"]}'
+```
+
+The response includes a `token` field with the bearer token. See [Endpoints](api-endpoints#authentication) for full request/response details.
+
+### Via Web Interface
+
+Admins can also create API tokens from the Partner Manager interface:
 
 1. Navigate to **Administration > API Tokens**
 2. Click **Create Token**

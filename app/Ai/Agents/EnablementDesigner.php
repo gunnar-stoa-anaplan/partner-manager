@@ -3,6 +3,7 @@
 namespace App\Ai\Agents;
 
 use App\Ai\Tools\LookupEnablementCatalog;
+use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\EnablementEvent;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Attributes\MaxSteps;
@@ -116,6 +117,7 @@ class EnablementDesigner implements Agent, HasStructuredOutput, HasTools
     {
         return [
             new LookupEnablementCatalog,
+            new SearchKnowledgeBase,
         ];
     }
 

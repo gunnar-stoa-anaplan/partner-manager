@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Ai\Agents\EnablementDesigner;
 use App\Ai\Tools\LookupEnablementCatalog;
+use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\EnablementEvent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -151,8 +152,9 @@ class EnablementDesignerTest extends TestCase
         $designer = new EnablementDesigner;
         $tools = iterator_to_array($designer->tools());
 
-        $this->assertCount(1, $tools);
+        $this->assertCount(2, $tools);
         $this->assertInstanceOf(LookupEnablementCatalog::class, $tools[0]);
+        $this->assertInstanceOf(SearchKnowledgeBase::class, $tools[1]);
     }
 
     public function test_catalog_tool_returns_events(): void

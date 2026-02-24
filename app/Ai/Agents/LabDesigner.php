@@ -3,6 +3,7 @@
 namespace App\Ai\Agents;
 
 use App\Ai\Tools\LookupExistingLabs;
+use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\Lab;
 use App\Models\LabCheckpoint;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -121,6 +122,7 @@ class LabDesigner implements Agent, HasStructuredOutput, HasTools
     {
         return [
             new LookupExistingLabs,
+            new SearchKnowledgeBase,
         ];
     }
 
