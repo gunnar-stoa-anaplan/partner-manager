@@ -2,6 +2,7 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\WithKnowledgeBase;
 use App\Ai\Tools\LookupExistingLabs;
 use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\Lab;
@@ -19,7 +20,7 @@ use Stringable;
 #[MaxSteps(5)]
 class LabDesigner implements Agent, HasStructuredOutput, HasTools
 {
-    use Promptable;
+    use Promptable, WithKnowledgeBase;
 
     public function __construct(public string $workshopContext = '') {}
 
@@ -110,6 +111,8 @@ class LabDesigner implements Agent, HasStructuredOutput, HasTools
           whether it's required, and the validation configuration
         - Checkpoints should cover at least 3 different validation types
         {$workshopSection}
+        {$this->buildKnowledgeBaseSection()}
+        {$this->citationInstructions()}
         PROMPT;
     }
 

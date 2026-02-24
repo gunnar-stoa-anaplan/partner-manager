@@ -2,7 +2,7 @@
 
 namespace App\Ai\Tools;
 
-use App\Models\KnowledgeChunk;
+use App\Services\KnowledgeBaseSearchService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
@@ -26,29 +26,14 @@ class SearchKnowledgeBase implements Tool
      */
     public function handle(Request $request): Stringable|string
     {
-        $query = (string) $request->string('query');
-        $limit = $request['limit'] ?? config('knowledge_base.search.default_limit', 10);
-        $minSimilarity = config('knowledge_base.search.min_similarity', 0.5);
+        $service = app(KnowledgeBaseSearchService::class);
 
-        $results = KnowledgeChunk::query()
-            ->whereVectorSimilarTo('embedding', $query, minSimilarity: $minSimilarity)
-            ->with('document:id,title,file_name')
-            ->limit($limit)
-            ->get();
+        $results = $service->search(
+            query: (string) $request->string('query'),
+            limit: $request['limit'] ?? null,
+        );
 
-        if ($results->isEmpty()) {
-            return 'No relevant knowledge base documents found for this query.';
-        }
-
-        $lines = ["Found {$results->count()} relevant excerpts:"];
-
-        foreach ($results as $chunk) {
-            $lines[] = '';
-            $lines[] = "--- [{$chunk->document?->title}] ({$chunk->document?->file_name}) ---";
-            $lines[] = $chunk->content;
-        }
-
-        return implode("\n", $lines);
+        return $service->formatAsToolOutput($results);
     }
 
     /**

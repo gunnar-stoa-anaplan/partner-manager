@@ -14,9 +14,13 @@ class LabDesignerController extends Controller
      */
     public function __invoke(DesignLabRequest $request): JsonResponse
     {
+        $prompt = $request->toPrompt();
+
         $response = LabDesigner::make(
             workshopContext: $request->validated('workshop_context', ''),
-        )->prompt($request->toPrompt());
+        )
+            ->withPrefetchedContext($prompt)
+            ->prompt($prompt);
 
         $checkpoints = [];
 

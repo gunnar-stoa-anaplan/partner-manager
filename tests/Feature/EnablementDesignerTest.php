@@ -145,6 +145,7 @@ class EnablementDesignerTest extends TestCase
         $this->assertStringContainsString('SPM', $instructions);
         $this->assertStringContainsString('OWP', $instructions);
         $this->assertStringContainsString('Tell-Show-Do', $instructions);
+        $this->assertStringContainsString('Citation & Grounding Rules', $instructions);
     }
 
     public function test_designer_has_catalog_lookup_tool(): void

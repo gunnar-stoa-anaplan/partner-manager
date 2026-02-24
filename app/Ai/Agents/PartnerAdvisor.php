@@ -2,6 +2,7 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\WithKnowledgeBase;
 use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\Partner;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -19,7 +20,7 @@ use Stringable;
 #[Temperature(0.4)]
 class PartnerAdvisor implements Agent, HasStructuredOutput, HasTools
 {
-    use Promptable;
+    use Promptable, WithKnowledgeBase;
 
     public function __construct(public Partner $partner) {}
 
@@ -41,6 +42,8 @@ class PartnerAdvisor implements Agent, HasStructuredOutput, HasTools
 
         Here is the partner's current data:
         {$context}
+        {$this->buildKnowledgeBaseSection()}
+        {$this->citationInstructions()}
         PROMPT;
     }
 

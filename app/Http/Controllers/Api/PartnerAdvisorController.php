@@ -11,7 +11,10 @@ class PartnerAdvisorController extends Controller
 {
     public function __invoke(Partner $partner): JsonResponse
     {
+        $prefetchQuery = "partner management best practices {$partner->industry} {$partner->geography}";
+
         $response = PartnerAdvisor::make(partner: $partner)
+            ->withPrefetchedContext($prefetchQuery)
             ->prompt('Analyze this partner and provide your health assessment with recommendations.');
 
         return response()->json([

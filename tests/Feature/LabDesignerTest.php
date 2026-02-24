@@ -147,6 +147,7 @@ class LabDesignerTest extends TestCase
         $this->assertStringContainsString('structure', $instructions);
         $this->assertStringContainsString('SUM', $instructions);
         $this->assertStringContainsString('LOOKUP', $instructions);
+        $this->assertStringContainsString('Citation & Grounding Rules', $instructions);
     }
 
     public function test_lab_designer_includes_workshop_context_in_instructions(): void

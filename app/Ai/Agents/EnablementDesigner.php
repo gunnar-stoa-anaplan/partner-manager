@@ -2,6 +2,7 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\WithKnowledgeBase;
 use App\Ai\Tools\LookupEnablementCatalog;
 use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\EnablementEvent;
@@ -18,7 +19,7 @@ use Stringable;
 #[MaxSteps(5)]
 class EnablementDesigner implements Agent, HasStructuredOutput, HasTools
 {
-    use Promptable;
+    use Promptable, WithKnowledgeBase;
 
     /**
      * Get the instructions that the agent should follow.
@@ -105,6 +106,8 @@ class EnablementDesigner implements Agent, HasStructuredOutput, HasTools
         workshop (4-8h hands-on), academy (8-24h deep training), webinar (1h overview),
         bootcamp (40h intensive multi-day), certification_exam (4h prep+exam),
         onboarding (2-4h new partner intro), hackathon (8h competitive build)
+        {$this->buildKnowledgeBaseSection()}
+        {$this->citationInstructions()}
         PROMPT;
     }
 

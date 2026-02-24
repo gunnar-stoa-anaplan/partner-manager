@@ -41,6 +41,7 @@ return [
     'search' => [
         'min_similarity' => 0.5,
         'default_limit' => 10,
+        'prefetch_limit' => 5,
     ],
 
     /*
