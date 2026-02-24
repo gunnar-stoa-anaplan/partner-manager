@@ -131,6 +131,16 @@ class Partner extends Model
         return $this->hasMany(PartnerGoal::class);
     }
 
+    public function scorecards()
+    {
+        return $this->hasMany(PartnerScorecard::class);
+    }
+
+    public function healthSnapshots()
+    {
+        return $this->hasMany(PartnerHealthSnapshot::class);
+    }
+
     public function influencers()
     {
         return $this->hasMany(Contact::class)->where('contact_type', 'influencer');

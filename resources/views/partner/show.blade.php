@@ -290,7 +290,7 @@
 @endsection
 
 @section('scripts')
-@vite(['resources/scripts/pages/table-init.js'])
+@vite(['resources/scripts/pages/table-init.js', 'resources/scripts/pages/ai-insights-partner.js'])
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var PARTNER_ID = {{ $partner->id }};

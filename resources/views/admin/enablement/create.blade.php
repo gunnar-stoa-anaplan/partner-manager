@@ -10,6 +10,75 @@
 @section('content')
 <p class="text-muted fst-italic mt-3 mb-4">Use this form to define a new enablement event for the catalog. Set the event type, product area, target audience, and capacity. Once created, you can schedule sessions for this event from the Calendar view and manage registrations from the event detail page.</p>
 
+    {{-- AI Generate Panel --}}
+    <div id="ai-generate-enablement-panel" data-generate-url="{{ route('enablement-events.generate') }}">
+        <div class="row mb-3">
+            <div class="col-xl-8 offset-xl-2">
+                <div class="card shadow-0 border-primary border-opacity-25 mb-0">
+                    <div class="card-header bg-primary bg-opacity-10 cursor-pointer" role="button"
+                         data-bs-toggle="collapse" data-bs-target="#aiEnablementCollapse">
+                        <div class="d-flex align-items-center">
+                            <svg class="sa-icon sa-icon-sm me-2"><use href="/icons/sprite.svg#cpu"></use></svg>
+                            <span class="fw-medium">Generate with AI</span>
+                            <i class="fal fa-chevron-down ms-auto"></i>
+                        </div>
+                    </div>
+                    <div class="collapse" id="aiEnablementCollapse">
+                        <div class="card-body">
+                            <p class="text-muted fs-sm mb-3">
+                                Select a product area and event type, then let AI design a complete enablement event.
+                                You can review and edit all fields before saving.
+                            </p>
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label class="form-label fs-sm">Product Area <span class="text-danger">*</span></label>
+                                    <select class="form-select form-select-sm" name="ai_product_area">
+                                        <option value="">Select...</option>
+                                        @foreach(\App\Models\EnablementEvent::PRODUCT_AREAS as $group => $areas)
+                                            <optgroup label="{{ $group }}">
+                                                @foreach($areas as $value => $label)
+                                                    <option value="{{ $value }}">{{ $label }}</option>
+                                                @endforeach
+                                            </optgroup>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fs-sm">Type <span class="text-danger">*</span></label>
+                                    <select class="form-select form-select-sm" name="ai_type">
+                                        <option value="">Select...</option>
+                                        @foreach(\App\Models\EnablementEvent::TYPES as $value => $label)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fs-sm">Topic <span class="text-muted">(optional)</span></label>
+                                    <input type="text" class="form-control form-control-sm" name="ai_topic" placeholder="e.g. Revenue forecasting">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fs-sm">Audience <span class="text-muted">(optional)</span></label>
+                                    <input type="text" class="form-control form-control-sm" name="ai_audience" placeholder="e.g. Solution Architects">
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-sm btn-primary" id="ai-generate-enablement-btn">
+                                    <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#cpu"></use></svg>
+                                    Generate
+                                </button>
+                                <div class="ai-generate-spinner d-none">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                    <span class="text-muted fs-sm ms-1">Designing event (10-30s)...</span>
+                                </div>
+                            </div>
+                            <div class="ai-generate-error text-danger fs-sm mt-2 d-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-xl-8 offset-xl-2">
             <div class="card shadow-0 mb-g">
@@ -129,4 +198,5 @@
 @endsection
 
 @section('scripts')
+    @vite(['resources/scripts/pages/ai-generate-enablement.js'])
 @endsection

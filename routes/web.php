@@ -244,6 +244,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/partners/{id}/summary', [PartnerController::class, 'summary'])->name('partners.summary');
     Route::get('/partners/{id}/insights', [PartnerController::class, 'insights'])->name('partners.insights');
     Route::get('/partners/{id}/blueprints', [PartnerController::class, 'blueprints'])->name('partners.blueprints');
+    Route::post('/partners/{partner}/advisor', [PartnerController::class, 'advisor'])->name('partners.advisor');
     Route::get('/partners/{id}/tab/{tab}', [PartnerController::class, 'partnerTab'])
         ->name('partners.tab')
         ->where('tab', 'overview|pipeline|enablement|projects|calendar|influencers|resources|app-enablement|launch-programs|workspaces|portal-users');
@@ -398,6 +399,7 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/blueprint-content-items/{item}', [BlueprintController::class, 'destroyContentItem'])->name('blueprint-content-items.destroy');
 
             // Enablement Events CRUD
+            Route::post('/enablement-events/generate', [EnablementEventController::class, 'generate'])->name('enablement-events.generate');
             Route::resource('enablement-events', EnablementEventController::class);
             Route::get('/enablement-events/{id}/sessions/create', [EnablementEventController::class, 'createSession'])->name('enablement-events.sessions.create');
             Route::post('/enablement-events/{id}/sessions', [EnablementEventController::class, 'storeSession'])->name('enablement-events.sessions.store');
@@ -427,6 +429,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Workshop Labs (gated by enablement_admin feature flag)
         Route::middleware('module:enablement_admin')->group(function () {
+            Route::post('/labs/generate', [LabController::class, 'generate'])->name('labs.generate');
             Route::resource('labs', LabController::class);
             Route::post('/labs/{lab}/publish', [LabController::class, 'publish'])->name('labs.publish');
             Route::post('/labs/{lab}/checkpoints', [LabController::class, 'addCheckpoint'])->name('labs.checkpoints.store');

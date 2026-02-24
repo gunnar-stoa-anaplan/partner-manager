@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Ai\Agents\LabDesigner;
 use App\Models\AnaplanModel;
 use App\Models\Contact;
 use App\Models\EnablementSession;
@@ -17,6 +18,63 @@ use Illuminate\View\View;
 
 class LabController extends Controller
 {
+    // ─── AI Generation ────────────────────────────────────────
+
+    public function generate(Request $request): JsonResponse
+    {
+        $request->validate([
+            'tenant' => ['required', 'string', 'in:ifp,owp,spm'],
+            'topic' => ['required', 'string', 'max:500'],
+            'duration_minutes' => ['nullable', 'integer', 'min:15', 'max:120'],
+            'workshop_context' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $tenant = Lab::TENANTS[$request->input('tenant')] ?? $request->input('tenant');
+        $duration = $request->input('duration_minutes', 45);
+
+        $prompt = "Design a {$duration}-minute hands-on lab for the {$tenant} tenant. "
+            ."The lab should focus on: {$request->input('topic')}.";
+        $prompt .= ' First check existing labs to see what already exists for this tenant, '
+            .'then design a complete lab with checkpoints that fills a gap or teaches a new skill.';
+
+        $response = LabDesigner::make(
+            workshopContext: $request->input('workshop_context', ''),
+        )->prompt($prompt);
+
+        $checkpoints = [];
+
+        for ($i = 1; $i <= 6; $i++) {
+            $title = $response["checkpoint_{$i}_title"] ?? null;
+
+            if (! $title) {
+                break;
+            }
+
+            $checkpoints[] = [
+                'sort_order' => $i,
+                'title' => $title,
+                'description' => $response["checkpoint_{$i}_description"],
+                'checkpoint_type' => $response["checkpoint_{$i}_type"],
+                'points' => $response["checkpoint_{$i}_points"],
+                'hint' => $response["checkpoint_{$i}_hint"],
+                'is_required' => strtolower($response["checkpoint_{$i}_required"] ?? 'yes') === 'yes',
+            ];
+        }
+
+        return response()->json([
+            'lab' => [
+                'name' => $response['name'],
+                'description' => $response['description'],
+                'instructions' => $response['instructions'],
+                'tenant' => $response['tenant'],
+                'duration_minutes' => $response['duration_minutes'],
+                'checkpoints' => $checkpoints,
+            ],
+        ]);
+    }
+
+    // ─── CRUD ─────────────────────────────────────────────────
+
     public function index(): View
     {
         $labs = Lab::with(['session.event', 'goldenModel', 'creator', 'checkpoints', 'participants'])
@@ -50,12 +108,34 @@ class LabController extends Controller
             'golden_model_id' => ['required', 'exists:anaplan_models,id'],
             'tenant' => ['required', 'in:ifp,owp,spm'],
             'duration_minutes' => ['nullable', 'integer', 'min:1'],
+            'checkpoints_json' => ['nullable', 'json'],
         ]);
+
+        $checkpointsJson = $validated['checkpoints_json'] ?? null;
+        unset($validated['checkpoints_json']);
 
         $validated['created_by'] = auth()->id();
         $validated['status'] = 'draft';
 
         $lab = Lab::create($validated);
+
+        if ($checkpointsJson) {
+            $checkpoints = json_decode($checkpointsJson, true);
+
+            foreach ($checkpoints as $i => $cp) {
+                LabCheckpoint::create([
+                    'lab_id' => $lab->id,
+                    'title' => $cp['title'],
+                    'description' => $cp['description'] ?? null,
+                    'checkpoint_type' => $cp['checkpoint_type'],
+                    'points' => $cp['points'] ?? 10,
+                    'hint' => $cp['hint'] ?? null,
+                    'is_required' => $cp['is_required'] ?? true,
+                    'sort_order' => $cp['sort_order'] ?? ($i + 1),
+                    'validation_config' => [],
+                ]);
+            }
+        }
 
         return redirect()->route('labs.show', $lab)->with('success', 'Lab created successfully.');
     }

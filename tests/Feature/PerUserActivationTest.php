@@ -50,24 +50,42 @@ class PerUserActivationTest extends TestCase
         $response->assertOk();
     }
 
-    // ─── Pennant Off: block even without a path ────────────────
+    // ─── Pennant Off: block non-admin, allow admin ─────────────
 
-    public function test_user_blocked_when_pennant_inactive(): void
+    public function test_non_admin_blocked_when_pennant_inactive(): void
     {
         Feature::for(null)->deactivate('enablement_admin');
 
         $registry = app(ModuleRegistry::class);
 
-        $this->assertFalse($registry->isEnabled('enablement_admin', $this->admin));
+        $this->assertFalse($registry->isEnabled('enablement_admin', $this->psm));
     }
 
-    public function test_route_returns_403_when_pennant_inactive(): void
+    public function test_admin_bypasses_pennant_inactive(): void
+    {
+        Feature::for(null)->deactivate('enablement_admin');
+
+        $registry = app(ModuleRegistry::class);
+
+        $this->assertTrue($registry->isEnabled('enablement_admin', $this->admin));
+    }
+
+    public function test_route_returns_403_for_non_admin_when_pennant_inactive(): void
+    {
+        Feature::for(null)->deactivate('enablement_admin');
+
+        $response = $this->actingAs($this->psm)->get(route('blueprints.index'));
+
+        $response->assertForbidden();
+    }
+
+    public function test_admin_route_allowed_when_pennant_inactive(): void
     {
         Feature::for(null)->deactivate('enablement_admin');
 
         $response = $this->actingAs($this->admin)->get(route('blueprints.index'));
 
-        $response->assertForbidden();
+        $response->assertOk();
     }
 
     // ─── With Path: incomplete blocks, complete allows ─────────
@@ -348,17 +366,26 @@ class PerUserActivationTest extends TestCase
         $this->assertNotNull($pivot->completed_at);
     }
 
-    // ─── Config disabled overrides everything ──────────────────
+    // ─── Config disabled: block non-admin, allow admin ─────────
 
-    public function test_config_disabled_blocks_even_with_pennant_and_path(): void
+    public function test_config_disabled_blocks_non_admin_even_with_pennant_and_path(): void
     {
         config(['modules.enablement_admin.enabled' => false]);
         Feature::for(null)->activate('enablement_admin');
 
-        $this->activateModuleForUser('enablement_admin', $this->admin);
+        $this->activateModuleForUser('enablement_admin', $this->psm);
 
         $registry = app(ModuleRegistry::class);
 
-        $this->assertFalse($registry->isEnabled('enablement_admin', $this->admin));
+        $this->assertFalse($registry->isEnabled('enablement_admin', $this->psm));
+    }
+
+    public function test_admin_bypasses_config_disabled(): void
+    {
+        config(['modules.enablement_admin.enabled' => false]);
+
+        $registry = app(ModuleRegistry::class);
+
+        $this->assertTrue($registry->isEnabled('enablement_admin', $this->admin));
     }
 }

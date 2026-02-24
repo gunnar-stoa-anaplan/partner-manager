@@ -46,6 +46,13 @@ class ModuleRegistry
 
     public function isEnabled(string $slug, ?User $user = null): bool
     {
+        $user = $user ?? Auth::user();
+
+        // Admins bypass all feature gating — full visibility regardless of flag state
+        if ($user?->role === 'admin') {
+            return true;
+        }
+
         // 1. Env override: if explicitly disabled in config, respect that
         if (! config("modules.{$slug}.enabled", false)) {
             return false;
@@ -57,15 +64,8 @@ class ModuleRegistry
         }
 
         // 3. Per-user activation check
-        $user = $user ?? Auth::user();
-
         if ($user === null) {
             return false;
-        }
-
-        // Admins bypass per-user activation gating
-        if ($user->role === 'admin') {
-            return true;
         }
 
         // No path defined for this slug = no user gating (allow)
