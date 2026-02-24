@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Ai\Agents\PartnerAdvisor;
 use App\Enums\StepType;
 use App\Helpers\FiscalYearHelper;
 use App\Models\Blueprint;
@@ -22,6 +23,7 @@ use App\Models\User;
 use App\Services\ActivationTracker;
 use App\Services\GateEvaluationService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -1557,6 +1559,32 @@ class PartnerController extends Controller
             'opportunityHistory',
             'resourceHistory'
         ));
+    }
+
+    /**
+     * Get AI-powered insights for a partner.
+     */
+    public function advisor(Partner $partner): JsonResponse
+    {
+        $response = PartnerAdvisor::make(partner: $partner)
+            ->prompt('Analyze this partner and provide your health assessment with recommendations.');
+
+        return response()->json([
+            'partner_id' => $partner->id,
+            'partner_name' => $partner->name,
+            'analysis' => [
+                'health_score' => $response['health_score'],
+                'risk_level' => $response['risk_level'],
+                'summary' => $response['summary'],
+                'recommendations' => [
+                    $response['top_recommendation'],
+                    $response['second_recommendation'],
+                    $response['third_recommendation'],
+                ],
+                'key_strength' => $response['key_strength'],
+                'key_risk' => $response['key_risk'],
+            ],
+        ]);
     }
 
     /**
