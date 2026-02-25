@@ -12,7 +12,7 @@ use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-#[MaxTokens(4096)]
+#[MaxTokens(16384)]
 #[MaxSteps(3)]
 #[Temperature(0.3)]
 class SupplyChainExpert implements Agent, HasTools
@@ -624,6 +624,53 @@ class SupplyChainExpert implements Agent, HasTools
            Each lab should have clear learning objectives stated upfront, and checkpoints that
            validate both the configuration AND the participant's understanding of WHY it works
            that way.
+
+           **Lab Structure — Every lab MUST open with:**
+           a) **Overview:** A clear, concise explanation of what this lab covers and
+              why it matters in a real supply chain planning context. Connect the topic to
+              the business outcome it enables (e.g., "This lab covers safety stock calculation
+              because incorrect safety stock is the #1 driver of excess inventory and stockouts").
+           b) **Exercise Reasoning:** Before each configuration exercise, explain WHY the
+              participant is about to build what they are building. Never jump straight into
+              "Create module X" — first explain the planning problem being solved, the design
+              decision being made, and how this piece fits into the larger architecture.
+
+           **Dual Deliverables — For every lab you design, produce TWO separate documents.**
+           These are distinct, standalone documents — not sections within one file. Clearly
+           label each with a `## DOCUMENT 1: PARTICIPANT LAB GUIDE` and
+           `## DOCUMENT 2: FACILITATOR GUIDE` heading so they can be split apart.
+
+           a) **Participant Lab Guide** — the document the participant works from:
+              - **Objectives:** What the participant will learn and be able to do.
+              - **Step-by-Step Instructions:** Detailed, numbered configuration steps the
+                participant follows to complete the lab. Include exercise reasoning before
+                each section explaining WHY they are building what they are building.
+              - **Success Criteria:** How the participant determines whether their end result
+                is successful or correct — specific values to check, module structures to
+                verify, formulas to confirm. Make it unambiguous so participants can
+                self-assess without facilitator help.
+
+           b) **Facilitator Guide** — the document the facilitator uses to deliver the lab:
+              - **Lab Setup Script:** What the facilitator needs to prepare before the lab
+                begins (environment, pre-loaded data, model state) and how to introduce the
+                session to participants.
+              - **Objectives:** The learning objectives the facilitator should communicate,
+                framed from the facilitator's perspective (what participants should walk away
+                understanding).
+              - **Delivery Instructions:** How to walk participants through the lab — the
+                introduction script, transition scripts between exercises, key teaching points
+                to emphasize, and common misconceptions to address.
+              - **Checkpoint Facilitation Notes:** What correct output looks like, common
+                mistakes participants make, and how to help them self-diagnose without giving
+                the answer away.
+              - **Timing Guidance:** Suggested time allocation per section to keep the session
+                on track.
+              - **Discussion Questions:** One or two questions the facilitator should pose to
+                participants after completing each lab to spark relevant conversation. Each
+                question must include suggested answers or talking points so the facilitator
+                can guide the discussion productively (e.g., "What would happen to your safety
+                stock if lead time variability doubled? — Expected answer: SS increases by ~41%
+                because LT variance is under the square root.").
 
         8. **Search the Knowledge Base** for Anaplan-specific documentation (PlanIQ setup,
            Forecaster configuration, time settings, calculation functions, SCM APPS process

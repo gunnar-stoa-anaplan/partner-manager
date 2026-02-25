@@ -89,6 +89,40 @@ class SupplyChainExpertTest extends TestCase
         $this->assertStringContainsString('Mastery Lab', $instructions);
     }
 
+    public function test_instructions_require_lab_overview_and_exercise_reasoning(): void
+    {
+        $agent = new SupplyChainExpert;
+        $instructions = (string) $agent->instructions();
+
+        $this->assertStringContainsString('Every lab MUST open with', $instructions);
+        $this->assertStringContainsString('why it matters', $instructions);
+        $this->assertStringContainsString('Exercise Reasoning', $instructions);
+        $this->assertStringContainsString('explain WHY', $instructions);
+    }
+
+    public function test_instructions_require_separate_participant_and_facilitator_documents(): void
+    {
+        $agent = new SupplyChainExpert;
+        $instructions = (string) $agent->instructions();
+
+        // Two separate documents
+        $this->assertStringContainsString('DOCUMENT 1: PARTICIPANT LAB GUIDE', $instructions);
+        $this->assertStringContainsString('DOCUMENT 2: FACILITATOR GUIDE', $instructions);
+        $this->assertStringContainsString('TWO separate documents', $instructions);
+
+        // Participant guide contents
+        $this->assertStringContainsString('Step-by-Step Instructions', $instructions);
+        $this->assertStringContainsString('Success Criteria', $instructions);
+
+        // Facilitator guide contents
+        $this->assertStringContainsString('Lab Setup Script', $instructions);
+        $this->assertStringContainsString('Delivery Instructions', $instructions);
+        $this->assertStringContainsString('Checkpoint Facilitation Notes', $instructions);
+        $this->assertStringContainsString('Timing Guidance', $instructions);
+        $this->assertStringContainsString('Discussion Questions', $instructions);
+        $this->assertStringContainsString('suggested answers', $instructions);
+    }
+
     public function test_instructions_contain_demand_analysis_foundation(): void
     {
         $agent = new SupplyChainExpert;

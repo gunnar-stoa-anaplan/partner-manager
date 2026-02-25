@@ -31,6 +31,10 @@ class DocumentIngestionService
             $parser = $this->parserFactory->make($document->mime_type);
             $text = $parser->parse($filePath);
 
+            // Sanitize to valid UTF-8 — PDF parsers can emit malformed byte
+            // sequences that cause json_encode failures in the embedding API.
+            $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8');
+
             if (trim($text) === '') {
                 throw new \RuntimeException('Document produced no extractable text.');
             }
