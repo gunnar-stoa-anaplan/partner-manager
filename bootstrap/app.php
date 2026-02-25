@@ -23,6 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->name('portal.')
                 ->group(base_path('routes/portal.php'));
 
+            Route::middleware('web')
+                ->prefix('workshops')
+                ->name('workshop-guides.')
+                ->group(base_path('routes/workshop-guides.php'));
+
             // Load module route files (web)
             foreach (['integration-hub', 'strategy', 'idea-room'] as $mod) {
                 $slug = str_replace('-', '_', $mod);

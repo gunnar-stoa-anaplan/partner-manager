@@ -56,6 +56,7 @@ use App\Http\Controllers\SystemStatusController;
 use App\Http\Controllers\TaskBoardController;
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WorkshopGuideAdminController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -441,6 +442,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/labs/{lab}/browse-lists', [LabController::class, 'browseLists'])->name('labs.browse-lists');
             Route::post('/labs/{lab}/participants', [LabController::class, 'addParticipant'])->name('labs.participants.store');
             Route::delete('/lab-participants/{participant}', [LabController::class, 'removeParticipant'])->name('lab-participants.destroy');
+        });
+
+        // Workshop Guides Admin (gated by enablement_admin feature flag)
+        Route::middleware('module:enablement_admin')->group(function () {
+            Route::resource('workshop-guides', WorkshopGuideAdminController::class)->names('admin.workshop-guides');
+            Route::post('/workshop-guides/{workshopGuide}/publish', [WorkshopGuideAdminController::class, 'publish'])->name('admin.workshop-guides.publish');
+            Route::post('/workshop-guides/{workshopGuide}/pages', [WorkshopGuideAdminController::class, 'addPage'])->name('admin.workshop-guides.pages.store');
+            Route::post('/workshop-guides/{workshopGuide}/images', [WorkshopGuideAdminController::class, 'uploadImage'])->name('admin.workshop-guides.images.store');
         });
 
         // Provisioning Admin (gated by provisioning_admin feature flag)
