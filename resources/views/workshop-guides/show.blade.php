@@ -1,0 +1,1 @@
+@extends('workshop-guides.layout')
