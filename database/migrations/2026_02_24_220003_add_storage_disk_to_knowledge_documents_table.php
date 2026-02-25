@@ -22,15 +22,12 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
+     *
+     * Intentionally a no-op: KB data lives on a separate PostgreSQL database
+     * and must never be dropped by migrate:refresh or migrate:rollback.
      */
     public function down(): void
     {
-        if (! Schema::connection('knowledge_base')->hasColumn('knowledge_documents', 'storage_disk')) {
-            return;
-        }
-
-        Schema::connection('knowledge_base')->table('knowledge_documents', function (Blueprint $table) {
-            $table->dropColumn('storage_disk');
-        });
+        //
     }
 };
