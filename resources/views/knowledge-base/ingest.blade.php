@@ -32,9 +32,9 @@
                         @csrf
                         <div class="mb-3">
                             <label for="documents" class="form-label">Select documents</label>
-                            <input type="file" class="form-control" id="documents" name="documents[]" multiple accept=".pdf,.docx,.xlsx,.xls,.txt,.md,.html,.csv">
+                            <input type="file" class="form-control" id="documents" name="documents[]" multiple accept=".pdf,.docx,.xlsx,.xls,.pptx,.ppt,.txt,.md,.html,.csv">
                             <div class="form-text">
-                                Supported: PDF, DOCX, XLSX, XLS, TXT, MD, HTML, CSV. Max 50 MB per file.
+                                Supported: PDF, DOCX, XLSX, XLS, PPTX, PPT, TXT, MD, HTML, CSV. Max 50 MB per file.
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">

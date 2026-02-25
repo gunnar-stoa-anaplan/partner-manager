@@ -18,7 +18,7 @@ class UploadDocumentRequest extends FormRequest
     {
         return [
             'documents' => ['required', 'array', 'min:1'],
-            'documents.*' => ['required', 'file', 'max:51200', 'mimes:pdf,docx,xlsx,xls,txt,md,html,csv'],
+            'documents.*' => ['required', 'file', 'max:51200', 'extensions:pdf,docx,xlsx,xls,pptx,ppt,txt,md,html,csv'],
         ];
     }
 }

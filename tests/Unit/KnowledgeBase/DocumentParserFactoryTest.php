@@ -7,6 +7,7 @@ use App\Services\KnowledgeBase\Parsers\DocxParser;
 use App\Services\KnowledgeBase\Parsers\HtmlParser;
 use App\Services\KnowledgeBase\Parsers\PdfParser;
 use App\Services\KnowledgeBase\Parsers\PlainTextParser;
+use App\Services\KnowledgeBase\Parsers\PresentationParser;
 use App\Services\KnowledgeBase\Parsers\SpreadsheetParser;
 use InvalidArgumentException;
 use Tests\TestCase;
@@ -76,6 +77,20 @@ class DocumentParserFactoryTest extends TestCase
         $parser = $this->factory->make('text/markdown');
 
         $this->assertInstanceOf(PlainTextParser::class, $parser);
+    }
+
+    public function test_it_returns_presentation_parser_for_pptx_mime(): void
+    {
+        $parser = $this->factory->make('application/vnd.openxmlformats-officedocument.presentationml.presentation');
+
+        $this->assertInstanceOf(PresentationParser::class, $parser);
+    }
+
+    public function test_it_returns_presentation_parser_for_ppt_mime(): void
+    {
+        $parser = $this->factory->make('application/vnd.ms-powerpoint');
+
+        $this->assertInstanceOf(PresentationParser::class, $parser);
     }
 
     public function test_it_throws_for_unsupported_mime_type(): void

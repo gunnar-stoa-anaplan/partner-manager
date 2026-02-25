@@ -62,6 +62,19 @@ class MimeTypeResolverTest extends TestCase
         $this->assertSame('text/markdown', $this->resolver->fromExtension('md'));
     }
 
+    public function test_resolves_pptx_extension(): void
+    {
+        $this->assertSame(
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            $this->resolver->fromExtension('pptx')
+        );
+    }
+
+    public function test_resolves_ppt_extension(): void
+    {
+        $this->assertSame('application/vnd.ms-powerpoint', $this->resolver->fromExtension('ppt'));
+    }
+
     public function test_returns_null_for_unsupported_extension(): void
     {
         $this->assertNull($this->resolver->fromExtension('zip'));

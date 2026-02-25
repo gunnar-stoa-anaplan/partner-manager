@@ -19,6 +19,8 @@ class MimeTypeResolver
         'htm' => 'text/html',
         'txt' => 'text/plain',
         'md' => 'text/markdown',
+        'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'ppt' => 'application/vnd.ms-powerpoint',
     ];
 
     /**

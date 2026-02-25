@@ -7,6 +7,7 @@ use App\Services\KnowledgeBase\Parsers\DocxParser;
 use App\Services\KnowledgeBase\Parsers\HtmlParser;
 use App\Services\KnowledgeBase\Parsers\PdfParser;
 use App\Services\KnowledgeBase\Parsers\PlainTextParser;
+use App\Services\KnowledgeBase\Parsers\PresentationParser;
 use App\Services\KnowledgeBase\Parsers\SpreadsheetParser;
 use InvalidArgumentException;
 
@@ -23,6 +24,8 @@ class DocumentParserFactory
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'application/vnd.ms-excel',
             'text/csv' => new SpreadsheetParser,
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/vnd.ms-powerpoint' => new PresentationParser,
             'text/html' => new HtmlParser,
             'text/plain', 'text/markdown' => new PlainTextParser,
             default => throw new InvalidArgumentException("Unsupported MIME type: {$mimeType}"),

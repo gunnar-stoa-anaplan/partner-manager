@@ -61,6 +61,6 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'supported_extensions' => ['pdf', 'docx', 'xlsx', 'xls', 'txt', 'md', 'html', 'csv'],
+    'supported_extensions' => ['pdf', 'docx', 'xlsx', 'xls', 'txt', 'md', 'html', 'csv', 'pptx', 'ppt'],
 
 ];
