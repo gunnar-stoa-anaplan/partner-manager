@@ -47,6 +47,13 @@ return [
             'report' => false,
         ],
 
+        'rag-data' => [
+            'driver' => 'local',
+            'root' => env('RAG_DATA_PATH', '/var/www/rag-data'),
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
