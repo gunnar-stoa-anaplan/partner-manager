@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Ai\Agents\EnablementDesigner;
+use App\Ai\Tools\ConsultProductExpert;
 use App\Ai\Tools\LookupEnablementCatalog;
 use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\EnablementEvent;
@@ -148,14 +149,23 @@ class EnablementDesignerTest extends TestCase
         $this->assertStringContainsString('Citation & Grounding Rules', $instructions);
     }
 
+    public function test_designer_instructions_reference_consult_product_expert(): void
+    {
+        $designer = new EnablementDesigner;
+        $instructions = (string) $designer->instructions();
+
+        $this->assertStringContainsString('ConsultProductExpert', $instructions);
+    }
+
     public function test_designer_has_catalog_lookup_tool(): void
     {
         $designer = new EnablementDesigner;
         $tools = iterator_to_array($designer->tools());
 
-        $this->assertCount(2, $tools);
+        $this->assertCount(3, $tools);
         $this->assertInstanceOf(LookupEnablementCatalog::class, $tools[0]);
-        $this->assertInstanceOf(SearchKnowledgeBase::class, $tools[1]);
+        $this->assertInstanceOf(ConsultProductExpert::class, $tools[1]);
+        $this->assertInstanceOf(SearchKnowledgeBase::class, $tools[2]);
     }
 
     public function test_catalog_tool_returns_events(): void

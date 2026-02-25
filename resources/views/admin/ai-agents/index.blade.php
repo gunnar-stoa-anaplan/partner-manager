@@ -63,7 +63,7 @@
                     <div class="mb-3">
                         <span class="badge bg-secondary me-1">Provider: {{ ucfirst(config('ai.default_provider', 'openai')) }}</span>
                         <span class="badge bg-secondary me-1">Max Tokens: 4096</span>
-                        <span class="badge bg-secondary">Tools: 1</span>
+                        <span class="badge bg-secondary">Tools: 3</span>
                     </div>
 
                     <h6 class="fs-sm fw-medium mb-2">Output Schema</h6>
@@ -97,7 +97,7 @@
                     <div class="mb-3">
                         <span class="badge bg-secondary me-1">Provider: {{ ucfirst(config('ai.default_provider', 'openai')) }}</span>
                         <span class="badge bg-secondary me-1">Max Tokens: 4096</span>
-                        <span class="badge bg-secondary">Tools: 1</span>
+                        <span class="badge bg-secondary">Tools: 3</span>
                     </div>
 
                     <h6 class="fs-sm fw-medium mb-2">Output Schema</h6>
@@ -114,5 +114,48 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <h5 class="mt-4 mb-1">Product-Line Experts</h5>
+    <p class="text-muted fst-italic mb-4">Specialized domain agents consulted automatically by the Enablement Designer and Lab Designer via the <code>ConsultProductExpert</code> tool. Each expert provides deep product-specific guidance — Anaplan formula patterns, realistic business scenarios, and implementation best practices — that the orchestrator agents use to produce technically accurate content.</p>
+
+    <div class="row">
+        @php
+            $experts = [
+                ['name' => 'Finance Expert', 'area' => 'IFP', 'color' => '#2196F3', 'desc' => 'Budgeting, forecasting, consolidation, financial close, revenue planning, P&L, balance sheet, cash flow, FP&A, variance analysis.'],
+                ['name' => 'Supply Chain Expert', 'area' => 'SCM', 'color' => '#4CAF50', 'desc' => 'Demand planning, supply planning, S&OP, inventory optimization, production scheduling, procurement.'],
+                ['name' => 'Workforce Expert', 'area' => 'OWP', 'color' => '#FF9800', 'desc' => 'Headcount planning, skills mapping, capacity modeling, workforce allocation, attrition, compensation planning.'],
+                ['name' => 'Sales Expert', 'area' => 'SPM', 'color' => '#9C27B0', 'desc' => 'Territory planning, quota management, incentive compensation, commissions, pipeline forecasting, sales capacity.'],
+                ['name' => 'Polaris Expert', 'area' => 'Polaris', 'color' => '#00BCD4', 'desc' => 'Polaris UX, new model experience, Polaris formula engine, migration from classic, board design, guided planning.'],
+                ['name' => 'ADO Expert', 'area' => 'ADO', 'color' => '#795548', 'desc' => 'Application design orchestration, page builder, custom views, UX design, app publishing, action workflows.'],
+            ];
+        @endphp
+
+        @foreach ($experts as $expert)
+        <div class="col-xl-4 col-lg-6 mb-g">
+            <div class="card shadow-0 h-100">
+                <div class="card-header" style="background: {{ $expert['color'] }}15;">
+                    <div class="d-flex align-items-center">
+                        <svg class="sa-icon sa-icon-sm me-2"><use href="/icons/sprite.svg#cpu"></use></svg>
+                        <span class="fw-medium">{{ $expert['name'] }}</span>
+                        <span class="badge ms-auto" style="background: {{ $expert['color'] }};">{{ $expert['area'] }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted fs-sm mb-3">{{ $expert['desc'] }}</p>
+
+                    <div class="mb-3">
+                        <span class="badge bg-secondary me-1">Max Tokens: 2048</span>
+                        <span class="badge bg-secondary me-1">Max Steps: 3</span>
+                        <span class="badge bg-secondary">Temp: 0.3</span>
+                    </div>
+
+                    <h6 class="fs-sm fw-medium mb-2">Invoked By</h6>
+                    <span class="badge bg-primary bg-opacity-10 text-primary me-1">Enablement Designer</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary">Lab Designer</span>
+                </div>
+            </div>
+        </div>
+        @endforeach
     </div>
 @endsection
