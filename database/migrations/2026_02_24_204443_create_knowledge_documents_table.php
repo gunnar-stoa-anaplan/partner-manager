@@ -39,9 +39,12 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
+     *
+     * Intentionally a no-op: KB data lives on a separate PostgreSQL database
+     * and must never be dropped by migrate:refresh or migrate:rollback.
      */
     public function down(): void
     {
-        Schema::connection('knowledge_base')->dropIfExists('knowledge_documents');
+        //
     }
 };
