@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Ai\Agents\EnablementDesigner;
+use App\Ai\Tools\ConsultProductExpert;
 use App\Ai\Tools\LookupEnablementCatalog;
+use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\EnablementEvent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -144,6 +146,15 @@ class EnablementDesignerTest extends TestCase
         $this->assertStringContainsString('SPM', $instructions);
         $this->assertStringContainsString('OWP', $instructions);
         $this->assertStringContainsString('Tell-Show-Do', $instructions);
+        $this->assertStringContainsString('Citation & Grounding Rules', $instructions);
+    }
+
+    public function test_designer_instructions_reference_consult_product_expert(): void
+    {
+        $designer = new EnablementDesigner;
+        $instructions = (string) $designer->instructions();
+
+        $this->assertStringContainsString('ConsultProductExpert', $instructions);
     }
 
     public function test_designer_has_catalog_lookup_tool(): void
@@ -151,8 +162,10 @@ class EnablementDesignerTest extends TestCase
         $designer = new EnablementDesigner;
         $tools = iterator_to_array($designer->tools());
 
-        $this->assertCount(1, $tools);
+        $this->assertCount(3, $tools);
         $this->assertInstanceOf(LookupEnablementCatalog::class, $tools[0]);
+        $this->assertInstanceOf(ConsultProductExpert::class, $tools[1]);
+        $this->assertInstanceOf(SearchKnowledgeBase::class, $tools[2]);
     }
 
     public function test_catalog_tool_returns_events(): void

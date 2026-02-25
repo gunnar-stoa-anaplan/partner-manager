@@ -46,6 +46,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libicu-dev \
         libxml2-dev \
         libonig-dev \
+        libpq-dev \
         libcurl4-openssl-dev \
         ca-certificates \
         unzip \
@@ -53,6 +54,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
+        pdo_pgsql \
         gd \
         zip \
         bcmath \

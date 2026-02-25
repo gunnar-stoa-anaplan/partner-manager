@@ -97,6 +97,20 @@ return [
             'sslmode' => 'prefer',
         ],
 
+        'knowledge_base' => [
+            'driver' => 'pgsql',
+            'host' => env('KB_DB_HOST', 'pgsql'),
+            'port' => env('KB_DB_PORT', '5432'),
+            'database' => env('KB_DB_DATABASE', 'knowledge_base'),
+            'username' => env('KB_DB_USERNAME', 'sail'),
+            'password' => env('KB_DB_PASSWORD', 'password'),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => 'prefer',
+        ],
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DB_URL'),

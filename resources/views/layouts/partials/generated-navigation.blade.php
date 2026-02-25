@@ -622,7 +622,7 @@
     </li>
     @endif
 
-    @if($show('blueprints', 'enablement_events') && $registry->isAccessible('enablement_admin'))
+    @if($show('blueprints', 'enablement_events') && $registry->isAccessible('enablement_events_admin'))
     <li class="nav-item">
         <a href="#" title="Enablement" data-filter-tags>
             <svg class="sa-icon">
@@ -655,7 +655,7 @@
     </li>
     @endif
 
-    @if($show('labs') && $registry->isAccessible('enablement_admin'))
+    @if($show('labs') && $registry->isAccessible('workshop_labs_admin'))
     <li class="nav-item">
         <a href="#" title="Workshops" data-filter-tags>
             <svg class="sa-icon">
@@ -702,6 +702,39 @@
     @endif
     @endif
 
+    {{-- Blueprint & Enablement Admin for non-admin users --}}
+    @if(Auth::user()->role !== 'admin' && $registry->isAccessible('enablement_events_admin'))
+    @if($show('blueprints', 'enablement_events'))
+    <li class="nav-title"><span>Enablement Administration</span></li>
+
+    <li class="nav-item">
+        <a href="#" title="Enablement" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#layers"></use>
+            </svg>
+            <span class="nav-link-text">Enablement</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('blueprints.catalog') }}">
+                    <span class="nav-link-text">Blueprints</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('enablement-events.index') }}">
+                    <span class="nav-link-text">Enablement Events</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('enablement-calendar') }}">
+                    <span class="nav-link-text">Enablement Calendar</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+    @endif
+
     {{-- System - always show Configuration so dev can change focus --}}
     @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_system'] ?? '1') === '1')
     <li class="nav-title"><span>System Administration</span></li>
@@ -741,6 +774,45 @@
             <span class="nav-link-text">Branding</span>
         </a>
     </li>
+
+    @if($registry->isAccessible('ai_agents_admin'))
+    <li>
+        <a href="{{ route('admin.ai-agents.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#cpu"></use>
+            </svg>
+            <span class="nav-link-text">AI Agents</span>
+        </a>
+    </li>
+    @endif
+
+    @if($registry->isAccessible('knowledge_base_admin'))
+    <li class="nav-item">
+        <a href="#" title="Knowledge Base" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#book-open"></use>
+            </svg>
+            <span class="nav-link-text">Knowledge Base</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('knowledge_base.dashboard') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('knowledge_base.documents.index') }}">
+                    <span class="nav-link-text">Documents</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('knowledge_base.ingest.create') }}">
+                    <span class="nav-link-text">Ingest</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
 
     @if(!$focused)
     <li>

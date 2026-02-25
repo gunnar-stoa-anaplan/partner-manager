@@ -39,7 +39,9 @@ class LabController extends Controller
 
         $response = LabDesigner::make(
             workshopContext: $request->input('workshop_context', ''),
-        )->prompt($prompt);
+        )
+            ->withPrefetchedContext($prompt)
+            ->prompt($prompt);
 
         $checkpoints = [];
 

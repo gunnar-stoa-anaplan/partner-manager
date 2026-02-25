@@ -274,4 +274,60 @@ return [
         'enabled' => env('MODULE_FEATURE_ACTIVATION_COE', true),
     ],
 
+    'ai_agents_admin' => [
+        'name' => 'AI Agents Administration',
+        'description' => 'Configure and manage AI-powered agents for partner insights, enablement design, and lab generation.',
+        'icon' => 'cpu',
+        'enabled' => env('MODULE_AI_AGENTS_ADMIN', true),
+    ],
+
+    'ai_agents_user' => [
+        'name' => 'AI Agents End Users',
+        'description' => 'Access AI-powered insights and content generation across partner, enablement, and lab modules.',
+        'icon' => 'cpu',
+        'enabled' => env('MODULE_AI_AGENTS_USER', true),
+    ],
+
+    'enablement_events_admin' => [
+        'name' => 'Enablement Events Administration',
+        'description' => 'Administrative access to enablement event catalog, sessions, registrations, and calendar.',
+        'icon' => 'layers',
+        'enabled' => env('MODULE_ENABLEMENT_EVENTS_ADMIN', true),
+    ],
+
+    'enablement_events_user' => [
+        'name' => 'Enablement Events End Users',
+        'description' => 'End-user access to browse and register for enablement events and view the calendar.',
+        'icon' => 'layers',
+        'enabled' => env('MODULE_ENABLEMENT_EVENTS_USER', true),
+    ],
+
+    'knowledge_base_admin' => [
+        'name' => 'Knowledge Base Administration',
+        'description' => 'Document ingestion, embedding management, and knowledge base configuration.',
+        'icon' => 'book-open',
+        'enabled' => env('MODULE_KNOWLEDGE_BASE_ADMIN', true),
+    ],
+
+    'knowledge_base_user' => [
+        'name' => 'Knowledge Base End Users',
+        'description' => 'Search the organizational knowledge base.',
+        'icon' => 'book-open',
+        'enabled' => env('MODULE_KNOWLEDGE_BASE_USER', true),
+    ],
+
+    'workshop_labs_admin' => [
+        'name' => 'Workshop Labs Administration',
+        'description' => 'Administrative access to create and manage workshop labs, checkpoints, and participants.',
+        'icon' => 'check-square',
+        'enabled' => env('MODULE_WORKSHOP_LABS_ADMIN', true),
+    ],
+
+    'workshop_labs_user' => [
+        'name' => 'Workshop Labs End Users',
+        'description' => 'End-user access to participate in workshop labs and complete checkpoint exercises.',
+        'icon' => 'check-square',
+        'enabled' => env('MODULE_WORKSHOP_LABS_USER', true),
+    ],
+
 ];

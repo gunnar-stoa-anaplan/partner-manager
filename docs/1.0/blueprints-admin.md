@@ -27,7 +27,7 @@ Content items are the individual learning resources:
 |------|------------|
 | **Document** | PDF, article, or documentation link |
 | **Video** | Training or demonstration video |
-| **Lab** | Hands-on exercise (links to lab system) |
+| **Lab** | Hands-on exercise (requires `workshop_labs_admin` feature flag) |
 | **Assessment** | Quiz or evaluation |
 | **External** | Link to external training platform |
 

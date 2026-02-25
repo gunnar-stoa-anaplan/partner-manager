@@ -529,6 +529,78 @@ class ActivationPathSeeder extends Seeder
                 ],
             ],
 
+            // ── AI Agents (Admin) ── not started
+            [
+                'feature_slug' => 'ai_agents_admin',
+                'name' => 'AI Agents Administration',
+                'description' => 'Steps to unlock admin configuration and management of AI-powered agents.',
+                'steps' => [
+                    ['name' => 'Complete AI overview training', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the AI Agents administration overview training.', 'phase' => 'tell'],
+                    ['name' => 'Configure AI provider settings', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Set up and verify the AI provider configuration in system settings.', 'phase' => 'show'],
+                    ['name' => 'Review agent output for 1 partner', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Generate and review AI insights for at least one partner.', 'phase' => 'do'],
+                ],
+            ],
+
+            // ── AI Agents (End User) ── not started
+            [
+                'feature_slug' => 'ai_agents_user',
+                'name' => 'AI Agents End User',
+                'description' => 'Steps to unlock end-user access to AI-powered insights and content generation.',
+                'steps' => [
+                    ['name' => 'Complete AI agents overview', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the AI Agents end-user orientation.', 'phase' => 'tell'],
+                    ['name' => 'Generate AI insights for a partner', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Use the Partner Advisor agent to generate insights for a partner.', 'phase' => 'show'],
+                    ['name' => 'Generate enablement content with AI', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Use an AI agent to generate an enablement event or lab.', 'phase' => 'do'],
+                ],
+            ],
+
+            // ── Enablement Events (Admin) ── not started
+            [
+                'feature_slug' => 'enablement_events_admin',
+                'name' => 'Enablement Events Administration',
+                'description' => 'Steps to unlock admin setup for enablement events, sessions, and the calendar.',
+                'steps' => [
+                    ['name' => 'Complete events admin training', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the Enablement Events administration training.', 'phase' => 'tell'],
+                    ['name' => 'Create an enablement event', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Create at least one enablement event in the catalog.', 'phase' => 'show'],
+                    ['name' => 'Publish event with sessions', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Publish an event and schedule at least one session.', 'phase' => 'do'],
+                ],
+            ],
+
+            // ── Enablement Events (End User) ── not started
+            [
+                'feature_slug' => 'enablement_events_user',
+                'name' => 'Enablement Events End User',
+                'description' => 'Steps to unlock end-user access to browse and register for enablement events.',
+                'steps' => [
+                    ['name' => 'Complete events overview', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the Enablement Events end-user orientation.', 'phase' => 'tell'],
+                    ['name' => 'Browse enablement catalog', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Navigate and explore the enablement event catalog.', 'phase' => 'show'],
+                    ['name' => 'Register for an event', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Register at least one participant for an enablement session.', 'phase' => 'do'],
+                ],
+            ],
+
+            // ── Workshop Labs (Admin) ── not started
+            [
+                'feature_slug' => 'workshop_labs_admin',
+                'name' => 'Workshop Labs Administration',
+                'description' => 'Steps to unlock admin setup for workshop labs, checkpoints, and participants.',
+                'steps' => [
+                    ['name' => 'Complete labs admin training', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the Workshop Labs administration training.', 'phase' => 'tell'],
+                    ['name' => 'Create a workshop lab', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Create at least one workshop lab with a golden model.', 'phase' => 'show'],
+                    ['name' => 'Publish lab with checkpoints', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Publish a lab with at least one checkpoint defined.', 'phase' => 'do'],
+                ],
+            ],
+
+            // ── Workshop Labs (End User) ── not started
+            [
+                'feature_slug' => 'workshop_labs_user',
+                'name' => 'Workshop Labs End User',
+                'description' => 'Steps to unlock end-user access to participate in workshop labs.',
+                'steps' => [
+                    ['name' => 'Complete labs overview', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the Workshop Labs end-user orientation.', 'phase' => 'tell'],
+                    ['name' => 'Browse available labs', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Navigate and explore the available workshop labs.', 'phase' => 'show'],
+                    ['name' => 'Complete a lab checkpoint', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Complete at least one checkpoint in a workshop lab.', 'phase' => 'do'],
+                ],
+            ],
+
             // ── Feature Activation (CoE) ── not started
             [
                 'feature_slug' => 'feature_activation_coe',

@@ -46,8 +46,10 @@ Multi-year agreements include a **price-lock guarantee** — the rate at sign-up
 | Deal registration | Yes | Yes | Yes | Yes |
 | Analytics & dashboards | — | Yes | Yes | Yes |
 | QBR workbench | — | — | Yes | Yes |
-| Enablement calendar | — | — | Yes | Yes |
+| Enablement events | — | — | Yes | Yes |
+| Workshop labs | — | — | Yes | Yes |
 | Competency matrix | — | — | Yes | Yes |
+| AI agents | — | — | — | Yes |
 | Benchmarking | — | — | — | Yes |
 | Custom integrations | — | — | — | Yes |
 | Dedicated support | — | — | — | Yes |

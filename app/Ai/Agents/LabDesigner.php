@@ -2,7 +2,10 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\WithKnowledgeBase;
+use App\Ai\Tools\ConsultProductExpert;
 use App\Ai\Tools\LookupExistingLabs;
+use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\Lab;
 use App\Models\LabCheckpoint;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -15,10 +18,10 @@ use Laravel\Ai\Promptable;
 use Stringable;
 
 #[MaxTokens(4096)]
-#[MaxSteps(5)]
+#[MaxSteps(7)]
 class LabDesigner implements Agent, HasStructuredOutput, HasTools
 {
-    use Promptable;
+    use Promptable, WithKnowledgeBase;
 
     public function __construct(public string $workshopContext = '') {}
 
@@ -108,7 +111,12 @@ class LabDesigner implements Agent, HasStructuredOutput, HasTools
         - 5-8 checkpoints, each with: title, description, type, points, hint,
           whether it's required, and the validation configuration
         - Checkpoints should cover at least 3 different validation types
+        - Always consult the product line expert (use the ConsultProductExpert tool) for the
+          selected tenant's product area before designing. Use the expert's domain-specific
+          guidance to ensure realistic scenarios, correct formula patterns, and practical exercises.
         {$workshopSection}
+        {$this->buildKnowledgeBaseSection()}
+        {$this->citationInstructions()}
         PROMPT;
     }
 
@@ -121,6 +129,8 @@ class LabDesigner implements Agent, HasStructuredOutput, HasTools
     {
         return [
             new LookupExistingLabs,
+            new ConsultProductExpert,
+            new SearchKnowledgeBase,
         ];
     }
 

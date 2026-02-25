@@ -2,7 +2,10 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\WithKnowledgeBase;
+use App\Ai\Tools\ConsultProductExpert;
 use App\Ai\Tools\LookupEnablementCatalog;
+use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\EnablementEvent;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Attributes\MaxSteps;
@@ -14,10 +17,10 @@ use Laravel\Ai\Promptable;
 use Stringable;
 
 #[MaxTokens(4096)]
-#[MaxSteps(5)]
+#[MaxSteps(7)]
 class EnablementDesigner implements Agent, HasStructuredOutput, HasTools
 {
-    use Promptable;
+    use Promptable, WithKnowledgeBase;
 
     /**
      * Get the instructions that the agent should follow.
@@ -97,6 +100,9 @@ class EnablementDesigner implements Agent, HasStructuredOutput, HasTools
           multi-day sessions.
         - Always check the existing catalog (use the lookup tool) before designing, to avoid
           duplicating existing content and to build on what already exists.
+        - Always consult the product line expert (use the ConsultProductExpert tool) for the
+          selected product area before designing. Use the expert's domain-specific guidance to
+          ensure technical depth, realistic scenarios, and correct Anaplan formula patterns.
         - Target audience must be explicitly stated — do not create "for everyone" workshops.
 
         ## Available Event Types
@@ -104,6 +110,8 @@ class EnablementDesigner implements Agent, HasStructuredOutput, HasTools
         workshop (4-8h hands-on), academy (8-24h deep training), webinar (1h overview),
         bootcamp (40h intensive multi-day), certification_exam (4h prep+exam),
         onboarding (2-4h new partner intro), hackathon (8h competitive build)
+        {$this->buildKnowledgeBaseSection()}
+        {$this->citationInstructions()}
         PROMPT;
     }
 
@@ -116,6 +124,8 @@ class EnablementDesigner implements Agent, HasStructuredOutput, HasTools
     {
         return [
             new LookupEnablementCatalog,
+            new ConsultProductExpert,
+            new SearchKnowledgeBase,
         ];
     }
 

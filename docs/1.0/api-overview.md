@@ -14,10 +14,13 @@ https://your-instance.example.com/api/v1/partners
 
 | Area | Capabilities |
 |------|-------------|
-| **Imports** | Create import records for opportunities, projects, and contacts |
-| **Partners** | Read partner data, pipeline information, and project details |
-| **Enablement** | Access calendar events and enablement data |
 | **Tokens** | Manage API tokens (create, list, revoke) |
+| **Partners** | Read partner data, pipeline, projects, and AI-powered advisor insights |
+| **Imports** | Create import records for opportunities, projects, and contacts |
+| **Enablement** | Access calendar events, enablement data, and AI-powered content generation |
+| **Integration Hub** | Push/pull data through configured integration connections |
+| **Idea Room** | Manage ideas, rooms, conversations, artifacts, and AI chat |
+| **Internal** | Metrics, signal aggregation, and activation data (agent-to-agent) |
 
 ## Response Format
 

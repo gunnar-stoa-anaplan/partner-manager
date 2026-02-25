@@ -29,7 +29,7 @@ return [
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
-        'description' => 'REST API for importing and exporting partner data, opportunity snapshots, projects, contacts, and enablement calendar. Authenticate with a Bearer token (Sanctum). Tokens are scoped with abilities: `imports:write`, `imports:read`, `partners:read`, `enablement:read`.',
+        'description' => 'REST API for importing partner data, reading partner records, accessing enablement content, managing integrations, and AI-powered insights.',
     ],
 
     /*

@@ -10,11 +10,18 @@ Navigate to **Engage > Enablement Events** to see upcoming and past events.
 
 ## Creating an Event
 
+> [!NOTE]
+> Creating and managing events requires the `enablement_events_admin` feature flag to be active.
+
 1. Click **New Event**
 2. Enter the event name, description, and type
 3. Set the date, time, and capacity
 4. Add sessions if the event spans multiple days or topics
 5. Click **Save**
+
+### AI-Assisted Event Design
+
+When the `enablement_events_user` feature flag is active, the event creation form includes a **Generate with AI** panel. Select a product area and event type, and the Enablement Designer agent will produce a complete event package including title, description, learning objectives, prerequisites, a time-blocked agenda, lab design, promotion copy, and instructor notes. All fields can be reviewed and edited before saving.
 
 ## Event Sessions
 

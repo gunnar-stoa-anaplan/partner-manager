@@ -14,8 +14,11 @@ class EnablementDesignerController extends Controller
      */
     public function __invoke(DesignWorkshopRequest $request): JsonResponse
     {
+        $prompt = $request->toPrompt();
+
         $response = EnablementDesigner::make()
-            ->prompt($request->toPrompt());
+            ->withPrefetchedContext($prompt)
+            ->prompt($prompt);
 
         return response()->json([
             'workshop' => [

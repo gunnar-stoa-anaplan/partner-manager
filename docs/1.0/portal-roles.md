@@ -10,10 +10,10 @@ The default role for all portal users:
 
 - View scorecard and goals
 - Browse and complete blueprints
-- Register for enablement events
+- Register for enablement events (requires `enablement_events_user`)
 - Submit deal registrations
 - View project status
-- Participate in labs
+- Participate in labs (requires `workshop_labs_user`)
 
 ### Team Lead
 
@@ -35,9 +35,9 @@ All standard capabilities, plus:
 
 All standard capabilities, plus:
 
-- Manage event registrations for their organization (register others)
+- Manage event registrations for their organization (requires `enablement_events_user`)
 - Bulk import contacts
-- Coordinate lab participation for their team
+- Coordinate lab participation for their team (requires `workshop_labs_user`)
 
 ## Assigning Roles
 

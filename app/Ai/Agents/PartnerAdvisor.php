@@ -2,20 +2,25 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\WithKnowledgeBase;
+use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\Partner;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Ai\Attributes\MaxSteps;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Temperature;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
+use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Promptable;
 use Stringable;
 
 #[MaxTokens(1024)]
+#[MaxSteps(5)]
 #[Temperature(0.4)]
-class PartnerAdvisor implements Agent, HasStructuredOutput
+class PartnerAdvisor implements Agent, HasStructuredOutput, HasTools
 {
-    use Promptable;
+    use Promptable, WithKnowledgeBase;
 
     public function __construct(public Partner $partner) {}
 
@@ -37,7 +42,21 @@ class PartnerAdvisor implements Agent, HasStructuredOutput
 
         Here is the partner's current data:
         {$context}
+        {$this->buildKnowledgeBaseSection()}
+        {$this->citationInstructions()}
         PROMPT;
+    }
+
+    /**
+     * Get the tools available to the agent.
+     *
+     * @return \Laravel\Ai\Contracts\Tool[]
+     */
+    public function tools(): iterable
+    {
+        return [
+            new SearchKnowledgeBase,
+        ];
     }
 
     /**

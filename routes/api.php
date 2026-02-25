@@ -6,11 +6,15 @@ use App\Http\Controllers\Api\InternalMetricsController;
 use App\Http\Controllers\Api\InternalSignalAggregateController;
 use App\Http\Controllers\Api\LabDesignerController;
 use App\Http\Controllers\Api\PartnerAdvisorController;
+use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\EnablementController;
 use App\Http\Controllers\Api\V1\ImportController;
 use App\Http\Controllers\Api\V1\PartnerController;
 use App\Http\Controllers\Api\V1\TokenController;
 use Illuminate\Support\Facades\Route;
+
+// --- Authentication (no token required) ---
+Route::post('/auth/login', [AuthController::class, 'login'])->name('api.auth.login');
 
 // --- Internal (agent-only, no auth) ---
 Route::get('/internal/metrics', InternalMetricsController::class);

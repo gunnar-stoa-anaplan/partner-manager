@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Ai\Agents\LabDesigner;
+use App\Ai\Tools\ConsultProductExpert;
 use App\Ai\Tools\LookupExistingLabs;
+use App\Ai\Tools\SearchKnowledgeBase;
 use App\Models\AnaplanModel;
 use App\Models\EnablementSession;
 use App\Models\Lab;
@@ -146,6 +148,7 @@ class LabDesignerTest extends TestCase
         $this->assertStringContainsString('structure', $instructions);
         $this->assertStringContainsString('SUM', $instructions);
         $this->assertStringContainsString('LOOKUP', $instructions);
+        $this->assertStringContainsString('Citation & Grounding Rules', $instructions);
     }
 
     public function test_lab_designer_includes_workshop_context_in_instructions(): void
@@ -158,13 +161,23 @@ class LabDesignerTest extends TestCase
         $this->assertStringContainsString('Workshop Context', $instructions);
     }
 
+    public function test_lab_designer_instructions_reference_consult_product_expert(): void
+    {
+        $designer = new LabDesigner;
+        $instructions = (string) $designer->instructions();
+
+        $this->assertStringContainsString('ConsultProductExpert', $instructions);
+    }
+
     public function test_lab_designer_has_lookup_tool(): void
     {
         $designer = new LabDesigner;
         $tools = iterator_to_array($designer->tools());
 
-        $this->assertCount(1, $tools);
+        $this->assertCount(3, $tools);
         $this->assertInstanceOf(LookupExistingLabs::class, $tools[0]);
+        $this->assertInstanceOf(ConsultProductExpert::class, $tools[1]);
+        $this->assertInstanceOf(SearchKnowledgeBase::class, $tools[2]);
     }
 
     public function test_lab_lookup_tool_returns_labs(): void
