@@ -173,6 +173,18 @@ class RoleSeeder extends Seeder
         ]);
         $this->syncPermissions($psm, [...self::USER_MODULES, 'health_alerts'], 'write');
 
+        // PAM
+        $pam = Role::updateOrCreate(['slug' => 'pam'], [
+            'display_name' => 'Partner Account Manager',
+            'type' => 'internal',
+            'is_protected' => true,
+            'bypass_permissions' => false,
+            'landing_route' => 'welcome',
+            'sort_order' => 5,
+            'description' => 'Partner account ownership, relationship management, and commercial oversight.',
+        ]);
+        $this->syncPermissions($pam, [...self::USER_MODULES, 'health_alerts'], 'write');
+
         // Integration
         $integration = Role::updateOrCreate(['slug' => 'integration'], [
             'display_name' => 'Integration',
@@ -180,7 +192,7 @@ class RoleSeeder extends Seeder
             'is_protected' => true,
             'bypass_permissions' => false,
             'landing_route' => 'integration_hub.dashboard',
-            'sort_order' => 5,
+            'sort_order' => 6,
             'description' => 'Data connector operations, import/export jobs, and field mappings.',
         ]);
         $this->syncPermissions($integration, ['integration_hub', 'data_imports'], 'write');
