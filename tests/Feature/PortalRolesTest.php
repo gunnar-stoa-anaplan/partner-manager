@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Contact;
 use App\Models\Partner;
+use App\Models\Role;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
@@ -20,8 +22,9 @@ class PortalRolesTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(RoleSeeder::class);
 
-        $this->psm = User::factory()->create(['role' => 'psm']);
+        $this->psm = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $this->psm->id]);
     }
 
@@ -117,7 +120,7 @@ class PortalRolesTest extends TestCase
         $contact = Contact::factory()->create([
             'partner_id' => $this->partner->id,
             'portal_access' => true,
-            'portal_role' => 'nonexistent',
+            'portal_role_id' => null,
         ]);
 
         $this->assertFalse($contact->canAccess('projects'));
@@ -224,7 +227,7 @@ class PortalRolesTest extends TestCase
             );
 
             $response->assertRedirect();
-            $this->assertEquals($role, $contact->fresh()->portal_role);
+            $this->assertEquals($role, $contact->fresh()->role?->slug);
         }
     }
 
@@ -263,12 +266,12 @@ class PortalRolesTest extends TestCase
             'email' => 'john.smith@test.com',
             'first_name' => 'John',
             'last_name' => 'Smith',
-            'portal_role' => 'delivery_lead',
+            'portal_role_id' => Role::where('slug', 'delivery_lead')->first()?->id,
         ]);
         $this->assertDatabaseHas('contacts', [
             'partner_id' => $this->partner->id,
             'email' => 'jane.doe@test.com',
-            'portal_role' => 'sales',
+            'portal_role_id' => Role::where('slug', 'sales')->first()?->id,
         ]);
     }
 
@@ -298,7 +301,7 @@ class PortalRolesTest extends TestCase
         $this->assertEquals('New', $existing->first_name);
         $this->assertEquals('Name', $existing->last_name);
         $this->assertEquals('Updated Title', $existing->title);
-        $this->assertEquals('partner_admin', $existing->portal_role);
+        $this->assertEquals('partner_admin', $existing->role?->slug);
     }
 
     public function test_import_skips_rows_with_invalid_email(): void
@@ -342,7 +345,7 @@ class PortalRolesTest extends TestCase
 
     public function test_import_requires_authorization(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         $csv = "First Name,Last Name,Email\nTest,User,test@test.com\n";

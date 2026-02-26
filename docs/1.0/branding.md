@@ -4,10 +4,10 @@ The Branding page allows administrators to customize the application's appearanc
 
 ## Accessing Branding
 
-Navigate to **System Administration > Branding** from the admin sidebar.
+Navigate to **Administration > Branding** from the sidebar.
 
 > [!IMPORTANT]
-> Only administrators can access the Branding page. Changes affect all users in the deployment.
+> Available to: CoE, Administrator. Changes affect all users in the deployment.
 
 ## Application Name
 

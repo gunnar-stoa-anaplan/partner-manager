@@ -6,6 +6,8 @@
     $focused = !empty($devFocus);
     $show = fn(string ...$features) => !$focused || in_array($devFocus, $features);
     $registry = app(\App\Services\ModuleRegistry::class);
+
+    $roleSlug = Auth::user()?->role?->slug;
 @endphp
 <ul id="js-nav-menu" class="nav-menu">
 
@@ -38,7 +40,7 @@
     @endauth
 
     @auth
-    @if(!in_array(Auth::user()->role, ['coe', 'integration']) && app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
+    @if(!in_array($roleSlug, ['coe', 'integration']) && app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
     <li class="nav-item">
         <a href="#" title="Idea Room" data-filter-tags>
             <svg class="sa-icon">
@@ -76,7 +78,7 @@
     </li>
     @endif
 
-    @if(!in_array(Auth::user()->role, ['coe', 'integration']))
+    @if(!in_array($roleSlug, ['coe', 'integration']))
     <li class="nav-item">
         <a href="#" title="Partners" data-filter-tags>
             <svg class="sa-icon">
@@ -122,7 +124,7 @@
 
     {{-- Engage Section (temporarily removed) --}}
 
-    @if(!in_array(Auth::user()->role, ['coe', 'integration']))
+    @if(!in_array($roleSlug, ['coe', 'integration']))
     {{-- Business Development --}}
     @if($show('deal_registration') && $registry->isAccessible('deal_registration_user'))
     @if(!$focused || Auth::user()->isAdmin() || ($navSettings['nav_visible_business_dev'] ?? '1') === '1')
@@ -213,10 +215,10 @@
     {{-- Act Section (temporarily removed) --}}
 
     {{-- Team Management (admin, super_admin, coe, manager) --}}
-    @if(in_array(Auth::user()->role, ['admin', 'super_admin', 'coe', 'manager']))
+    @if(in_array($roleSlug, ['admin', 'super_admin', 'coe', 'manager']))
     <li class="nav-title"><span>Team</span></li>
 
-    @if(in_array(Auth::user()->role, ['admin', 'super_admin', 'coe']))
+    @if(in_array($roleSlug, ['admin', 'super_admin', 'coe']))
     <li>
         <a href="{{ route('users.index') }}">
             <svg class="sa-icon">
@@ -245,7 +247,7 @@
         </a>
     </li>
 
-    @if(in_array(Auth::user()->role, ['admin', 'super_admin', 'coe']) && $registry->isAccessible('directory_sync_admin'))
+    @if(in_array($roleSlug, ['admin', 'super_admin', 'coe']) && $registry->isAccessible('directory_sync_admin'))
     <li>
         <a href="{{ route('directory-sync.index') }}">
             <svg class="sa-icon">
@@ -258,7 +260,7 @@
     @endif
 
     {{-- CoE Management --}}
-    @if(Auth::user()->role === 'coe' || Auth::user()->role === 'super_admin')
+    @if($roleSlug === 'coe' || $roleSlug === 'super_admin')
     <li class="nav-title"><span>CoE Management</span></li>
 
     <li>
@@ -570,7 +572,7 @@
     @endif
 
     {{-- Blueprint & Enablement Admin for CoE users --}}
-    @if(in_array(Auth::user()->role, ['coe', 'super_admin']) && $registry->isAccessible('enablement_events_admin'))
+    @if(in_array($roleSlug, ['coe', 'super_admin']) && $registry->isAccessible('enablement_events_admin'))
     @if($show('blueprints', 'enablement_events'))
     <li class="nav-title"><span>Enablement Administration</span></li>
 
@@ -659,6 +661,15 @@
         </a>
     </li>
 
+    <li>
+        <a href="{{ route('admin.roles.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#shield"></use>
+            </svg>
+            <span class="nav-link-text">Roles &amp; Permissions</span>
+        </a>
+    </li>
+
     @if(!$focused)
     <li>
         <a href="/pulse" target="_blank">
@@ -719,7 +730,7 @@
     @endcan
 
     {{-- Dynamic Module Navigation — rendered for integration role (other roles have hardcoded nav) --}}
-    @if(in_array(Auth::user()->role, ['integration', 'super_admin']) && !empty($moduleNav))
+    @if(in_array($roleSlug, ['integration', 'super_admin']) && !empty($moduleNav))
     @foreach($moduleNav as $section => $items)
     @php
         // Only render modules whose routes the integration role can actually reach

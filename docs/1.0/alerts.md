@@ -1,6 +1,9 @@
 # Alerts
 
-Alerts are system-generated notifications that flag conditions requiring PSM attention. They are the "early warning system" that ensures nothing falls through the cracks.
+> [!NOTE]
+> Available to: PSM, Manager, Administrator. Alert thresholds are configured by administrators under [Configuration](configuration).
+
+Alerts are system-generated notifications that flag conditions requiring attention. They are the "early warning system" that ensures nothing falls through the cracks.
 
 The Signal Engine processes data from multiple sources on daily and weekly schedules, routing signals through risk, trend, anomaly, and recommendation channels to generate actionable alerts.
 
@@ -42,7 +45,7 @@ Each alert includes:
 Alerts can be acknowledged, deferred, or resolved.
 
 > [!NOTE]
-> Alerts are generated automatically by the Alert Generation Service based on configurable thresholds. Admins can adjust these thresholds under [Configuration](configuration).
+> Alerts are generated automatically by the Alert Generation Service based on configurable thresholds. Administrators can adjust these thresholds under [Configuration](configuration).
 
 ## Alert History
 

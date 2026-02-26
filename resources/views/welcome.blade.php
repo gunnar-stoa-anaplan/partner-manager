@@ -6,13 +6,17 @@
 
 @section('content')
 
+    @php
+        $roleSlug = Auth::user()->role?->slug;
+    @endphp
+
     @if(Auth::user()->isAdmin())
         @include('welcome.admin')
-    @elseif(Auth::user()->role === 'coe')
+    @elseif($roleSlug === 'coe')
         @include('welcome.coe')
-    @elseif(Auth::user()->role === 'manager')
+    @elseif($roleSlug === 'manager')
         @include('welcome.manager')
-    @elseif(Auth::user()->role === 'integration')
+    @elseif($roleSlug === 'integration')
         @include('welcome.integration')
     @else
         @include('welcome.psm')

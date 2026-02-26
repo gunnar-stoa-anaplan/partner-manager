@@ -46,8 +46,8 @@
                     <label class="form-label">Portal Role</label>
                     <select name="portal_role" class="form-select @error('portal_role') is-invalid @enderror">
                         <option value="">— None —</option>
-                        @foreach(\App\Models\Contact::PORTAL_ROLES as $key => $label)
-                            <option value="{{ $key }}" {{ old('portal_role', $contact->portal_role) === $key ? 'selected' : '' }}>{{ $label }}</option>
+                        @foreach(\App\Models\Role::portal()->orderBy('sort_order')->get() as $portalRole)
+                            <option value="{{ $portalRole->slug }}" {{ old('portal_role', $contact->role?->slug) === $portalRole->slug ? 'selected' : '' }}>{{ $portalRole->display_name }}</option>
                         @endforeach
                     </select>
                     @error('portal_role') <div class="invalid-feedback">{{ $message }}</div> @enderror

@@ -1,5 +1,8 @@
 # Path Reviews
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator. Path configuration is managed by CoE users.
+
 Path Reviews are the formal process for evaluating whether a partner is ready to advance to the next stage in their path.
 
 ## When Reviews Happen

@@ -123,6 +123,12 @@
                 <span class="badge bg-primary bg-opacity-25 text-primary ms-1">{{ $partner->opportunities->count() }}</span>
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#deal-registrations" data-tab="deal-registrations" role="tab">
+                <i class="fal fa-file-text me-1 d-none d-md-inline"></i> Deal Registrations
+                <span class="badge bg-info bg-opacity-25 text-info ms-1">{{ $partner->dealRegistrations->count() }}</span>
+            </a>
+        </li>
         @endif
         @if($registry->isEnabled('project_health_user'))
         <li class="nav-item">
@@ -199,6 +205,14 @@
             <div class="spinner-loader">
                 <div class="spinner-border text-primary" role="status"></div>
                 <p class="mt-2 text-muted">Loading pipeline data...</p>
+            </div>
+        </div>
+
+        {{-- Deal Registrations (AJAX) --}}
+        <div class="tab-pane" id="tab-deal-registrations" style="display: none;">
+            <div class="spinner-loader">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading deal registrations...</p>
             </div>
         </div>
         @endif
@@ -295,7 +309,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     var PARTNER_ID = {{ $partner->id }};
     var TAB_BASE_URL = '{{ url("/partners") }}/' + PARTNER_ID + '/tab/';
-    var AJAX_TABS = ['pipeline', 'projects', 'enablement', 'calendar', 'influencers', 'resources', 'app-enablement', 'launch-programs', 'workspaces', 'portal-users'];
+    var AJAX_TABS = ['pipeline', 'deal-registrations', 'projects', 'enablement', 'calendar', 'influencers', 'resources', 'app-enablement', 'launch-programs', 'workspaces', 'portal-users'];
     var ALL_TABS = ['overview'].concat(AJAX_TABS);
 
     // State

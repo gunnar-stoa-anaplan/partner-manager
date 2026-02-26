@@ -23,7 +23,7 @@ class EnablementDesignerTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = User::factory()->create(['role' => 'admin']);
+        $this->user = User::factory()->admin()->create();
     }
 
     public function test_designer_returns_structured_workshop(): void

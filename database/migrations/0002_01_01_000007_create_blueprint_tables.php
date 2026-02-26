@@ -12,11 +12,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
-            $table->enum('category', ['application', 'product']);
+            $table->string('category', 50);
             $table->string('product_area')->nullable();
             $table->text('description')->nullable();
             $table->string('version')->nullable();
-            $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
+            $table->string('status', 50)->default('draft');
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
             $table->softDeletes();
@@ -43,9 +43,9 @@ return new class extends Migration
             $table->string('duration_display')->nullable();
             $table->string('source')->nullable();
             $table->string('prerequisites')->nullable();
-            $table->enum('gtm_applicable', ['required', 'optional', 'na'])->default('na');
-            $table->enum('pre_sales_applicable', ['required', 'optional', 'na'])->default('na');
-            $table->enum('delivery_applicable', ['required', 'optional', 'na'])->default('na');
+            $table->string('gtm_applicable', 50)->default('na');
+            $table->string('pre_sales_applicable', 50)->default('na');
+            $table->string('delivery_applicable', 50)->default('na');
             $table->timestamps();
 
             $table->index(['blueprint_outcome_id', 'sort_order']);
@@ -55,9 +55,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('partner_id')->constrained('partners')->cascadeOnDelete();
             $table->foreignId('blueprint_id')->constrained('blueprints')->cascadeOnDelete();
-            $table->enum('role', ['gtm', 'pre_sales', 'delivery']);
+            $table->string('role', 50);
             $table->foreignId('assigned_by')->constrained('users')->cascadeOnDelete();
-            $table->enum('status', ['active', 'completed', 'paused'])->default('active');
+            $table->string('status', 50)->default('active');
             $table->text('notes')->nullable();
             $table->timestamps();
 
@@ -73,7 +73,7 @@ return new class extends Migration
                 ->references('id')->on('partner_blueprint_assignments')->cascadeOnDelete();
             $table->foreignId('contact_id')->constrained('contacts')->cascadeOnDelete();
             $table->foreignId('enrolled_by')->constrained('users')->cascadeOnDelete();
-            $table->enum('status', ['enrolled', 'in_progress', 'completed'])->default('enrolled');
+            $table->string('status', 50)->default('enrolled');
             $table->dateTime('completed_at')->nullable();
             $table->timestamps();
 

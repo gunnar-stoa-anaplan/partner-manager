@@ -16,7 +16,7 @@ return new class extends Migration
             $table->text('description');
             $table->longText('navigation');
             $table->string('product_area')->nullable();
-            $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
+            $table->string('status', 50)->default('draft');
             $table->boolean('requires_auth')->default(false);
             $table->timestamp('published_at')->nullable();
             $table->decimal('estimated_duration_hours', 5, 2)->nullable();

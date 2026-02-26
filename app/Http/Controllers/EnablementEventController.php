@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Ai\Agents\EnablementDesigner;
+use App\Jobs\CancelZoomMeetingJob;
+use App\Jobs\CreateZoomMeetingJob;
+use App\Jobs\SyncZoomMeetingJob;
 use App\Models\EnablementEvent;
 use App\Models\EnablementRegistration;
 use App\Models\EnablementSession;
@@ -89,6 +92,7 @@ class EnablementEventController extends Controller
 
         $sessions = $event->sessions()
             ->withCount('registrations')
+            ->with(['zoomMeeting' => fn ($q) => $q->withCount('attendances')])
             ->orderBy('start_at')
             ->get();
 
@@ -173,7 +177,11 @@ class EnablementEventController extends Controller
         $validated['created_by'] = auth()->id();
         $validated['all_day'] = $request->boolean('all_day');
 
-        EnablementSession::create($validated);
+        $session = EnablementSession::create($validated);
+
+        if ($event->type === 'workshop') {
+            CreateZoomMeetingJob::dispatch($session->id, auth()->id());
+        }
 
         return redirect()->route('enablement-events.show', $event->id)
             ->with('success', 'Session added successfully.');
@@ -215,14 +223,23 @@ class EnablementEventController extends Controller
 
         $session->update($validated);
 
+        if ($session->zoomMeeting && $session->wasChanged(['start_at', 'end_at', 'title_override', 'timezone'])) {
+            SyncZoomMeetingJob::dispatch($session->id);
+        }
+
         return redirect()->route('enablement-events.show', $session->enablement_event_id)
             ->with('success', 'Session updated successfully.');
     }
 
     public function destroySession($sessionId)
     {
-        $session = EnablementSession::findOrFail($sessionId);
+        $session = EnablementSession::with('zoomMeeting')->findOrFail($sessionId);
         $eventId = $session->enablement_event_id;
+
+        if ($session->zoomMeeting) {
+            CancelZoomMeetingJob::dispatch($session->id);
+        }
+
         $session->delete();
 
         return redirect()->route('enablement-events.show', $eventId)

@@ -1,5 +1,8 @@
 # Task Board
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator
+
 The Task Board is where PSMs manage the prescriptive and ad-hoc tasks for their partners. Tasks are the actionable units of work that drive partner progression.
 
 ## How Tasks Work
@@ -35,7 +38,7 @@ Navigate to **Plan > Task Board** to see all tasks across your portfolio. Tasks 
 When a partner advances to a new stage in their path, Partner Manager automatically creates tasks from the configured task templates for that stage. This ensures that every partner at a given stage has the same baseline set of tasks.
 
 > [!NOTE]
-> Task templates are configured by admins under **Administration > Task Templates**. See the [Configuration](configuration) page for details.
+> Task templates are configured by administrators under **Administration > Configuration > Task Templates**. See the [Configuration](configuration) page for details.
 
 ## Task Verification
 

@@ -1,5 +1,8 @@
 # Blueprints
 
+> [!NOTE]
+> Creation: CoE, Administrator (see [Blueprints Admin](blueprints-admin)). Assignment and viewing: PSM, Manager, Administrator. Partners can access assigned blueprints through the Portal.
+
 Blueprints are structured learning paths that guide partners through a sequence of content — courses, documentation, hands-on labs, and assessments. They provide a clear roadmap for skill development.
 
 ## How Blueprints Work
@@ -39,7 +42,7 @@ Blueprint outcomes are verified upon completion. They can feed into:
 - Competency matrix updates
 
 > [!NOTE]
-> Blueprints are created and managed by admins under [Blueprints Admin](blueprints-admin). PSMs can assign published blueprints to their partners.
+> Blueprints are created and managed by CoE users and administrators under [Blueprints Admin](blueprints-admin). PSMs can assign published blueprints to their partners.
 
 ## Partner Portal Access
 

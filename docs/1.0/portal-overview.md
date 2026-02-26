@@ -1,5 +1,8 @@
 # Portal Overview
 
+> [!NOTE]
+> Available to: Partner contacts with portal access enabled. Portal access is configured by administrators.
+
 The Partner Portal is a self-service interface that gives partner contacts direct access to their own data, progress, and tools — without needing to go through their PSM for every request.
 
 ## Accessing the Portal

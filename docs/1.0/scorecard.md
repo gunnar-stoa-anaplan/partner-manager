@@ -1,5 +1,8 @@
 # Scorecard
 
+> [!NOTE]
+> Weight configuration: CoE, Administrator. Viewing: PSM, Manager, Administrator. Partners can view their own scorecard through the Portal.
+
 The Scorecard provides a quantitative view of partner performance. It aggregates metrics across multiple dimensions into a single weighted score that drives health assessments and path advancement decisions.
 
 ## How Scoring Works
@@ -28,7 +31,7 @@ The scorecard displays:
 
 ## Scorecard Weights
 
-Admins configure scorecard weights under **Administration > Configuration**. Weights determine how much each dimension contributes to the composite score.
+Administrators configure scorecard weights under **Administration > Configuration**. Weights determine how much each dimension contributes to the composite score.
 
 > [!TIP]
 > Scorecard weights can be different for each partner tier. A newly onboarded partner might weight enablement heavily, while an advanced partner might weight revenue more.

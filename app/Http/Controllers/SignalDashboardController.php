@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Partner;
 use App\Models\Signal;
 use App\Services\SignalEngineService;
+use App\Support\DatabasePortability;
 use Illuminate\Http\Request;
 
 class SignalDashboardController extends Controller
@@ -12,9 +13,11 @@ class SignalDashboardController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
+        $seesAll = $user->isAdmin() || $user->bypassesPermissions() || $user->role?->slug === 'coe';
+
         $query = Signal::with('partner');
 
-        if (! $user->isAdmin() && $user->role !== 'coe') {
+        if (! $seesAll) {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
             $query->whereIn('partner_id', $partnerIds);
         }
@@ -35,13 +38,13 @@ class SignalDashboardController extends Controller
             $query->where('partner_id', $request->partner_id);
         }
 
-        $signals = $query->orderByRaw("FIELD(severity, 'critical', 'warning', 'info', 'positive')")
+        $signals = $query->orderByRaw(DatabasePortability::orderByValues('severity', DatabasePortability::SEVERITY_ORDER))
             ->orderByDesc('confidence_score')
             ->orderByDesc('created_at')
             ->paginate(25);
 
         $baseQuery = Signal::where('status', 'active')
-            ->when(! $user->isAdmin() && $user->role !== 'coe', function ($q) use ($user) {
+            ->when(! $seesAll, function ($q) use ($user) {
                 $q->whereIn('partner_id', Partner::where('user_id', $user->id)->pluck('id'));
             });
 
@@ -57,7 +60,7 @@ class SignalDashboardController extends Controller
             'total_active' => (clone $baseQuery)->count(),
         ];
 
-        $partners = ($user->isAdmin() || $user->role === 'coe')
+        $partners = $seesAll
             ? Partner::select('id', 'name')->orderBy('name')->get()
             : Partner::where('user_id', $user->id)->select('id', 'name')->orderBy('name')->get();
 

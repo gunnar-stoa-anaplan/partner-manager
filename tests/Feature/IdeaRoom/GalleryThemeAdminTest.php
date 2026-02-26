@@ -22,8 +22,8 @@ class GalleryThemeAdminTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->user = User::factory()->create(['role' => 'user']);
+        $this->admin = User::factory()->admin()->create();
+        $this->user = User::factory()->create();
 
         $this->activateModuleForUser('idea_room', $this->admin);
 

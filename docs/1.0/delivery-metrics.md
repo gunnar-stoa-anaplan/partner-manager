@@ -1,5 +1,8 @@
 # Delivery Metrics
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator
+
 Delivery Metrics track the quality and efficiency of your partners' project delivery — success rates, resource utilization, and capacity trends.
 
 ## Key Metrics

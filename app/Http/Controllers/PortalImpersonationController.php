@@ -16,7 +16,7 @@ class PortalImpersonationController extends Controller
         $partner = $contact->partner;
         $this->authorizeImpersonation($partner);
 
-        if (! $contact->portal_access || ! $contact->portal_role) {
+        if (! $contact->portal_access || ! $contact->portal_role_id) {
             return back()->with('error', 'This contact does not have active portal access.');
         }
 

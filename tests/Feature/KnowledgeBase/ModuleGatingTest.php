@@ -21,7 +21,7 @@ class ModuleGatingTest extends TestCase
     {
         config(['modules.knowledge_base_admin.enabled' => false]);
 
-        $user = User::factory()->create(['role' => 'psm']);
+        $user = User::factory()->psm()->create();
 
         $response = $this->actingAs($user)->get('/knowledge-base');
 

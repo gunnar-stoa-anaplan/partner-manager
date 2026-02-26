@@ -110,8 +110,8 @@
                                 @method('PATCH')
                                 <select name="portal_role" onchange="this.form.submit()" class="form-select form-select-sm" style="width: auto; font-size: 0.8rem;">
                                     <option value="">— None —</option>
-                                    @foreach(\App\Models\Contact::PORTAL_ROLES as $key => $label)
-                                        <option value="{{ $key }}" {{ $contact->portal_role === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                    @foreach(\App\Models\Role::portal()->orderBy('sort_order')->get() as $portalRole)
+                                        <option value="{{ $portalRole->slug }}" {{ $contact->portal_role_id === $portalRole->id ? 'selected' : '' }}>{{ $portalRole->display_name }}</option>
                                     @endforeach
                                 </select>
                             </form>
@@ -127,7 +127,7 @@
                             <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#setPasswordModal{{ $contact->id }}" title="Set Password">
                                 <i class="fal fa-key"></i>
                             </button>
-                            @if($contact->portal_access && $contact->portal_role)
+                            @if($contact->portal_access && $contact->portal_role_id)
                                 <form action="{{ route('portal.impersonate.start', $contact) }}" method="POST" class="d-inline">
                                     @csrf
                                     <button type="submit" class="btn btn-sm btn-outline-info" title="Login as {{ $contact->full_name }}">

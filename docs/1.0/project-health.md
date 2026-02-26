@@ -1,5 +1,8 @@
 # Project Health
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator. Requires the `project_health_user` or `project_health_admin` feature flag to be active.
+
 The Project Health view provides visibility into a partner's active project portfolio — tracking delivery status, resource utilization, risks, and team composition.
 
 ## Project Overview

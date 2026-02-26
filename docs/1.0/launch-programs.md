@@ -1,6 +1,9 @@
 # Launch Programs
 
-Launch Programs are structured programs designed to guide a cohort of partners through a product launch, solution go-to-market, or strategic initiative.
+> [!NOTE]
+> Available to: CoE, Administrator (creation and management). PSM, Manager (viewing enrolled partners). Requires the `launch_programs_admin` or `launch_programs_user` feature flag to be active.
+
+Launch Programs are structured programs designed to guide a cohort of partners through a product launch, solution go-to-market, or strategic initiative. CoE users create and manage programs, while PSMs can view their partners' enrollment and progress.
 
 ## How Launch Programs Work
 
@@ -13,7 +16,7 @@ A launch program defines:
 
 ## Creating a Launch Program
 
-1. Navigate to **Administration > Launch Programs**
+1. Navigate to **Strategy & CoE > Launch Programs**
 2. Click **New Launch Program**
 3. Enter the program name, description, and timeline
 4. Add milestones with descriptions and due dates

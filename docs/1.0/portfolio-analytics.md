@@ -1,5 +1,8 @@
 # Portfolio Analytics
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator
+
 Portfolio Analytics provides an at-a-glance view of your entire partner portfolio — key metrics, trends, and distributions that help you prioritize your time and attention.
 
 ## Dashboard Overview

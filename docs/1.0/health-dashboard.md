@@ -1,5 +1,8 @@
 # Health Dashboard
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator
+
 The Health Dashboard provides a risk-oriented view of your partner portfolio. It surfaces partners that need attention based on computed health scores and automated alerts.
 
 ## Health Score

@@ -20,7 +20,7 @@ class LabGenerateTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->admin = User::factory()->admin()->create();
     }
 
     public function test_generate_requires_authentication(): void

@@ -1,5 +1,8 @@
 # Competency Matrix
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator
+
 The Competency Matrix maps a partner's skills and certifications across key capability areas. It provides a visual representation of where a partner is strong and where they need development.
 
 ## How It Works

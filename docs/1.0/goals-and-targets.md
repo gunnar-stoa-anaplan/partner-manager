@@ -1,5 +1,8 @@
 # Goals & Targets
 
+> [!NOTE]
+> Template configuration: CoE, Administrator. Goal setting: PSM, Manager, Administrator.
+
 Goals define what a partner should achieve within a fiscal year. They provide measurable targets that feed into the partner scorecard and health score.
 
 ![Strategy planning workflow](images/strategy-planning-workflow.svg)
@@ -25,7 +28,7 @@ Goals can be set across multiple dimensions:
 
 ## Goal Templates
 
-Admins can create goal templates that pre-define standard targets based on partner tier or path stage. When applied, a template automatically creates the configured set of goals for a partner.
+CoE users and administrators can create goal templates that pre-define standard targets based on partner tier or path stage. When applied, a template automatically creates the configured set of goals for a partner.
 
 > [!NOTE]
 > Goal templates are managed under **Administration > Goal Templates**. They can be applied individually or in bulk across a partner portfolio.

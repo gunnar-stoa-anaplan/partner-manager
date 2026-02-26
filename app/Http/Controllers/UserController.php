@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -11,7 +12,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::withCount('partners')->orderBy('name')->get();
+        $users = User::with('role')->withCount('partners')->orderBy('name')->get();
 
         return view('users.index', compact('users'));
     }
@@ -19,8 +20,9 @@ class UserController extends Controller
     public function create()
     {
         $managers = User::orderBy('name')->get();
+        $roles = Role::internal()->orderBy('sort_order')->get();
 
-        return view('users.create', compact('managers'));
+        return view('users.create', compact('managers', 'roles'));
     }
 
     public function store(Request $request)
@@ -28,11 +30,13 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|in:super_admin,admin,psm,manager,coe,integration',
+            'role' => 'required|exists:roles,slug,type,internal',
             'password' => 'required|string|min:8|confirmed',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
             'manager_id' => 'nullable|exists:users,id',
         ]);
+
+        $role = Role::where('slug', $request->role)->where('type', 'internal')->first();
 
         $avatarPath = null;
         if ($request->hasFile('avatar')) {
@@ -42,7 +46,7 @@ class UserController extends Controller
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'role' => $request->role,
+            'role_id' => $role->id,
             'password' => Hash::make($request->password),
             'avatar' => $avatarPath,
             'manager_id' => $request->manager_id,
@@ -54,8 +58,9 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $managers = User::where('id', '!=', $user->id)->orderBy('name')->get();
+        $roles = Role::internal()->orderBy('sort_order')->get();
 
-        return view('users.edit', compact('user', 'managers'));
+        return view('users.edit', compact('user', 'managers', 'roles'));
     }
 
     public function update(Request $request, User $user)
@@ -63,15 +68,17 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$user->id,
-            'role' => 'required|in:super_admin,admin,psm,manager,coe,integration',
+            'role' => 'required|exists:roles,slug,type,internal',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
             'manager_id' => 'nullable|exists:users,id',
         ]);
 
+        $role = Role::where('slug', $request->role)->where('type', 'internal')->first();
+
         $data = [
             'name' => $request->name,
             'email' => $request->email,
-            'role' => $request->role,
+            'role_id' => $role->id,
             'manager_id' => $request->manager_id,
         ];
 

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class EnablementSession extends Model
 {
@@ -95,6 +96,11 @@ class EnablementSession extends Model
     public function labs(): HasMany
     {
         return $this->hasMany(Lab::class, 'enablement_session_id');
+    }
+
+    public function zoomMeeting(): HasOne
+    {
+        return $this->hasOne(ZoomMeeting::class);
     }
 
     // ─── Accessors ─────────────────────────────────────────────

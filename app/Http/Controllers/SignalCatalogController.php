@@ -13,7 +13,7 @@ class SignalCatalogController extends Controller
         $catalog = $engine->getCatalog();
 
         $signalStats = Signal::query()
-            ->selectRaw('source_processor, count(*) as total, sum(status = "active") as active')
+            ->selectRaw('source_processor, count(*) as total, SUM(CASE WHEN status = \'active\' THEN 1 ELSE 0 END) as active')
             ->groupBy('source_processor')
             ->pluck('total', 'source_processor')
             ->toArray();

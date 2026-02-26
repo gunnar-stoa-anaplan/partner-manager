@@ -2,7 +2,7 @@
 
 @section('content')
 <h2 class="fw-bold mb-1">Welcome, {{ $contact->first_name }}</h2>
-<p class="text-muted mb-4">{{ $partner->name }} — {{ \App\Models\Contact::PORTAL_ROLES[$contact->portal_role] ?? '' }} Dashboard</p>
+<p class="text-muted mb-4">{{ $partner->name }} — {{ $contact->role?->display_name ?? '' }} Dashboard</p>
 
 {{-- ===== ADMIN DASHBOARD ===== --}}
 @if($contact->dashboardGroup() === 'admin')

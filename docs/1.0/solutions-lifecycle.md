@@ -1,5 +1,8 @@
 # Solutions Lifecycle
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator
+
 The Solutions Lifecycle tracks partner-built IP and solutions through their development, validation, and go-to-market stages.
 
 ## Solution Stages

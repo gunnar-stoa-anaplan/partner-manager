@@ -75,11 +75,13 @@ That distinction — between *descriptive* and *prescriptive* — is the key ins
 
 Partner Manager is a prescriptive partner management platform. It consolidates every dimension of the partner relationship into a single system, and then does something most tools don't: it tells you what to do next.
 
-The CoE defines the framework: partner paths with stages and gates, scorecard weights and benchmarks, task templates and enablement milestones, certification requirements and ramping programs. These become the operating system for the entire ecosystem — not a strategy deck that sits in a shared drive, but a live system that every PSM executes against every day.
+The CoE defines the framework: partner paths with stages and gates, scorecard weights and benchmarks, task templates and enablement milestones, certification requirements and ramping programs. These become the operating system for the entire ecosystem — not a strategy deck that sits in a shared drive, but a live system that every PSM executes against every day. The CoE also manages the Strategy Workbench for fiscal-year planning, curates the Knowledge Base that powers AI agents, designs workshops and labs with Zoom integration, and configures the AI agents that provide contextual assistance throughout the platform.
 
-Every partner follows a defined path with clear stages, measurable gates, and automatically generated tasks. Health scores surface risk before it becomes a crisis. Scorecards replace spreadsheets with live, weighted metrics. QBR preparation becomes one click instead of a half-day exercise.
+Every partner follows a defined path with clear stages, measurable gates, and automatically generated tasks. Health scores surface risk before it becomes a crisis. Scorecards replace spreadsheets with live, weighted metrics. QBR preparation becomes one click instead of a half-day exercise. PSMs collaborate in the Idea Room, manage business development leads, and use AI-powered advisors for partner insights.
 
 Partners get a single portal — one place to see their standing, track their progress, register deals, and understand what's expected of them next. No more navigating five disconnected systems to piece together their own status.
+
+Administrators control the platform through feature activation (progressive rollout with phased learning paths), user management with directory sync, and system configuration. A dedicated Integration role handles data operations — connecting external systems through the Integration Hub with field mapping templates and automated import/export jobs.
 
 The platform is organized around four pillars that map to the continuous management cycle:
 
@@ -98,17 +100,41 @@ Because every interaction is structured and tracked, the platform also answers t
 
 ## Key Capabilities
 
-### Partner Paths
+### Partner Management
 
-Partners progress through gate-based stages — from **Onboarded** to **Strategic**. Each stage has defined requirements that must be met before advancement. PSMs manage the review and approval process.
+The [Partner Dashboard](partner-dashboard) gives PSMs and Managers a comprehensive view of their portfolio. Each partner has a detailed profile with tabs for Pipeline, Enablement, Projects, Resources, App Enablement, Calendar, Influencers, Deal Registrations, Launch Programs, and more. Analysis tools include Full Summary views, Guided Analysis, Partner Coach trend analysis, and an AI-powered Advisor.
 
-### Scorecard & Goals
+### Partner Paths & Scorecard
 
-Every partner has a quantitative scorecard driven by weighted metrics. Goals are set at the fiscal-year level for sourced revenue, certifications, and delivery quality.
+Partners progress through gate-based stages — from **Onboarded** to **Strategic**. Each stage has defined requirements that must be met before advancement. Every partner has a quantitative [Scorecard](scorecard) driven by weighted metrics, and [Goals](goals-and-targets) are set at the fiscal-year level.
 
-### Task Board
+### Idea Room
 
-Prescriptive tasks are generated automatically based on a partner's current stage and path. PSMs can also create ad-hoc tasks with ownership and deadlines.
+The [Idea Room](idea-room) provides collaborative ideation spaces with AI-assisted discussion, a Gallery Wall for visual assets, a freeform Whiteboard, and a Constellation graph that visualizes relationships between ideas.
+
+### Business Development & Deal Registration
+
+Track [sourced and influenced leads](business-development), manage [lead assignment](lead-assignment) with configurable routing rules, and process [deal registrations](deal-registration) from submission through approval.
+
+### Strategy Workbench
+
+The CoE uses the [Strategy Workbench](strategy-workbench) to create fiscal-year plans with targets, budgets, initiatives, and scenario modeling. Plans progress through draft, active, and committed states with variance tracking.
+
+### Enablement & Workshops
+
+[Enablement Events](enablement-events) support workshops, webinars, and courses with session scheduling, registration tracking, and Zoom integration. [Workshops & Labs](workshops) add hands-on learning with breakout rooms, checkpoints, and participant progress tracking. [Blueprints](blueprints) provide structured learning paths.
+
+### Knowledge Base & AI Agents
+
+The [Knowledge Base](knowledge-base) serves as a centralized document repository with vector embeddings for AI-powered search. [AI Agents](ai-agents) — product experts, partner advisors, and enablement designers — draw on the knowledge base to provide contextual assistance throughout the platform.
+
+### Integration Hub
+
+The [Integration Hub](integration-hub) provides multi-connector data synchronization with field mapping templates, import/export job management, and retry capabilities for failed jobs.
+
+### Feature Activation
+
+[Feature Activation](feature-activation) enables progressive feature rollout through feature flags and phased activation paths (Tell, Show, Do) that gradually unlock capabilities for individual users.
 
 ### Partner Portal
 
@@ -121,9 +147,11 @@ Partners have self-service access to view their scorecard, register for events, 
 
 If you are new to Partner Manager, start with the [Getting Started](getting-started) guide, which covers:
 
-- **Administrators** — One-time setup checklist (paths, users, imports, branding)
-- **PSMs** — Day-one onboarding and daily workflow
+- **Administrators** — System setup, feature activation, user management, and directory sync
+- **CoE** — Strategy design, enablement programs, knowledge base, and AI agents
+- **PSMs** — Day-one onboarding, partner management, and daily workflow
+- **Integration** — Connector setup, field mapping, and import/export jobs
 - **Partners** — Portal access and self-service capabilities
 
 > [!TIP]
-> Use the sidebar navigation to jump to any feature area. Each page includes step-by-step instructions.
+> Use the sidebar navigation to jump to any feature area. Each page includes step-by-step instructions and a role-access note so you know which roles can access the feature.
