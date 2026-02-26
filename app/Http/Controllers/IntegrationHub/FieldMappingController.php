@@ -39,7 +39,7 @@ class FieldMappingController extends Controller
         FieldMapping::create($request->validated());
 
         return redirect()
-            ->route('integration-hub.mappings.index')
+            ->route('integration_hub.mappings.index')
             ->with('success', 'Field mapping created.');
     }
 
@@ -63,7 +63,7 @@ class FieldMappingController extends Controller
         $mapping->update($request->validated());
 
         return redirect()
-            ->route('integration-hub.mappings.index')
+            ->route('integration_hub.mappings.index')
             ->with('success', 'Field mapping updated.');
     }
 
@@ -72,7 +72,7 @@ class FieldMappingController extends Controller
         $mapping->delete();
 
         return redirect()
-            ->route('integration-hub.mappings.index')
+            ->route('integration_hub.mappings.index')
             ->with('success', 'Field mapping deleted.');
     }
 

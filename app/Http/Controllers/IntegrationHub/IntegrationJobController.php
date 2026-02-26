@@ -60,7 +60,7 @@ class IntegrationJobController extends Controller
         // dispatch(new ProcessIntegrationJob($job));
 
         return redirect()
-            ->route('integration-hub.jobs.show', $job)
+            ->route('integration_hub.jobs.show', $job)
             ->with('success', 'Job queued successfully.');
     }
 
@@ -68,7 +68,7 @@ class IntegrationJobController extends Controller
     {
         if ($job->status !== 'failed') {
             return redirect()
-                ->route('integration-hub.jobs.show', $job)
+                ->route('integration_hub.jobs.show', $job)
                 ->with('error', 'Only failed jobs can be retried.');
         }
 
@@ -83,7 +83,7 @@ class IntegrationJobController extends Controller
         // dispatch(new ProcessIntegrationJob($newJob));
 
         return redirect()
-            ->route('integration-hub.jobs.show', $newJob)
+            ->route('integration_hub.jobs.show', $newJob)
             ->with('success', 'Retry job queued.');
     }
 
@@ -92,7 +92,7 @@ class IntegrationJobController extends Controller
         $job->delete();
 
         return redirect()
-            ->route('integration-hub.jobs.index')
+            ->route('integration_hub.jobs.index')
             ->with('success', 'Job record deleted.');
     }
 }

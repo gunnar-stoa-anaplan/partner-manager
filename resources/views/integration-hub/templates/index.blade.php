@@ -4,7 +4,7 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'Mapping Templates',
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
     ])
 @endsection
 
@@ -20,7 +20,7 @@
     @if($connections->isEmpty())
         <div class="alert alert-info">
             <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#info"></use></svg>
-            Create a <a href="{{ route('integration-hub.connections.create') }}">connection</a> first, then apply templates to it.
+            Create a <a href="{{ route('integration_hub.connections.create') }}">connection</a> first, then apply templates to it.
         </div>
     @endif
 
@@ -77,7 +77,7 @@
                                 @foreach($connections as $connection)
                                     <li>
                                         <a class="dropdown-item d-flex align-items-center justify-content-between"
-                                           href="{{ route('integration-hub.templates.review', ['template' => $template, 'connection_id' => $connection->id]) }}">
+                                           href="{{ route('integration_hub.templates.review', ['template' => $template, 'connection_id' => $connection->id]) }}">
                                             {{ $connection->name }}
                                             @if(isset($updatesAvailable[$connection->id][$template->target_model]))
                                                 <span class="badge bg-warning text-dark ms-2">Update</span>

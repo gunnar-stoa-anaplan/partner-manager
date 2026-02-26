@@ -8,6 +8,7 @@ use App\Models\IdeaRoom\Room;
 use App\Models\IdeaRoom\Snapshot;
 use App\Models\IdeaRoom\Tag;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -26,6 +27,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'manager_id',
         'avatar',
         'preferences',
         'timezone',
@@ -88,11 +90,35 @@ class User extends Authenticatable
     }
 
     /**
+     * The user's direct manager.
+     */
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    /**
+     * Users who report directly to this user.
+     */
+    public function directReports(): HasMany
+    {
+        return $this->hasMany(User::class, 'manager_id');
+    }
+
+    /**
      * Check if user has admin-level access (admin or super_admin).
      */
     public function isAdmin(): bool
     {
         return in_array($this->role, ['admin', 'super_admin']);
+    }
+
+    /**
+     * Check if user can manage the reporting hierarchy.
+     */
+    public function canManageHierarchy(): bool
+    {
+        return in_array($this->role, ['admin', 'super_admin', 'coe', 'manager']);
     }
 
     /**

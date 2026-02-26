@@ -89,6 +89,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'portal.role' => \App\Http\Middleware\PortalRole::class,
             'portal.can' => \App\Http\Middleware\PortalCan::class,
             'module' => \App\Http\Middleware\EnsureModuleEnabled::class,
+            'admin_or_integration' => \App\Http\Middleware\EnsureAdminOrIntegration::class,
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\RedirectRestrictedRoles::class,

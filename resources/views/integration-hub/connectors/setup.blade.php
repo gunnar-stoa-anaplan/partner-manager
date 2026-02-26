@@ -4,9 +4,9 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'Set Up ' . $profile->name,
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
         'pageSubTitle2' => 'Connectors',
-        'pageSubTitle2Url' => route('integration-hub.connectors.catalog'),
+        'pageSubTitle2Url' => route('integration_hub.connectors.catalog'),
     ])
 @endsection
 
@@ -22,7 +22,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('integration-hub.connectors.store', $profile) }}">
+                    <form method="POST" action="{{ route('integration_hub.connectors.store', $profile) }}">
                         @csrf
 
                         <div class="mb-3">
@@ -76,7 +76,7 @@
                         @endif
 
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <a href="{{ route('integration-hub.connectors.catalog') }}" class="btn btn-light">Cancel</a>
+                            <a href="{{ route('integration_hub.connectors.catalog') }}" class="btn btn-light">Cancel</a>
                             <button type="submit" class="btn btn-primary">
                                 <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#check"></use></svg>
                                 Create Connection

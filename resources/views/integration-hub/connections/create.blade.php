@@ -4,9 +4,9 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'New Connection',
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
         'pageSubTitle2' => 'Connections',
-        'pageSubTitle2Url' => route('integration-hub.connections.index'),
+        'pageSubTitle2Url' => route('integration_hub.connections.index'),
     ])
 @endsection
 
@@ -19,7 +19,7 @@
                     <div class="card-title">Connection Details</div>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('integration-hub.connections.store') }}">
+                    <form method="POST" action="{{ route('integration_hub.connections.store') }}">
                         @csrf
 
                         <div class="mb-3">
@@ -156,7 +156,7 @@
                         <input type="hidden" name="config" id="config-json">
 
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <a href="{{ route('integration-hub.connections.index') }}" class="btn btn-light">Cancel</a>
+                            <a href="{{ route('integration_hub.connections.index') }}" class="btn btn-light">Cancel</a>
                             <button type="submit" class="btn btn-primary">Create Connection</button>
                         </div>
                     </form>

@@ -4,9 +4,9 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'Edit: ' . $mapping->name,
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
         'pageSubTitle2' => 'Field Mappings',
-        'pageSubTitle2Url' => route('integration-hub.mappings.index'),
+        'pageSubTitle2Url' => route('integration_hub.mappings.index'),
     ])
 @endsection
 
@@ -19,7 +19,7 @@
                     <div class="card-title">Edit Mapping</div>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('integration-hub.mappings.update', $mapping) }}">
+                    <form method="POST" action="{{ route('integration_hub.mappings.update', $mapping) }}">
                         @csrf
                         @method('PUT')
 
@@ -101,7 +101,7 @@
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <a href="{{ route('integration-hub.mappings.index') }}" class="btn btn-light">Cancel</a>
+                            <a href="{{ route('integration_hub.mappings.index') }}" class="btn btn-light">Cancel</a>
                             <button type="submit" class="btn btn-primary">Save Changes</button>
                         </div>
                     </form>

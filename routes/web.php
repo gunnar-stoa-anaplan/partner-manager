@@ -15,6 +15,7 @@ use App\Http\Controllers\ApiTokenController;
 use App\Http\Controllers\BenchmarkController;
 use App\Http\Controllers\BlueprintAssignmentController;
 use App\Http\Controllers\BlueprintController;
+use App\Http\Controllers\BlueprintDashboardController;
 use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CompetencyMatrixController;
@@ -47,6 +48,7 @@ use App\Http\Controllers\PortalUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\QbrController;
+use App\Http\Controllers\ReportingHierarchyController;
 use App\Http\Controllers\RoutingController;
 use App\Http\Controllers\SalesforceCredentialController;
 use App\Http\Controllers\ScorecardController;
@@ -67,6 +69,15 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 Auth::routes();
+
+// GET /logout convenience — logs out via session invalidation (dev-friendly)
+Route::get('/logout', function (\Illuminate\Http\Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/');
+})->middleware('auth')->name('logout.get');
 
 /*
 |--------------------------------------------------------------------------
@@ -253,7 +264,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/partners/{partner}/advisor', [PartnerController::class, 'advisor'])->name('partners.advisor');
     Route::get('/partners/{id}/tab/{tab}', [PartnerController::class, 'partnerTab'])
         ->name('partners.tab')
-        ->where('tab', 'overview|pipeline|enablement|projects|calendar|influencers|resources|app-enablement|launch-programs|workspaces|portal-users');
+        ->where('tab', 'overview|pipeline|deal-registrations|enablement|projects|calendar|influencers|resources|app-enablement|launch-programs|workspaces|portal-users');
 
     // Portal User Management (PSM/Admin)
     Route::patch('/partners/{partner}/portal-users/{contact}/toggle-access', [PortalUserController::class, 'toggleAccess'])->name('partners.portal-users.toggle-access');
@@ -371,6 +382,23 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Admin + Integration Routes (Data Imports)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['admin_or_integration'])->group(function () {
+        Route::resource('imports', ImportController::class)->except(['edit', 'update']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reporting Hierarchy (admin, super_admin, coe, manager)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('reporting-hierarchy', [ReportingHierarchyController::class, 'index'])->name('reporting-hierarchy.index');
+    Route::put('reporting-hierarchy/{user}', [ReportingHierarchyController::class, 'update'])->name('reporting-hierarchy.update');
+
+    /*
+    |--------------------------------------------------------------------------
     | Admin-Only Routes (Configuration & Setup)
     |--------------------------------------------------------------------------
     */
@@ -381,7 +409,6 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('objectives', ObjectiveController::class);
         Route::resource('salesforce-credentials', SalesforceCredentialController::class);
         Route::post('/salesforce-credentials/test', [SalesforceCredentialController::class, 'testConnection'])->name('salesforce-credentials.test');
-        Route::resource('imports', ImportController::class)->except(['edit', 'update']);
         Route::resource('users', UserController::class);
 
         // API Token Management
@@ -422,6 +449,9 @@ Route::middleware(['auth'])->group(function () {
 
             // Enablement Dashboard
             Route::get('/enablement-dashboard', [EnablementDashboardController::class, 'index'])->name('admin.enablement-dashboard');
+
+            // Blueprint Dashboard
+            Route::get('/blueprint-dashboard', [BlueprintDashboardController::class, 'index'])->name('admin.blueprint-dashboard');
         });
 
         // Launch Programs Admin (gated by launch_programs_admin feature flag)
@@ -580,6 +610,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Deal Registrations (gated by deal_registration_user feature flag)
         Route::middleware('module:deal_registration_user')->group(function () {
+            Route::get('/deal-registrations/dashboard', [DealRegistrationController::class, 'dashboard'])->name('deal-registrations.dashboard');
             Route::get('/deal-registrations', [DealRegistrationController::class, 'index'])->name('deal-registrations.index');
             Route::get('/deal-registrations/create', [DealRegistrationController::class, 'create'])->name('deal-registrations.create');
             Route::post('/deal-registrations', [DealRegistrationController::class, 'store'])->name('deal-registrations.store');

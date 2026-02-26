@@ -4,9 +4,9 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'Job #' . $job->id,
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
         'pageSubTitle2' => 'Jobs',
-        'pageSubTitle2Url' => route('integration-hub.jobs.index'),
+        'pageSubTitle2Url' => route('integration_hub.jobs.index'),
     ])
 @endsection
 
@@ -33,7 +33,7 @@
                 <div class="card-header d-flex align-items-center">
                     <div class="card-title flex-grow-1">Job Details</div>
                     @if($job->status === 'failed')
-                        <form method="POST" action="{{ route('integration-hub.jobs.retry', $job) }}" class="d-inline">
+                        <form method="POST" action="{{ route('integration_hub.jobs.retry', $job) }}" class="d-inline">
                             @csrf
                             <button class="btn btn-warning btn-sm">
                                 <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#refresh-cw"></use></svg>
@@ -47,7 +47,7 @@
                         <dt class="col-sm-5">Connection</dt>
                         <dd class="col-sm-7">
                             @if($job->connection)
-                                <a href="{{ route('integration-hub.connections.show', $job->connection) }}">{{ $job->connection->name }}</a>
+                                <a href="{{ route('integration_hub.connections.show', $job->connection) }}">{{ $job->connection->name }}</a>
                             @else
                                 <span class="text-muted">Deleted</span>
                             @endif

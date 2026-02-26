@@ -6,10 +6,14 @@
 
 @section('content')
 
-    @if(Auth::user()->role === 'coe')
-        @include('welcome.coe')
-    @elseif(Auth::user()->isAdmin())
+    @if(Auth::user()->isAdmin())
         @include('welcome.admin')
+    @elseif(Auth::user()->role === 'coe')
+        @include('welcome.coe')
+    @elseif(Auth::user()->role === 'manager')
+        @include('welcome.manager')
+    @elseif(Auth::user()->role === 'integration')
+        @include('welcome.integration')
     @else
         @include('welcome.psm')
     @endif

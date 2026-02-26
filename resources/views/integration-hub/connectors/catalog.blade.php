@@ -4,7 +4,7 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'Connectors',
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
     ])
 @endsection
 
@@ -36,7 +36,7 @@
                         </div>
                     @endif
 
-                    <a href="{{ route('integration-hub.connectors.setup', $profile) }}" class="btn btn-primary btn-sm w-100">
+                    <a href="{{ route('integration_hub.connectors.setup', $profile) }}" class="btn btn-primary btn-sm w-100">
                         <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#settings"></use></svg>
                         Set Up
                     </a>
@@ -48,8 +48,8 @@
 
     <div class="mt-3">
         <p class="text-muted small">
-            Need a custom connection? <a href="{{ route('integration-hub.connections.create') }}">Create one manually</a> and
-            <a href="{{ route('integration-hub.templates.index') }}">apply templates</a> separately.
+            Need a custom connection? <a href="{{ route('integration_hub.connections.create') }}">Create one manually</a> and
+            <a href="{{ route('integration_hub.templates.index') }}">apply templates</a> separately.
         </p>
     </div>
 

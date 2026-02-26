@@ -4,7 +4,7 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'Integration Jobs',
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
     ])
 @endsection
 
@@ -27,7 +27,7 @@
     {{-- Filters --}}
     <div class="row mb-3">
         <div class="col-xl-12">
-            <form method="GET" action="{{ route('integration-hub.jobs.index') }}" class="d-flex gap-2 align-items-end flex-wrap">
+            <form method="GET" action="{{ route('integration_hub.jobs.index') }}" class="d-flex gap-2 align-items-end flex-wrap">
                 <div>
                     <label class="form-label small mb-1">Direction</label>
                     <select name="direction" class="form-select form-select-sm" style="width: 140px">
@@ -57,7 +57,7 @@
                 </div>
                 <button type="submit" class="btn btn-sm btn-outline-info">Filter</button>
                 @if(request()->hasAny(['direction', 'status', 'connection_id']))
-                    <a href="{{ route('integration-hub.jobs.index') }}" class="btn btn-sm btn-light">Clear</a>
+                    <a href="{{ route('integration_hub.jobs.index') }}" class="btn btn-sm btn-light">Clear</a>
                 @endif
             </form>
         </div>
@@ -99,7 +99,7 @@
                                             <td>{{ $job->id }}</td>
                                             <td>
                                                 @if($job->connection)
-                                                    <a href="{{ route('integration-hub.connections.show', $job->connection) }}">{{ $job->connection->name }}</a>
+                                                    <a href="{{ route('integration_hub.connections.show', $job->connection) }}">{{ $job->connection->name }}</a>
                                                 @else
                                                     <span class="text-muted">Deleted</span>
                                                 @endif
@@ -140,11 +140,11 @@
                                             <td>{{ $job->durationSeconds() ? $job->durationSeconds() . 's' : '—' }}</td>
                                             <td class="text-nowrap">{{ $job->started_at?->format('M j, g:ia') ?? '—' }}</td>
                                             <td class="text-center text-nowrap">
-                                                <a href="{{ route('integration-hub.jobs.show', $job) }}" class="btn btn-outline-info btn-sm">
+                                                <a href="{{ route('integration_hub.jobs.show', $job) }}" class="btn btn-outline-info btn-sm">
                                                     <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#eye"></use></svg>
                                                 </a>
                                                 @if($job->status === 'failed')
-                                                    <form method="POST" action="{{ route('integration-hub.jobs.retry', $job) }}" class="d-inline">
+                                                    <form method="POST" action="{{ route('integration_hub.jobs.retry', $job) }}" class="d-inline">
                                                         @csrf
                                                         <button class="btn btn-outline-warning btn-sm" title="Retry">
                                                             <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#refresh-cw"></use></svg>

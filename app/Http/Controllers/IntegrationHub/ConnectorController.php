@@ -83,7 +83,7 @@ class ConnectorController extends Controller
         $templateCount = $templates->count();
 
         return redirect()
-            ->route('integration-hub.connections.show', $connection)
+            ->route('integration_hub.connections.show', $connection)
             ->with('success', "Connection created with {$totalMappings} field mapping(s) from {$templateCount} template(s).");
     }
 
