@@ -52,6 +52,19 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label" for="manager_id">Reports To</label>
+                        <select class="form-select" id="manager_id" name="manager_id">
+                            <option value="">-- None --</option>
+                            @foreach($managers as $manager)
+                                <option value="{{ $manager->id }}" {{ old('manager_id') == $manager->id ? 'selected' : '' }}>
+                                    {{ $manager->name }} ({{ ucfirst(str_replace('_', ' ', $manager->role)) }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">Assign this user's direct manager in the reporting hierarchy</div>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label" for="avatar">Profile Picture</label>
                         <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
                         <div class="form-text">Upload a profile picture (JPEG, PNG, GIF - Max 2MB)</div>

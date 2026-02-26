@@ -215,12 +215,33 @@
     {{-- Team Management (admin, super_admin, coe, manager) --}}
     @if(in_array(Auth::user()->role, ['admin', 'super_admin', 'coe', 'manager']))
     <li class="nav-title"><span>Team</span></li>
+
+    @if(in_array(Auth::user()->role, ['admin', 'super_admin', 'coe']))
+    <li>
+        <a href="{{ route('users.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#users"></use>
+            </svg>
+            <span class="nav-link-text">Team Members</span>
+        </a>
+    </li>
+    @endif
+
     <li>
         <a href="{{ route('reporting-hierarchy.index') }}">
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#git-merge"></use>
             </svg>
             <span class="nav-link-text">Reporting Hierarchy</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ route('partners.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#link"></use>
+            </svg>
+            <span class="nav-link-text">Partner Assignments</span>
         </a>
     </li>
     @endif
@@ -334,17 +355,7 @@
     </li>
     @endif
 
-    {{-- Partner Assignments --}}
-    @if($show('partner_paths', 'goals_scorecards'))
-    <li>
-        <a href="{{ route('partners.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#link"></use>
-            </svg>
-            <span class="nav-link-text">Partner Assignments</span>
-        </a>
-    </li>
-    @endif
+    {{-- Partner Assignments moved to Team section --}}
 
     {{-- Lead Assignment Rules --}}
     @if($show('deal_registration') && $registry->isAccessible('deal_registration_admin'))

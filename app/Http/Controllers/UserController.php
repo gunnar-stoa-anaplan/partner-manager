@@ -18,7 +18,9 @@ class UserController extends Controller
 
     public function create()
     {
-        return view('users.create');
+        $managers = User::orderBy('name')->get();
+
+        return view('users.create', compact('managers'));
     }
 
     public function store(Request $request)
@@ -29,6 +31,7 @@ class UserController extends Controller
             'role' => 'required|in:super_admin,admin,psm,manager,coe,integration',
             'password' => 'required|string|min:8|confirmed',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
+            'manager_id' => 'nullable|exists:users,id',
         ]);
 
         $avatarPath = null;
@@ -42,6 +45,7 @@ class UserController extends Controller
             'role' => $request->role,
             'password' => Hash::make($request->password),
             'avatar' => $avatarPath,
+            'manager_id' => $request->manager_id,
         ]);
 
         return redirect()->route('users.index')->with('success', 'User created successfully!');
@@ -49,7 +53,9 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        return view('users.edit', compact('user'));
+        $managers = User::where('id', '!=', $user->id)->orderBy('name')->get();
+
+        return view('users.edit', compact('user', 'managers'));
     }
 
     public function update(Request $request, User $user)
@@ -59,12 +65,14 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,'.$user->id,
             'role' => 'required|in:super_admin,admin,psm,manager,coe,integration',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
+            'manager_id' => 'nullable|exists:users,id',
         ]);
 
         $data = [
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
+            'manager_id' => $request->manager_id,
         ];
 
         // Handle avatar upload

@@ -22,11 +22,11 @@ class RedirectRestrictedRoles
      */
     private array $restrictions = [
         'integration' => [
-            'prefixes' => ['integration-hub', 'imports', 'logout', 'welcome', 'livewire'],
+            'prefixes' => ['integration-hub', 'imports', 'logout', 'welcome', 'livewire', 'impersonate'],
             'landing' => 'integration_hub.dashboard',
         ],
         'coe' => [
-            'prefixes' => ['strategy', 'activation', 'logout', 'users/impersonate', 'welcome', 'livewire', '_boost', 'plan/paths', 'admin/paths', 'admin/task-templates', 'act/path-reviews', 'launch-programs', 'knowledge-base', 'branding', 'ai-agents', 'partner-goals', 'admin/goal-templates', 'blueprints-catalog', 'blueprints', 'enablement-events', 'enablement-calendar', 'enablement-dashboard', 'program-dashboard', 'reporting-hierarchy'],
+            'prefixes' => ['strategy', 'activation', 'logout', 'impersonate', 'welcome', 'livewire', '_boost', 'plan/paths', 'admin/paths', 'admin/task-templates', 'act/path-reviews', 'launch-programs', 'knowledge-base', 'branding', 'ai-agents', 'partner-goals', 'admin/goal-templates', 'blueprints-catalog', 'blueprints', 'enablement-events', 'enablement-calendar', 'enablement-dashboard', 'program-dashboard', 'reporting-hierarchy', 'users', 'partners', 'partner-assignments'],
             'landing' => 'strategy.dashboard',
         ],
     ];
