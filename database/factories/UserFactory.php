@@ -79,6 +79,11 @@ class UserFactory extends Factory
         return $this->withRole('psm', ['display_name' => 'Partner Success Manager']);
     }
 
+    public function pam(): static
+    {
+        return $this->withRole('pam', ['display_name' => 'Partner Account Manager']);
+    }
+
     public function coe(): static
     {
         return $this->withRole('coe', ['display_name' => 'Center of Excellence']);
