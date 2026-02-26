@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AppSetting;
 use App\Models\TelemetryEvent;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -20,13 +21,13 @@ class TelemetryService
             'environment' => app()->environment(),
             'php_version' => PHP_VERSION,
             'laravel_version' => app()->version(),
-            
+
             // Usage metrics
             'user_counts' => [
                 'total' => DB::table('users')->count(),
-                'admin' => DB::table('users')->where('role', 'admin')->count(),
-                'psm' => DB::table('users')->where('role', 'psm')->count(),
-                'manager' => DB::table('users')->where('role', 'manager')->count(),
+                'admin' => User::whereRelation('role', 'slug', 'admin')->count(),
+                'psm' => User::whereRelation('role', 'slug', 'psm')->count(),
+                'manager' => User::whereRelation('role', 'slug', 'manager')->count(),
                 'active_30d' => DB::table('users')->where('updated_at', '>=', now()->subDays(30))->count(),
             ],
             'partner_counts' => [
@@ -65,21 +66,22 @@ class TelemetryService
             ],
             'critical_events' => $this->getRecentCriticalEvents(),
         ];
-        
+
         return $metrics;
     }
-    
+
     public function sendHeartbeat(): bool
     {
         $endpoint = AppSetting::get('telemetry_endpoint');
-        if (!$endpoint) {
+        if (! $endpoint) {
             Log::info('Telemetry: No endpoint configured, skipping send.');
+
             return false;
         }
-        
+
         $metrics = $this->collectHeartbeat();
         $apiKey = AppSetting::get('telemetry_api_key');
-        
+
         try {
             $response = Http::timeout(10)
                 ->withHeaders([
@@ -88,7 +90,7 @@ class TelemetryService
                     'Content-Type' => 'application/json',
                 ])
                 ->post($endpoint, $metrics);
-            
+
             // Log the event
             DB::table('telemetry_heartbeats')->insert([
                 'metrics' => json_encode($metrics),
@@ -97,18 +99,18 @@ class TelemetryService
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            
-            if (!$response->successful()) {
+
+            if (! $response->successful()) {
                 Log::warning('Telemetry: Failed to send heartbeat', [
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
             }
-            
+
             return $response->successful();
         } catch (\Throwable $e) {
             Log::warning('Telemetry: Exception sending heartbeat', ['error' => $e->getMessage()]);
-            
+
             DB::table('telemetry_heartbeats')->insert([
                 'metrics' => json_encode($metrics),
                 'sent_at' => null,
@@ -116,11 +118,11 @@ class TelemetryService
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            
+
             return false;
         }
     }
-    
+
     public function recordEvent(string $type, array $payload = []): void
     {
         TelemetryEvent::create([
@@ -131,18 +133,22 @@ class TelemetryService
             ]),
         ]);
     }
-    
+
     public function sendPendingEvents(): int
     {
         $endpoint = AppSetting::get('telemetry_endpoint');
-        if (!$endpoint) return 0;
-        
+        if (! $endpoint) {
+            return 0;
+        }
+
         $events = TelemetryEvent::where('status', 'pending')->limit(100)->get();
-        if ($events->isEmpty()) return 0;
-        
+        if ($events->isEmpty()) {
+            return 0;
+        }
+
         $apiKey = AppSetting::get('telemetry_api_key');
-        $eventsEndpoint = rtrim($endpoint, '/') . '/events';
-        
+        $eventsEndpoint = rtrim($endpoint, '/').'/events';
+
         try {
             $response = Http::timeout(10)
                 ->withHeaders([
@@ -150,39 +156,42 @@ class TelemetryService
                     'X-Instance-Id' => $this->getInstanceId(),
                 ])
                 ->post($eventsEndpoint, ['events' => $events->toArray()]);
-            
+
             if ($response->successful()) {
                 TelemetryEvent::whereIn('id', $events->pluck('id'))
                     ->update(['status' => 'sent', 'sent_at' => now()]);
+
                 return $events->count();
             }
         } catch (\Throwable $e) {
             Log::warning('Telemetry: Failed to send events', ['error' => $e->getMessage()]);
         }
-        
+
         return 0;
     }
-    
+
     protected function getInstanceId(): string
     {
         $id = AppSetting::get('instance_id');
-        if (!$id) {
-            $id = 'pm-' . substr(md5(config('app.key', '') . config('app.url', '')), 0, 12);
+        if (! $id) {
+            $id = 'pm-'.substr(md5(config('app.key', '').config('app.url', '')), 0, 12);
             AppSetting::set('instance_id', $id);
         }
+
         return $id;
     }
-    
+
     protected function checkDbHealth(): string
     {
         try {
             DB::select('SELECT 1');
+
             return 'healthy';
         } catch (\Throwable $e) {
             return 'unhealthy';
         }
     }
-    
+
     protected function getStorageFreePercent(): ?float
     {
         $total = @disk_total_space('/');
@@ -190,9 +199,10 @@ class TelemetryService
         if ($total && $free) {
             return round(($free / $total) * 100, 1);
         }
+
         return null;
     }
-    
+
     protected function getRecentCriticalEvents(): array
     {
         return DB::table('partner_alerts')

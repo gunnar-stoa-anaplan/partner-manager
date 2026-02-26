@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Import;
 use App\Models\User;
+use App\Support\DatabasePortability;
 use Illuminate\Support\Facades\DB;
 
 class AdminDashboardController extends Controller
@@ -24,20 +25,22 @@ class AdminDashboardController extends Controller
             ->pluck('count', 'status');
 
         $importTimeline = Import::select(
-            DB::raw('YEARWEEK(created_at, 1) as week'),
-            DB::raw('MIN(DATE(created_at)) as week_start'),
+            DB::raw(DatabasePortability::yearWeek('created_at').' as week'),
+            DB::raw('MIN('.DatabasePortability::extractDate('created_at').') as week_start'),
             DB::raw('SUM(successful_rows) as successful_rows'),
             DB::raw('SUM(failed_rows) as failed_rows')
         )
             ->where('created_at', '>=', now()->subWeeks(12))
-            ->groupBy(DB::raw('YEARWEEK(created_at, 1)'))
+            ->groupBy(DB::raw(DatabasePortability::yearWeek('created_at')))
             ->orderBy('week')
             ->get();
 
         // ── Section 2: User Access ──
 
-        $usersByRole = User::select('role', DB::raw('COUNT(*) as count'))
-            ->groupBy('role')
+        $usersByRole = User::query()
+            ->join('roles', 'users.role_id', '=', 'roles.id')
+            ->select('roles.display_name as role', DB::raw('COUNT(*) as count'))
+            ->groupBy('roles.display_name')
             ->pluck('count', 'role');
 
         $allUsers = User::withCount('partners')

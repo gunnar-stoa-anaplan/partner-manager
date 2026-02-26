@@ -83,8 +83,11 @@ class DirectorySyncService
                     $updated++;
                 } else {
                     // Create new user with default role and random password
+                    $defaultRoleSlug = config('team.directory.default_role', 'psm');
+                    $defaultRole = \App\Models\Role::where('slug', $defaultRoleSlug)->where('type', 'internal')->first();
+
                     User::create(array_merge($syncData, [
-                        'role' => config('team.directory.default_role', 'psm'),
+                        'role_id' => $defaultRole?->id,
                         'password' => Hash::make(Str::random(32)),
                     ]));
                     $created++;

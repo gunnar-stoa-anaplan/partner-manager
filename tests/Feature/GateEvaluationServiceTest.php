@@ -33,9 +33,11 @@ class GateEvaluationServiceTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
         $this->service = app(GateEvaluationService::class);
 
-        $psm = User::factory()->create(['role' => 'psm']);
+        $psm = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $psm->id]);
 
         $this->path = PartnerPath::factory()->create();

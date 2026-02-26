@@ -23,9 +23,9 @@ class ActivationPathSeeder extends Seeder
         Feature::purge();
 
         // Load users by role for auto-assignment
-        $admins = User::where('role', 'admin')->get();
-        $psms = User::where('role', 'psm')->get();
-        $coes = User::where('role', 'coe')->get();
+        $admins = User::whereRelation('role', 'slug', 'admin')->get();
+        $psms = User::whereRelation('role', 'slug', 'psm')->get();
+        $coes = User::whereRelation('role', 'slug', 'coe')->get();
         $primaryUser = User::where('email', 'gunnar.stoa@gmail.com')->first();
 
         $paths = $this->pathDefinitions();

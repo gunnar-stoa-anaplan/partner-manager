@@ -31,7 +31,7 @@ class AnaplanVersionConfigSeeder extends Seeder
         AnaplanVersionConfig::where('product_area', 'IFP')->delete();
 
         // Seed the notification template for version alerts
-        $adminUser = \App\Models\User::where('role', 'admin')->first();
+        $adminUser = \App\Models\User::whereRelation('role', 'slug', 'admin')->first();
         NotificationTemplate::updateOrCreate(
             ['event_type' => 'anaplan_version_outdated'],
             [

@@ -46,7 +46,7 @@
                             @forelse($users as $user)
                             <tr>
                                 <td><strong>{{ $user->name }}</strong></td>
-                                <td><span class="badge bg-secondary">{{ ucfirst(str_replace('_', ' ', $user->role)) }}</span></td>
+                                <td><span class="badge bg-secondary">{{ $user->role?->display_name ?? 'No Role' }}</span></td>
                                 <td>
                                     @if($user->manager)
                                         <span class="badge bg-success">{{ $user->manager->name }}</span>
@@ -102,7 +102,7 @@
                         <select class="form-select" id="modal_manager_id" name="manager_id">
                             <option value="">-- None --</option>
                             @foreach($managers as $manager)
-                                <option value="{{ $manager->id }}">{{ $manager->name }} ({{ ucfirst(str_replace('_', ' ', $manager->role)) }})</option>
+                                <option value="{{ $manager->id }}">{{ $manager->name }} ({{ $manager->role?->display_name ?? 'No Role' }})</option>
                             @endforeach
                         </select>
                     </div>

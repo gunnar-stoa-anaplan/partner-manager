@@ -50,6 +50,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\QbrController;
 use App\Http\Controllers\ReportingHierarchyController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoutingController;
 use App\Http\Controllers\SalesforceCredentialController;
 use App\Http\Controllers\ScorecardController;
@@ -507,12 +508,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/ai-agents', [AiAgentsController::class, 'index'])->name('admin.ai-agents.index');
         });
 
-        // Directory Sync (gated by directory_sync_admin feature flag)
-        Route::middleware('module:directory_sync_admin')->group(function () {
-            Route::get('/directory-sync', [DirectorySyncController::class, 'index'])->name('directory-sync.index');
-            Route::post('/directory-sync/upload', [DirectorySyncController::class, 'upload'])->name('directory-sync.upload');
-        });
-
         // System Status & Updates
         Route::get('/system-status', [SystemStatusController::class, 'index'])->name('admin.system-status');
         Route::get('/system-update', [UpdateController::class, 'show'])->name('admin.update');
@@ -522,6 +517,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/branding', [BrandingController::class, 'index'])->name('admin.branding');
         Route::put('/branding', [BrandingController::class, 'update'])->name('admin.branding.update');
 
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Directory Sync (gated by directory_sync_admin module permission)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('module:directory_sync_admin')->group(function () {
+        Route::get('/directory-sync', [DirectorySyncController::class, 'index'])->name('directory-sync.index');
+        Route::post('/directory-sync/upload', [DirectorySyncController::class, 'upload'])->name('directory-sync.upload');
     });
 
     /*
@@ -690,6 +695,9 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
+        // Role Management
+        Route::resource('roles', RoleController::class)->except(['show']);
+
         // Path Configuration
         Route::get('/paths', [PathConfigurationController::class, 'index'])->name('paths.index');
         Route::post('/paths', [PathConfigurationController::class, 'store'])->name('paths.store');

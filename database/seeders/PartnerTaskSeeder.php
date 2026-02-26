@@ -19,10 +19,11 @@ class PartnerTaskSeeder extends Seeder
         $enrollments = PartnerPathEnrollment::with(['partner.contacts', 'currentStage'])->get();
         $templates = TaskTemplate::where('is_active', true)->get();
         $users = User::all();
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first();
 
         if ($enrollments->isEmpty()) {
             $this->command->warn('No enrollments found. Run PartnerPathEnrollmentSeeder first.');
+
             return;
         }
 
@@ -37,7 +38,7 @@ class PartnerTaskSeeder extends Seeder
 
             // Get templates for stages up to and including current
             $relevantTemplates = $templates->filter(function ($t) use ($currentStage) {
-                return !$t->stage_id || $t->sort_order <= ($currentStage->sort_order ?? 999);
+                return ! $t->stage_id || $t->sort_order <= ($currentStage->sort_order ?? 999);
             });
 
             if ($relevantTemplates->isEmpty()) {
@@ -58,7 +59,7 @@ class PartnerTaskSeeder extends Seeder
                 ));
 
                 $dueDate = fake()->dateTimeBetween('-3 months', '+3 months');
-                $isPastDue = $dueDate < now() && !in_array($status, ['completed', 'waived']);
+                $isPastDue = $dueDate < now() && ! in_array($status, ['completed', 'waived']);
 
                 $startedAt = in_array($status, ['in_progress', 'completed', 'blocked'])
                     ? fake()->dateTimeBetween('-6 months', 'now')

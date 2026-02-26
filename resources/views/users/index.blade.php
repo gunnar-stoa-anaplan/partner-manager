@@ -59,14 +59,16 @@
                                     </td>
                                     <td>{{ $user->email }}</td>
                                     <td>
-                                        @if($user->role === 'super_admin')
-                                            <span class="badge bg-dark">Super Admin</span>
-                                        @elseif($user->role === 'admin')
-                                            <span class="badge bg-danger">Admin</span>
-                                        @elseif($user->role === 'psm')
-                                            <span class="badge bg-success">PSM</span>
+                                        @php
+                                            $slug = $user->role?->slug;
+                                            $roleName = $user->role?->display_name ?? 'Unknown';
+                                        @endphp
+                                        @if(in_array($slug, ['super_admin', 'admin']))
+                                            <span class="badge bg-{{ $slug === 'super_admin' ? 'dark' : 'danger' }}">{{ $roleName }}</span>
+                                        @elseif($slug === 'psm')
+                                            <span class="badge bg-success">{{ $roleName }}</span>
                                         @else
-                                            <span class="badge bg-info">{{ ucfirst($user->role) }}</span>
+                                            <span class="badge bg-info">{{ $roleName }}</span>
                                         @endif
                                     </td>
                                     <td>

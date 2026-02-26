@@ -26,12 +26,14 @@ class ReportingHierarchyTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->superAdmin = User::factory()->create(['role' => 'super_admin']);
-        $this->coe = User::factory()->create(['role' => 'coe']);
-        $this->manager = User::factory()->create(['role' => 'manager']);
-        $this->psm = User::factory()->create(['role' => 'psm']);
-        $this->integration = User::factory()->create(['role' => 'integration']);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->admin = User::factory()->admin()->create();
+        $this->superAdmin = User::factory()->superAdmin()->create();
+        $this->coe = User::factory()->coe()->create();
+        $this->manager = User::factory()->manager()->create();
+        $this->psm = User::factory()->psm()->create();
+        $this->integration = User::factory()->integration()->create();
     }
 
     public function test_admin_can_access_reporting_hierarchy(): void
@@ -159,7 +161,7 @@ class ReportingHierarchyTest extends TestCase
 
     public function test_multi_level_hierarchy(): void
     {
-        $director = User::factory()->create(['role' => 'admin']);
+        $director = User::factory()->admin()->create();
         $this->manager->update(['manager_id' => $director->id]);
         $this->psm->update(['manager_id' => $this->manager->id]);
 

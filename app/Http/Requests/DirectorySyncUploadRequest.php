@@ -8,7 +8,8 @@ class DirectorySyncUploadRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() && in_array($this->user()->role, ['admin', 'super_admin', 'coe']);
+        return $this->user()?->bypassesPermissions()
+            || in_array($this->user()?->role?->slug, ['coe']);
     }
 
     /**

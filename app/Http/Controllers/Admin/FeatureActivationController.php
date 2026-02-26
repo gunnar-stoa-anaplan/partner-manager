@@ -7,6 +7,7 @@ use App\Enums\TrainingPhase;
 use App\Http\Controllers\Controller;
 use App\Models\ActivationPath;
 use App\Models\ActivationStep;
+use App\Models\Role;
 use App\Models\User;
 use App\Services\ActivationService;
 use App\Services\ModuleRegistry;
@@ -348,7 +349,7 @@ class FeatureActivationController extends Controller
             $q->where('activation_path_id', $path->id);
         })->orderBy('name')->get();
 
-        $roles = User::query()->distinct()->pluck('role')->sort()->values();
+        $roles = Role::where('type', 'internal')->orderBy('sort_order')->pluck('slug');
 
         return view('admin.activation.assignments', compact('path', 'availableUsers', 'roles'));
     }
@@ -362,7 +363,7 @@ class FeatureActivationController extends Controller
             'role' => 'required|string',
         ]);
 
-        $users = User::where('role', $validated['role'])
+        $users = User::whereRelation('role', 'slug', $validated['role'])
             ->whereDoesntHave('activationPaths', function ($q) use ($path) {
                 $q->where('activation_path_id', $path->id);
             })

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -14,7 +15,7 @@ class IntegrationUserSeeder extends Seeder
             [
                 'name' => 'Integration Hub',
                 'password' => bcrypt('password'),
-                'role' => 'integration',
+                'role_id' => Role::where('slug', 'integration')->value('id'),
             ]
         );
 

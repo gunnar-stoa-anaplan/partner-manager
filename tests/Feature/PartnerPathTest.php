@@ -33,8 +33,10 @@ class PartnerPathTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->psm = User::factory()->create(['role' => 'psm']);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->admin = User::factory()->admin()->create();
+        $this->psm = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $this->psm->id]);
 
         $this->path = PartnerPath::factory()->create(['is_active' => true]);
@@ -91,7 +93,7 @@ class PartnerPathTest extends TestCase
 
     public function test_admin_can_view_all_partner_enrollments(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         PartnerPathEnrollment::factory()->create([
@@ -111,7 +113,7 @@ class PartnerPathTest extends TestCase
 
     public function test_psm_only_sees_own_partner_enrollments(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         PartnerPathEnrollment::factory()->create([
@@ -132,7 +134,7 @@ class PartnerPathTest extends TestCase
 
     public function test_psm_filter_narrows_enrollments(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         PartnerPathEnrollment::factory()->create([

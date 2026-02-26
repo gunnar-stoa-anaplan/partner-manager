@@ -16,7 +16,13 @@ class PortalRole
     {
         $contact = Auth::guard('portal')->user();
 
-        if (! $contact || ! in_array($contact->portal_role, $roles, true)) {
+        if (! $contact) {
+            abort(403, 'You do not have permission to access this section.');
+        }
+
+        $slug = $contact->role?->slug;
+
+        if (! in_array($slug, $roles, true)) {
             abort(403, 'You do not have permission to access this section.');
         }
 

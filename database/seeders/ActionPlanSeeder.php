@@ -16,7 +16,7 @@ class ActionPlanSeeder extends Seeder
 
         $partners = Partner::with('contacts')->get();
         $users = User::all();
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first();
         $planCount = 0;
         $itemCount = 0;
 

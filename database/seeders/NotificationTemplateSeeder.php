@@ -2,15 +2,15 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\NotificationTemplate;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class NotificationTemplateSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminId = (User::where('role', 'admin')->first() ?? User::first())->id;
+        $adminId = (User::whereRelation('role', 'slug', 'admin')->first() ?? User::first())->id;
         $templates = [
             [
                 'event_type' => 'blueprint_assigned',

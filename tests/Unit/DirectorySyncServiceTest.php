@@ -24,6 +24,8 @@ class DirectorySyncServiceTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
         $this->service = new DirectorySyncService;
 
         $this->connection = IntegrationConnection::create([
@@ -165,10 +167,9 @@ class DirectorySyncServiceTest extends TestCase
 
         $this->service->syncFromCsv($this->connection, $path, $this->job);
 
-        $this->assertDatabaseHas('users', [
-            'external_id' => 'EMP001',
-            'role' => 'psm',
-        ]);
+        $user = User::where('external_id', 'EMP001')->first();
+        $this->assertNotNull($user);
+        $this->assertEquals('psm', $user->role?->slug);
 
         unlink($path);
     }

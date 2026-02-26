@@ -29,9 +29,11 @@ class DirectorySyncTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->coe = User::factory()->create(['role' => 'coe']);
-        $this->psm = User::factory()->create(['role' => 'psm']);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->admin = User::factory()->admin()->create();
+        $this->coe = User::factory()->coe()->create();
+        $this->psm = User::factory()->psm()->create();
 
         Feature::for(null)->activate('directory_sync_admin');
 
@@ -143,8 +145,7 @@ class DirectorySyncTest extends TestCase
 
     public function test_synced_user_fields_are_protected_on_update(): void
     {
-        $syncedUser = User::factory()->create([
-            'role' => 'psm',
+        $syncedUser = User::factory()->psm()->create([
             'name' => 'Original Name',
             'email' => 'original@example.com',
             'directory_source' => 'csv',
@@ -166,13 +167,12 @@ class DirectorySyncTest extends TestCase
         $this->assertEquals('original@example.com', $syncedUser->email);
 
         // Local fields should be changed
-        $this->assertEquals('manager', $syncedUser->role);
+        $this->assertEquals('manager', $syncedUser->role->slug);
     }
 
     public function test_local_user_fields_are_not_protected(): void
     {
-        $localUser = User::factory()->create([
-            'role' => 'psm',
+        $localUser = User::factory()->psm()->create([
             'name' => 'Original Name',
             'email' => 'original@example.com',
             'directory_source' => null,
@@ -190,7 +190,7 @@ class DirectorySyncTest extends TestCase
 
         $this->assertEquals('Changed Name', $localUser->name);
         $this->assertEquals('changed@example.com', $localUser->email);
-        $this->assertEquals('manager', $localUser->role);
+        $this->assertEquals('manager', $localUser->role->slug);
     }
 
     public function test_user_model_is_synced_from_directory(): void
@@ -240,8 +240,7 @@ class DirectorySyncTest extends TestCase
 
     public function test_edit_form_shows_sync_badge_for_directory_user(): void
     {
-        $syncedUser = User::factory()->create([
-            'role' => 'psm',
+        $syncedUser = User::factory()->psm()->create([
             'directory_source' => 'csv',
             'external_id' => 'EMP001',
             'last_synced_at' => now(),
@@ -256,8 +255,7 @@ class DirectorySyncTest extends TestCase
 
     public function test_edit_form_does_not_show_sync_badge_for_local_user(): void
     {
-        $localUser = User::factory()->create([
-            'role' => 'psm',
+        $localUser = User::factory()->psm()->create([
             'directory_source' => null,
         ]);
 

@@ -77,7 +77,7 @@
                     <label class="form-label">Select users to assign</label>
                     <select name="user_ids[]" class="form-select" multiple size="6">
                         @foreach($availableUsers as $user)
-                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }}) — {{ ucfirst($user->role) }}</option>
+                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }}) — {{ $user->role?->display_name ?? 'No Role' }}</option>
                         @endforeach
                     </select>
                     <div class="form-text">Hold Ctrl/Cmd to select multiple users.</div>
@@ -118,7 +118,7 @@
                                     <a href="{{ route('admin.activation.user-progress', $user) }}">{{ $user->name }}</a>
                                 </td>
                                 <td>{{ $user->email }}</td>
-                                <td><span class="badge bg-secondary">{{ ucfirst($user->role) }}</span></td>
+                                <td><span class="badge bg-secondary">{{ $user->role?->display_name ?? 'No Role' }}</span></td>
                                 <td>{{ $user->pivot->assigned_at ? \Carbon\Carbon::parse($user->pivot->assigned_at)->format('M d, Y') : '—' }}</td>
                                 <td>
                                     @if($user->pivot->completed_at)

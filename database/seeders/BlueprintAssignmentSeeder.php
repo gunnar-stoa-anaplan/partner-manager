@@ -121,17 +121,17 @@ class BlueprintAssignmentSeeder extends Seeder
         $this->command->info('Creating blueprint assignments, enrollments, and progress...');
 
         // Clear existing data
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        BlueprintProgress::truncate();
-        BlueprintEnrollment::truncate();
-        PartnerBlueprintAssignment::truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        \Schema::withoutForeignKeyConstraints(function () {
+            BlueprintProgress::truncate();
+            BlueprintEnrollment::truncate();
+            PartnerBlueprintAssignment::truncate();
+        });
 
         $partners = Partner::with('contacts')->get();
         $blueprints = Blueprint::with('outcomes.contentItems')->where('status', 'published')->get();
         $blueprintsBySlug = $blueprints->keyBy('slug');
         $blueprintsById = $blueprints->keyBy('id');
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first();
         $users = User::all();
 
         if ($blueprints->isEmpty()) {

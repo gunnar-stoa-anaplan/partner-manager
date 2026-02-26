@@ -28,7 +28,7 @@ class LaunchProgramController extends Controller
     public function create(): \Illuminate\View\View
     {
         $products = Product::published()->orderBy('name')->get();
-        $psms = User::where('role', 'psm')->orderBy('name')->get();
+        $psms = User::whereRelation('role', 'slug', 'psm')->orderBy('name')->get();
 
         return view('admin.launch-programs.create', compact('products', 'psms'));
     }
@@ -46,7 +46,7 @@ class LaunchProgramController extends Controller
             'max_partners' => ['nullable', 'integer', 'min:1'],
             'partner_strategy' => ['required', 'string', 'in:include,exclude'],
             'exclusion_reason' => ['nullable', 'string', 'required_if:partner_strategy,exclude'],
-            'owner_id' => ['nullable', 'exists:users,id,role,psm'],
+            'owner_id' => ['nullable', 'exists:users,id'],
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
@@ -87,7 +87,7 @@ class LaunchProgramController extends Controller
     public function edit(LaunchProgram $launchProgram): \Illuminate\View\View
     {
         $products = Product::published()->orderBy('name')->get();
-        $psms = User::where('role', 'psm')->orderBy('name')->get();
+        $psms = User::whereRelation('role', 'slug', 'psm')->orderBy('name')->get();
 
         return view('admin.launch-programs.edit', [
             'program' => $launchProgram,
@@ -109,7 +109,7 @@ class LaunchProgramController extends Controller
             'max_partners' => ['nullable', 'integer', 'min:1'],
             'partner_strategy' => ['required', 'string', 'in:include,exclude'],
             'exclusion_reason' => ['nullable', 'string', 'required_if:partner_strategy,exclude'],
-            'owner_id' => ['nullable', 'exists:users,id,role,psm'],
+            'owner_id' => ['nullable', 'exists:users,id'],
             'date_change_reason' => ['nullable', 'string'],
         ]);
 

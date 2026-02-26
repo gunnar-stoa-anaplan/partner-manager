@@ -61,14 +61,12 @@
                         <label class="form-label" for="role">Role <span class="text-danger">*</span></label>
                         <select class="form-select" id="role" name="role" required>
                             <option value="">Select Role</option>
-                            <option value="super_admin" {{ old('role', $user->role) === 'super_admin' ? 'selected' : '' }}>Super Admin - Unrestricted access</option>
-                            <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin - Full system access</option>
-                            <option value="psm" {{ old('role', $user->role) === 'psm' ? 'selected' : '' }}>PSM - Partner Success Manager</option>
-                            <option value="manager" {{ old('role', $user->role) === 'manager' ? 'selected' : '' }}>Manager - Team oversight</option>
-                            <option value="coe" {{ old('role', $user->role) === 'coe' ? 'selected' : '' }}>CoE - Center of Excellence</option>
-                            <option value="integration" {{ old('role', $user->role) === 'integration' ? 'selected' : '' }}>Integration - Integration Hub access</option>
+                            @foreach($roles as $role)
+                                <option value="{{ $role->slug }}" {{ old('role', $user->role?->slug) === $role->slug ? 'selected' : '' }}>
+                                    {{ $role->display_name }}{{ $role->description ? ' - ' . $role->description : '' }}
+                                </option>
+                            @endforeach
                         </select>
-                        <div class="form-text">PSMs can be assigned to manage partners</div>
                     </div>
 
                     <div class="mb-3">
@@ -77,7 +75,7 @@
                             <option value="">-- None --</option>
                             @foreach($managers as $manager)
                                 <option value="{{ $manager->id }}" {{ old('manager_id', $user->manager_id) == $manager->id ? 'selected' : '' }}>
-                                    {{ $manager->name }} ({{ ucfirst(str_replace('_', ' ', $manager->role)) }})
+                                    {{ $manager->name }} ({{ $manager->role?->display_name ?? 'Unknown' }})
                                 </option>
                             @endforeach
                         </select>

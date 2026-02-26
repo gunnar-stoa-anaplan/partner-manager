@@ -2,21 +2,21 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\TaskTemplate;
 use App\Models\PartnerPath;
+use App\Models\TaskTemplate;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class TaskTemplateSeeder extends Seeder
 {
     public function run(): void
     {
         $path = PartnerPath::where('is_default', true)->first();
-        if (!$path) {
+        if (! $path) {
             return;
         }
 
-        $adminId = (User::where('role', 'admin')->first() ?? User::first())->id;
+        $adminId = (User::whereRelation('role', 'slug', 'admin')->first() ?? User::first())->id;
 
         $stages = $path->stages()->pluck('id', 'stage_number');
 

@@ -9,6 +9,7 @@ use App\Models\ResourceSnapshot;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ResourceHistorySeeder extends Seeder
 {
@@ -39,14 +40,14 @@ class ResourceHistorySeeder extends Seeder
         $this->command->info('Seeding resource history (52 weeks)...');
 
         // Clear only resource-related data (non-destructive to partners/users/contacts/etc.)
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        ResourceSnapshot::truncate();
-        Resource::truncate();
-        Import::where('type', 'resources')->delete();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        Schema::withoutForeignKeyConstraints(function () {
+            ResourceSnapshot::truncate();
+            Resource::truncate();
+            Import::where('type', 'resources')->delete();
+        });
 
         $partners = Partner::orderBy('id')->get();
-        $admin = User::where('role', 'admin')->first() ?? User::first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first() ?? User::first();
 
         if ($partners->isEmpty()) {
             $this->command->warn('No partners found. Run PartnerSeeder first.');

@@ -26,7 +26,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
+        'role_id',
         'manager_id',
         'avatar',
         'preferences',
@@ -94,6 +94,14 @@ class User extends Authenticatable
     }
 
     /**
+     * The user's assigned role.
+     */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    /**
      * The user's direct manager.
      */
     public function manager(): BelongsTo
@@ -114,7 +122,7 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return in_array($this->role, ['admin', 'super_admin']);
+        return in_array($this->role?->slug, ['admin', 'super_admin']);
     }
 
     /**
@@ -122,7 +130,11 @@ class User extends Authenticatable
      */
     public function canManageHierarchy(): bool
     {
-        return in_array($this->role, ['admin', 'super_admin', 'coe', 'manager']);
+        if ($this->bypassesPermissions()) {
+            return true;
+        }
+
+        return $this->hasModulePermission('user_management');
     }
 
     /**
@@ -130,7 +142,39 @@ class User extends Authenticatable
      */
     public function isPsm(): bool
     {
-        return $this->role === 'psm';
+        return $this->role?->slug === 'psm';
+    }
+
+    /**
+     * Check if this user's role bypasses all permission checks.
+     */
+    public function bypassesPermissions(): bool
+    {
+        return $this->role?->bypass_permissions ?? false;
+    }
+
+    /**
+     * Check if the user has any access (read or write) to the given module.
+     */
+    public function hasModulePermission(string $moduleSlug): bool
+    {
+        return $this->role?->hasPermission($moduleSlug) ?? false;
+    }
+
+    /**
+     * Check if the user has at least read access to the given module.
+     */
+    public function canReadModule(string $moduleSlug): bool
+    {
+        return $this->hasModulePermission($moduleSlug);
+    }
+
+    /**
+     * Check if the user has write access to the given module.
+     */
+    public function canWriteModule(string $moduleSlug): bool
+    {
+        return $this->role?->hasWritePermission($moduleSlug) ?? false;
     }
 
     /**

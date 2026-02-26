@@ -330,6 +330,20 @@ return [
         'enabled' => env('MODULE_ZOOM_CHAT_USER', true),
     ],
 
+    'workshop_delivery_admin' => [
+        'name' => 'Workshop Delivery Administration',
+        'description' => 'Host workshops via embedded Zoom meetings with breakout rooms, attendance tracking, and AI chat.',
+        'icon' => 'video',
+        'enabled' => env('MODULE_WORKSHOP_DELIVERY_ADMIN', true),
+    ],
+
+    'workshop_delivery_user' => [
+        'name' => 'Workshop Delivery End Users',
+        'description' => 'Join and participate in interactive workshop sessions delivered via embedded Zoom.',
+        'icon' => 'video',
+        'enabled' => env('MODULE_WORKSHOP_DELIVERY_USER', true),
+    ],
+
     'workshop_labs_admin' => [
         'name' => 'Workshop Labs Administration',
         'description' => 'Administrative access to create and manage workshop labs, checkpoints, and participants.',
@@ -342,6 +356,13 @@ return [
         'description' => 'End-user access to participate in workshop labs and complete checkpoint exercises.',
         'icon' => 'check-square',
         'enabled' => env('MODULE_WORKSHOP_LABS_USER', true),
+    ],
+
+    'directory_sync_admin' => [
+        'name' => 'Directory Sync Administration',
+        'description' => 'CSV directory import for automated user provisioning and manager hierarchy sync.',
+        'icon' => 'upload-cloud',
+        'enabled' => env('MODULE_DIRECTORY_SYNC_ADMIN', true),
     ],
 
 ];

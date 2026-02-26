@@ -15,7 +15,7 @@ class GalleryThemeSeeder extends Seeder
             return;
         }
 
-        $admin = User::where('role', 'admin')->first()
+        $admin = User::whereRelation('role', 'slug', 'admin')->first()
             ?? User::first();
 
         if (! $admin) {

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\StrategyPlan;
 use App\Models\StrategyPlanAssumption;
 use App\Models\StrategyPlanBudget;
@@ -19,13 +20,15 @@ class StrategySeeder extends Seeder
     {
         $this->command->info('Seeding Strategy Workbench data...');
 
+        $coeRoleId = Role::where('slug', 'coe')->value('id');
+
         // === CoE Users ===
         $sarah = User::updateOrCreate(
             ['email' => 'sarah.chen@example.com'],
             [
                 'name' => 'Sarah Chen',
                 'password' => bcrypt('password'),
-                'role' => 'coe',
+                'role_id' => $coeRoleId,
             ]
         );
 
@@ -34,7 +37,7 @@ class StrategySeeder extends Seeder
             [
                 'name' => 'Marcus Williams',
                 'password' => bcrypt('password'),
-                'role' => 'coe',
+                'role_id' => $coeRoleId,
             ]
         );
 
@@ -43,7 +46,7 @@ class StrategySeeder extends Seeder
             [
                 'name' => 'Emily Rodriguez',
                 'password' => bcrypt('password'),
-                'role' => 'coe',
+                'role_id' => $coeRoleId,
             ]
         );
 
@@ -52,7 +55,7 @@ class StrategySeeder extends Seeder
             [
                 'name' => 'James Park',
                 'password' => bcrypt('password'),
-                'role' => 'coe',
+                'role_id' => $coeRoleId,
             ]
         );
 

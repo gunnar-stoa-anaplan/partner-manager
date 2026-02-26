@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,11 +36,23 @@ class RedirectRestrictedRoles
     {
         $user = $request->user();
 
-        if (! $user || ! isset($this->restrictions[$user->role])) {
+        // Only applies to internal users, not portal contacts
+        if (! $user instanceof User) {
             return $next($request);
         }
 
-        $rule = $this->restrictions[$user->role];
+        // System roles (bypass_permissions) are never restricted
+        if ($user->bypassesPermissions()) {
+            return $next($request);
+        }
+
+        $roleSlug = $user->role?->slug;
+
+        if (! $roleSlug || ! isset($this->restrictions[$roleSlug])) {
+            return $next($request);
+        }
+
+        $rule = $this->restrictions[$roleSlug];
         $path = $request->path();
 
         foreach ($rule['prefixes'] as $prefix) {

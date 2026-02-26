@@ -25,7 +25,7 @@ class PortalAuth
                 ->withErrors(['email' => 'Your portal access has been disabled.']);
         }
 
-        if (! $contact->portal_role) {
+        if (! $contact->portal_role_id) {
             Auth::guard('portal')->logout();
 
             return redirect()->route('portal.login')

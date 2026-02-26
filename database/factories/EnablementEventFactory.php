@@ -38,18 +38,18 @@ class EnablementEventFactory extends Factory
             'max_participants' => $this->faker->optional(0.6)->randomElement([10, 15, 20, 25, 30, 50]),
             'materials_url' => null,
             'status' => 'published',
-            'created_by' => User::where('role', 'admin')->first()?->id ?? 1,
+            'created_by' => User::whereRelation('role', 'slug', 'admin')->first()?->id ?? 1,
         ];
     }
 
     public function draft(): static
     {
-        return $this->state(fn() => ['status' => 'draft']);
+        return $this->state(fn () => ['status' => 'draft']);
     }
 
     public function archived(): static
     {
-        return $this->state(fn() => ['status' => 'archived']);
+        return $this->state(fn () => ['status' => 'archived']);
     }
 
     private function generateTitle(string $type, string $productArea): string

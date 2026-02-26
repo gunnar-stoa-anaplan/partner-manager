@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\DealRegistration;
 use App\Models\Partner;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
@@ -16,23 +17,26 @@ class GunnarSeeder extends Seeder
     {
         $this->command->info('Creating admin and Gunnar users...');
 
+        // Pre-resolve internal role IDs
+        $roles = Role::internal()->pluck('id', 'slug');
+
         // Create Admin user
         $admin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin',
                 'password' => bcrypt('password'),
-                'role' => 'admin',
+                'role_id' => $roles['admin'],
             ]
         );
         $this->command->info('✓ Created/Updated Admin user (admin@example.com / password)');
 
         // Create role-specific test users for dev switcher
         $roleUsers = [
-            ['email' => 'superadmin@example.com', 'name' => 'Super Admin', 'role' => 'super_admin'],
-            ['email' => 'manager@example.com', 'name' => 'Manager User', 'role' => 'manager'],
-            ['email' => 'coe@example.com', 'name' => 'CoE User', 'role' => 'coe'],
-            ['email' => 'integration@example.com', 'name' => 'Integration User', 'role' => 'integration'],
+            ['email' => 'superadmin@example.com', 'name' => 'Super Admin', 'role_slug' => 'super_admin'],
+            ['email' => 'manager@example.com', 'name' => 'Manager User', 'role_slug' => 'manager'],
+            ['email' => 'coe@example.com', 'name' => 'CoE User', 'role_slug' => 'coe'],
+            ['email' => 'integration@example.com', 'name' => 'Integration User', 'role_slug' => 'integration'],
         ];
 
         foreach ($roleUsers as $userData) {
@@ -41,7 +45,7 @@ class GunnarSeeder extends Seeder
                 [
                     'name' => $userData['name'],
                     'password' => bcrypt('password'),
-                    'role' => $userData['role'],
+                    'role_id' => $roles[$userData['role_slug']],
                 ]
             );
             $this->command->info("✓ Created/Updated {$userData['name']} ({$userData['email']} / password)");
@@ -53,7 +57,7 @@ class GunnarSeeder extends Seeder
             [
                 'name' => 'Gunnar Stoa',
                 'password' => bcrypt('password'),
-                'role' => 'psm', // Set as PSM
+                'role_id' => $roles['psm'],
             ]
         );
 
@@ -118,7 +122,7 @@ class GunnarSeeder extends Seeder
 
         $this->command->info('✅ Gunnar setup complete!');
         $this->command->info("   Email: {$gunnar->email}");
-        $this->command->info("   Role: {$gunnar->role}");
+        $this->command->info("   Role: {$gunnar->role?->display_name}");
         $this->command->info('   Assigned Partners: '.$gunnar->psmPartners()->count());
     }
 }

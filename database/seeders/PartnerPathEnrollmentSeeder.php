@@ -32,7 +32,7 @@ class PartnerPathEnrollmentSeeder extends Seeder
             return;
         }
 
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first();
         $users = User::all();
         $enrollmentCount = 0;
         $historyCount = 0;

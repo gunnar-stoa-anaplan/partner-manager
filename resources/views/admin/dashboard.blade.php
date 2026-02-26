@@ -180,14 +180,14 @@
                                     <td>{{ $u->email }}</td>
                                     <td>
                                         @php
-                                            $roleColor = match($u->role) {
-                                                'admin' => 'danger',
+                                            $roleColor = match($u->role?->slug) {
+                                                'admin', 'super_admin' => 'danger',
                                                 'manager' => 'warning',
                                                 'psm' => 'primary',
                                                 default => 'secondary'
                                             };
                                         @endphp
-                                        <span class="badge bg-{{ $roleColor }}">{{ strtoupper($u->role) }}</span>
+                                        <span class="badge bg-{{ $roleColor }}">{{ strtoupper($u->role?->slug ?? 'none') }}</span>
                                     </td>
                                     <td class="text-center">{{ $u->partners_count }}</td>
                                     <td class="text-nowrap">{{ $u->created_at->format('M j, Y') }}</td>

@@ -8,9 +8,11 @@ use App\Models\OpportunitySnapshot;
 use App\Models\Partner;
 use App\Models\Resource;
 use App\Models\ResourceSnapshot;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class HistoricalDataSeeder extends Seeder
 {
@@ -35,25 +37,26 @@ class HistoricalDataSeeder extends Seeder
     {
         $this->command->info('🚀 Starting Historical Data Seeder...');
 
+        $roles = Role::internal()->pluck('id', 'slug');
+
         // Clear existing data
         $this->command->info('Clearing existing data...');
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        OpportunitySnapshot::truncate();
-        ResourceSnapshot::truncate();
-        Opportunity::truncate();
-        Resource::truncate();
-        Import::truncate();
-        DB::table('user_partner')->truncate();
-        Partner::truncate();
-        User::where('role', 'psm')->delete();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        Schema::withoutForeignKeyConstraints(function () use ($roles) {
+            OpportunitySnapshot::truncate();
+            ResourceSnapshot::truncate();
+            Opportunity::truncate();
+            Resource::truncate();
+            Import::truncate();
+            DB::table('user_partner')->truncate();
+            Partner::truncate();
+            User::where('role_id', $roles['psm'])->delete();
+        });
 
         // Create base data
         $this->command->info('Creating base users and partners...');
-        $admin = User::first() ?? User::factory()->create([
+        $admin = User::first() ?? User::factory()->admin()->create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
-            'role' => 'admin',
         ]);
 
         // Create Gunnar as a PSM user
@@ -62,14 +65,12 @@ class HistoricalDataSeeder extends Seeder
             [
                 'name' => 'Gunnar Stoa',
                 'password' => bcrypt('password'),
-                'role' => 'psm',
+                'role_id' => $roles['psm'],
             ]
         );
 
         // Create additional PSM users
-        $psms = User::factory()->count(4)->create([
-            'role' => 'psm',
-        ]);
+        $psms = User::factory()->count(4)->psm()->create();
 
         // Add Gunnar to the PSM collection
         $psms->prepend($gunnar);
@@ -110,7 +111,7 @@ class HistoricalDataSeeder extends Seeder
         }
 
         $this->command->info("Created {$partners->count()} partners and {$psms->count()} PSMs");
-        $this->command->info('✓ Gunnar Stoa (gunnar.stoa@gmail.com) created with role=psm');
+        $this->command->info('✓ Gunnar Stoa (gunnar.stoa@gmail.com) created as PSM');
         $this->command->info('✓ Accenture partner assigned to Gunnar');
 
         // Track opportunities across weeks for evolution

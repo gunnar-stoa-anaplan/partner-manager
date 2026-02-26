@@ -15,7 +15,7 @@ class EnablementSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminUser = User::where('role', 'admin')->first();
+        $adminUser = User::whereRelation('role', 'slug', 'admin')->first();
         $adminId = $adminUser?->id ?? 1;
 
         $allUsers = User::all();
@@ -98,7 +98,7 @@ class EnablementSeeder extends Seeder
         ]);
         $createdEvents[] = $partnerBoost;
 
-        $this->command->info('Created ' . count($createdEvents) . ' enablement events.');
+        $this->command->info('Created '.count($createdEvents).' enablement events.');
 
         // Also create a couple of draft events
         $draftEvent = EnablementEvent::create([
@@ -194,7 +194,7 @@ class EnablementSeeder extends Seeder
                     'all_day' => $allDay,
                     'timezone' => 'UTC',
                     'location' => $location,
-                    'meeting_url' => $location === 'Virtual' ? 'https://teams.microsoft.com/meet/' . fake()->uuid() : null,
+                    'meeting_url' => $location === 'Virtual' ? 'https://teams.microsoft.com/meet/'.fake()->uuid() : null,
                     'instructor' => fake()->randomElement($instructors),
                     'geography' => $geo,
                     'region' => $region,
@@ -221,13 +221,13 @@ class EnablementSeeder extends Seeder
 
             $session = EnablementSession::create([
                 'enablement_event_id' => $partnerBoost->id,
-                'title_override' => 'Partner Boost — ' . $boostDate->format('F Y'),
+                'title_override' => 'Partner Boost — '.$boostDate->format('F Y'),
                 'start_at' => $boostDate,
                 'end_at' => $boostDate->copy()->addHour(),
                 'all_day' => false,
                 'timezone' => 'UTC',
                 'location' => 'Virtual',
-                'meeting_url' => 'https://teams.microsoft.com/meet/' . fake()->uuid(),
+                'meeting_url' => 'https://teams.microsoft.com/meet/'.fake()->uuid(),
                 'instructor' => fake()->randomElement($instructors),
                 'geography' => null,
                 'region' => null,
@@ -244,7 +244,9 @@ class EnablementSeeder extends Seeder
         // Also create a few past (completed) sessions for other events
         $pastEvents = fake()->randomElements($createdEvents, min(8, count($createdEvents)));
         foreach ($pastEvents as $event) {
-            if ($event->id === $partnerBoost->id) continue; // already handled
+            if ($event->id === $partnerBoost->id) {
+                continue;
+            } // already handled
 
             $geo = fake()->randomElement($geographies);
             $region = fake()->randomElement($regionsByGeo[$geo]);
@@ -266,13 +268,13 @@ class EnablementSeeder extends Seeder
                 'all_day' => $allDay,
                 'timezone' => 'UTC',
                 'location' => $location,
-                'meeting_url' => $location === 'Virtual' ? 'https://teams.microsoft.com/meet/' . fake()->uuid() : null,
+                'meeting_url' => $location === 'Virtual' ? 'https://teams.microsoft.com/meet/'.fake()->uuid() : null,
                 'instructor' => fake()->randomElement($instructors),
                 'geography' => $geo,
                 'region' => $region,
                 'max_participants' => $event->max_participants,
                 'status' => 'completed',
-                'summary' => 'Session completed successfully with ' . fake()->numberBetween(8, 20) . ' attendees.',
+                'summary' => 'Session completed successfully with '.fake()->numberBetween(8, 20).' attendees.',
                 'created_by' => $adminId,
             ]);
 
@@ -305,7 +307,9 @@ class EnablementSeeder extends Seeder
                 ? $allUsers->firstWhere('id', $partner->user_id)
                 : $allUsers->random();
 
-            if (!$psm) continue;
+            if (! $psm) {
+                continue;
+            }
 
             // Avoid duplicate partner registrations
             $exists = \DB::table('partner_enablement_session')
@@ -313,7 +317,9 @@ class EnablementSeeder extends Seeder
                 ->where('enablement_session_id', $session->id)
                 ->exists();
 
-            if ($exists) continue;
+            if ($exists) {
+                continue;
+            }
 
             \DB::table('partner_enablement_session')->insert([
                 'partner_id' => $partner->id,
@@ -325,7 +331,9 @@ class EnablementSeeder extends Seeder
 
             // Register 1-3 contacts from this partner
             $contacts = $partner->contacts;
-            if ($contacts->isEmpty()) continue;
+            if ($contacts->isEmpty()) {
+                continue;
+            }
 
             $contactCount = fake()->numberBetween(1, min(3, $contacts->count()));
             $selectedContacts = $contacts->random($contactCount);
@@ -364,7 +372,7 @@ class EnablementSeeder extends Seeder
                     ->where('contact_id', $contact->id)
                     ->exists();
 
-                if (!$existing) {
+                if (! $existing) {
                     EnablementRegistration::create($regData);
                 }
             }

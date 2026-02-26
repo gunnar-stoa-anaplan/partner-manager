@@ -27,11 +27,11 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(ZoomApiService::class, function () {
             return new ZoomApiService(
-                accountId: config('services.zoom.account_id', ''),
-                clientId: config('services.zoom.client_id', ''),
-                clientSecret: config('services.zoom.client_secret', ''),
-                webhookSecretToken: config('services.zoom.webhook_secret_token', ''),
-                baseUrl: config('services.zoom.base_url', 'https://api.zoom.us/v2'),
+                accountId: config('services.zoom.account_id') ?? '',
+                clientId: config('services.zoom.client_id') ?? '',
+                clientSecret: config('services.zoom.client_secret') ?? '',
+                webhookSecretToken: config('services.zoom.webhook_secret_token') ?? '',
+                baseUrl: config('services.zoom.base_url') ?? 'https://api.zoom.us/v2',
             );
         });
     }
@@ -46,15 +46,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('manage-activation', function (User $user) {
-            if ($user->isAdmin()) {
+            if ($user->bypassesPermissions()) {
                 return true;
             }
 
-            if ($user->role === 'coe') {
-                return Feature::for(null)->active('feature_activation_coe');
-            }
-
-            return false;
+            return $user->hasModulePermission('feature_activation_coe')
+                && Feature::for(null)->active('feature_activation_coe');
         });
 
         Pulse::user(fn ($user) => [

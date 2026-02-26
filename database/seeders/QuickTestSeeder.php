@@ -8,9 +8,11 @@ use App\Models\OpportunitySnapshot;
 use App\Models\Partner;
 use App\Models\Resource;
 use App\Models\ResourceSnapshot;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Quick test seeder that creates 4 weeks of sample data for rapid testing.
@@ -25,23 +27,24 @@ class QuickTestSeeder extends Seeder
     {
         $this->command->info('🚀 Quick Test Seeder - Creating 4 weeks of sample data...');
 
+        $roles = Role::internal()->pluck('id', 'slug');
+
         // Clear existing data
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        OpportunitySnapshot::truncate();
-        ResourceSnapshot::truncate();
-        Opportunity::truncate();
-        Resource::truncate();
-        Import::truncate();
-        DB::table('user_partner')->truncate();
-        Partner::truncate();
-        User::where('role', 'psm')->delete();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        Schema::withoutForeignKeyConstraints(function () use ($roles) {
+            OpportunitySnapshot::truncate();
+            ResourceSnapshot::truncate();
+            Opportunity::truncate();
+            Resource::truncate();
+            Import::truncate();
+            DB::table('user_partner')->truncate();
+            Partner::truncate();
+            User::where('role_id', $roles['psm'])->delete();
+        });
 
         // Create admin user
-        $admin = User::first() ?? User::factory()->create([
+        $admin = User::first() ?? User::factory()->admin()->create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
-            'role' => 'admin',
         ]);
 
         // Create Gunnar as a PSM user
@@ -50,12 +53,12 @@ class QuickTestSeeder extends Seeder
             [
                 'name' => 'Gunnar Stoa',
                 'password' => bcrypt('password'),
-                'role' => 'psm',
+                'role_id' => $roles['psm'],
             ]
         );
 
         // Create 1 additional PSM
-        $psms = User::factory()->count(1)->create(['role' => 'psm']);
+        $psms = User::factory()->count(1)->psm()->create();
         $psms->prepend($gunnar);
 
         // Create Accenture partner

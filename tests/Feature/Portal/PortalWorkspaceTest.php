@@ -23,7 +23,9 @@ class PortalWorkspaceTest extends TestCase
     {
         parent::setUp();
 
-        $this->psm = User::factory()->create(['role' => 'psm']);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->psm = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $this->psm->id]);
     }
 

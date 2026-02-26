@@ -2,15 +2,15 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\ScorecardWeight;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class ScorecardWeightSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminId = User::where('role', 'admin')->first()?->id;
+        $adminId = User::whereRelation('role', 'slug', 'admin')->first()?->id;
 
         $weights = [
             ['dimension' => 'certification', 'weight' => 0.15],

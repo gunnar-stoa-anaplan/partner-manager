@@ -46,10 +46,13 @@ class ModuleRegistry
 
     public function isEnabled(string $slug, ?User $user = null): bool
     {
-        $user = $user ?? Auth::user();
+        $authUser = $user ?? Auth::user();
 
-        // Admins bypass all feature gating — full visibility regardless of flag state
-        if ($user?->isAdmin()) {
+        // Only apply internal-user checks to User models (not portal Contacts)
+        $internalUser = $authUser instanceof User ? $authUser : null;
+
+        // System roles (bypass_permissions) skip all feature gating
+        if ($internalUser?->bypassesPermissions()) {
             return true;
         }
 
@@ -63,17 +66,22 @@ class ModuleRegistry
             return false;
         }
 
-        // 3. Per-user activation check
-        if ($user === null) {
+        // 3. Role permission check (enforced when user has a role_id)
+        if ($internalUser === null) {
+            // Portal contacts pass through — access is controlled by PortalCan/PortalRole middleware
+            return $authUser !== null;
+        }
+
+        if ($internalUser->role_id !== null && ! $internalUser->hasModulePermission($slug)) {
             return false;
         }
 
-        // No path defined for this slug = no user gating (allow)
+        // 4. Per-user activation check
         if (! $this->hasActivePath($slug)) {
             return true;
         }
 
-        return $this->userHasCompleted($user, $slug);
+        return $this->userHasCompleted($internalUser, $slug);
     }
 
     /**
@@ -86,13 +94,18 @@ class ModuleRegistry
             return true;
         }
 
-        $user = $user ?? Auth::user();
+        $authUser = $user ?? Auth::user();
 
-        if ($user === null) {
+        if (! $authUser instanceof User) {
             return false;
         }
 
-        return $this->userHasCompletedTellPhase($user, $slug);
+        // Role permission is required even for Tell-phase access (when role_id is populated)
+        if ($authUser->role_id !== null && ! $authUser->hasModulePermission($slug)) {
+            return false;
+        }
+
+        return $this->userHasCompletedTellPhase($authUser, $slug);
     }
 
     /**

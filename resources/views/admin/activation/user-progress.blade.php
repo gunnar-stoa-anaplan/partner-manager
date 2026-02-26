@@ -19,7 +19,7 @@
         <div class="d-flex align-items-center gap-3">
             <div>
                 <h5 class="mb-1">{{ $user->name }}</h5>
-                <p class="text-muted mb-0">{{ $user->email }} &middot; <span class="badge bg-secondary">{{ ucfirst($user->role) }}</span></p>
+                <p class="text-muted mb-0">{{ $user->email }} &middot; <span class="badge bg-secondary">{{ $user->role?->display_name ?? 'No Role' }}</span></p>
             </div>
         </div>
     </div>
