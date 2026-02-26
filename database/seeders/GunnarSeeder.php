@@ -2,10 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\DealRegistration;
 use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Laravel\Pennant\Feature;
 
 class GunnarSeeder extends Seeder
 {
@@ -91,6 +94,27 @@ class GunnarSeeder extends Seeder
 
             $this->command->info("✓ Created/Updated {$partner->name} and assigned to Gunnar");
         }
+
+        // Seed deal registrations
+        if (DealRegistration::count() === 0) {
+            DealRegistration::factory(30)->create();
+            $this->command->info('✓ Seeded 30 deal registrations');
+        }
+
+        // Activate all Pennant feature flags by discovering Feature classes
+        $featureClasses = collect(File::files(app_path('Features')))
+            ->map(fn ($file) => 'App\\Features\\'.pathinfo($file->getFilename(), PATHINFO_FILENAME))
+            ->filter(fn ($class) => class_exists($class));
+
+        $activated = 0;
+        foreach ($featureClasses as $class) {
+            Feature::for(null)->activate($class);
+            $activated++;
+        }
+        $this->command->info("✓ Activated all {$activated} Pennant feature flags");
+
+        // Seed directory sync connector + sample connection
+        $this->call(DirectorySyncConnectorSeeder::class);
 
         $this->command->info('✅ Gunnar setup complete!');
         $this->command->info("   Email: {$gunnar->email}");

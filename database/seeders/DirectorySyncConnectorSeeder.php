@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\ConnectorProfile;
+use App\Models\FieldMapping;
+use App\Models\IntegrationConnection;
 use App\Models\MappingTemplate;
 use Illuminate\Database\Seeder;
 
@@ -41,5 +43,33 @@ class DirectorySyncConnectorSeeder extends Seeder
                 ],
             ],
         );
+
+        // Create a sample IntegrationConnection with field mappings
+        $connection = IntegrationConnection::updateOrCreate(
+            ['name' => 'HR CSV Upload'],
+            [
+                'type' => 'csv_upload',
+                'direction' => 'import',
+                'status' => 'active',
+                'applied_templates' => ['user-directory-import'],
+            ],
+        );
+
+        $mappings = [
+            ['name' => 'Employee ID', 'source_field' => 'employee_id', 'target_model' => 'User', 'target_field' => 'external_id', 'transform' => 'trim', 'sort_order' => 1],
+            ['name' => 'Full Name', 'source_field' => 'full_name', 'target_model' => 'User', 'target_field' => 'name', 'transform' => 'trim', 'sort_order' => 2],
+            ['name' => 'Email', 'source_field' => 'email_address', 'target_model' => 'User', 'target_field' => 'email', 'transform' => 'lowercase', 'sort_order' => 3],
+            ['name' => 'Manager ID', 'source_field' => 'manager_employee_id', 'target_model' => 'User', 'target_field' => 'manager_external_id', 'transform' => 'trim', 'sort_order' => 4],
+        ];
+
+        foreach ($mappings as $mapping) {
+            FieldMapping::updateOrCreate(
+                [
+                    'connection_id' => $connection->id,
+                    'source_field' => $mapping['source_field'],
+                ],
+                $mapping,
+            );
+        }
     }
 }
