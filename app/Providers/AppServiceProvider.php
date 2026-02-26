@@ -6,6 +6,7 @@ use App\Contracts\ChatServiceInterface;
 use App\Models\AppSetting;
 use App\Models\User;
 use App\Services\SimulatedChatService;
+use App\Services\ZoomApiService;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
@@ -23,6 +24,16 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(ChatServiceInterface::class, SimulatedChatService::class);
+
+        $this->app->singleton(ZoomApiService::class, function () {
+            return new ZoomApiService(
+                accountId: config('services.zoom.account_id', ''),
+                clientId: config('services.zoom.client_id', ''),
+                clientSecret: config('services.zoom.client_secret', ''),
+                webhookSecretToken: config('services.zoom.webhook_secret_token', ''),
+                baseUrl: config('services.zoom.base_url', 'https://api.zoom.us/v2'),
+            );
+        });
     }
 
     /**
@@ -31,11 +42,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('viewPulse', function ($user) {
-            return $user->role === 'admin';
+            return $user->isAdmin();
         });
 
         Gate::define('manage-activation', function (User $user) {
-            if ($user->role === 'admin') {
+            if ($user->isAdmin()) {
                 return true;
             }
 

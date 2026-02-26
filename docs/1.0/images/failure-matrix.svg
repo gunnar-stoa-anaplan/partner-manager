@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 310" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="820" height="310" rx="16" fill="#f8f9fa"/>
+
+  <!-- Title -->
+  <text x="410" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#2d3436">Failure Impact Matrix</text>
+  <text x="410" y="56" text-anchor="middle" font-size="11" fill="#636e72">No management-plane failure affects application availability</text>
+
+  <!-- Table header row -->
+  <rect x="40" y="76" width="260" height="34" rx="0" fill="#2d3436"/>
+  <rect x="40" y="76" width="260" height="34" rx="8" fill="#2d3436"/>
+  <text x="170" y="98" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Component Down</text>
+
+  <rect x="300" y="76" width="240" height="34" fill="#2d3436"/>
+  <text x="420" y="98" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">App Serving Users?</text>
+
+  <rect x="540" y="76" width="240" height="34" rx="0" fill="#2d3436"/>
+  <rect x="540" y="76" width="260" height="34" rx="8" fill="#2d3436"/>
+  <rect x="540" y="76" width="240" height="34" fill="#2d3436"/>
+  <text x="660" y="98" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Management Available?</text>
+
+  <!-- Row 1: Control Plane offline -->
+  <rect x="40" y="110" width="260" height="36" rx="0" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="170" y="133" text-anchor="middle" font-size="12" font-weight="600" fill="#2d3436">Control Plane offline</text>
+
+  <rect x="300" y="110" width="240" height="36" fill="#e6fcf5" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="420" y="133" text-anchor="middle" font-size="13" font-weight="700" fill="#00b894">&#10003; Yes</text>
+
+  <rect x="540" y="110" width="240" height="36" rx="0" fill="#ffeef0" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="660" y="133" text-anchor="middle" font-size="13" font-weight="700" fill="#d63031">&#10007; No</text>
+
+  <!-- Row 2: Agent crashed -->
+  <rect x="40" y="146" width="260" height="36" rx="0" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="170" y="169" text-anchor="middle" font-size="12" font-weight="600" fill="#2d3436">Agent crashed</text>
+
+  <rect x="300" y="146" width="240" height="36" fill="#e6fcf5" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="420" y="169" text-anchor="middle" font-size="13" font-weight="700" fill="#00b894">&#10003; Yes</text>
+
+  <rect x="540" y="146" width="240" height="36" rx="0" fill="#ffeef0" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="660" y="163" text-anchor="middle" font-size="13" font-weight="700" fill="#d63031">&#10007; No</text>
+  <text x="660" y="177" text-anchor="middle" font-size="9" fill="#636e72">(auto-restarts)</text>
+
+  <!-- Row 3: Registry unreachable -->
+  <rect x="40" y="182" width="260" height="36" rx="0" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="170" y="205" text-anchor="middle" font-size="12" font-weight="600" fill="#2d3436">Registry unreachable</text>
+
+  <rect x="300" y="182" width="240" height="36" fill="#e6fcf5" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="420" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#00b894">&#10003; Yes</text>
+
+  <rect x="540" y="182" width="240" height="36" rx="0" fill="#fff8e6" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="660" y="199" text-anchor="middle" font-size="13" font-weight="700" fill="#e17055">Partial</text>
+  <text x="660" y="213" text-anchor="middle" font-size="9" fill="#636e72">(no new deploys)</text>
+
+  <!-- Row 4: CA unavailable -->
+  <rect x="40" y="218" width="260" height="36" rx="0" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="170" y="241" text-anchor="middle" font-size="12" font-weight="600" fill="#2d3436">CA unavailable</text>
+
+  <rect x="300" y="218" width="240" height="36" fill="#e6fcf5" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="420" y="241" text-anchor="middle" font-size="13" font-weight="700" fill="#00b894">&#10003; Yes</text>
+
+  <rect x="540" y="218" width="240" height="36" rx="0" fill="#fff8e6" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="660" y="235" text-anchor="middle" font-size="13" font-weight="700" fill="#e17055">Partial</text>
+  <text x="660" y="249" text-anchor="middle" font-size="9" fill="#636e72">(no new certs)</text>
+
+  <!-- Row 5: Client DB offline — the only real SPOF -->
+  <rect x="40" y="254" width="260" height="36" rx="0" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="170" y="277" text-anchor="middle" font-size="12" font-weight="600" fill="#2d3436">Client DB offline</text>
+
+  <rect x="300" y="254" width="240" height="36" fill="#ffeef0" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="420" y="271" text-anchor="middle" font-size="13" font-weight="700" fill="#d63031">&#10007; No</text>
+  <text x="420" y="285" text-anchor="middle" font-size="9" fill="#636e72">(that client only)</text>
+
+  <rect x="540" y="254" width="240" height="36" rx="0" fill="#e6fcf5" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="660" y="277" text-anchor="middle" font-size="13" font-weight="700" fill="#00b894">&#10003; Yes</text>
+
+  <!-- Footer -->
+  <text x="410" y="304" text-anchor="middle" font-size="9" fill="#b2bec3">Partner Manager &#8212; Failure Impact Matrix</text>
+</svg>

@@ -63,4 +63,13 @@ return [
         'api_url' => env('ANAPLAN_SPM_API_URL', 'https://api.anaplan.com/2/0'),
     ],
 
+    'zoom' => [
+        'account_id' => env('ZOOM_ACCOUNT_ID'),
+        'client_id' => env('ZOOM_CLIENT_ID'),
+        'client_secret' => env('ZOOM_CLIENT_SECRET'),
+        'webhook_secret_token' => env('ZOOM_WEBHOOK_SECRET_TOKEN'),
+        'verification_token' => env('ZOOM_VERIFICATION_TOKEN'),
+        'base_url' => env('ZOOM_API_BASE_URL', 'https://api.zoom.us/v2'),
+    ],
+
 ];

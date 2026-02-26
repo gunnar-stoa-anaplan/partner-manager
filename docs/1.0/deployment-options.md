@@ -41,6 +41,8 @@ The client provisions and manages their own infrastructure. Partner Manager runs
 
 We provision and operate the infrastructure on behalf of the client. The application runs in our cloud environment with dedicated, isolated resources per client.
 
+![Hosted SaaS deployment](images/internal-hosted-saas-deployment.svg)
+
 **How it works:**
 
 - We provision a dedicated environment (compute, database, networking) for each client

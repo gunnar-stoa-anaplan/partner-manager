@@ -49,7 +49,7 @@ class ModuleRegistry
         $user = $user ?? Auth::user();
 
         // Admins bypass all feature gating — full visibility regardless of flag state
-        if ($user?->role === 'admin') {
+        if ($user?->isAdmin()) {
             return true;
         }
 

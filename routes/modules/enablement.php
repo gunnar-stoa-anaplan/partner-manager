@@ -30,7 +30,7 @@ Route::get('/influence-map', [FieldEnablementController::class, 'influenceMap'])
 
 // Calendar Views
 Route::get('/calendar', function () {
-    $query = auth()->user()->role === 'admin'
+    $query = auth()->user()->isAdmin()
         ? \App\Models\Partner::query()
         : \App\Models\Partner::where('user_id', auth()->id());
 
@@ -44,7 +44,7 @@ Route::get('/partners/{id}/calendar', function ($id) {
         'opportunities:id,partner_id,opportunity_name',
         'projects:id,partner_id,name',
     ])->findOrFail($id);
-    if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
+    if ($partner->user_id !== auth()->id() && ! auth()->user()->isAdmin()) {
         abort(403);
     }
 
@@ -111,7 +111,7 @@ Route::get('/enablement/my-nominations', function () {
 Route::get('/partners/{id}/enablement', function ($id) {
     $partner = \App\Models\Partner::with('contacts:id,partner_id,first_name,last_name,email')
         ->findOrFail($id);
-    if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
+    if ($partner->user_id !== auth()->id() && ! auth()->user()->isAdmin()) {
         abort(403);
     }
 

@@ -146,7 +146,7 @@ class PortalUserController extends Controller
 
     private function authorizePartnerAccess(Partner $partner): void
     {
-        if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
+        if ($partner->user_id !== auth()->id() && ! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access to this partner.');
         }
     }

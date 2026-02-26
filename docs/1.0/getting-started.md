@@ -6,6 +6,8 @@ This guide walks each user type through their first steps with Partner Manager. 
 
 After a fresh deployment, the administrator must configure several foundational elements before the platform becomes useful. Complete these steps in order.
 
+![Phase 1: Setup & activation](images/phase1-setup-activation.svg)
+
 ### 1. Branding & Configuration
 
 Start by establishing your organization's identity and preferences:
@@ -103,6 +105,8 @@ See [Portal Overview](portal-overview) and [Provisioning](provisioning) for deta
 
 Once an administrator has completed the initial setup and assigned you to partners, here's how to get started as a Partner Success Manager.
 
+![Phase 2: Core management](images/phase2-core-management.svg)
+
 ### Logging In
 
 Navigate to the Partner Manager URL provided by your administrator and log in with your credentials.
@@ -138,7 +142,9 @@ Partner Manager uses a left-hand sidebar organized by four pillars:
 
 ### Ongoing Workflow
 
-As a PSM, your daily workflow typically follows this cycle:
+As a PSM, your daily workflow typically follows this cycle, feeding into continuous optimization.
+
+![Phase 4: CoE review & optimization](images/phase4-coe-optimization.svg)
 
 1. **Plan** — Review tasks, update action plans, set goals for the quarter
 2. **Engage** — Conduct enablement, manage deal registrations, hold QBR sessions
@@ -150,6 +156,8 @@ As a PSM, your daily workflow typically follows this cycle:
 ## Partner: Getting Started with the Portal
 
 As a partner contact, you access Partner Manager through the **Partner Portal** — a self-service interface for tracking your organization's progress, registering for events, and managing deal registrations.
+
+![Phase 3: Partner portal](images/phase3-partner-portal.svg)
 
 ### Accessing the Portal
 

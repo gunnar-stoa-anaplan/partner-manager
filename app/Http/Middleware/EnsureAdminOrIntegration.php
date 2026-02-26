@@ -10,7 +10,7 @@ class EnsureAdminOrIntegration
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! in_array($request->user()?->role, ['admin', 'integration'])) {
+        if (! in_array($request->user()?->role, ['admin', 'super_admin', 'integration'])) {
             abort(403, 'Unauthorized. Admin or Integration access required.');
         }
 

@@ -59,7 +59,9 @@
                                     </td>
                                     <td>{{ $user->email }}</td>
                                     <td>
-                                        @if($user->role === 'admin')
+                                        @if($user->role === 'super_admin')
+                                            <span class="badge bg-dark">Super Admin</span>
+                                        @elseif($user->role === 'admin')
                                             <span class="badge bg-danger">Admin</span>
                                         @elseif($user->role === 'psm')
                                             <span class="badge bg-success">PSM</span>

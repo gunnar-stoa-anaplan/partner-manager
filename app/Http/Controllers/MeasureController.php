@@ -15,7 +15,7 @@ class MeasureController extends Controller
         $user = auth()->user();
         $fy = $this->currentFiscalYear();
 
-        $partnerIds = $user->role === 'admin'
+        $partnerIds = $user->isAdmin()
             ? Partner::pluck('id')
             : Partner::where('user_id', $user->id)->pluck('id');
 

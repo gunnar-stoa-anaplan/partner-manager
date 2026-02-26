@@ -8,34 +8,7 @@ Partner Manager is deployed as isolated, single-tenant instances — one per cli
 
 The enitre solution consists of three independent components:  the control plane, the client application and a monitoring agent.
 
-```
-                          ┌──────────────────────────────────────┐
-                          │          CONTROL PLANE               │
-                          │      (AWS-hosted, centralized)       │
-                          │                                      │
-                          │   Fleet Dashboard    Release Mgmt    │
-                          │   Alert Monitoring   Certificate CA  │
-                          │   Agent API (v1)     Deployment Svc  │
-                          └───────────────┬──────────────────────┘
-                                          │
-                          Outbound HTTPS only (mTLS, TLS 1.3)
-                          Agents pull — control plane never pushes
-                                          │
-              ┌───────────────┬───────────┴───────────┬───────────────┐
-              │               │                       │               │
-              ▼               ▼                       ▼               ▼
-     ┌────────────────┐ ┌────────────────┐  ┌────────────────┐ ┌────────────────┐
-     │  Client A      │ │  Client B      │  │  Client C      │ │  Client N      │
-     │ ┌────┐ ┌─────┐ │ │ ┌────┐ ┌─────┐ │  │ ┌────┐ ┌─────┐ │ │ ┌────┐ ┌─────┐ │
-     │ │App │ │Agent│ │ │ │App │ │Agent│ │  │ │App │ │Agent│ │ │ │App │ │Agent│ │
-     │ └──┬─┘ └──┬──┘ │ │ └──┬─┘ └──┬──┘ │  │ └──┬─┘ └──┬──┘ │ │ └──┬─┘ └──┬──┘ │
-     │    ▼      │    │ │    ▼      │    │  │    ▼      │    │ │    ▼      │    │
-     │ ┌──────┐  │    │ │ ┌──────┐  │    │  │ ┌──────┐  │    │ │ ┌──────┐  │    │
-     │ │  DB  │  │    │ │ │  DB  │  │    │  │ │  DB  │  │    │ │ │  DB  │  │    │
-     │ └──────┘  │    │ │ └──────┘  │    │  │ └──────┘  │    │ │ └──────┘  │    │
-     └───────────┘    │ └───────────┘    │  └───────────┘    │ └───────────┘    │
-     Client infra     │  Client infra    │   Client infra    │  Client infra    │
-```
+![System architecture overview](images/internal-combined-system-architecture.svg)
 
 **Key design principles:**
 
@@ -48,37 +21,7 @@ The enitre solution consists of three independent components:  the control plane
 
 Each client runs exactly two containers, orchestrated with Docker Compose:
 
-```
-┌──────────────────────── Client Infrastructure ──────────────────────────┐
-│                                                                         │
-│  ┌───────────────────────────────┐   ┌───────────────────────────────┐  │
-│  │       App Container           │   │       Agent Container         │  │
-│  │                               │   │                               │  │
-│  │  partner-manager:2.1.0        │   │  pm-agent:1.2.0               │  │
-│  │                               │   │                               │  │
-│  │  Ports: 80, 443 ─── Users     │   │  No listening ports           │  │
-│  │                               │   │                               │  │
-│  │  Env vars:                    │   │  Mounts (all read-only):      │  │
-│  │    DB_HOST, DB_PORT           │   │    /var/run/docker.sock       │  │
-│  │    DB_DATABASE                │   │    /etc/pm-agent/config.yaml  │  │
-│  │    DB_USERNAME, DB_PASSWORD   │   │    /etc/pm-agent/certs/       │  │
-│  │    APP_KEY                    │   │                               │  │
-│  └───────────────┬───────────────┘   └───────────────┬───────────────┘  │
-│                  │                                   │                  │
-│                  ▼                                   │                  │
-│  ┌───────────────────────────────┐    Outbound HTTPS │ (mTLS)           │
-│  │       Client Database         │    to control     │ plane only       │
-│  │                               │                   │                  │
-│  │  RDS / Azure SQL /            │                   ▼                  │
-│  │  Cloud SQL / self-hosted      │   ┌──────────────────────────────┐   │
-│  │                               │   │  Control Plane               │   │
-│  │  Fully owned and managed      │   │  (AWS infrastructure)        │   │
-│  │  by the client                │   └──────────────────────────────┘   │
-│  └───────────────────────────────┘                                      │
-│                                                                         │
-│  No external access to database                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
+![Client deployment architecture](images/internal-client-onprem-deployment.svg)
 
 ### Container Isolation
 
@@ -134,23 +77,7 @@ Partner Manager exposes three distinct access points, each serving a different a
 
 Each access point uses its own authentication guard and middleware stack. The PSM application and Partner Portal share the same deployment but operate with **completely separate user pools** — internal users cannot log into the portal, and portal contacts cannot access the PSM application.
 
-```
-                 ┌─────────────────────────────┐
-                 │       HTTPS Endpoint         │
-                 └──────────┬──────────────────┘
-                            │
-            ┌───────────────┼───────────────┐
-            │               │               │
-     ┌──────┴──────┐ ┌─────┴─────┐  ┌──────┴──────┐
-     │  Web Guard   │ │ Portal    │  │  Token Auth │
-     │  (Users)     │ │ Guard     │  │  /api/v1    │
-     │  /dashboard  │ │ (Contacts)│  │             │
-     │  /plan/*     │ │ /portal/* │  │             │
-     │  /engage/*   │ │           │  │             │
-     │  /measure/*  │ │           │  │             │
-     │  /act/*      │ │           │  │             │
-     └─────────────┘ └───────────┘  └─────────────┘
-```
+![Access points and authentication guards](images/access-points-routing.svg)
 
 ### External Integrations
 
@@ -169,51 +96,7 @@ The agent is a lightweight, statically compiled binary (~10 MB) that runs as a s
 
 ### Lifecycle
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                     Agent Process Lifecycle                   │
-│                                                              │
-│  START                                                       │
-│    │                                                         │
-│    ▼                                                         │
-│  Load config.yaml (/etc/pm-agent/config.yaml)                │
-│    │                                                         │
-│    ▼                                                         │
-│  Initialize mTLS client                                      │
-│    │  Load CA cert, client cert, client key                  │
-│    │  Configure TLS 1.3 minimum                              │
-│    │                                                         │
-│    ▼                                                         │
-│  Initialize Docker client                                    │
-│    │  Connect to /var/run/docker.sock (read-only)            │
-│    │                                                         │
-│    ▼                                                         │
-│  ┌──────────────── Heartbeat Loop ────────────────────────┐  │
-│  │                                                        │  │
-│  │  Every 30 seconds (configurable):                      │  │
-│  │                                                        │  │
-│  │  1. COLLECT  → Query Docker API for container states   │  │
-│  │               → Check app container reachability       │  │
-│  │               → Read system resource metrics           │  │
-│  │                                                        │  │
-│  │  2. SEND     → POST health report to control plane     │  │
-│  │               → Authenticated via mTLS client cert     │  │
-│  │                                                        │  │
-│  │  3. RECEIVE  → Parse response for pending commands     │  │
-│  │                                                        │  │
-│  │  4. EXECUTE  → Process each command sequentially       │  │
-│  │               → Report results back to control plane   │  │
-│  │                                                        │  │
-│  │  If control plane unreachable:                         │  │
-│  │    → Log warning, retry next cycle                     │  │
-│  │    → App continues to function independently           │  │
-│  │                                                        │  │
-│  └────────────────────────────────────────────────────────┘  │
-│                                                              │
-│  On SIGINT/SIGTERM → graceful shutdown                       │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
-```
+![Agent-control plane architecture](images/agent-control-plane-architecture.svg)
 
 ### What the Agent Collects
 
@@ -311,6 +194,8 @@ All configuration files and certificates are mounted **read-only** into the cont
 
 The control plane is the centralized management hub for all Partner Manager instances. It is operated by MyService administrators and hosted on MyService infrastructure.
 
+![Control plane architecture](images/internal-control-plane-architecture.svg)
+
 ### Capabilities
 
 1. Receives and stores health telemetry from agents
@@ -351,57 +236,7 @@ This section documents every secret, credential, and cryptographic key in the sy
 
 ### Secrets Boundary Map
 
-```
-╔═══════════════════════════════ CLIENT BOUNDARY ════════════════════════════╗
-║                                                                           ║
-║  App Container                      Agent Container                       ║
-║  ┌──────────────────────────┐       ┌──────────────────────────┐          ║
-║  │                          │       │                          │          ║
-║  │  DB_PASSWORD       ──────│── ✗ ──│── Cannot access          │          ║
-║  │  APP_KEY           ──────│── ✗ ──│── Cannot access          │          ║
-║  │  MAIL_PASSWORD     ──────│── ✗ ──│── Cannot access          │          ║
-║  │  API tokens (env)  ──────│── ✗ ──│── Cannot access          │          ║
-║  │  SESSION_SECRET    ──────│── ✗ ──│── Cannot access          │          ║
-║  │                          │       │                          │          ║
-║  │  (These NEVER leave      │       │  client-key.pem ────────│── ✗ ──→  ║
-║  │   the app container)     │       │  (NEVER transmitted)    │  Never   ║
-║  │                          │       │                         │  leaves  ║
-║  └──────────────────────────┘       │  client.pem ────────────│──────→   ║
-║           │                         │  (public cert, sent     │  Sent    ║
-║           ▼                         │   during TLS handshake) │  to CP   ║
-║  ┌──────────────────────────┐       │                         │          ║
-║  │  Client Database          │       │  instance_id ───────────│──────→   ║
-║  │                           │       │  (sent in every         │  Sent    ║
-║  │  Passwords:  bcrypt       │       │   heartbeat)            │  in HB   ║
-║  │  API tokens: SHA-256      │       └──────────────────────────┘         ║
-║  │  Sessions:   AES-256      │                                            ║
-║  │  Encrypted fields:        │                                            ║
-║  │    AES-256-CBC            │                                            ║
-║  │                           │                                            ║
-║  │  (NEVER leaves client     │                                            ║
-║  │   infrastructure)         │                                            ║
-║  └───────────────────────────┘                                            ║
-║                                                                           ║
-╚═══════════════════════════════════════════════════════════════════════════╝
-
-╔═══════════════════════════ MYSERVICE BOUNDARY ════════════════════════════╗
-║                                                                           ║
-║  Control Plane                      CI/CD Pipeline                        ║
-║  ┌──────────────────────────┐       ┌──────────────────────────┐          ║
-║  │  CA private key           │       │  Ed25519 private key     │          ║
-║  │  (signs agent certs)      │       │  (signs release images)  │          ║
-║  │  HSM/KMS recommended      │       │  Encrypted by CI/CD      │          ║
-║  │  NEVER transmitted        │       │  NEVER transmitted       │          ║
-║  │                           │       └──────────────────────────┘          ║
-║  │  NO client DB credentials │                                            ║
-║  │  NO client APP_KEYs       │                                            ║
-║  │  NO client passwords      │                                            ║
-║  │  NO client API tokens     │                                            ║
-║  │  NO client PII            │                                            ║
-║  └───────────────────────────┘                                            ║
-║                                                                           ║
-╚═══════════════════════════════════════════════════════════════════════════╝
-```
+![Secrets boundary map](images/secrets-boundary-map.svg)
 
 ### Database Credentials
 
@@ -526,64 +361,13 @@ For production deployments, use your cloud provider's secrets management instead
 
 ### Defense in Depth
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│ Layer 1: NETWORK ISOLATION                                          │
-│   Agent outbound-only. No inbound ports. Client firewall intact.    │
-│                                                                     │
-│ ┌─────────────────────────────────────────────────────────────────┐ │
-│ │ Layer 2: TRANSPORT ENCRYPTION (mTLS, TLS 1.3)                   │ │
-│ │   All data encrypted. Both sides present CA-signed certs.       │ │
-│ │   Rogue agents rejected. MITM attacks fail.                     │ │
-│ │                                                                 │ │
-│ │ ┌─────────────────────────────────────────────────────────────┐ │ │
-│ │ │ Layer 3: IDENTITY VERIFICATION                               │ │ │
-│ │ │   Unique instance_id per agent. Cert fingerprint bound to    │ │ │
-│ │ │   instance. Compromised cert A cannot impersonate B.         │ │ │
-│ │ │                                                             │ │ │
-│ │ │ ┌───────────────────────────────────────────────────────┐   │ │ │
-│ │ │ │ Layer 4: ARTIFACT INTEGRITY (Ed25519)                  │   │ │ │
-│ │ │ │   Every deploy signed. Agent verifies before applying. │   │ │ │
-│ │ │ │   Signing key in CI/CD only.                           │   │ │ │
-│ │ │ │                                                       │   │ │ │
-│ │ │ │ ┌─────────────────────────────────────────────────┐   │   │ │ │
-│ │ │ │ │ Layer 5: CONTAINER ISOLATION                     │   │   │ │ │
-│ │ │ │ │   Non-root. Read-only Docker socket.             │   │   │ │ │
-│ │ │ │ │   No DB access. No app volumes. Business data    │   │   │ │ │
-│ │ │ │ │   unreachable.                                   │   │   │ │ │
-│ │ │ │ └─────────────────────────────────────────────────┘   │   │ │ │
-│ │ │ └───────────────────────────────────────────────────────┘   │ │ │
-│ │ └─────────────────────────────────────────────────────────────┘ │ │
-│ └─────────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────┘
-```
+![Defense in depth security layers](images/defense-in-depth.svg)
 
 ### mTLS (Mutual TLS)
 
 Standard HTTPS verifies the server's identity. mTLS adds client verification — both sides must present a certificate signed by the trusted Certificate Authority.
 
-```
-Agent                                              Control Plane
-  │                                                     │
-  │── TLS ClientHello (TLS 1.3) ──────────────────────>│
-  │                                                     │
-  │<── ServerHello + Server Cert + CertificateRequest ──│
-  │                                                     │
-  │  Agent verifies:                                    │
-  │  ✓ Server cert signed by trusted CA?                │
-  │  ✓ Not expired? Hostname matches?                   │
-  │                                                     │
-  │── Client Certificate (signed by CA) ──────────────>│
-  │                                                     │
-  │                           Control Plane verifies:   │
-  │                           ✓ Client cert signed by   │
-  │                             trusted CA?             │
-  │                           ✓ Not expired or revoked? │
-  │                           ✓ Fingerprint matches     │
-  │                             registered instance?    │
-  │                                                     │
-  │<── Encrypted channel established ──────────────────│
-```
+![mTLS handshake](images/mtls-handshake.svg)
 
 **What this prevents:**
 - Unauthorized agents connecting (no valid client cert)
@@ -594,20 +378,7 @@ Agent                                              Control Plane
 
 ### Ed25519 Artifact Signing
 
-```
-CI/CD Pipeline                              Agent (at deploy time)
-  │                                               │
-  │  1. Build Docker image                        │
-  │  2. Compute image digest (SHA-256)             │
-  │  3. Sign with Ed25519 private key              │
-  │  4. Publish image + signature                  │
-  │                                               │
-  │  (command delivered via heartbeat)             │
-  │                                          6. Verify signature
-  │                                             with public key
-  │                                          7. If valid: deploy
-  │                                          8. If invalid: reject
-```
+![Ed25519 artifact signing](images/ed25519-artifact-signing.svg)
 
 Even if the control plane database is compromised, an attacker cannot forge a valid signature without the Ed25519 private key (held only in CI/CD).
 
@@ -631,54 +402,17 @@ Even if the control plane database is compromised, an attacker cannot forge a va
 
 ### Heartbeat Cycle (every 30 seconds)
 
-```
-Agent                                                    Control Plane
-  │                                                           │
-  │  1. Collect container states from Docker API              │
-  │  2. Check app container reachability                      │
-  │  3. Read system metrics                                   │
-  │                                                           │
-  │── POST /api/v1/agent/heartbeat (mTLS) ──────────────────>│
-  │   { instance_id, health: { ... } }                        │
-  │                                                           │
-  │                                  4. Validate client cert   │
-  │                                  5. Store heartbeat        │
-  │                                  6. Update instance status │
-  │                                  7. Gather pending commands│
-  │                                                           │
-  │<──── 200 { "commands": [...] } ───────────────────────────│
-  │                                                           │
-  │  8. Execute each command locally                          │
-  │                                                           │
-  │── POST /api/v1/agent/commands/{id}/report ───────────────>│
-  │   { success: true, output: "deployed 2.2.0" }            │
-  │                                                           │
-```
+![Heartbeat cycle](images/heartbeat-cycle.svg)
 
 ### Deployment Flow
 
-```
-Operator                      Control Plane                   Agent
-   │                               │                            │
-   │  1. Click "Deploy v2.2.0"     │                            │
-   │──────────────────────────────>│                            │
-   │                               │  2. Create Deployment      │
-   │                               │  3. Queue deploy Command   │
-   │                               │                            │
-   │                               │  (next heartbeat, ≤30s)    │
-   │                               │<── heartbeat ──────────────│
-   │                               │── commands: [deploy] ─────>│
-   │                               │                            │
-   │                               │         4. Verify signature│
-   │                               │         5. Pull new image  │
-   │                               │         6. Restart app     │
-   │                               │                            │
-   │                               │<── command report ─────────│
-   │                               │  7. Update status          │
-   │                               │                            │
-   │  8. Dashboard: "Deployed"     │                            │
-   │<──────────────────────────────│                            │
-```
+![Deployment flow](images/deployment-flow.svg)
+
+## Data Model
+
+The application data model centers on the **Partner** entity, with related entities for tracking opportunities, certifications, health snapshots, signals, scorecards, and more.
+
+![Data model overview](images/data-model-overview.svg)
 
 ## Scalability
 
@@ -759,15 +493,7 @@ The architecture is designed so that no single component failure prevents end us
 
 The most critical design decision is that **no management-plane failure affects application availability**. The control plane, agent, CA, and registry are all management infrastructure — if any of them go down, users continue working uninterrupted. Only the client's own database is a true availability dependency, and that is fully within the client's control and infrastructure.
 
-```
-Component Down?         App Serving Users?    Management Available?
-─────────────────────── ───────────────────── ─────────────────────
-Control Plane offline   ✓ Yes                 ✗ No
-Agent crashed           ✓ Yes                 ✗ No (auto-restarts)
-Registry unreachable    ✓ Yes                 Partial (no deploys)
-CA unavailable          ✓ Yes                 Partial (no new certs)
-Client DB offline       ✗ No (that client)    ✓ Yes
-```
+![Failure impact matrix](images/failure-matrix.svg)
 
 ## Docker Compose Reference
 

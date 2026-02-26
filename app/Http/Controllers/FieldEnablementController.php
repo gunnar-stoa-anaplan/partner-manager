@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use App\Models\Partner;
-use Illuminate\Http\Request;
 
 class FieldEnablementController extends Controller
 {
@@ -15,7 +14,7 @@ class FieldEnablementController extends Controller
     {
         $partnerId = session('selected_partner_id');
 
-        if (!$partnerId) {
+        if (! $partnerId) {
             return redirect()->route('partners.my')->with('error', 'Please select a partner first.');
         }
 
@@ -23,7 +22,7 @@ class FieldEnablementController extends Controller
 
         // Authorization
         $user = auth()->user();
-        if ($user->role !== 'admin' && $partner->user_id !== $user->id) {
+        if (! $user->isAdmin() && $partner->user_id !== $user->id) {
             abort(403, 'Unauthorized access to this partner.');
         }
 
@@ -47,7 +46,7 @@ class FieldEnablementController extends Controller
         ];
 
         // Chart: contacts by title (top roles)
-        $byTitle = $contacts->groupBy(fn($c) => $c->title ?: 'Unknown')
+        $byTitle = $contacts->groupBy(fn ($c) => $c->title ?: 'Unknown')
             ->map->count()
             ->sortDesc()
             ->take(8);
@@ -65,7 +64,7 @@ class FieldEnablementController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->role === 'admin') {
+        if ($user->isAdmin()) {
             $partnerIds = Partner::pluck('id');
         } else {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
@@ -84,7 +83,7 @@ class FieldEnablementController extends Controller
         $partnerCount = $contacts->pluck('partner_id')->unique()->count();
 
         // Chart: contacts per partner (top 10)
-        $contactsByPartner = $contacts->groupBy(fn($c) => $c->partner->name ?? 'Unknown')
+        $contactsByPartner = $contacts->groupBy(fn ($c) => $c->partner->name ?? 'Unknown')
             ->map->count()
             ->sortDesc()
             ->take(10);
@@ -111,7 +110,7 @@ class FieldEnablementController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->role === 'admin') {
+        if ($user->isAdmin()) {
             $partnerIds = Partner::pluck('id');
         } else {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
@@ -134,7 +133,7 @@ class FieldEnablementController extends Controller
         $maxProjectCount = $deepCount > 0 ? $contacts->max('projects_count') : 0;
 
         // Chart: deep contacts by partner
-        $deepByPartner = $contacts->groupBy(fn($c) => $c->partner->name ?? 'Unknown')
+        $deepByPartner = $contacts->groupBy(fn ($c) => $c->partner->name ?? 'Unknown')
             ->map->count()
             ->sortDesc()
             ->take(10);
@@ -157,7 +156,7 @@ class FieldEnablementController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->role === 'admin') {
+        if ($user->isAdmin()) {
             $partnerIds = Partner::pluck('id');
         } else {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
@@ -175,16 +174,16 @@ class FieldEnablementController extends Controller
         // Top-level metrics
         $totalInfluencers = $contacts->count();
         $activeInfluencers = $contacts->where('projects_count', '>', 0)->count();
-        $totalProjects = $partners->sum(fn($p) => $p->projects->count());
-        $totalLeads = $partners->sum(fn($p) => $p->leads->count());
+        $totalProjects = $partners->sum(fn ($p) => $p->projects->count());
+        $totalLeads = $partners->sum(fn ($p) => $p->leads->count());
 
         // Contacts per partner (radar-style comparison)
-        $contactsByPartner = $partners->mapWithKeys(fn($p) => [$p->name => $p->contacts->count()])
+        $contactsByPartner = $partners->mapWithKeys(fn ($p) => [$p->name => $p->contacts->count()])
             ->sortDesc()
             ->take(8);
 
         // Projects per partner (bar)
-        $projectsByPartner = $partners->mapWithKeys(fn($p) => [$p->name => $p->projects->count()])
+        $projectsByPartner = $partners->mapWithKeys(fn ($p) => [$p->name => $p->projects->count()])
             ->sortDesc()
             ->take(10);
 
@@ -193,18 +192,18 @@ class FieldEnablementController extends Controller
         $deepEngagement = $totalInfluencers > 0 ? round(($contacts->where('projects_count', '>=', 3)->count() / $totalInfluencers) * 100) : 0;
 
         // Industry distribution (from partners)
-        $industryDistribution = $partners->groupBy(fn($p) => $p->industry ?: 'Unknown')
-            ->map(fn($group) => $group->sum(fn($p) => $p->contacts->count()))
+        $industryDistribution = $partners->groupBy(fn ($p) => $p->industry ?: 'Unknown')
+            ->map(fn ($group) => $group->sum(fn ($p) => $p->contacts->count()))
             ->sortDesc()
             ->take(8);
 
         // Geographic distribution
-        $geoDistribution = $partners->groupBy(fn($p) => $p->geography ?: 'Unknown')
-            ->map(fn($group) => $group->sum(fn($p) => $p->contacts->count()))
+        $geoDistribution = $partners->groupBy(fn ($p) => $p->geography ?: 'Unknown')
+            ->map(fn ($group) => $group->sum(fn ($p) => $p->contacts->count()))
             ->sortDesc();
 
         // Contact title distribution
-        $titleDistribution = $contacts->groupBy(fn($c) => $c->title ?: 'Unknown')
+        $titleDistribution = $contacts->groupBy(fn ($c) => $c->title ?: 'Unknown')
             ->map->count()
             ->sortDesc()
             ->take(8);

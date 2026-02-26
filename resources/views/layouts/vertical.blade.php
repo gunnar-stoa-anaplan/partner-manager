@@ -17,6 +17,8 @@
 
     <main class="app-body">
 
+        @include('layouts.partials/app-impersonation-banner')
+
         <div class="app-content">
             <div class="content-wrapper">
 

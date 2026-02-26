@@ -52,10 +52,12 @@ use App\Http\Controllers\SalesforceCredentialController;
 use App\Http\Controllers\ScorecardController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SolutionLifecycleController;
+use App\Http\Controllers\Strategy\CoeProgramDashboardController;
 use App\Http\Controllers\SystemStatusController;
 use App\Http\Controllers\TaskBoardController;
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserImpersonationController;
 use App\Http\Controllers\WorkshopGuideAdminController;
 use Illuminate\Support\Facades\Route;
 
@@ -89,6 +91,8 @@ Route::middleware(['auth'])->group(function () {
         return view('welcome', ['data' => '']);
     })->name('welcome');
 
+    Route::get('/program-dashboard', CoeProgramDashboardController::class)->name('program-dashboard');
+
     /*
     |--------------------------------------------------------------------------
     | My Training (Tell / Show / Do)
@@ -115,7 +119,7 @@ Route::middleware(['auth'])->group(function () {
     Route::view('relationship_overview', 'relationship_overview')->name('relationship_overview');
     Route::get('/influence-map', [FieldEnablementController::class, 'influenceMap'])->name('influence_map');
     Route::get('/calendar', function () {
-        $query = auth()->user()->role === 'admin'
+        $query = auth()->user()->isAdmin()
             ? \App\Models\Partner::query()
             : \App\Models\Partner::where('user_id', auth()->id());
 
@@ -129,7 +133,7 @@ Route::middleware(['auth'])->group(function () {
             'opportunities:id,partner_id,opportunity_name',
             'projects:id,partner_id,name',
         ])->findOrFail($id);
-        if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
+        if ($partner->user_id !== auth()->id() && ! auth()->user()->isAdmin()) {
             abort(403);
         }
 
@@ -258,6 +262,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/partners/{partner}/portal-users/import', [PortalUserController::class, 'import'])->name('partners.portal-users.import');
     Route::get('/partners/portal-users/template', [PortalUserController::class, 'downloadTemplate'])->name('partners.portal-users.template');
 
+    // User Impersonation — switch between user roles during development
+    Route::post('/impersonate/{user}', [UserImpersonationController::class, 'start'])->name('impersonate.start');
+    Route::post('/impersonate-stop', [UserImpersonationController::class, 'stop'])->name('impersonate.stop');
+
     // Portal Impersonation (PSM/Admin) — stop must be before start to avoid {contact} matching "stop"
     Route::post('/portal/impersonate/stop', [PortalImpersonationController::class, 'stop'])->name('portal.impersonate.stop');
     Route::post('/portal/impersonate/{contact}', [PortalImpersonationController::class, 'start'])->name('portal.impersonate.start');
@@ -304,7 +312,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/partners/{id}/enablement', function ($id) {
             $partner = \App\Models\Partner::with('contacts:id,partner_id,first_name,last_name,email')
                 ->findOrFail($id);
-            if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
+            if ($partner->user_id !== auth()->id() && ! auth()->user()->isAdmin()) {
                 abort(403);
             }
 

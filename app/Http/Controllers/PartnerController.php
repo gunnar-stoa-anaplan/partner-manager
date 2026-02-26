@@ -45,7 +45,7 @@ class PartnerController extends Controller
      */
     public function myPartners()
     {
-        $query = auth()->user()->role === 'admin'
+        $query = auth()->user()->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', auth()->id());
 
@@ -131,7 +131,7 @@ class PartnerController extends Controller
      */
     private function authorizePartnerAccess(Partner $partner): void
     {
-        if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
+        if ($partner->user_id !== auth()->id() && ! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access to this partner.');
         }
     }
@@ -1215,7 +1215,7 @@ class PartnerController extends Controller
     public function fullSummary()
     {
         // Get all partners assigned to the authenticated user (admins see all)
-        $query = auth()->user()->role === 'admin'
+        $query = auth()->user()->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', auth()->id());
 
@@ -1287,7 +1287,7 @@ class PartnerController extends Controller
     public function fullInsights()
     {
         // Get all partners (admins see all, PSMs see their own)
-        $query = auth()->user()->role === 'admin'
+        $query = auth()->user()->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', auth()->id());
 
@@ -1394,7 +1394,7 @@ class PartnerController extends Controller
      */
     public function analysis()
     {
-        $isAdmin = auth()->user()->role === 'admin';
+        $isAdmin = auth()->user()->isAdmin();
 
         if ($isAdmin) {
             $partners = Partner::with(['projects', 'contacts', 'opportunities', 'leads', 'resources'])
@@ -1450,7 +1450,7 @@ class PartnerController extends Controller
      */
     public function guidedAnalysis()
     {
-        $query = auth()->user()->role === 'admin'
+        $query = auth()->user()->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', auth()->id());
 
@@ -1513,7 +1513,7 @@ class PartnerController extends Controller
      */
     public function partnerCoach()
     {
-        $query = auth()->user()->role === 'admin'
+        $query = auth()->user()->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', auth()->id());
 

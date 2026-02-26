@@ -77,6 +77,9 @@
     <!-- Notifications dropdown -->
     @include('layouts.partials/app-notifications')
 
+    <!-- Dev Role Switcher (local only) -->
+    @include('layouts.partials.app-dev-switcher')
+
     <!-- Profile -->
     @auth
     <button type="button" data-bs-toggle="dropdown" title="{{ Auth::user()->email }}"

@@ -316,6 +316,20 @@ return [
         'enabled' => env('MODULE_KNOWLEDGE_BASE_USER', true),
     ],
 
+    'zoom_chat_admin' => [
+        'name' => 'Zoom Chat Responder Administration',
+        'description' => 'Configure AI-powered chat responders for Zoom meetings and webcasts.',
+        'icon' => 'video',
+        'enabled' => env('MODULE_ZOOM_CHAT_ADMIN', true),
+    ],
+
+    'zoom_chat_user' => [
+        'name' => 'Zoom Chat Responder',
+        'description' => 'AI chat responder for live Zoom meetings and webcasts.',
+        'icon' => 'video',
+        'enabled' => env('MODULE_ZOOM_CHAT_USER', true),
+    ],
+
     'workshop_labs_admin' => [
         'name' => 'Workshop Labs Administration',
         'description' => 'Administrative access to create and manage workshop labs, checkpoints, and participants.',

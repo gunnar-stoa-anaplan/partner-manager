@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\EnablementEvent;
-use App\Models\EnablementSession;
-use App\Models\EnablementRegistration;
-use App\Models\Partner;
 use App\Models\Contact;
+use App\Models\EnablementEvent;
+use App\Models\EnablementRegistration;
+use App\Models\EnablementSession;
+use App\Models\Partner;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,22 +32,22 @@ class EnablementController extends Controller
 
         $query = EnablementSession::with(['event', 'registrations'])
             ->where('start_at', '<', $rangeEnd)
-            ->where(function ($q) use ($rangeEnd) {
+            ->where(function ($q) {
                 $q->where('end_at', '>', now()->subYear())
-                  ->orWhereNull('end_at');
+                    ->orWhereNull('end_at');
             })
             ->where('start_at', '>=', $rangeStart->copy()->subMonth());
 
         $user = auth()->user();
 
         // Non-admin users only see sessions from published events
-        if ($user->role !== 'admin') {
-            $query->whereHas('event', fn($q) => $q->where('status', 'published'));
+        if (! $user->isAdmin()) {
+            $query->whereHas('event', fn ($q) => $q->where('status', 'published'));
         }
 
         // Optional filters
         if ($request->filled('type')) {
-            $query->whereHas('event', fn($q) => $q->where('type', $request->type));
+            $query->whereHas('event', fn ($q) => $q->where('type', $request->type));
         }
 
         if ($request->filled('geography')) {
@@ -56,7 +56,7 @@ class EnablementController extends Controller
 
         $sessions = $query->get();
 
-        $calendarEvents = $sessions->map(fn($s) => $s->toCalendarArray())->toArray();
+        $calendarEvents = $sessions->map(fn ($s) => $s->toCalendarArray())->toArray();
 
         return response()->json($calendarEvents);
     }
@@ -76,13 +76,13 @@ class EnablementController extends Controller
         $user = auth()->user();
 
         // Non-admin: only show published events
-        if ($user->role !== 'admin' && $session->event->status !== 'published') {
+        if (! $user->isAdmin() && $session->event->status !== 'published') {
             abort(403);
         }
 
-        $registrations = $session->registrations->map(fn($r) => [
+        $registrations = $session->registrations->map(fn ($r) => [
             'id' => $r->id,
-            'contact_name' => $r->contact->first_name . ' ' . $r->contact->last_name,
+            'contact_name' => $r->contact->first_name.' '.$r->contact->last_name,
             'contact_email' => $r->contact->email,
             'partner_name' => $r->partner->name ?? '',
             'partner_id' => $r->partner_id,
@@ -94,9 +94,9 @@ class EnablementController extends Controller
         ]);
 
         // For PSMs, filter to only show registrations from their partners
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             $myPartnerIds = Partner::where('user_id', $user->id)->pluck('id')->toArray();
-            $registrations = $registrations->filter(fn($r) => in_array($r['partner_id'], $myPartnerIds))->values();
+            $registrations = $registrations->filter(fn ($r) => in_array($r['partner_id'], $myPartnerIds))->values();
         }
 
         return response()->json([
@@ -135,7 +135,7 @@ class EnablementController extends Controller
     public function storeSession(Request $request): JsonResponse
     {
         $user = auth()->user();
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
@@ -165,7 +165,7 @@ class EnablementController extends Controller
     public function updateSessionApi(Request $request, $id): JsonResponse
     {
         $user = auth()->user();
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
@@ -189,7 +189,7 @@ class EnablementController extends Controller
     public function deleteSessionApi($id): JsonResponse
     {
         $user = auth()->user();
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
@@ -217,7 +217,7 @@ class EnablementController extends Controller
         $user = auth()->user();
         $partner = Partner::findOrFail($validated['partner_id']);
 
-        if ($user->role !== 'admin' && $partner->user_id !== $user->id) {
+        if (! $user->isAdmin() && $partner->user_id !== $user->id) {
             return response()->json(['message' => 'You can only register your assigned partners.'], 403);
         }
 
@@ -244,7 +244,7 @@ class EnablementController extends Controller
         $user = auth()->user();
         $partner = Partner::findOrFail($validated['partner_id']);
 
-        if ($user->role !== 'admin' && $partner->user_id !== $user->id) {
+        if (! $user->isAdmin() && $partner->user_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
@@ -266,7 +266,7 @@ class EnablementController extends Controller
         $partner = Partner::findOrFail($partnerId);
         $user = auth()->user();
 
-        if ($user->role !== 'admin' && $partner->user_id !== $user->id) {
+        if (! $user->isAdmin() && $partner->user_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
@@ -290,9 +290,9 @@ class EnablementController extends Controller
         $calendarEvents = $sessions->map(function ($s) use ($partnerId) {
             $arr = $s->toCalendarArray();
             // Add partner-specific registration info
-            $regs = $s->registrations->map(fn($r) => [
+            $regs = $s->registrations->map(fn ($r) => [
                 'id' => $r->id,
-                'contact_name' => $r->contact->first_name . ' ' . $r->contact->last_name,
+                'contact_name' => $r->contact->first_name.' '.$r->contact->last_name,
                 'contact_id' => $r->contact_id,
                 'status' => $r->status,
                 'status_label' => $r->status_label,
@@ -300,6 +300,7 @@ class EnablementController extends Controller
             ]);
             $arr['extendedProps']['partner_registrations'] = $regs->toArray();
             $arr['extendedProps']['partner_id'] = (int) $partnerId;
+
             return $arr;
         })->toArray();
 
@@ -318,7 +319,7 @@ class EnablementController extends Controller
             return response()->json(['message' => 'This event is not published.'], 422);
         }
 
-        if (!$session->isRegistrationOpen()) {
+        if (! $session->isRegistrationOpen()) {
             return response()->json(['message' => 'Registration is closed for this session.'], 422);
         }
 
@@ -332,7 +333,7 @@ class EnablementController extends Controller
         $partner = Partner::findOrFail($validated['partner_id']);
 
         // PSMs can only nominate from their own partners
-        if ($user->role !== 'admin' && $partner->user_id !== $user->id) {
+        if (! $user->isAdmin() && $partner->user_id !== $user->id) {
             return response()->json(['message' => 'You can only nominate contacts from your assigned partners.'], 403);
         }
 
@@ -363,7 +364,7 @@ class EnablementController extends Controller
         }
 
         return response()->json([
-            'message' => count($created) . ' contact(s) nominated successfully.',
+            'message' => count($created).' contact(s) nominated successfully.',
             'nominations' => count($created),
         ], 201);
     }
@@ -377,13 +378,13 @@ class EnablementController extends Controller
         $user = auth()->user();
 
         // Only the nominator or admin can remove
-        if ($user->role !== 'admin' && $registration->nominated_by !== $user->id) {
+        if (! $user->isAdmin() && $registration->nominated_by !== $user->id) {
             return response()->json(['message' => 'You can only remove your own nominations.'], 403);
         }
 
         // Can only remove if still in nominated status
-        if (!in_array($registration->status, ['nominated', 'registered'])) {
-            return response()->json(['message' => 'Cannot remove a registration with status: ' . $registration->status], 422);
+        if (! in_array($registration->status, ['nominated', 'registered'])) {
+            return response()->json(['message' => 'Cannot remove a registration with status: '.$registration->status], 422);
         }
 
         $registration->delete();
@@ -403,10 +404,10 @@ class EnablementController extends Controller
             'contact',
             'partner:id,name',
         ])->where('nominated_by', $user->id)
-          ->orderByDesc('created_at');
+            ->orderByDesc('created_at');
 
         // Admin can see all nominations
-        if ($user->role === 'admin' && $request->filled('all')) {
+        if ($user->isAdmin() && $request->filled('all')) {
             $query = EnablementRegistration::with([
                 'session.event',
                 'contact',
@@ -415,7 +416,7 @@ class EnablementController extends Controller
             ])->orderByDesc('created_at');
         }
 
-        $registrations = $query->get()->map(fn($r) => [
+        $registrations = $query->get()->map(fn ($r) => [
             'id' => $r->id,
             'session_id' => $r->enablement_session_id,
             'session_title' => $r->session->display_title ?? '',
@@ -423,7 +424,7 @@ class EnablementController extends Controller
             'event_type' => $r->session->event->type ?? '',
             'session_start' => $r->session->start_at?->toIso8601String(),
             'session_location' => $r->session->location,
-            'contact_name' => $r->contact->first_name . ' ' . $r->contact->last_name,
+            'contact_name' => $r->contact->first_name.' '.$r->contact->last_name,
             'contact_email' => $r->contact->email,
             'partner_name' => $r->partner->name ?? '',
             'nominated_by' => $r->nominator->name ?? $user->name,

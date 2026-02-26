@@ -88,6 +88,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user has admin-level access (admin or super_admin).
+     */
+    public function isAdmin(): bool
+    {
+        return in_array($this->role, ['admin', 'super_admin']);
+    }
+
+    /**
      * Check if user is a PSM.
      */
     public function isPsm(): bool

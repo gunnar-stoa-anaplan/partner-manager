@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Partner;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 class GunnarSeeder extends Seeder
@@ -22,7 +22,27 @@ class GunnarSeeder extends Seeder
                 'role' => 'admin',
             ]
         );
-        $this->command->info("✓ Created/Updated Admin user (admin@example.com / password)");
+        $this->command->info('✓ Created/Updated Admin user (admin@example.com / password)');
+
+        // Create role-specific test users for dev switcher
+        $roleUsers = [
+            ['email' => 'superadmin@example.com', 'name' => 'Super Admin', 'role' => 'super_admin'],
+            ['email' => 'manager@example.com', 'name' => 'Manager User', 'role' => 'manager'],
+            ['email' => 'coe@example.com', 'name' => 'CoE User', 'role' => 'coe'],
+            ['email' => 'integration@example.com', 'name' => 'Integration User', 'role' => 'integration'],
+        ];
+
+        foreach ($roleUsers as $userData) {
+            User::updateOrCreate(
+                ['email' => $userData['email']],
+                [
+                    'name' => $userData['name'],
+                    'password' => bcrypt('password'),
+                    'role' => $userData['role'],
+                ]
+            );
+            $this->command->info("✓ Created/Updated {$userData['name']} ({$userData['email']} / password)");
+        }
 
         // Create Gunnar Stoa as PSM user
         $gunnar = User::updateOrCreate(
@@ -58,14 +78,14 @@ class GunnarSeeder extends Seeder
                 ['name' => $data['name']],
                 [
                     'user_id' => $gunnar->id,
-                    'salesforce_id' => '00Q' . Str::upper(Str::random(15)),
+                    'salesforce_id' => '00Q'.Str::upper(Str::random(15)),
                     'website' => $data['website'],
                     'industry' => $data['industry'],
                 ]
             );
 
             // Assign partner to Gunnar via user_partner pivot table (many-to-many)
-            if (!$partner->psms()->where('user_id', $gunnar->id)->exists()) {
+            if (! $partner->psms()->where('user_id', $gunnar->id)->exists()) {
                 $partner->psms()->attach($gunnar->id, ['role' => 'psm']);
             }
 
@@ -75,6 +95,6 @@ class GunnarSeeder extends Seeder
         $this->command->info('✅ Gunnar setup complete!');
         $this->command->info("   Email: {$gunnar->email}");
         $this->command->info("   Role: {$gunnar->role}");
-        $this->command->info("   Assigned Partners: " . $gunnar->psmPartners()->count());
+        $this->command->info('   Assigned Partners: '.$gunnar->psmPartners()->count());
     }
 }

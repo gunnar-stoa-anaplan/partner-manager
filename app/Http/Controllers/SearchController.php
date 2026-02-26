@@ -17,7 +17,7 @@ class SearchController extends Controller
         }
 
         $user = auth()->user();
-        $partnerIds = $user->role === 'admin'
+        $partnerIds = $user->isAdmin()
             ? null
             : Partner::where('user_id', $user->id)->pluck('id')->toArray();
 
@@ -43,10 +43,10 @@ class SearchController extends Controller
         // Search Contacts (influencers, resources, general)
         $contactQuery = Contact::where(function ($query) use ($q) {
             $query->where('first_name', 'like', "%{$q}%")
-                  ->orWhere('last_name', 'like', "%{$q}%")
-                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$q}%"])
-                  ->orWhere('email', 'like', "%{$q}%")
-                  ->orWhere('organization', 'like', "%{$q}%");
+                ->orWhere('last_name', 'like', "%{$q}%")
+                ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$q}%"])
+                ->orWhere('email', 'like', "%{$q}%")
+                ->orWhere('organization', 'like', "%{$q}%");
         })->with('partner:id,name');
 
         if ($partnerIds !== null) {
@@ -57,18 +57,18 @@ class SearchController extends Controller
         foreach ($contacts as $c) {
             $typeLabel = match ($c->contact_type) {
                 'influencer' => 'Influencer',
-                'resource'   => 'Resource',
-                default      => 'Contact',
+                'resource' => 'Resource',
+                default => 'Contact',
             };
             $icon = match ($c->contact_type) {
                 'influencer' => 'fa-user-tie',
-                'resource'   => 'fa-user-hard-hat',
-                default      => 'fa-user',
+                'resource' => 'fa-user-hard-hat',
+                default => 'fa-user',
             };
             $color = match ($c->contact_type) {
                 'influencer' => 'info',
-                'resource'   => 'success',
-                default      => 'secondary',
+                'resource' => 'success',
+                default => 'secondary',
             };
 
             $results[] = [
@@ -76,7 +76,7 @@ class SearchController extends Controller
                 'icon' => $icon,
                 'color' => $color,
                 'label' => "{$c->first_name} {$c->last_name}",
-                'sub' => "{$typeLabel} at " . ($c->partner->name ?? 'Unknown'),
+                'sub' => "{$typeLabel} at ".($c->partner->name ?? 'Unknown'),
                 'url' => $c->contact_type === 'influencer'
                     ? route('influencers.show', $c->id)
                     : '#',

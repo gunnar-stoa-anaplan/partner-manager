@@ -26,7 +26,7 @@ class RedirectRestrictedRoles
             'landing' => 'integration-hub.dashboard',
         ],
         'coe' => [
-            'prefixes' => ['strategy', 'activation', 'logout', 'users/impersonate', 'welcome', 'livewire', '_boost'],
+            'prefixes' => ['strategy', 'activation', 'logout', 'users/impersonate', 'welcome', 'livewire', '_boost', 'plan/paths', 'admin/paths', 'admin/task-templates', 'act/path-reviews', 'launch-programs', 'knowledge-base', 'branding', 'ai-agents', 'partner-goals', 'admin/goal-templates', 'blueprints-catalog', 'blueprints', 'enablement-events', 'enablement-calendar', 'enablement-dashboard', 'program-dashboard'],
             'landing' => 'strategy.dashboard',
         ],
     ];

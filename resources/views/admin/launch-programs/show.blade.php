@@ -187,7 +187,7 @@
             <div class="card shadow-0 h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Enrolled Partners</h5>
-                    @if(auth()->user()->role === 'admin')
+                    @if(auth()->user()->isAdmin())
                         <button class="btn btn-xs btn-primary" data-bs-toggle="collapse" data-bs-target="#adminNominateForm">
                             <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#plus"></use></svg>
                         </button>
@@ -195,7 +195,7 @@
                 </div>
                 <div class="card-body p-0">
                     {{-- Admin Nomination Form (collapsed) --}}
-                    @if(auth()->user()->role === 'admin')
+                    @if(auth()->user()->isAdmin())
                     <div class="collapse p-3 border-bottom" id="adminNominateForm">
                         <form action="{{ route('admin.launch-programs.admin-nominate', $program) }}" method="POST">
                             @csrf
@@ -247,7 +247,7 @@
                                         <small class="text-muted">{{ $completion }}%</small>
                                     </td>
                                     <td class="text-end">
-                                        @if($pp->status === 'nominated' && (auth()->user()->role === 'admin' || auth()->id() === $program->owner_id))
+                                        @if($pp->status === 'nominated' && (auth()->user()->isAdmin() || auth()->id() === $program->owner_id))
                                             <form action="{{ route('admin.launch-program-partners.update', $pp) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('PUT')

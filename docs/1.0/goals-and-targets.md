@@ -2,6 +2,8 @@
 
 Goals define what a partner should achieve within a fiscal year. They provide measurable targets that feed into the partner scorecard and health score.
 
+![Strategy planning workflow](images/strategy-planning-workflow.svg)
+
 ## Goal Categories
 
 Goals can be set across multiple dimensions:

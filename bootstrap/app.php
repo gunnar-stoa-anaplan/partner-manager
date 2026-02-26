@@ -28,8 +28,18 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->name('workshop-guides.')
                 ->group(base_path('routes/workshop-guides.php'));
 
+            // Zoom Chat Webhook (no auth — Zoom server-to-server)
+            $zoomWebhook = base_path('routes/modules/zoom-chat-webhook.php');
+
+            if (file_exists($zoomWebhook)) {
+                Route::middleware('api')
+                    ->prefix('api/webhooks')
+                    ->name('webhooks.')
+                    ->group($zoomWebhook);
+            }
+
             // Load module route files (web)
-            foreach (['integration-hub', 'strategy', 'idea-room'] as $mod) {
+            foreach (['integration-hub', 'strategy', 'idea-room', 'zoom-chat'] as $mod) {
                 $slug = str_replace('-', '_', $mod);
                 $file = base_path("routes/modules/{$mod}.php");
 

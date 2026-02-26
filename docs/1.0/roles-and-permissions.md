@@ -2,6 +2,8 @@
 
 Partner Manager uses role-based access control to ensure users only see and do what they are authorized for. There are separate role systems for the PSM application and the Partner Portal.
 
+![Role access map](images/role-access-map.svg)
+
 ## PSM Application Roles
 
 ### Admin

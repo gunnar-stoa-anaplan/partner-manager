@@ -14,7 +14,7 @@ class SignalDashboardController extends Controller
         $user = auth()->user();
         $query = Signal::with('partner');
 
-        if ($user->role !== 'admin' && $user->role !== 'coe') {
+        if (! $user->isAdmin() && $user->role !== 'coe') {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
             $query->whereIn('partner_id', $partnerIds);
         }
@@ -41,7 +41,7 @@ class SignalDashboardController extends Controller
             ->paginate(25);
 
         $baseQuery = Signal::where('status', 'active')
-            ->when($user->role !== 'admin' && $user->role !== 'coe', function ($q) use ($user) {
+            ->when(! $user->isAdmin() && $user->role !== 'coe', function ($q) use ($user) {
                 $q->whereIn('partner_id', Partner::where('user_id', $user->id)->pluck('id'));
             });
 
@@ -57,7 +57,7 @@ class SignalDashboardController extends Controller
             'total_active' => (clone $baseQuery)->count(),
         ];
 
-        $partners = ($user->role === 'admin' || $user->role === 'coe')
+        $partners = ($user->isAdmin() || $user->role === 'coe')
             ? Partner::select('id', 'name')->orderBy('name')->get()
             : Partner::where('user_id', $user->id)->select('id', 'name')->orderBy('name')->get();
 

@@ -12,6 +12,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::withCount('partners')->orderBy('name')->get();
+
         return view('users.index', compact('users'));
     }
 
@@ -25,7 +26,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|in:admin,psm,manager',
+            'role' => 'required|in:super_admin,admin,psm,manager,coe,integration',
             'password' => 'required|string|min:8|confirmed',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
         ]);
@@ -55,8 +56,8 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'role' => 'required|in:admin,psm,manager',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'role' => 'required|in:super_admin,admin,psm,manager,coe,integration',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
         ]);
 
@@ -104,6 +105,7 @@ class UserController extends Controller
         }
 
         $user->delete();
+
         return redirect()->route('users.index')->with('success', 'User deleted successfully!');
     }
 }

@@ -2,6 +2,10 @@
 
 Alerts are system-generated notifications that flag conditions requiring PSM attention. They are the "early warning system" that ensures nothing falls through the cracks.
 
+The Signal Engine processes data from multiple sources on daily and weekly schedules, routing signals through risk, trend, anomaly, and recommendation channels to generate actionable alerts.
+
+![Signal engine pipeline](images/signal-engine-pipeline.svg)
+
 ## Alert Types
 
 Partner Manager generates alerts for conditions such as:

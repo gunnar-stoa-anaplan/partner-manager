@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 500" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="500" rx="16" fill="#f8f9fa"/>
+
+  <!-- Title -->
+  <text x="550" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#2d3436">Defense in Depth &#8212; Security Layers</text>
+  <text x="550" y="56" text-anchor="middle" font-size="11" fill="#636e72">Five concentric security layers protect client infrastructure from outer network to inner container</text>
+
+  <!-- Layer 1 (outermost): NETWORK ISOLATION — #2d3436 -->
+  <rect x="30" y="72" width="1040" height="400" rx="14" fill="none" stroke="#2d3436" stroke-width="2.5" filter="url(#shadow)"/>
+  <rect x="30" y="72" width="1040" height="32" rx="14" fill="#2d3436"/>
+  <rect x="30" y="96" width="1040" height="8" fill="#2d3436"/>
+  <text x="550" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">LAYER 1 &#8212; NETWORK ISOLATION</text>
+  <text x="550" y="122" text-anchor="middle" font-size="10" fill="#636e72">Agent outbound-only. No inbound ports. Client firewall intact.</text>
+
+  <!-- Layer 2: TRANSPORT ENCRYPTION — #6c5ce7 -->
+  <rect x="70" y="138" width="960" height="318" rx="12" fill="none" stroke="#6c5ce7" stroke-width="2.5"/>
+  <rect x="70" y="138" width="960" height="30" rx="12" fill="#6c5ce7"/>
+  <rect x="70" y="160" width="960" height="8" fill="#6c5ce7"/>
+  <text x="550" y="159" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">LAYER 2 &#8212; TRANSPORT ENCRYPTION (mTLS, TLS 1.3)</text>
+  <text x="550" y="184" text-anchor="middle" font-size="10" fill="#636e72">All data encrypted in transit. Both sides present CA-signed certificates.</text>
+
+  <!-- Layer 3: IDENTITY VERIFICATION — #0984e3 -->
+  <rect x="114" y="200" width="872" height="240" rx="12" fill="none" stroke="#0984e3" stroke-width="2.5"/>
+  <rect x="114" y="200" width="872" height="30" rx="12" fill="#0984e3"/>
+  <rect x="114" y="222" width="872" height="8" fill="#0984e3"/>
+  <text x="550" y="221" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">LAYER 3 &#8212; IDENTITY VERIFICATION</text>
+  <text x="550" y="246" text-anchor="middle" font-size="10" fill="#636e72">Unique instance_id per agent. Certificate fingerprint bound to instance.</text>
+
+  <!-- Layer 4: ARTIFACT INTEGRITY — #e17055 -->
+  <rect x="162" y="262" width="776" height="160" rx="12" fill="none" stroke="#e17055" stroke-width="2.5"/>
+  <rect x="162" y="262" width="776" height="30" rx="12" fill="#e17055"/>
+  <rect x="162" y="284" width="776" height="8" fill="#e17055"/>
+  <text x="550" y="283" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">LAYER 4 &#8212; ARTIFACT INTEGRITY (Ed25519)</text>
+  <text x="550" y="308" text-anchor="middle" font-size="10" fill="#636e72">Every deploy artifact is signed. Agent verifies signature before applying.</text>
+
+  <!-- Layer 5 (innermost): CONTAINER ISOLATION — #00b894 -->
+  <rect x="214" y="324" width="672" height="80" rx="12" fill="none" stroke="#00b894" stroke-width="2.5"/>
+  <rect x="214" y="324" width="672" height="30" rx="12" fill="#00b894"/>
+  <rect x="214" y="346" width="672" height="8" fill="#00b894"/>
+  <text x="550" y="345" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">LAYER 5 &#8212; CONTAINER ISOLATION</text>
+  <text x="550" y="374" text-anchor="middle" font-size="10" fill="#636e72">Non-root. Read-only Docker socket. No DB access. Business data unreachable.</text>
+  <text x="550" y="394" text-anchor="middle" font-size="9" fill="#b2bec3">pmagent:pmagent &#8226; Alpine minimal &#8226; No shell &#8226; 5 MB image</text>
+
+  <!-- Layer number badges on the left side -->
+  <circle cx="46" cy="88" r="8" fill="#2d3436"/>
+  <text x="46" y="92" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">1</text>
+
+  <circle cx="86" cy="153" r="8" fill="#6c5ce7"/>
+  <text x="86" y="157" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">2</text>
+
+  <circle cx="130" cy="215" r="8" fill="#0984e3"/>
+  <text x="130" y="219" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">3</text>
+
+  <circle cx="178" cy="277" r="8" fill="#e17055"/>
+  <text x="178" y="281" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">4</text>
+
+  <circle cx="230" cy="339" r="8" fill="#00b894"/>
+  <text x="230" y="343" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">5</text>
+
+  <!-- Footer -->
+  <text x="550" y="490" text-anchor="middle" font-size="9" fill="#b2bec3">Partner Manager &#8212; Defense in Depth Security Model</text>
+</svg>

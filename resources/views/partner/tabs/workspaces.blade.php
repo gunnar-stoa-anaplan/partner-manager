@@ -8,7 +8,7 @@
 <div class="text-center py-5">
     <svg class="sa-icon sa-icon-xl text-muted mb-3" style="width: 48px; height: 48px;"><use href="/icons/sprite.svg#server"></use></svg>
     <p class="text-muted">No Anaplan workspaces have been assigned to this partner.</p>
-    @if(auth()->user()->role === 'admin')
+    @if(auth()->user()->isAdmin())
     <a href="{{ route('admin.provisioning-workspaces.index') }}" class="btn btn-outline-primary btn-sm">Manage Workspaces</a>
     @endif
 </div>

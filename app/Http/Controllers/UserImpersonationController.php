@@ -50,6 +50,6 @@ class UserImpersonationController extends Controller
 
         Auth::login($admin);
 
-        return redirect()->route('users.index')->with('success', 'Returned to your admin account.');
+        return redirect()->route('welcome')->with('success', 'Returned to your admin account.');
     }
 }
