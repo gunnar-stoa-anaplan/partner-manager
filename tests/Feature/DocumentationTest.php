@@ -103,7 +103,7 @@ class DocumentationTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('On This Page');
-        $response->assertSee('Philosophy');
+        $response->assertSee('Why Partner Ecosystems Exist');
     }
 
     public function test_docs_callouts_are_transformed(): void

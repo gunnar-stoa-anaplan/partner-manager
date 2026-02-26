@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 520" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.12"/>
+    </filter>
+    <pattern id="diag" patternUnits="userSpaceOnUse" width="8" height="8">
+      <path d="M-1,1 l2,-2 M0,8 l8,-8 M7,9 l2,-2" stroke="#dfe6e9" stroke-width="0.8"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="520" rx="16" fill="#f8f9fa"/>
+
+  <!-- Title -->
+  <text x="550" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#2d3436">The System Sprawl</text>
+  <text x="550" y="56" text-anchor="middle" font-size="11" fill="#636e72">Each system owns a slice of the partner relationship &#8212; none provide the full picture</text>
+
+  <!-- Silo dividers (vertical dashed lines between columns) -->
+  <line x1="273" y1="80" x2="273" y2="460" stroke="#dfe6e9" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="460" y1="80" x2="460" y2="460" stroke="#dfe6e9" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="647" y1="80" x2="647" y2="460" stroke="#dfe6e9" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="833" y1="80" x2="833" y2="460" stroke="#dfe6e9" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- System 1: CRM -->
+  <rect x="48" y="86" width="200" height="150" rx="12" fill="#fff" stroke="#e17055" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="48" y="86" width="200" height="32" rx="12" fill="#e17055"/>
+  <rect x="48" y="106" width="200" height="12" fill="#e17055"/>
+  <text x="148" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">CRM</text>
+  <text x="64" y="140" font-size="10" fill="#636e72">Deal registration</text>
+  <text x="64" y="156" font-size="10" fill="#636e72">Lead qualification</text>
+  <text x="64" y="172" font-size="10" fill="#636e72">Opportunity pipeline</text>
+  <text x="64" y="188" font-size="10" fill="#636e72">Revenue tracking</text>
+  <text x="64" y="210" font-size="9" fill="#b2bec3">Partner logs in here</text>
+  <text x="64" y="224" font-size="9" fill="#b2bec3">PSM logs in here</text>
+
+  <!-- System 2: Case Management -->
+  <rect x="275" y="86" width="182" height="150" rx="12" fill="#fff" stroke="#0984e3" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="275" y="86" width="182" height="32" rx="12" fill="#0984e3"/>
+  <rect x="275" y="106" width="182" height="12" fill="#0984e3"/>
+  <text x="366" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Case Management</text>
+  <text x="291" y="140" font-size="10" fill="#636e72">Trouble tickets</text>
+  <text x="291" y="156" font-size="10" fill="#636e72">Product issues</text>
+  <text x="291" y="172" font-size="10" fill="#636e72">Escalations</text>
+  <text x="291" y="188" font-size="10" fill="#636e72">Resource assignments</text>
+  <text x="291" y="210" font-size="9" fill="#b2bec3">Partner logs in here</text>
+  <text x="291" y="224" font-size="9" fill="#b2bec3">PSM logs in here</text>
+
+  <!-- System 3: Training / LMS -->
+  <rect x="462" y="86" width="182" height="150" rx="12" fill="#fff" stroke="#6c5ce7" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="462" y="86" width="182" height="32" rx="12" fill="#6c5ce7"/>
+  <rect x="462" y="106" width="182" height="12" fill="#6c5ce7"/>
+  <text x="553" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Training / LMS</text>
+  <text x="478" y="140" font-size="10" fill="#636e72">Product overviews</text>
+  <text x="478" y="156" font-size="10" fill="#636e72">Certification exams</text>
+  <text x="478" y="172" font-size="10" fill="#636e72">Role-based curricula</text>
+  <text x="478" y="188" font-size="10" fill="#636e72">Completion records</text>
+  <text x="478" y="210" font-size="9" fill="#b2bec3">Partner logs in here</text>
+  <text x="478" y="224" font-size="9" fill="#b2bec3">PSM checks here</text>
+
+  <!-- System 4: Knowledge Base -->
+  <rect x="649" y="86" width="182" height="150" rx="12" fill="#fff" stroke="#00b894" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="649" y="86" width="182" height="32" rx="12" fill="#00b894"/>
+  <rect x="649" y="106" width="182" height="12" fill="#00b894"/>
+  <text x="740" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Knowledge Base</text>
+  <text x="665" y="140" font-size="10" fill="#636e72">Content libraries</text>
+  <text x="665" y="156" font-size="10" fill="#636e72">Presentations</text>
+  <text x="665" y="172" font-size="10" fill="#636e72">Implementation guides</text>
+  <text x="665" y="188" font-size="10" fill="#636e72">Recordings</text>
+  <text x="665" y="210" font-size="9" fill="#b2bec3">Partner logs in here</text>
+  <text x="665" y="224" font-size="9" fill="#b2bec3">PSM publishes here</text>
+
+  <!-- System 5: Spreadsheets & Email -->
+  <rect x="836" y="86" width="216" height="150" rx="12" fill="#fff" stroke="#fdcb6e" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="836" y="86" width="216" height="32" rx="12" fill="#fdcb6e"/>
+  <rect x="836" y="106" width="216" height="12" fill="#fdcb6e"/>
+  <text x="944" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#2d3436">Spreadsheets &amp; Email</text>
+  <text x="852" y="140" font-size="10" fill="#636e72">Scorecards</text>
+  <text x="852" y="156" font-size="10" fill="#636e72">QBR agendas &amp; notes</text>
+  <text x="852" y="172" font-size="10" fill="#636e72">Onboarding checklists</text>
+  <text x="852" y="188" font-size="10" fill="#636e72">Annual plans &amp; goals</text>
+  <text x="852" y="210" font-size="9" fill="#b2bec3">Emailed to partner</text>
+  <text x="852" y="224" font-size="9" fill="#b2bec3">Versioned by filename</text>
+
+  <!-- "No connections" annotation area -->
+  <rect x="48" y="260" width="1004" height="44" rx="8" fill="#fff" stroke="#dfe6e9" stroke-width="1" stroke-dasharray="6,3"/>
+  <text x="550" y="278" text-anchor="middle" font-size="11" fill="#d63031" font-weight="600">No integration between systems</text>
+  <text x="550" y="294" text-anchor="middle" font-size="10" fill="#636e72">Each system operates independently &#8212; the PSM is the human integration layer</text>
+
+  <!-- PSM figure: overwhelmed in the center -->
+  <rect x="350" y="324" width="400" height="100" rx="12" fill="#fff" stroke="#2d3436" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="350" y="324" width="400" height="32" rx="12" fill="#2d3436"/>
+  <rect x="350" y="344" width="400" height="12" fill="#2d3436"/>
+  <text x="550" y="346" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Partner Success Manager</text>
+
+  <text x="366" y="378" font-size="10" fill="#636e72">Logs into 5 systems daily</text>
+  <text x="366" y="394" font-size="10" fill="#636e72">Cross-references data manually</text>
+  <text x="550" y="378" font-size="10" fill="#636e72">Assembles partner picture from memory</text>
+  <text x="550" y="394" font-size="10" fill="#636e72">Hopes nothing falls through the cracks</text>
+
+  <!-- Dashed lines from PSM to each system (manual effort) -->
+  <line x1="148" y1="236" x2="400" y2="324" stroke="#b2bec3" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="366" y1="236" x2="460" y2="324" stroke="#b2bec3" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="553" y1="236" x2="550" y2="324" stroke="#b2bec3" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="740" y1="236" x2="640" y2="324" stroke="#b2bec3" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="944" y1="236" x2="700" y2="324" stroke="#b2bec3" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Bottom: Partner experience -->
+  <rect x="180" y="448" width="740" height="36" rx="8" fill="#ffeef0" stroke="#d63031" stroke-width="1"/>
+  <text x="550" y="466" text-anchor="middle" font-size="11" fill="#d63031" font-weight="600">Partner experience:</text>
+  <text x="550" y="480" text-anchor="middle" font-size="10" fill="#636e72">5 separate logins &#8226; no unified view of their own standing &#8226; spreadsheets arrive by email</text>
+
+  <!-- Footer -->
+  <text x="550" y="512" text-anchor="middle" font-size="9" fill="#b2bec3">Partner Manager &#8212; The System Sprawl</text>
+</svg>

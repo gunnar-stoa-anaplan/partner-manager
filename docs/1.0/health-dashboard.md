@@ -4,7 +4,11 @@ The Health Dashboard provides a risk-oriented view of your partner portfolio. It
 
 ## Health Score
 
-Each partner has a health score computed from multiple dimensions:
+Each partner has a health score computed from multiple weighted dimensions.
+
+![Health score composition](images/health-score-composition.svg)
+
+The contributing dimensions are:
 
 - **Scorecard performance** — Are they meeting their metric targets?
 - **Delivery quality** — Are their projects on track?

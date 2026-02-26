@@ -21,7 +21,7 @@ class ChatContextService
     {
         $partnerQuery = Partner::without(['projects', 'contacts']);
 
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             $partnerQuery->where('user_id', $user->id);
         }
 

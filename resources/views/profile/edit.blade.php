@@ -150,7 +150,9 @@
                     <h1 class="fs-xxl fw-700 mb-2">{{ $user->name }}</h1>
                     <p class="text-muted mb-2">{{ $user->email }}</p>
                     <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start">
-                        @if($user->role === 'admin')
+                        @if($user->role === 'super_admin')
+                            <span class="badge bg-dark text-white">Super Admin</span>
+                        @elseif($user->role === 'admin')
                             <span class="badge bg-danger-100 text-danger">Admin</span>
                         @elseif($user->role === 'psm')
                             <span class="badge bg-success-100 text-success">Partner Success Manager</span>
@@ -226,7 +228,9 @@
                                                 <use href="/icons/sprite.svg#shield"></use>
                                             </svg>
                                             <strong class="me-2">Role:</strong>
-                                            @if($user->role === 'admin')
+                                            @if($user->role === 'super_admin')
+                                                <span class="badge bg-dark">Super Admin</span>
+                                            @elseif($user->role === 'admin')
                                                 <span class="badge bg-danger">Admin</span>
                                             @elseif($user->role === 'psm')
                                                 <span class="badge bg-success">PSM</span>

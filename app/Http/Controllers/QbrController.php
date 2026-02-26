@@ -1,11 +1,10 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Partner;
-use App\Models\QbrSession;
 use App\Models\QbrSection;
-use App\Models\ActionPlan;
-use App\Services\ScorecardCalculationService;
+use App\Models\QbrSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -16,14 +15,14 @@ class QbrController extends Controller
         $user = auth()->user();
         $query = QbrSession::with(['partner', 'preparedByUser']);
 
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
             $query->whereIn('partner_id', $partnerIds);
         }
 
         $sessions = $query->orderByDesc('scheduled_date')->get();
 
-        $partners = $user->role === 'admin'
+        $partners = $user->isAdmin()
             ? Partner::select('id', 'name')->orderBy('name')->get()
             : Partner::where('user_id', $user->id)->select('id', 'name')->orderBy('name')->get();
 
@@ -66,6 +65,7 @@ class QbrController extends Controller
     public function show(QbrSession $session)
     {
         $session->load(['partner', 'sections', 'preparedByUser']);
+
         return view('act.qbr.show', compact('session'));
     }
 
@@ -76,6 +76,7 @@ class QbrController extends Controller
             'partner_feedback' => $request->partner_feedback,
             'rating' => $request->rating,
         ]);
+
         return redirect()->back()->with('success', 'Section updated.');
     }
 
@@ -87,6 +88,7 @@ class QbrController extends Controller
             'overall_rating' => $request->overall_rating,
             'executive_summary' => $request->executive_summary,
         ]);
+
         return redirect()->route('act.qbr.index')->with('success', 'QBR completed.');
     }
 

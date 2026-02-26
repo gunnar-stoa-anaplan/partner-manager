@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 780" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.12"/>
+    </filter>
+    <linearGradient id="hubGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2d3436"/>
+      <stop offset="100%" stop-color="#636e72"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7 Z" fill="#b2bec3"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="780" rx="16" fill="#f8f9fa"/>
+
+  <!-- Title -->
+  <text x="550" y="40" text-anchor="middle" font-size="22" font-weight="700" fill="#2d3436">The Partner Data Landscape</text>
+  <text x="550" y="62" text-anchor="middle" font-size="13" fill="#636e72">For each partner, a PSM must track data across multiple dimensions and systems</text>
+  <line x1="300" y1="74" x2="800" y2="74" stroke="#dfe6e9" stroke-width="1.5"/>
+
+  <!-- Connection lines (behind everything) -->
+  <line x1="550" y1="183" x2="550" y2="327" stroke="#dfe6e9" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="660" y1="255" x2="598" y2="347" stroke="#dfe6e9" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="705" y1="395" x2="618" y2="395" stroke="#dfe6e9" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="660" y1="535" x2="598" y2="443" stroke="#dfe6e9" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="550" y1="607" x2="550" y2="463" stroke="#dfe6e9" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="350" y1="535" x2="502" y2="443" stroke="#dfe6e9" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="295" y1="395" x2="482" y2="395" stroke="#dfe6e9" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="350" y1="255" x2="502" y2="347" stroke="#dfe6e9" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Halo ring -->
+  <circle cx="550" cy="395" r="82" fill="none" stroke="#dfe6e9" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Center: Partner -->
+  <circle cx="550" cy="395" r="68" fill="url(#hubGrad)" filter="url(#shadow)"/>
+  <text x="550" y="388" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">PARTNER</text>
+  <text x="550" y="408" text-anchor="middle" font-size="10" fill="#b2bec3">&#215;20&#8211;50 per PSM</text>
+
+  <!-- ═══ Card 1: Pipeline & Revenue (N) ═══ -->
+  <rect x="460" y="117" width="180" height="66" rx="10" fill="#fff" stroke="#e17055" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="460" y="117" width="180" height="22" rx="10" fill="#e17055"/>
+  <rect x="460" y="129" width="180" height="10" fill="#e17055"/>
+  <text x="550" y="134" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Pipeline &amp; Revenue</text>
+  <text x="472" y="155" font-size="10" fill="#636e72">Opportunities &#183; Win rates</text>
+  <text x="472" y="170" font-size="10" fill="#636e72">Deal registrations &#183; ARR</text>
+  <text x="550" y="107" text-anchor="middle" font-size="9" fill="#b2bec3" font-style="italic">CRM / Salesforce</text>
+
+  <!-- ═══ Card 2: Certifications (NE) ═══ -->
+  <rect x="653" y="189" width="180" height="66" rx="10" fill="#fff" stroke="#6c5ce7" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="653" y="189" width="180" height="22" rx="10" fill="#6c5ce7"/>
+  <rect x="653" y="201" width="180" height="10" fill="#6c5ce7"/>
+  <text x="743" y="206" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Certifications &amp; Training</text>
+  <text x="665" y="227" font-size="10" fill="#636e72">Cert count &#183; Expiry dates</text>
+  <text x="665" y="242" font-size="10" fill="#636e72">Blueprint progress &#183; Completions</text>
+  <text x="743" y="179" text-anchor="middle" font-size="9" fill="#b2bec3" font-style="italic">Training Portal / LMS</text>
+
+  <!-- ═══ Card 3: Projects (E) ═══ -->
+  <rect x="705" y="362" width="180" height="66" rx="10" fill="#fff" stroke="#0984e3" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="705" y="362" width="180" height="22" rx="10" fill="#0984e3"/>
+  <rect x="705" y="374" width="180" height="10" fill="#0984e3"/>
+  <text x="795" y="379" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Projects &amp; Delivery</text>
+  <text x="717" y="400" font-size="10" fill="#636e72">On-time delivery &#183; CSAT</text>
+  <text x="717" y="415" font-size="10" fill="#636e72">Resource utilization &#183; Quality</text>
+  <text x="795" y="352" text-anchor="middle" font-size="9" fill="#b2bec3" font-style="italic">Project Management Tools</text>
+
+  <!-- ═══ Card 4: Contacts (SE) ═══ -->
+  <rect x="653" y="535" width="180" height="66" rx="10" fill="#fff" stroke="#00b894" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="653" y="535" width="180" height="22" rx="10" fill="#00b894"/>
+  <rect x="653" y="547" width="180" height="10" fill="#00b894"/>
+  <text x="743" y="552" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Contacts &amp; Portal</text>
+  <text x="665" y="573" font-size="10" fill="#636e72">Portal activity &#183; Login frequency</text>
+  <text x="665" y="588" font-size="10" fill="#636e72">Team structure &#183; Roles</text>
+  <text x="743" y="613" text-anchor="middle" font-size="9" fill="#b2bec3" font-style="italic">Partner Portal</text>
+
+  <!-- ═══ Card 5: Path & Tasks (S) ═══ -->
+  <rect x="460" y="607" width="180" height="66" rx="10" fill="#fff" stroke="#fdcb6e" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="460" y="607" width="180" height="22" rx="10" fill="#fdcb6e"/>
+  <rect x="460" y="619" width="180" height="10" fill="#fdcb6e"/>
+  <text x="550" y="624" text-anchor="middle" font-size="11" font-weight="600" fill="#2d3436">Path &amp; Tasks</text>
+  <text x="472" y="645" font-size="10" fill="#636e72">Stage progression &#183; Gate criteria</text>
+  <text x="472" y="660" font-size="10" fill="#636e72">Task completion &#183; Deadlines</text>
+  <text x="550" y="685" text-anchor="middle" font-size="9" fill="#b2bec3" font-style="italic">Manual Assessment</text>
+
+  <!-- ═══ Card 6: QBR (SW) ═══ -->
+  <rect x="187" y="535" width="180" height="66" rx="10" fill="#fff" stroke="#e84393" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="187" y="535" width="180" height="22" rx="10" fill="#e84393"/>
+  <rect x="187" y="547" width="180" height="10" fill="#e84393"/>
+  <text x="277" y="552" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">QBR Sessions</text>
+  <text x="199" y="573" font-size="10" fill="#636e72">Quarterly reviews &#183; Notes</text>
+  <text x="199" y="588" font-size="10" fill="#636e72">Action items &#183; Follow-ups</text>
+  <text x="277" y="613" text-anchor="middle" font-size="9" fill="#b2bec3" font-style="italic">Meeting Notes / Decks</text>
+
+  <!-- ═══ Card 7: Health (W) ═══ -->
+  <rect x="115" y="362" width="180" height="66" rx="10" fill="#fff" stroke="#d63031" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="115" y="362" width="180" height="22" rx="10" fill="#d63031"/>
+  <rect x="115" y="374" width="180" height="10" fill="#d63031"/>
+  <text x="205" y="379" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Health &amp; Signals</text>
+  <text x="127" y="400" font-size="10" fill="#636e72">Health score &#183; Risk level</text>
+  <text x="127" y="415" font-size="10" fill="#636e72">Alert triggers &#183; Trend lines</text>
+  <text x="205" y="352" text-anchor="middle" font-size="9" fill="#b2bec3" font-style="italic">Computed from all data</text>
+
+  <!-- ═══ Card 8: Goals (NW) ═══ -->
+  <rect x="187" y="189" width="180" height="66" rx="10" fill="#fff" stroke="#00cec9" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="187" y="189" width="180" height="22" rx="10" fill="#00cec9"/>
+  <rect x="187" y="201" width="180" height="10" fill="#00cec9"/>
+  <text x="277" y="206" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Goals &amp; Strategy</text>
+  <text x="199" y="227" font-size="10" fill="#636e72">Fiscal-year targets &#183; KPIs</text>
+  <text x="199" y="242" font-size="10" fill="#636e72">Strategic plans &#183; Initiatives</text>
+  <text x="277" y="179" text-anchor="middle" font-size="9" fill="#b2bec3" font-style="italic">Spreadsheets / Plans</text>
+
+  <!-- Bottom annotation -->
+  <text x="550" y="740" text-anchor="middle" font-size="12" fill="#636e72">Multiply this by 20&#8211;50 partners per PSM &#8212; the complexity becomes unmanageable without a unified platform</text>
+</svg>

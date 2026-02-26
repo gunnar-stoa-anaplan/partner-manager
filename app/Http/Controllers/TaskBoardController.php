@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Partner;
@@ -13,7 +14,7 @@ class TaskBoardController extends Controller
         $user = auth()->user();
         $query = PartnerTask::with(['partner', 'template', 'assignedUser', 'assignedContact']);
 
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
             $query->whereIn('partner_id', $partnerIds);
         }
@@ -35,7 +36,7 @@ class TaskBoardController extends Controller
             ->orderBy('due_date')
             ->get();
 
-        $partners = $user->role === 'admin'
+        $partners = $user->isAdmin()
             ? Partner::select('id', 'name')->orderBy('name')->get()
             : Partner::where('user_id', $user->id)->select('id', 'name')->orderBy('name')->get();
 
@@ -60,7 +61,7 @@ class TaskBoardController extends Controller
 
         $data = ['status' => $request->status];
 
-        if ($request->status === 'in_progress' && !$task->started_at) {
+        if ($request->status === 'in_progress' && ! $task->started_at) {
             $data['started_at'] = now();
         }
         if ($request->status === 'completed') {

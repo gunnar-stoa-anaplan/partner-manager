@@ -16,7 +16,7 @@ class GoalsController extends Controller
     public function index(Request $request): \Illuminate\View\View
     {
         $user = auth()->user();
-        $partnersQuery = $user->role === 'admin'
+        $partnersQuery = $user->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', $user->id);
 

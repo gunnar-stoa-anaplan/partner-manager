@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Partner;
 use App\Models\ActionPlan;
 use App\Models\ActionPlanItem;
+use App\Models\Partner;
 use Illuminate\Http\Request;
 
 class ActionPlanController extends Controller
@@ -13,20 +14,26 @@ class ActionPlanController extends Controller
         $user = auth()->user();
         $query = ActionPlan::with(['partner', 'items', 'ownerUser', 'creator']);
 
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
             $query->whereIn('partner_id', $partnerIds);
         }
 
-        if ($request->filled('partner_id')) $query->where('partner_id', $request->partner_id);
-        if ($request->filled('status')) $query->where('status', $request->status);
-        if ($request->filled('priority')) $query->where('priority', $request->priority);
+        if ($request->filled('partner_id')) {
+            $query->where('partner_id', $request->partner_id);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->priority);
+        }
 
         $plans = $query->orderByRaw("FIELD(status, 'overdue', 'in_progress', 'open', 'completed', 'cancelled')")
             ->orderByRaw("FIELD(priority, 'critical', 'high', 'medium', 'low')")
             ->get();
 
-        $partners = $user->role === 'admin'
+        $partners = $user->isAdmin()
             ? Partner::select('id', 'name')->orderBy('name')->get()
             : Partner::where('user_id', $user->id)->select('id', 'name')->orderBy('name')->get();
 
@@ -78,6 +85,7 @@ class ActionPlanController extends Controller
             'status' => $request->status,
             'completed_at' => $request->status === 'done' ? now() : null,
         ]);
+
         return redirect()->back()->with('success', 'Item updated.');
     }
 }

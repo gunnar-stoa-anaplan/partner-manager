@@ -14,7 +14,7 @@ class DealRegistrationController extends Controller
         $user = auth()->user();
         $query = DealRegistration::with(['partner', 'contact', 'reviewer']);
 
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
             $query->whereIn('partner_id', $partnerIds);
         }
@@ -37,7 +37,7 @@ class DealRegistrationController extends Controller
     public function create(): \Illuminate\View\View
     {
         $user = auth()->user();
-        $partners = $user->role === 'admin'
+        $partners = $user->isAdmin()
             ? Partner::orderBy('name')->get(['id', 'name'])
             : Partner::where('user_id', $user->id)->orderBy('name')->get(['id', 'name']);
 

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 400" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrowRight" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#636e72"/>
+    </marker>
+    <marker id="arrowLeft" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto">
+      <polygon points="10 0, 0 3.5, 10 7" fill="#636e72"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="400" rx="16" fill="#f8f9fa"/>
+
+  <!-- Title -->
+  <text x="550" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#2d3436">Ed25519 Artifact Signing &amp; Verification</text>
+  <text x="550" y="56" text-anchor="middle" font-size="11" fill="#636e72">CI/CD signs Docker image digests; agents verify signatures before deploying</text>
+
+  <!-- Actor headers -->
+  <!-- CI/CD Pipeline -->
+  <rect x="160" y="78" width="180" height="38" rx="8" fill="#2d3436" filter="url(#shadow)"/>
+  <text x="250" y="103" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">CI/CD Pipeline</text>
+
+  <!-- Agent -->
+  <rect x="760" y="78" width="180" height="38" rx="8" fill="#0984e3" filter="url(#shadow)"/>
+  <text x="850" y="103" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Agent</text>
+
+  <!-- Lifelines -->
+  <line x1="250" y1="116" x2="250" y2="380" stroke="#b2bec3" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="850" y1="116" x2="850" y2="380" stroke="#b2bec3" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- CI/CD side steps (1-4) -->
+  <rect x="48" y="130" width="280" height="22" rx="4" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="58" y="146" font-size="11" fill="#2d3436"><tspan font-weight="700" fill="#2d3436">1.</tspan> Build Docker image</text>
+
+  <rect x="48" y="160" width="280" height="22" rx="4" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="58" y="176" font-size="11" fill="#2d3436"><tspan font-weight="700" fill="#2d3436">2.</tspan> Compute image digest (SHA-256)</text>
+
+  <rect x="48" y="190" width="280" height="22" rx="4" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="58" y="206" font-size="11" fill="#2d3436"><tspan font-weight="700" fill="#2d3436">3.</tspan> Sign digest with Ed25519 private key</text>
+
+  <!-- Step 4: Publish -->
+  <line x1="260" y1="232" x2="840" y2="232" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrowRight)"/>
+  <rect x="370" y="216" width="360" height="22" rx="4" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="550" y="232" text-anchor="middle" font-size="11" font-weight="600" fill="#2d3436">4. Publish image + signature to registry</text>
+
+  <!-- Gap separator -->
+  <line x1="140" y1="262" x2="960" y2="262" stroke="#dfe6e9" stroke-width="1" stroke-dasharray="8,4"/>
+  <rect x="430" y="252" width="240" height="20" rx="4" fill="#f8f9fa"/>
+  <text x="550" y="266" text-anchor="middle" font-size="10" font-style="italic" fill="#636e72">(command delivered via heartbeat)</text>
+
+  <!-- Agent side steps (6-8) -->
+  <rect x="772" y="286" width="280" height="22" rx="4" fill="#fff" stroke="#0984e3" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="782" y="302" font-size="11" fill="#636e72"><tspan font-weight="700" fill="#2d3436">6.</tspan><tspan font-style="italic"> Verify signature with Ed25519 public key</tspan></text>
+
+  <!-- Step 7: Valid -> Deploy -->
+  <rect x="772" y="316" width="280" height="22" rx="4" fill="#e6fcf5" stroke="#00b894" stroke-width="1"/>
+  <text x="782" y="332" font-size="11" fill="#00b894"><tspan font-weight="700">7.</tspan> If valid: pull image and deploy</text>
+
+  <!-- Step 8: Invalid -> Reject -->
+  <rect x="772" y="346" width="280" height="22" rx="4" fill="#fff5f5" stroke="#d63031" stroke-width="1"/>
+  <text x="782" y="362" font-size="11" fill="#d63031"><tspan font-weight="700">8.</tspan> If invalid: reject deployment</text>
+
+  <!-- Footer -->
+  <text x="550" y="392" text-anchor="middle" font-size="9" fill="#b2bec3">Ed25519 provides fast, compact (64-byte) signatures with strong security guarantees</text>
+</svg>

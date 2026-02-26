@@ -62,7 +62,7 @@ class PortalImpersonationController extends Controller
             abort(403);
         }
 
-        if ($user->role === 'admin') {
+        if ($user->isAdmin()) {
             return;
         }
 

@@ -17,7 +17,7 @@ class PathReviewController extends Controller
         $query = PartnerPathEnrollment::with(['partner', 'currentStage', 'path'])
             ->where('status', 'active');
 
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
             $query->whereIn('partner_id', $partnerIds);
         }

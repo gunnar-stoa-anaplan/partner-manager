@@ -169,7 +169,7 @@ class DocumentationServiceTest extends TestCase
         $this->assertNotNull($overviewEntry);
 
         $this->assertDoesNotMatchRegularExpression('/<[^>]+>/', $overviewEntry['content']);
-        $this->assertStringContainsString('Partner Manager', $overviewEntry['content']);
+        $this->assertStringContainsString('Partner Ecosystems', $overviewEntry['content']);
     }
 
     public function test_build_search_index_includes_headings(): void

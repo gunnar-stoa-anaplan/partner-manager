@@ -6,6 +6,8 @@ Benchmarking allows you to compare a partner's performance against anonymized pe
 
 The Benchmark Service computes peer comparisons across key metrics. All comparison data is **anonymized** — partners never see the identities of their peers.
 
+![Benchmarking signals reference](images/benchmarking-signals-reference.svg)
+
 ## Benchmark Dimensions
 
 | Dimension | What's Compared |

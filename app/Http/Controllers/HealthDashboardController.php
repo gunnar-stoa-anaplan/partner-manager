@@ -11,7 +11,7 @@ class HealthDashboardController extends Controller
     public function index(PartnerHealthService $service): \Illuminate\View\View
     {
         $user = auth()->user();
-        $partnersQuery = $user->role === 'admin'
+        $partnersQuery = $user->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', $user->id);
 

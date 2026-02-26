@@ -38,7 +38,7 @@
     @endauth
 
     @auth
-    @if(app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
+    @if(Auth::user()->role !== 'coe' && app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
     <li class="nav-item">
         <a href="#" title="Idea Room" data-filter-tags>
             <svg class="sa-icon">
@@ -76,6 +76,7 @@
     </li>
     @endif
 
+    @if(Auth::user()->role !== 'coe')
     <li class="nav-item">
         <a href="#" title="Partners" data-filter-tags>
             <svg class="sa-icon">
@@ -97,7 +98,7 @@
             </li>
             @endif
             @if($show('analysis') && $registry->isAccessible('analytics'))
-            @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
+            @if(!$focused || Auth::user()->isAdmin() || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
             <li>
                 <a href="{{ route('custom-filters.index') }}">
                     <span class="nav-link-text">Custom Filters</span>
@@ -117,187 +118,15 @@
             @endif
         </ul>
     </li>
-
-    {{-- Plan Section --}}
-    @if($show('goals_scorecards'))
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_plan'] ?? '1') === '1')
-    <li class="nav-title"><span>Plan</span></li>
-
-    @if($show('goals_scorecards'))
-
-    @if($registry->isAccessible('analytics'))
-    <li>
-        <a href="{{ route('plan.scorecard.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#bar-chart"></use>
-            </svg>
-            <span class="nav-link-text">Scorecard</span>
-        </a>
-    </li>
     @endif
 
-    @if($registry->isAccessible('enablement_user'))
-    <li>
-        <a href="{{ route('plan.competency-matrix.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#grid"></use>
-            </svg>
-            <span class="nav-link-text">Competency Matrix</span>
-        </a>
-    </li>
-    @endif
+    {{-- Plan Section (temporarily removed) --}}
 
-    @if($registry->isAccessible('action_plans_user'))
-    <li>
-        <a href="{{ route('plan.tasks.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#check-square"></use>
-            </svg>
-            <span class="nav-link-text">Task Board</span>
-        </a>
-    </li>
-    @endif
-
-    @if($registry->isAccessible('goals_targets_user'))
-    <li>
-        <a href="{{ route('plan.goals.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#target"></use>
-            </svg>
-            <span class="nav-link-text">Goals & Targets</span>
-        </a>
-    </li>
-    @endif
-
-    @if($registry->isAccessible('action_plans_user'))
-    <li>
-        <a href="{{ route('plan.action-plans.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#list"></use>
-            </svg>
-            <span class="nav-link-text">Action Plans</span>
-        </a>
-    </li>
-    @endif
-    @endif
-    @endif
-    @endif
-
-    {{-- Engage Section --}}
-    @if($show('deal_registration', 'enablement_events', 'projects'))
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_engage'] ?? '1') === '1')
-    <li class="nav-title"><span>Engage</span></li>
-
-    @if($show('projects') && $registry->isAccessible('project_health_user'))
-    <li class="nav-item">
-        <a href="#" title="Project Health" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#clipboard"></use>
-            </svg>
-            <span class="nav-link-text">Project Health</span>
-        </a>
-        <ul>
-            <li>
-                <a href="{{ route('projects.index') }}">
-                    <span class="nav-link-text">Projects</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('projects.risks') }}">
-                    <span class="nav-link-text">Risks</span>
-                </a>
-            </li>
-        </ul>
-    </li>
-    @endif
-
-    @if($show('enablement_events') && $registry->isAccessible('enablement_user'))
-    <li class="nav-item">
-        <a href="#" title="Field Engagements" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#calendar"></use>
-            </svg>
-            <span class="nav-link-text">Field Engagements</span>
-        </a>
-        <ul>
-            <li>
-                <a href="{{ route('calendar.portfolio') }}">
-                    <span class="nav-link-text">Partner Calendar</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('enablement.calendar') }}">
-                    <span class="nav-link-text">Calendar</span>
-                </a>
-            </li>
-        </ul>
-    </li>
-    @endif
-
-    @if($show('field_enablement') && $registry->isAccessible('enablement_user'))
-    <li class="nav-item">
-        <a href="#" title="Field Enablement" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#users"></use>
-            </svg>
-            <span class="nav-link-text">Field Enablement</span>
-        </a>
-        <ul>
-            <li>
-                <a href="{{ route('influence_map') }}">
-                    <span class="nav-link-text">Influence Map</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('field.breadth') }}">
-                    <span class="nav-link-text">Breadth</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('field.depth') }}">
-                    <span class="nav-link-text">Depth</span>
-                </a>
-            </li>
-            @if(Auth::user()->role === 'admin' || session('selected_partner_id'))
-            <li>
-                <a href="{{ route('field.key-influencers') }}">
-                    <span class="nav-link-text">Key Influencers</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('influencers.index') }}">
-                    <span class="nav-link-text">Influencer Directory</span>
-                </a>
-            </li>
-            @endif
-        </ul>
-    </li>
-    @endif
-
-    @if($show('deal_registration') && $registry->isAccessible('deal_registration_user'))
-    <li>
-        <a href="{{ route('engage.solutions.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#package"></use>
-            </svg>
-            <span class="nav-link-text">Solution Lifecycle</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('engage.deal-registrations.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#file-text"></use>
-            </svg>
-            <span class="nav-link-text">Deal Registrations</span>
-        </a>
-    </li>
-    @endif
-    @endif
-    @endif
+    {{-- Engage Section (temporarily removed) --}}
 
     {{-- Key Metrics (Partner Profile) - only show when a partner is selected during focus mode --}}
-    @if($focused ? session('selected_partner_id') : (Auth::user()->role === 'admin' || session('selected_partner_id')))
+    @if(Auth::user()->role !== 'coe')
+    @if($focused ? session('selected_partner_id') : (Auth::user()->isAdmin() || session('selected_partner_id')))
     @if(!$focused || ($navSettings['nav_visible_key_metrics'] ?? '1') === '1')
     <li class="nav-item">
         <a href="#" title="Key Metrics" data-filter-tags>
@@ -341,7 +170,7 @@
 
     {{-- Business Development --}}
     @if($show('deal_registration') && $registry->isAccessible('deal_registration_user'))
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_business_dev'] ?? '1') === '1')
+    @if(!$focused || Auth::user()->isAdmin() || ($navSettings['nav_visible_business_dev'] ?? '1') === '1')
     <li class="nav-item">
         <a href="#" title="Business Development" data-filter-tags>
             <svg class="sa-icon">
@@ -370,132 +199,14 @@
     @endif
     @endif
     @endif
+    @endif {{-- end coe exclusion for Key Metrics / Business Development --}}
 
-    {{-- Measure Section --}}
-    @if($show('goals_scorecards', 'measure'))
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_measure'] ?? '1') === '1')
-    <li class="nav-title"><span>Measure</span></li>
+    {{-- Measure Section (temporarily removed) --}}
 
-    @if($show('measure') && $registry->isAccessible('analytics'))
-    <li>
-        <a href="{{ route('partners.full-summary') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#bar-chart-2"></use>
-            </svg>
-            <span class="nav-link-text">Full Summary</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('partners.full-insights') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#pie-chart"></use>
-            </svg>
-            <span class="nav-link-text">Full Insights</span>
-        </a>
-    </li>
-
-    <li class="nav-item">
-        <a href="#" title="Analytics" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#trending-up"></use>
-            </svg>
-            <span class="nav-link-text">Analytics</span>
-        </a>
-        <ul>
-            <li>
-                <a href="{{ route('measure.at-a-glance') }}">
-                    <span class="nav-link-text">At a Glance</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('measure.pipeline') }}">
-                    <span class="nav-link-text">Pipeline Analysis</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('measure.lead-flow') }}">
-                    <span class="nav-link-text">Lead Flow</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('measure.funding') }}">
-                    <span class="nav-link-text">Funding</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('measure.revenue') }}">
-                    <span class="nav-link-text">Revenue</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('measure.enablement') }}">
-                    <span class="nav-link-text">Enablement</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('measure.delivery') }}">
-                    <span class="nav-link-text">Delivery</span>
-                </a>
-            </li>
-        </ul>
-    </li>
-    @endif
-
-    @if($show('goals_scorecards') && $registry->isAccessible('benchmark_user'))
-    <li>
-        <a href="{{ route('measure.benchmarks.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#award"></use>
-            </svg>
-            <span class="nav-link-text">Benchmarks</span>
-        </a>
-    </li>
-    @endif
-    @endif
-    @endif
-
-    {{-- Act Section --}}
-    @if($show('health_alerts'))
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_act'] ?? '1') === '1')
-    <li class="nav-title"><span>Act</span></li>
-
-    @if($show('health_alerts') && $registry->isAccessible('enablement_user'))
-    <li>
-        <a href="{{ route('act.health.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#heart"></use>
-            </svg>
-            <span class="nav-link-text">Partner Health</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('act.alerts.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#bell"></use>
-            </svg>
-            <span class="nav-link-text">Alerts & Recommendations</span>
-        </a>
-    </li>
-
-    @if($registry->isAccessible('qbr_user'))
-    <li>
-        <a href="{{ route('act.qbr.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#clipboard"></use>
-            </svg>
-            <span class="nav-link-text">QBR Workbench</span>
-        </a>
-    </li>
-    @endif
-    @endif
-
-    @endif
-    @endif
+    {{-- Act Section (temporarily removed) --}}
 
     {{-- Partner Admin - Admin Only --}}
-    @if(Auth::user()->role === 'admin')
+    @if(Auth::user()->isAdmin())
     @if($show('goals_scorecards', 'partner_paths', 'deal_registration', 'anaplan', 'blueprints', 'enablement_events', 'labs', 'launch_programs'))
     <li class="nav-title"><span>Partner Administration</span></li>
 
@@ -637,7 +348,7 @@
                 </a>
             </li>
             <li>
-                <a href="{{ Auth::user()->role === 'admin' ? route('blueprints.index') : route('blueprints.catalog') }}">
+                <a href="{{ Auth::user()->isAdmin() ? route('blueprints.index') : route('blueprints.catalog') }}">
                     <span class="nav-link-text">Blueprints</span>
                 </a>
             </li>
@@ -701,11 +412,225 @@
     </li>
     @endif
     @endif
+    @endif {{-- end admin-only Partner Administration --}}
+
+    {{-- CoE Program Administration --}}
+    @if(Auth::user()->role === 'coe' || Auth::user()->role === 'super_admin')
+    <li class="nav-title"><span>Program Administration</span></li>
+
+    <li>
+        <a href="{{ route('program-dashboard') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#compass"></use>
+            </svg>
+            <span class="nav-link-text">Program Dashboard</span>
+        </a>
+    </li>
+
+    {{-- Strategy Workbench for CoE users --}}
+    @if($registry->isAccessible('strategy'))
+    <li class="nav-item">
+        <a href="#" title="Strategy Workbench" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#compass"></use>
+            </svg>
+            <span class="nav-link-text">Strategy Workbench</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('strategy.dashboard') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('strategy.plans.index') }}">
+                    <span class="nav-link-text">Plans</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('strategy.scenarios.index') }}">
+                    <span class="nav-link-text">Scenarios</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('strategy.benchmarks') }}">
+                    <span class="nav-link-text">Benchmarks</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    @if($show('partner_paths'))
+    <li class="nav-item">
+        <a href="#" title="Partner Paths" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#map"></use>
+            </svg>
+            <span class="nav-link-text">Partner Paths</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('plan.paths.index') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.paths.index') }}">
+                    <span class="nav-link-text">Path Configuration</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.task-templates.index') }}">
+                    <span class="nav-link-text">Task Templates</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('act.path-reviews.index') }}">
+                    <span class="nav-link-text">Path Reviews</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    {{-- Goals for CoE users --}}
+    @if($show('goals_scorecards') && $registry->isAccessible('goals_targets_admin'))
+    <li class="nav-item">
+        <a href="#" title="Goals" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#target"></use>
+            </svg>
+            <span class="nav-link-text">Goals</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('partner-goals.index') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.goal-templates.index') }}">
+                    <span class="nav-link-text">Templates</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    {{-- Launch Programs for CoE users --}}
+    @if($show('launch_programs') && $registry->isAccessible('launch_programs_admin'))
+    <li class="nav-item">
+        <a href="#" title="Launch Programs" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#zap"></use>
+            </svg>
+            <span class="nav-link-text">Launch Programs</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('admin.launch-programs.dashboard') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.launch-programs.index') }}">
+                    <span class="nav-link-text">Program Details</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    {{-- Knowledge Base for CoE users --}}
+    @if($registry->isAccessible('knowledge_base_admin'))
+    <li class="nav-item">
+        <a href="#" title="Knowledge Base" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#book-open"></use>
+            </svg>
+            <span class="nav-link-text">Knowledge Base</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('knowledge_base.dashboard') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('knowledge_base.documents.index') }}">
+                    <span class="nav-link-text">Documents</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('knowledge_base.ingest.create') }}">
+                    <span class="nav-link-text">Ingest</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    {{-- Branding for CoE users --}}
+    <li>
+        <a href="{{ route('admin.branding') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#edit"></use>
+            </svg>
+            <span class="nav-link-text">Branding</span>
+        </a>
+    </li>
+
+    {{-- Enablement Blueprints for CoE users --}}
+    @if($registry->isAccessible('enablement_admin'))
+    <li class="nav-item">
+        <a href="#" title="Enablement Blueprints" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#layers"></use>
+            </svg>
+            <span class="nav-link-text">Enablement Blueprints</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('blueprints.catalog') }}">
+                    <span class="nav-link-text">Catalog</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('blueprints.index') }}">
+                    <span class="nav-link-text">Manage Blueprints</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    {{-- AI Agents for CoE users --}}
+    @if($registry->isAccessible('ai_agents_admin'))
+    <li>
+        <a href="{{ route('admin.ai-agents.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#cpu"></use>
+            </svg>
+            <span class="nav-link-text">AI Agents</span>
+        </a>
+    </li>
+    @endif
+    @endif
 
     {{-- Blueprint & Enablement Admin for non-admin users --}}
-    @if(Auth::user()->role !== 'admin' && $registry->isAccessible('enablement_events_admin'))
+    @if(!Auth::user()->isAdmin() && $registry->isAccessible('enablement_events_admin'))
     @if($show('blueprints', 'enablement_events'))
     <li class="nav-title"><span>Enablement Administration</span></li>
+
+    <li>
+        <a href="{{ route('admin.enablement-dashboard') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#trending-up"></use>
+            </svg>
+            <span class="nav-link-text">Dashboard</span>
+        </a>
+    </li>
 
     <li class="nav-item">
         <a href="#" title="Enablement" data-filter-tags>
@@ -715,11 +640,13 @@
             <span class="nav-link-text">Enablement</span>
         </a>
         <ul>
+            @if(Auth::user()->role !== 'coe')
             <li>
                 <a href="{{ route('blueprints.catalog') }}">
                     <span class="nav-link-text">Blueprints</span>
                 </a>
             </li>
+            @endif
             <li>
                 <a href="{{ route('enablement-events.index') }}">
                     <span class="nav-link-text">Enablement Events</span>
@@ -736,7 +663,8 @@
     @endif
 
     {{-- System - always show Configuration so dev can change focus --}}
-    @if(!$focused || Auth::user()->role === 'admin' || ($navSettings['nav_visible_system'] ?? '1') === '1')
+    @if(Auth::user()->role !== 'coe')
+    @if(!$focused || Auth::user()->isAdmin() || ($navSettings['nav_visible_system'] ?? '1') === '1')
     <li class="nav-title"><span>System Administration</span></li>
 
     <li>
@@ -877,8 +805,7 @@
     </li>
     @endif
     @endif
-
-    @endif
+    @endif {{-- end coe exclusion for System Administration --}}
 
     {{-- Feature Activation — visible to admin and authorized CoE --}}
     @can('manage-activation')

@@ -12,7 +12,7 @@ class ContactController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $partnerIds = $user->role === 'admin'
+        $partnerIds = $user->isAdmin()
             ? Partner::pluck('id')
             : Partner::where('user_id', $user->id)->pluck('id');
 
@@ -39,7 +39,7 @@ class ContactController extends Controller
     public function create()
     {
         $user = auth()->user();
-        $partners = $user->role === 'admin'
+        $partners = $user->isAdmin()
             ? Partner::orderBy('name')->get()
             : Partner::where('user_id', $user->id)->orderBy('name')->get();
 
@@ -55,7 +55,7 @@ class ContactController extends Controller
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:50',
             'title' => 'nullable|string|max:255',
-            'influencer_role' => 'required|in:' . implode(',', array_keys(Contact::INFLUENCER_ROLES)),
+            'influencer_role' => 'required|in:'.implode(',', array_keys(Contact::INFLUENCER_ROLES)),
             'organization' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
         ]);
@@ -85,7 +85,7 @@ class ContactController extends Controller
     {
         $contact = Contact::findOrFail($id);
         $user = auth()->user();
-        $partners = $user->role === 'admin'
+        $partners = $user->isAdmin()
             ? Partner::orderBy('name')->get()
             : Partner::where('user_id', $user->id)->orderBy('name')->get();
 
@@ -111,9 +111,9 @@ class ContactController extends Controller
         ];
 
         if ($contact->contact_type === 'influencer') {
-            $rules['influencer_role'] = 'required|in:' . implode(',', array_keys(Contact::INFLUENCER_ROLES));
+            $rules['influencer_role'] = 'required|in:'.implode(',', array_keys(Contact::INFLUENCER_ROLES));
         } elseif ($contact->contact_type === 'resource') {
-            $rules['resource_role'] = 'required|in:' . implode(',', array_keys(Contact::RESOURCE_ROLES));
+            $rules['resource_role'] = 'required|in:'.implode(',', array_keys(Contact::RESOURCE_ROLES));
         }
 
         $validated = $request->validate($rules);
@@ -136,7 +136,7 @@ class ContactController extends Controller
     public function storeInteraction(Request $request, Contact $influencer)
     {
         $validated = $request->validate([
-            'interaction_type' => 'required|in:' . implode(',', array_keys(ContactInteraction::TYPES)),
+            'interaction_type' => 'required|in:'.implode(',', array_keys(ContactInteraction::TYPES)),
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'interaction_date' => 'required|date',
@@ -157,6 +157,7 @@ class ContactController extends Controller
     public function destroyInteraction(ContactInteraction $interaction)
     {
         $interaction->delete();
+
         return redirect()->back()->with('success', 'Interaction removed.');
     }
 

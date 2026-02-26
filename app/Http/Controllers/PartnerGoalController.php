@@ -15,7 +15,7 @@ class PartnerGoalController extends Controller
         $currentFY = FiscalYearHelper::getCurrentFiscalPeriod()['fiscal_year'];
         $selectedFY = (int) $request->query('fy', $currentFY);
 
-        if ($user->role === 'admin') {
+        if ($user->isAdmin()) {
             $partners = Partner::withOnly([])
                 ->orderBy('name')
                 ->get();
@@ -49,7 +49,7 @@ class PartnerGoalController extends Controller
         $goalsData = $request->input('goals', []);
 
         // Determine which partner IDs this user can edit
-        if ($user->role === 'admin') {
+        if ($user->isAdmin()) {
             $allowedPartnerIds = Partner::pluck('id')->toArray();
         } else {
             $allowedPartnerIds = $user->partners()->pluck('partners.id')->toArray();
@@ -58,7 +58,7 @@ class PartnerGoalController extends Controller
         foreach ($goalsData as $partnerId => $data) {
             $partnerId = (int) $partnerId;
 
-            if (!in_array($partnerId, $allowedPartnerIds)) {
+            if (! in_array($partnerId, $allowedPartnerIds)) {
                 continue;
             }
 
@@ -67,7 +67,7 @@ class PartnerGoalController extends Controller
             $notes = $data['notes'] ?? null;
 
             // Only create/update if at least one value is non-zero or notes exist
-            if ($sourced > 0 || $influenced > 0 || !empty($notes)) {
+            if ($sourced > 0 || $influenced > 0 || ! empty($notes)) {
                 PartnerGoal::updateOrCreate(
                     ['partner_id' => $partnerId, 'fiscal_year' => $fiscalYear],
                     [

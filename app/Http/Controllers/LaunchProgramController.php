@@ -205,7 +205,7 @@ class LaunchProgramController extends Controller
     {
         $program = $programPartner->program;
 
-        if (auth()->user()->role !== 'admin' && auth()->id() !== $program->owner_id) {
+        if (! auth()->user()->isAdmin() && auth()->id() !== $program->owner_id) {
             abort(403, 'Only the program owner or an admin can update partner status.');
         }
 

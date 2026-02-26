@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 380" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#636e72"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="380" rx="16" fill="#f8f9fa"/>
+
+  <!-- Title -->
+  <text x="550" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#2d3436">Access Points &amp; Authentication Guards</text>
+  <text x="550" y="56" text-anchor="middle" font-size="11" fill="#636e72">Single HTTPS entry point branches to three authentication guards based on route prefix</text>
+
+  <!-- HTTPS Endpoint Box (top center) -->
+  <rect x="390" y="76" width="320" height="60" rx="12" fill="#2d3436" filter="url(#shadow)"/>
+  <text x="550" y="102" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">HTTPS Endpoint</text>
+  <text x="550" y="122" text-anchor="middle" font-size="10" fill="#b2bec3">https://app.example.com &#8212; TLS 1.2+ terminated at load balancer</text>
+
+  <!-- Connecting lines from HTTPS box down to each guard -->
+  <!-- Left line (Web Guard) -->
+  <line x1="460" y1="136" x2="200" y2="190" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- Center line (Portal Guard) -->
+  <line x1="550" y1="136" x2="550" y2="190" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- Right line (Token Auth) -->
+  <line x1="640" y1="136" x2="900" y2="190" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Route prefix labels on lines -->
+  <text x="310" y="163" text-anchor="middle" font-size="9" fill="#636e72" font-weight="600">/dashboard, /plan/*, /engage/*...</text>
+  <text x="550" y="170" text-anchor="middle" font-size="9" fill="#636e72" font-weight="600">/portal/*</text>
+  <text x="790" y="163" text-anchor="middle" font-size="9" fill="#636e72" font-weight="600">/api/v1/*</text>
+
+  <!-- Web Guard Card (left) -->
+  <rect x="60" y="192" width="280" height="160" rx="12" fill="#fff" stroke="#dfe6e9" stroke-width="1" filter="url(#shadow)"/>
+  <rect x="60" y="192" width="280" height="38" rx="12" fill="#0984e3"/>
+  <rect x="60" y="220" width="280" height="10" fill="#0984e3"/>
+  <text x="200" y="217" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Web Guard</text>
+
+  <text x="80" y="252" font-size="11" font-weight="600" fill="#2d3436">Audience</text>
+  <text x="80" y="268" font-size="10" fill="#636e72">Internal Users (Admins, PSMs, CoE, Integration)</text>
+
+  <text x="80" y="292" font-size="11" font-weight="600" fill="#2d3436">Route Paths</text>
+  <text x="80" y="308" font-size="10" fill="#636e72">/dashboard</text>
+  <text x="80" y="322" font-size="10" fill="#636e72">/plan/*  /engage/*  /measure/*  /act/*</text>
+
+  <text x="80" y="344" font-size="9" fill="#b2bec3">Session-based &#8226; CSRF protected &#8226; Sanctum cookie</text>
+
+  <!-- Portal Guard Card (center) -->
+  <rect x="410" y="192" width="280" height="160" rx="12" fill="#fff" stroke="#dfe6e9" stroke-width="1" filter="url(#shadow)"/>
+  <rect x="410" y="192" width="280" height="38" rx="12" fill="#00b894"/>
+  <rect x="410" y="220" width="280" height="10" fill="#00b894"/>
+  <text x="550" y="217" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Portal Guard</text>
+
+  <text x="430" y="252" font-size="11" font-weight="600" fill="#2d3436">Audience</text>
+  <text x="430" y="268" font-size="10" fill="#636e72">External Partner Contacts</text>
+
+  <text x="430" y="292" font-size="11" font-weight="600" fill="#2d3436">Route Paths</text>
+  <text x="430" y="308" font-size="10" fill="#636e72">/portal/*</text>
+
+  <text x="430" y="344" font-size="9" fill="#b2bec3">Separate guard &#8226; Scoped to own partner data only</text>
+
+  <!-- Token Auth Card (right) -->
+  <rect x="760" y="192" width="280" height="160" rx="12" fill="#fff" stroke="#dfe6e9" stroke-width="1" filter="url(#shadow)"/>
+  <rect x="760" y="192" width="280" height="38" rx="12" fill="#6c5ce7"/>
+  <rect x="760" y="220" width="280" height="10" fill="#6c5ce7"/>
+  <text x="900" y="217" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Token Auth (API)</text>
+
+  <text x="780" y="252" font-size="11" font-weight="600" fill="#2d3436">Audience</text>
+  <text x="780" y="268" font-size="10" fill="#636e72">API Consumers (Integrations, Agents)</text>
+
+  <text x="780" y="292" font-size="11" font-weight="600" fill="#2d3436">Route Paths</text>
+  <text x="780" y="308" font-size="10" fill="#636e72">/api/v1/*</text>
+
+  <text x="780" y="344" font-size="9" fill="#b2bec3">Sanctum token &#8226; Stateless &#8226; Ability-scoped</text>
+
+  <!-- Footer -->
+  <text x="550" y="372" text-anchor="middle" font-size="9" fill="#b2bec3">Partner Manager &#8212; Access Points &amp; Authentication Guards</text>
+</svg>

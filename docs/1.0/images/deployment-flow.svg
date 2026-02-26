@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 520" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrowRight" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#636e72"/>
+    </marker>
+    <marker id="arrowLeft" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto">
+      <polygon points="10 0, 0 3.5, 10 7" fill="#636e72"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="520" rx="16" fill="#f8f9fa"/>
+
+  <!-- Title -->
+  <text x="550" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#2d3436">Deployment Flow</text>
+  <text x="550" y="56" text-anchor="middle" font-size="11" fill="#636e72">Operator triggers deployment via dashboard; command flows through Control Plane to Agent via heartbeat</text>
+
+  <!-- Actor headers -->
+  <!-- Operator -->
+  <rect x="100" y="78" width="160" height="38" rx="8" fill="#2d3436" filter="url(#shadow)"/>
+  <text x="180" y="103" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Operator</text>
+
+  <!-- Control Plane -->
+  <rect x="470" y="78" width="160" height="38" rx="8" fill="#6c5ce7" filter="url(#shadow)"/>
+  <text x="550" y="103" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Control Plane</text>
+
+  <!-- Agent -->
+  <rect x="840" y="78" width="160" height="38" rx="8" fill="#0984e3" filter="url(#shadow)"/>
+  <text x="920" y="103" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Agent</text>
+
+  <!-- Lifelines -->
+  <line x1="180" y1="116" x2="180" y2="500" stroke="#b2bec3" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="550" y1="116" x2="550" y2="500" stroke="#b2bec3" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="920" y1="116" x2="920" y2="500" stroke="#b2bec3" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- Step 1: Operator -> CP: Click Deploy -->
+  <line x1="190" y1="148" x2="540" y2="148" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrowRight)"/>
+  <rect x="275" y="132" width="220" height="22" rx="4" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="385" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="#2d3436">1. Click "Deploy v2.2.0"</text>
+
+  <!-- CP side steps (2-3) -->
+  <rect x="432" y="168" width="236" height="22" rx="4" fill="#fff" stroke="#6c5ce7" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="442" y="184" font-size="10" font-style="italic" fill="#636e72"><tspan font-weight="600" fill="#2d3436">2.</tspan> Create Deployment record</text>
+
+  <rect x="432" y="196" width="236" height="22" rx="4" fill="#fff" stroke="#6c5ce7" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="442" y="212" font-size="10" font-style="italic" fill="#636e72"><tspan font-weight="600" fill="#2d3436">3.</tspan> Queue deploy command for agent</text>
+
+  <!-- Gap separator: next heartbeat -->
+  <line x1="100" y1="238" x2="1000" y2="238" stroke="#dfe6e9" stroke-width="1" stroke-dasharray="8,4"/>
+  <rect x="430" y="228" width="240" height="20" rx="4" fill="#f8f9fa"/>
+  <text x="550" y="242" text-anchor="middle" font-size="10" font-style="italic" fill="#636e72">(next heartbeat, &#8804;30s)</text>
+
+  <!-- Step 5: Agent -> CP: heartbeat -->
+  <line x1="910" y1="270" x2="560" y2="270" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrowLeft)"/>
+  <rect x="665" y="254" width="170" height="22" rx="4" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="750" y="270" text-anchor="middle" font-size="11" font-weight="600" fill="#2d3436">heartbeat</text>
+
+  <!-- Step 6: CP -> Agent: commands: [deploy] -->
+  <line x1="560" y1="302" x2="910" y2="302" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrowRight)"/>
+  <rect x="640" y="286" width="220" height="22" rx="4" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="750" y="302" text-anchor="middle" font-size="11" font-weight="600" fill="#2d3436">commands: [deploy]</text>
+
+  <!-- Agent side steps (4-6) -->
+  <rect x="802" y="322" width="236" height="22" rx="4" fill="#fff" stroke="#0984e3" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="812" y="338" font-size="10" font-style="italic" fill="#636e72"><tspan font-weight="600" fill="#2d3436">4.</tspan> Verify Ed25519 signature</text>
+
+  <rect x="802" y="350" width="236" height="22" rx="4" fill="#fff" stroke="#0984e3" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="812" y="366" font-size="10" font-style="italic" fill="#636e72"><tspan font-weight="600" fill="#2d3436">5.</tspan> Pull new Docker image</text>
+
+  <rect x="802" y="378" width="236" height="22" rx="4" fill="#fff" stroke="#0984e3" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="812" y="394" font-size="10" font-style="italic" fill="#636e72"><tspan font-weight="600" fill="#2d3436">6.</tspan> Restart app container</text>
+
+  <!-- Step 10: Agent -> CP: command report -->
+  <line x1="910" y1="422" x2="560" y2="422" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrowLeft)"/>
+  <rect x="650" y="406" width="200" height="22" rx="4" fill="#fff" stroke="#dfe6e9" stroke-width="1"/>
+  <text x="750" y="422" text-anchor="middle" font-size="11" font-weight="600" fill="#2d3436">command report (success)</text>
+
+  <!-- CP side step (7) -->
+  <rect x="432" y="442" width="236" height="22" rx="4" fill="#fff" stroke="#6c5ce7" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="442" y="458" font-size="10" font-style="italic" fill="#636e72"><tspan font-weight="600" fill="#2d3436">7.</tspan> Update deployment status</text>
+
+  <!-- Step 12: CP -> Operator: Dashboard update -->
+  <line x1="540" y1="482" x2="190" y2="482" stroke="#00b894" stroke-width="1.5" marker-end="url(#arrowLeft)"/>
+  <rect x="260" y="466" width="260" height="22" rx="4" fill="#e6fcf5" stroke="#00b894" stroke-width="1"/>
+  <text x="390" y="482" text-anchor="middle" font-size="11" font-weight="700" fill="#00b894">8. Dashboard: "Deployed v2.2.0"</text>
+
+  <!-- Footer -->
+  <text x="550" y="512" text-anchor="middle" font-size="9" fill="#b2bec3">End-to-end deployment latency depends on heartbeat interval (default 30s) plus image pull time</text>
+</svg>
