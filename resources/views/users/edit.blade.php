@@ -7,6 +7,19 @@
 @section('content')
 <p class="text-muted fst-italic mt-3 mb-4">Update this user's name, email, role, and avatar. Role changes take effect immediately — Admin users get full system access, PSMs can manage assigned partners, and Managers have team oversight. Leave the password field blank to keep the current password.</p>
 
+@if($user->isSyncedFromDirectory())
+    <div class="alert alert-warning d-flex align-items-center mb-4">
+        <svg class="sa-icon sa-icon-sm me-2"><use href="/icons/sprite.svg#refresh-cw"></use></svg>
+        <div>
+            <strong>Synced from {{ ucfirst($user->directory_source) }}</strong>
+            — Name, email, and manager are managed by directory sync and cannot be edited here.
+            @if($user->last_synced_at)
+                <span class="text-muted ms-1">Last synced {{ $user->last_synced_at->diffForHumans() }}</span>
+            @endif
+        </div>
+    </div>
+@endif
+
 <div class="row">
     <div class="col-xl-8 offset-xl-2">
         <div class="card shadow-0 mb-g">
@@ -30,12 +43,18 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="name">Full Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->name) }}" required>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->name) }}" required {{ $user->isFieldReadOnly('name') ? 'disabled' : '' }}>
+                        @if($user->isFieldReadOnly('name'))
+                            <div class="form-text text-warning">This field is managed by directory sync</div>
+                        @endif
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label" for="email">Email Address <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $user->email) }}" required>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $user->email) }}" required {{ $user->isFieldReadOnly('email') ? 'disabled' : '' }}>
+                        @if($user->isFieldReadOnly('email'))
+                            <div class="form-text text-warning">This field is managed by directory sync</div>
+                        @endif
                     </div>
 
                     <div class="mb-3">
@@ -54,7 +73,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="manager_id">Reports To</label>
-                        <select class="form-select" id="manager_id" name="manager_id">
+                        <select class="form-select" id="manager_id" name="manager_id" {{ $user->isFieldReadOnly('manager_id') ? 'disabled' : '' }}>
                             <option value="">-- None --</option>
                             @foreach($managers as $manager)
                                 <option value="{{ $manager->id }}" {{ old('manager_id', $user->manager_id) == $manager->id ? 'selected' : '' }}>
@@ -62,7 +81,11 @@
                                 </option>
                             @endforeach
                         </select>
-                        <div class="form-text">Assign this user's direct manager in the reporting hierarchy</div>
+                        @if($user->isFieldReadOnly('manager_id'))
+                            <div class="form-text text-warning">This field is managed by directory sync</div>
+                        @else
+                            <div class="form-text">Assign this user's direct manager in the reporting hierarchy</div>
+                        @endif
                     </div>
 
                     <div class="mb-3">

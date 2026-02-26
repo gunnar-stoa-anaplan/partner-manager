@@ -75,6 +75,13 @@ class UserController extends Controller
             'manager_id' => $request->manager_id,
         ];
 
+        // Strip directory-synced fields to prevent accidental overwrites
+        if ($user->isSyncedFromDirectory()) {
+            foreach (config('team.directory.synced_fields', []) as $field) {
+                unset($data[$field]);
+            }
+        }
+
         // Handle avatar upload
         if ($request->hasFile('avatar')) {
             // Delete old avatar if exists

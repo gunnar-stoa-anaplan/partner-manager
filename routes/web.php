@@ -22,6 +22,7 @@ use App\Http\Controllers\CompetencyMatrixController;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DealRegistrationController;
+use App\Http\Controllers\DirectorySyncController;
 use App\Http\Controllers\EnablementDashboardController;
 use App\Http\Controllers\EnablementEventController;
 use App\Http\Controllers\FieldEnablementController;
@@ -504,6 +505,12 @@ Route::middleware(['auth'])->group(function () {
         // AI Agents Admin (gated by ai_agents_admin feature flag)
         Route::middleware('module:ai_agents_admin')->group(function () {
             Route::get('/ai-agents', [AiAgentsController::class, 'index'])->name('admin.ai-agents.index');
+        });
+
+        // Directory Sync (gated by directory_sync_admin feature flag)
+        Route::middleware('module:directory_sync_admin')->group(function () {
+            Route::get('/directory-sync', [DirectorySyncController::class, 'index'])->name('directory-sync.index');
+            Route::post('/directory-sync/upload', [DirectorySyncController::class, 'upload'])->name('directory-sync.upload');
         });
 
         // System Status & Updates

@@ -31,6 +31,9 @@ class User extends Authenticatable
         'avatar',
         'preferences',
         'timezone',
+        'external_id',
+        'directory_source',
+        'last_synced_at',
     ];
 
     /**
@@ -50,6 +53,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'preferences' => 'array',
+            'last_synced_at' => 'datetime',
         ];
     }
 
@@ -127,6 +131,23 @@ class User extends Authenticatable
     public function isPsm(): bool
     {
         return $this->role === 'psm';
+    }
+
+    /**
+     * Check if this user is synced from an external directory.
+     */
+    public function isSyncedFromDirectory(): bool
+    {
+        return $this->directory_source !== null;
+    }
+
+    /**
+     * Check if a given field is read-only because it's managed by directory sync.
+     */
+    public function isFieldReadOnly(string $field): bool
+    {
+        return $this->isSyncedFromDirectory()
+            && in_array($field, config('team.directory.synced_fields', []));
     }
 
     // ── Activation Path relationships ────────────────────────────

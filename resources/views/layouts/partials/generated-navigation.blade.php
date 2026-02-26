@@ -244,6 +244,17 @@
             <span class="nav-link-text">Partner Assignments</span>
         </a>
     </li>
+
+    @if(in_array(Auth::user()->role, ['admin', 'super_admin', 'coe']) && $registry->isAccessible('directory_sync_admin'))
+    <li>
+        <a href="{{ route('directory-sync.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#refresh-cw"></use>
+            </svg>
+            <span class="nav-link-text">Directory Sync</span>
+        </a>
+    </li>
+    @endif
     @endif
 
     {{-- CoE Management --}}
