@@ -21,7 +21,9 @@ class TrainingTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = User::factory()->create(['role' => 'psm']);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->user = User::factory()->psm()->create();
 
         $this->path = ActivationPath::factory()->create([
             'feature_slug' => 'test_feature',

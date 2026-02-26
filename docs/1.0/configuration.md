@@ -1,5 +1,8 @@
 # Configuration
 
+> [!NOTE]
+> Available to: Administrator
+
 The Configuration section allows administrators to customize how Partner Manager operates — from scorecard weights to alert thresholds to task templates.
 
 > [!TIP]

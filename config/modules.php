@@ -25,13 +25,13 @@ return [
         'enabled' => env('MODULE_INTEGRATION_HUB', true),
         'nav_section' => 'Integrations',
         'nav_items' => [
-            ['label' => 'Dashboard', 'route' => 'integration-hub.dashboard', 'icon' => 'home'],
-            ['label' => 'Connectors', 'route' => 'integration-hub.connectors.catalog', 'icon' => 'package'],
-            ['label' => 'Connections', 'route' => 'integration-hub.connections.index', 'icon' => 'link-2'],
-            ['label' => 'Field Mappings', 'route' => 'integration-hub.mappings.index', 'icon' => 'shuffle'],
-            ['label' => 'Templates', 'route' => 'integration-hub.templates.index', 'icon' => 'copy'],
-            ['label' => 'Import Jobs', 'route' => 'integration-hub.jobs.index', 'icon' => 'download', 'params' => ['direction' => 'import']],
-            ['label' => 'Export Jobs', 'route' => 'integration-hub.jobs.index', 'icon' => 'upload', 'params' => ['direction' => 'export']],
+            ['label' => 'Dashboard', 'route' => 'integration_hub.dashboard', 'icon' => 'home'],
+            ['label' => 'Connectors', 'route' => 'integration_hub.connectors.catalog', 'icon' => 'package'],
+            ['label' => 'Connections', 'route' => 'integration_hub.connections.index', 'icon' => 'link-2'],
+            ['label' => 'Field Mappings', 'route' => 'integration_hub.mappings.index', 'icon' => 'shuffle'],
+            ['label' => 'Templates', 'route' => 'integration_hub.templates.index', 'icon' => 'copy'],
+            ['label' => 'Import Jobs', 'route' => 'integration_hub.jobs.index', 'icon' => 'download', 'params' => ['direction' => 'import']],
+            ['label' => 'Export Jobs', 'route' => 'integration_hub.jobs.index', 'icon' => 'upload', 'params' => ['direction' => 'export']],
             ['label' => 'Data Imports', 'route' => 'imports.index', 'icon' => 'upload-cloud'],
         ],
     ],
@@ -330,6 +330,20 @@ return [
         'enabled' => env('MODULE_ZOOM_CHAT_USER', true),
     ],
 
+    'workshop_delivery_admin' => [
+        'name' => 'Workshop Delivery Administration',
+        'description' => 'Host workshops via embedded Zoom meetings with breakout rooms, attendance tracking, and AI chat.',
+        'icon' => 'video',
+        'enabled' => env('MODULE_WORKSHOP_DELIVERY_ADMIN', true),
+    ],
+
+    'workshop_delivery_user' => [
+        'name' => 'Workshop Delivery End Users',
+        'description' => 'Join and participate in interactive workshop sessions delivered via embedded Zoom.',
+        'icon' => 'video',
+        'enabled' => env('MODULE_WORKSHOP_DELIVERY_USER', true),
+    ],
+
     'workshop_labs_admin' => [
         'name' => 'Workshop Labs Administration',
         'description' => 'Administrative access to create and manage workshop labs, checkpoints, and participants.',
@@ -342,6 +356,13 @@ return [
         'description' => 'End-user access to participate in workshop labs and complete checkpoint exercises.',
         'icon' => 'check-square',
         'enabled' => env('MODULE_WORKSHOP_LABS_USER', true),
+    ],
+
+    'directory_sync_admin' => [
+        'name' => 'Directory Sync Administration',
+        'description' => 'CSV directory import for automated user provisioning and manager hierarchy sync.',
+        'icon' => 'upload-cloud',
+        'enabled' => env('MODULE_DIRECTORY_SYNC_ADMIN', true),
     ],
 
 ];

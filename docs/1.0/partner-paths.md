@@ -1,5 +1,8 @@
 # Partner Paths
 
+> [!NOTE]
+> Configuration: CoE, Administrator. Viewing and enrollment: PSM, Manager, Administrator.
+
 Partner Paths are the backbone of Partner Manager's prescriptive approach. A path defines a structured maturity journey that a partner progresses through — from onboarding through to strategic partnership.
 
 ## How Paths Work

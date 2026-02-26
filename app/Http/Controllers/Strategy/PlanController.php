@@ -64,7 +64,7 @@ class PlanController extends Controller
             'childVersions',
         ]);
 
-        $coeUsers = User::whereIn('role', ['admin', 'coe'])->orderBy('name')->get();
+        $coeUsers = User::whereHas('role', fn ($q) => $q->whereIn('slug', ['admin', 'coe']))->orderBy('name')->get();
 
         return view('strategy.plans.show', compact('plan', 'coeUsers'));
     }

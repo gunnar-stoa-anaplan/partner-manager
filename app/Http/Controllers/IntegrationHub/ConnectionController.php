@@ -39,7 +39,7 @@ class ConnectionController extends Controller
         IntegrationConnection::create($data);
 
         return redirect()
-            ->route('integration-hub.connections.index')
+            ->route('integration_hub.connections.index')
             ->with('success', 'Connection created successfully.');
     }
 
@@ -66,7 +66,7 @@ class ConnectionController extends Controller
         $connection->update($data);
 
         return redirect()
-            ->route('integration-hub.connections.show', $connection)
+            ->route('integration_hub.connections.show', $connection)
             ->with('success', 'Connection updated.');
     }
 
@@ -75,7 +75,7 @@ class ConnectionController extends Controller
         $connection->delete();
 
         return redirect()
-            ->route('integration-hub.connections.index')
+            ->route('integration_hub.connections.index')
             ->with('success', 'Connection deleted.');
     }
 

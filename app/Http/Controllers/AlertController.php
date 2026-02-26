@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Partner;
 use App\Models\PartnerAlert;
+use App\Support\DatabasePortability;
 use Illuminate\Http\Request;
 
 class AlertController extends Controller
@@ -33,7 +34,7 @@ class AlertController extends Controller
             $query->where('partner_id', $request->partner_id);
         }
 
-        $alerts = $query->orderByRaw("FIELD(severity, 'critical', 'warning', 'info', 'positive')")
+        $alerts = $query->orderByRaw(DatabasePortability::orderByValues('severity', DatabasePortability::SEVERITY_ORDER))
             ->orderByDesc('created_at')
             ->paginate(25);
 

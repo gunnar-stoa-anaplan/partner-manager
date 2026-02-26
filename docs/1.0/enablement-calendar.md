@@ -1,5 +1,8 @@
 # Enablement Calendar
 
+> [!NOTE]
+> Available to: CoE, Administrator. Requires the `enablement_events_admin` feature flag.
+
 The Enablement Calendar provides a centralized view of all scheduled enablement activities — events, workshops, training sessions, and partner meetings.
 
 ## Calendar View

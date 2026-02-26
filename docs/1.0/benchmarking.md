@@ -1,5 +1,8 @@
 # Benchmarking
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator. Requires the `benchmark_user` or `benchmark_admin` feature flag to be active.
+
 Benchmarking allows you to compare a partner's performance against anonymized peer data. This helps identify where a partner excels and where they lag behind similar organizations.
 
 ## How It Works

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Partner;
 use App\Models\PartnerTask;
 use App\Models\TaskComment;
+use App\Support\DatabasePortability;
 use Illuminate\Http\Request;
 
 class TaskBoardController extends Controller
@@ -32,7 +33,7 @@ class TaskBoardController extends Controller
             $query->where('requirement_level', $request->requirement_level);
         }
 
-        $tasks = $query->orderByRaw("FIELD(priority, 'critical', 'high', 'medium', 'low')")
+        $tasks = $query->orderByRaw(DatabasePortability::orderByValues('priority', DatabasePortability::PRIORITY_ORDER))
             ->orderBy('due_date')
             ->get();
 

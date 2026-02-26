@@ -1,5 +1,8 @@
 # Provisioning
 
+> [!NOTE]
+> Available to: CoE, Administrator. Requires the `provisioning_admin` feature flag.
+
 The Provisioning section manages Anaplan workspace assignments for partners — connecting partners to the Anaplan environments they need for planning and analytics.
 
 ## Anaplan Integration

@@ -4,7 +4,7 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'Field Mappings',
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
     ])
 @endsection
 
@@ -22,11 +22,11 @@
             <div class="card shadow-0 mb-g">
                 <div class="card-header d-flex align-items-center">
                     <div class="card-title flex-grow-1">All Field Mappings</div>
-                    <a href="{{ route('integration-hub.templates.index') }}" class="btn btn-outline-info btn-sm me-1">
+                    <a href="{{ route('integration_hub.templates.index') }}" class="btn btn-outline-info btn-sm me-1">
                         <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#copy"></use></svg>
                         Browse Templates
                     </a>
-                    <a href="{{ route('integration-hub.mappings.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('integration_hub.mappings.create') }}" class="btn btn-primary btn-sm">
                         <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#plus"></use></svg>
                         New Mapping
                     </a>
@@ -35,11 +35,11 @@
                     @if($mappings->isEmpty())
                         <div class="p-4 text-center text-muted">
                             <p>No field mappings configured yet.</p>
-                            <a href="{{ route('integration-hub.templates.index') }}" class="btn btn-primary btn-sm me-1">
+                            <a href="{{ route('integration_hub.templates.index') }}" class="btn btn-primary btn-sm me-1">
                                 <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#copy"></use></svg>
                                 Apply a Template
                             </a>
-                            <a href="{{ route('integration-hub.mappings.create') }}" class="btn btn-outline-secondary btn-sm">Create Manually</a>
+                            <a href="{{ route('integration_hub.mappings.create') }}" class="btn btn-outline-secondary btn-sm">Create Manually</a>
                         </div>
                     @else
                         @foreach($connections as $connection)
@@ -47,7 +47,7 @@
                             <div class="px-3 pt-3">
                                 <h6 class="d-flex align-items-center gap-2">
                                     <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#link-2"></use></svg>
-                                    <a href="{{ route('integration-hub.connections.show', $connection) }}">{{ $connection->name }}</a>
+                                    <a href="{{ route('integration_hub.connections.show', $connection) }}">{{ $connection->name }}</a>
                                     <span class="badge bg-secondary">{{ ucfirst(str_replace('_', ' ', $connection->type)) }}</span>
                                 </h6>
                             </div>
@@ -82,10 +82,10 @@
                                                     @endif
                                                 </td>
                                                 <td class="text-center text-nowrap">
-                                                    <a href="{{ route('integration-hub.mappings.edit', $mapping) }}" class="btn btn-outline-info btn-sm">
+                                                    <a href="{{ route('integration_hub.mappings.edit', $mapping) }}" class="btn btn-outline-info btn-sm">
                                                         <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#edit"></use></svg>
                                                     </a>
-                                                    <form method="POST" action="{{ route('integration-hub.mappings.destroy', $mapping) }}" class="d-inline" onsubmit="return confirm('Delete this mapping?')">
+                                                    <form method="POST" action="{{ route('integration_hub.mappings.destroy', $mapping) }}" class="d-inline" onsubmit="return confirm('Delete this mapping?')">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button class="btn btn-outline-danger btn-sm">

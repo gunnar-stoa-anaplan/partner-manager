@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ActionPlan;
 use App\Models\ActionPlanItem;
 use App\Models\Partner;
+use App\Support\DatabasePortability;
 use Illuminate\Http\Request;
 
 class ActionPlanController extends Controller
@@ -29,8 +30,8 @@ class ActionPlanController extends Controller
             $query->where('priority', $request->priority);
         }
 
-        $plans = $query->orderByRaw("FIELD(status, 'overdue', 'in_progress', 'open', 'completed', 'cancelled')")
-            ->orderByRaw("FIELD(priority, 'critical', 'high', 'medium', 'low')")
+        $plans = $query->orderByRaw(DatabasePortability::orderByValues('status', DatabasePortability::ACTION_STATUS_ORDER))
+            ->orderByRaw(DatabasePortability::orderByValues('priority', DatabasePortability::PRIORITY_ORDER))
             ->get();
 
         $partners = $user->isAdmin()

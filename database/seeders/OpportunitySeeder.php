@@ -15,7 +15,7 @@ class OpportunitySeeder extends Seeder
         $this->command->info('Creating opportunities...');
 
         $partners = Partner::all();
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first();
 
         // Create a dummy import record for seeded data
         $import = Import::create([

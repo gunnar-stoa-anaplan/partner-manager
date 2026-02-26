@@ -8,7 +8,7 @@ The client provisions and manages their own infrastructure. Partner Manager runs
 
 **How it works:**
 
-- Client provides compute (VM or bare metal), a MySQL database, and outbound HTTPS access
+- Client provides compute (VM or bare metal), a [supported database](database-support), and outbound HTTPS access
 - We provide the Docker images, configuration, and TLS certificates
 - The PM Agent sidecar handles automatic updates, health monitoring, and license validation
 - The control plane monitors all instances remotely via the agent heartbeat
@@ -26,7 +26,7 @@ The client provisions and manages their own infrastructure. Partner Manager runs
 | License management | — | Yes |
 | Support | — | Yes |
 
-**Pricing:** License fee only. See [Licensing](licensing.md) for tiers and rates.
+**Pricing:** License fee only. See [Licensing](licensing) for tiers and rates.
 
 | Tier | Monthly | Annual |
 |------|--------:|-------:|
@@ -49,6 +49,42 @@ We provision and operate the infrastructure on behalf of the client. The applica
 - Infrastructure is fully managed — patching, backups, scaling, and monitoring
 - The client accesses Partner Manager through a dedicated URL
 - Same agent-based management, same control plane visibility
+
+### Isolation & Access Boundaries
+
+Although we provision and maintain the infrastructure, **only the client has access to what runs inside their containers**. Each managed deployment consists of three dedicated containers — the application, the sidecar agent, and the database — and these containers are fully isolated from every other client and from our own operations staff.
+
+**What the client controls:**
+
+| Resource | Client Access |
+|----------|--------------|
+| Application data | Full access — all partner, user, and configuration data lives exclusively in the client's database container |
+| Database | Only the client's application container can connect — credentials are generated at provisioning time and are never stored or accessible outside the client's environment |
+| Application key (`APP_KEY`) | Generated inside the client's container at provisioning — used to encrypt session data and sensitive fields, never transmitted or stored externally |
+| User credentials | Managed entirely within the client's application — passwords, API tokens, and session data never leave the container |
+| File uploads & storage | Stored in the client's application container volume — not accessible to any other container or client |
+
+**What we (the hosting provider) can access:**
+
+| Resource | Our Access | Purpose |
+|----------|-----------|---------|
+| Container health status | Running, stopped, or crashed | Restart unhealthy containers, maintain uptime SLA |
+| Resource utilization | CPU, memory, and disk usage metrics | Capacity planning and scaling |
+| Agent heartbeat data | Instance ID, application version, container state | Fleet dashboard monitoring and update orchestration |
+| Container image versions | Which version of the application and agent images are running | Coordinate version deployments |
+| Network routing | Inbound traffic routing to the client's container | TLS termination and DNS management |
+| Backup snapshots | Encrypted, opaque database snapshots | Disaster recovery (we cannot read the contents) |
+
+**What we cannot access:**
+
+- The client's database contents — we have no credentials and no network path into the database container
+- Application data, partner records, user information, or any business data
+- The application encryption key (`APP_KEY`) or any user passwords
+- File uploads, session data, or API tokens
+- The application's internal configuration or environment variables
+
+> [!NOTE]
+> Database backups are performed at the storage layer using encrypted snapshots. The snapshots are opaque to our operations team — they can restore a snapshot to the client's container in a disaster recovery scenario, but they cannot mount, read, or query the contents independently.
 
 **Responsibilities:**
 
@@ -82,6 +118,7 @@ Annual pricing includes the same ~17% discount on the license portion. Infrastru
 | | Self-Hosted | Managed Service |
 |---|:-----------:|:---------------:|
 | **Data location** | Client-controlled | Our cloud (region selectable) |
+| **Data access** | Client-only | Client-only (we cannot access container contents) |
 | **Setup time** | 1-2 days (with client infra ready) | Same day |
 | **Operational burden** | Client manages compute & DB | Fully managed |
 | **Pricing** | License only | License + infrastructure fee |
@@ -98,6 +135,6 @@ Both options include the same application features, the same agent-based managem
 
 ## Further Reading
 
-- [Deployment](deployment.md) — Step-by-step self-hosted deployment guide
-- [Architecture](architecture.md) — System architecture and component overview
-- [Licensing](licensing.md) — License types, pricing, and billing options
+- [Deployment](deployment) — Step-by-step self-hosted deployment guide
+- [Architecture](architecture) — System architecture and component overview
+- [Licensing](licensing) — License types, pricing, and billing options

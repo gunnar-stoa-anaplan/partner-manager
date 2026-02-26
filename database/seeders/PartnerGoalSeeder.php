@@ -15,7 +15,7 @@ class PartnerGoalSeeder extends Seeder
         $this->command->info('Creating partner goals and dimensions...');
 
         $partners = Partner::all();
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first();
         $goalCount = 0;
         $dimCount = 0;
 
@@ -25,7 +25,9 @@ class PartnerGoalSeeder extends Seeder
         foreach ($partners as $partner) {
             foreach ($fiscalYears as $fy) {
                 // Skip FY28 for ~40% of partners (not all have next year targets yet)
-                if ($fy === 2028 && fake()->boolean(40)) continue;
+                if ($fy === 2028 && fake()->boolean(40)) {
+                    continue;
+                }
 
                 $sourcedTarget = fake()->randomFloat(2, 200000, 3000000);
                 $influencedTarget = fake()->randomFloat(2, 500000, 8000000);

@@ -1,5 +1,8 @@
 # Action Plans
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator
+
 Action Plans provide a structured way to define and track strategic initiatives for a partner. Unlike individual tasks, an action plan groups related items into a cohesive development plan.
 
 ## Creating an Action Plan

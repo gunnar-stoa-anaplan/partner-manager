@@ -331,7 +331,7 @@ class BlueprintController extends Controller
         $template = NotificationTemplate::where('event_type', 'blueprint_submitted')->first();
 
         if ($template) {
-            $admins = User::where('role', 'admin')->get();
+            $admins = User::whereRelation('role', 'slug', 'admin')->get();
             foreach ($admins as $admin) {
                 $template->render([
                     'blueprint_name' => $blueprint->name,

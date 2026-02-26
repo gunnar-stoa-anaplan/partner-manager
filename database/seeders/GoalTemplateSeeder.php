@@ -12,7 +12,7 @@ class GoalTemplateSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first();
         if (! $admin) {
             $this->command->warn('No admin user found. Skipping GoalTemplateSeeder.');
 

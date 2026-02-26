@@ -28,11 +28,13 @@ class EnablementFeatureTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
         Feature::for(null)->activate('enablement_admin');
         Feature::for(null)->activate('enablement_user');
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->psm = User::factory()->create(['role' => 'psm']);
+        $this->admin = User::factory()->admin()->create();
+        $this->psm = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $this->psm->id]);
     }
 
@@ -819,7 +821,7 @@ class EnablementFeatureTest extends TestCase
 
     public function test_psm_cannot_register_other_psm_partner(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         $event = EnablementEvent::factory()->create([
@@ -920,7 +922,7 @@ class EnablementFeatureTest extends TestCase
 
     public function test_psm_cannot_unregister_other_psm_partner(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         $session = EnablementSession::factory()->create(['created_by' => $this->admin->id]);
@@ -1046,7 +1048,7 @@ class EnablementFeatureTest extends TestCase
 
     public function test_psm_cannot_nominate_other_partner_contacts(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         $event = EnablementEvent::factory()->create([
@@ -1094,7 +1096,7 @@ class EnablementFeatureTest extends TestCase
 
     public function test_psm_cannot_remove_other_psm_nomination(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
         $contact = Contact::factory()->create(['partner_id' => $otherPartner->id]);
 
@@ -1150,7 +1152,7 @@ class EnablementFeatureTest extends TestCase
         $this->createNomination();
 
         // Other PSM's nomination
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
         $otherContact = Contact::factory()->create(['partner_id' => $otherPartner->id]);
         $session = EnablementSession::factory()->create(['created_by' => $this->admin->id]);
@@ -1196,7 +1198,7 @@ class EnablementFeatureTest extends TestCase
 
     public function test_psm_cannot_view_other_partner_sessions(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         $response = $this->actingAs($this->psm)->getJson(route('api.enablement.partner-sessions', [
@@ -1241,7 +1243,7 @@ class EnablementFeatureTest extends TestCase
 
     public function test_psm_cannot_view_other_psm_partner_enablement_tab(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         $response = $this->actingAs($this->psm)->get(route('partners.tab', [
@@ -1281,7 +1283,7 @@ class EnablementFeatureTest extends TestCase
 
     public function test_psm_cannot_view_other_partner_enablement_page(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         $response = $this->actingAs($this->psm)->get(route('partners.enablement', $otherPartner->id));
@@ -1291,7 +1293,7 @@ class EnablementFeatureTest extends TestCase
 
     public function test_admin_can_view_any_partner_enablement_page(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         $response = $this->actingAs($this->admin)->get(route('partners.enablement', $otherPartner->id));

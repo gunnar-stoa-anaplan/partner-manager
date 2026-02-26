@@ -3,6 +3,7 @@
 namespace App\Mcp\Tools;
 
 use App\Models\Signal;
+use App\Support\DatabasePortability;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -37,7 +38,7 @@ class SignalFeedTool extends Tool
 
         $limit = min($request->get('limit') ?? 20, 50);
 
-        $signals = $query->orderByRaw("FIELD(severity, 'critical', 'warning', 'info', 'positive')")
+        $signals = $query->orderByRaw(DatabasePortability::orderByValues('severity', DatabasePortability::SEVERITY_ORDER))
             ->orderByDesc('confidence_score')
             ->limit($limit)
             ->get();

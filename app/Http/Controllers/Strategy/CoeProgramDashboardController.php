@@ -78,7 +78,7 @@ class CoeProgramDashboardController extends Controller
         ];
 
         // ── Section 3: PSM Utilization ──
-        $psmUtilization = User::where('role', 'psm')
+        $psmUtilization = User::whereRelation('role', 'slug', 'psm')
             ->withCount('partners')
             ->orderByDesc('partners_count')
             ->get();
@@ -87,8 +87,9 @@ class CoeProgramDashboardController extends Controller
 
         $pipelinePerPsm = DB::table('partners')
             ->join('users', 'partners.user_id', '=', 'users.id')
+            ->join('roles', 'users.role_id', '=', 'roles.id')
             ->join('opportunities', 'opportunities.partner_id', '=', 'partners.id')
-            ->where('users.role', 'psm')
+            ->where('roles.slug', 'psm')
             ->select('users.name', DB::raw('SUM(opportunities.amount) as total_pipeline'), DB::raw('COUNT(opportunities.id) as opp_count'))
             ->groupBy('users.id', 'users.name')
             ->orderByDesc('total_pipeline')

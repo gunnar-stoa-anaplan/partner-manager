@@ -20,11 +20,13 @@ class WorkshopGuideAdminTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
         $this->withoutVite();
         Storage::fake('local');
         Feature::for(null)->activate('enablement_admin');
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->admin = User::factory()->admin()->create();
     }
 
     public function test_admin_index_lists_guides(): void
@@ -188,7 +190,7 @@ class WorkshopGuideAdminTest extends TestCase
 
     public function test_non_admin_cannot_access_admin_routes(): void
     {
-        $psm = User::factory()->create(['role' => 'psm']);
+        $psm = User::factory()->psm()->create();
         $guide = WorkshopGuide::factory()->create(['created_by' => $this->admin->id]);
 
         $response = $this->actingAs($psm)->get(route('admin.workshop-guides.index'));

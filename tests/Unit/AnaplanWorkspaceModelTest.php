@@ -395,7 +395,7 @@ class AnaplanWorkspaceModelTest extends TestCase
 
     public function test_link_to_partners_matches_by_name(): void
     {
-        $psm = User::factory()->create(['role' => 'psm']);
+        $psm = User::factory()->psm()->create();
         $partner = Partner::factory()->create(['name' => 'Accenture', 'user_id' => $psm->id]);
 
         AnaplanWorkspace::factory()->unassigned()->create([
@@ -413,7 +413,7 @@ class AnaplanWorkspaceModelTest extends TestCase
 
     public function test_link_to_partners_skips_already_assigned(): void
     {
-        $psm = User::factory()->create(['role' => 'psm']);
+        $psm = User::factory()->psm()->create();
         $partner = Partner::factory()->create(['name' => 'Deloitte', 'user_id' => $psm->id]);
 
         AnaplanWorkspace::factory()->create([

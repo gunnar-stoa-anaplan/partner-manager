@@ -4,7 +4,7 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'Connections',
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
     ])
 @endsection
 
@@ -22,11 +22,11 @@
             <div class="card shadow-0 mb-g">
                 <div class="card-header d-flex align-items-center">
                     <div class="card-title flex-grow-1">All Connections</div>
-                    <a href="{{ route('integration-hub.connectors.catalog') }}" class="btn btn-outline-info btn-sm me-1">
+                    <a href="{{ route('integration_hub.connectors.catalog') }}" class="btn btn-outline-info btn-sm me-1">
                         <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#package"></use></svg>
                         Browse Connectors
                     </a>
-                    <a href="{{ route('integration-hub.connections.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('integration_hub.connections.create') }}" class="btn btn-primary btn-sm">
                         <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#plus"></use></svg>
                         New Connection
                     </a>
@@ -35,11 +35,11 @@
                     @if($connections->isEmpty())
                         <div class="p-4 text-center text-muted">
                             <p>No connections have been configured yet.</p>
-                            <a href="{{ route('integration-hub.connectors.catalog') }}" class="btn btn-primary btn-sm me-1">
+                            <a href="{{ route('integration_hub.connectors.catalog') }}" class="btn btn-primary btn-sm me-1">
                                 <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#package"></use></svg>
                                 Browse Connectors
                             </a>
-                            <a href="{{ route('integration-hub.connections.create') }}" class="btn btn-outline-info btn-sm">Create Manually</a>
+                            <a href="{{ route('integration_hub.connections.create') }}" class="btn btn-outline-info btn-sm">Create Manually</a>
                         </div>
                     @else
                         <div class="table-responsive">
@@ -61,7 +61,7 @@
                                     @foreach($connections as $connection)
                                         <tr>
                                             <td class="fw-bold">
-                                                <a href="{{ route('integration-hub.connections.show', $connection) }}">{{ $connection->name }}</a>
+                                                <a href="{{ route('integration_hub.connections.show', $connection) }}">{{ $connection->name }}</a>
                                             </td>
                                             <td><span class="badge bg-secondary">{{ ucfirst(str_replace('_', ' ', $connection->type)) }}</span></td>
                                             <td>{{ ucfirst($connection->direction) }}</td>
@@ -79,13 +79,13 @@
                                             <td class="text-nowrap">{{ $connection->last_tested_at?->diffForHumans() ?? '—' }}</td>
                                             <td class="text-nowrap">{{ $connection->last_sync_at?->diffForHumans() ?? '—' }}</td>
                                             <td class="text-center text-nowrap">
-                                                <button class="btn btn-outline-info btn-sm btn-test-connection" data-id="{{ $connection->id }}" data-url="{{ route('integration-hub.connections.test', $connection) }}">
+                                                <button class="btn btn-outline-info btn-sm btn-test-connection" data-id="{{ $connection->id }}" data-url="{{ route('integration_hub.connections.test', $connection) }}">
                                                     <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#zap"></use></svg>
                                                 </button>
-                                                <a href="{{ route('integration-hub.connections.edit', $connection) }}" class="btn btn-outline-info btn-sm">
+                                                <a href="{{ route('integration_hub.connections.edit', $connection) }}" class="btn btn-outline-info btn-sm">
                                                     <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#edit"></use></svg>
                                                 </a>
-                                                <form method="POST" action="{{ route('integration-hub.connections.destroy', $connection) }}" class="d-inline" onsubmit="return confirm('Delete this connection and all its mappings?')">
+                                                <form method="POST" action="{{ route('integration_hub.connections.destroy', $connection) }}" class="d-inline" onsubmit="return confirm('Delete this connection and all its mappings?')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="btn btn-outline-danger btn-sm">

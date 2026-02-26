@@ -16,7 +16,7 @@ class QbrSessionSeeder extends Seeder
 
         $partners = Partner::all();
         $users = User::all();
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first();
         $sessionCount = 0;
         $sectionCount = 0;
 

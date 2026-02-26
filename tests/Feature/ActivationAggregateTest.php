@@ -23,7 +23,7 @@ class ActivationAggregateTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->admin = User::factory()->admin()->create();
     }
 
     // ─── Aggregate Structure ───────────────────────────────────

@@ -21,9 +21,11 @@ class FeatureActivationAccessTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->coe = User::factory()->create(['role' => 'coe']);
-        $this->psm = User::factory()->create(['role' => 'psm']);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->admin = User::factory()->admin()->create();
+        $this->coe = User::factory()->coe()->create();
+        $this->psm = User::factory()->psm()->create();
     }
 
     public function test_admin_can_access_feature_flags(): void

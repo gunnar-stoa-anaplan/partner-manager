@@ -16,7 +16,7 @@ class PartnerSolutionSeeder extends Seeder
 
         $partners = Partner::all();
         $users = User::all();
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first();
         $solutionCount = 0;
         $historyCount = 0;
 
@@ -54,15 +54,15 @@ class PartnerSolutionSeeder extends Seeder
 
                 $solution = PartnerSolution::create([
                     'partner_id' => $partner->id,
-                    'name' => $name . ' — ' . $partner->name,
+                    'name' => $name.' — '.$partner->name,
                     'description' => fake()->paragraph(2),
                     'product_area' => $productArea,
                     'industry_focus' => fake()->randomElement($industries),
                     'lifecycle_stage' => $currentStage,
                     'stage_entered_at' => $stageEnteredAt,
                     'status' => fake()->randomElement(['active', 'active', 'active', 'paused']),
-                    'demo_url' => fake()->boolean(40) ? 'https://demo.example.com/' . fake()->slug(3) : null,
-                    'documentation_url' => fake()->boolean(50) ? 'https://docs.example.com/' . fake()->slug(3) : null,
+                    'demo_url' => fake()->boolean(40) ? 'https://demo.example.com/'.fake()->slug(3) : null,
+                    'documentation_url' => fake()->boolean(50) ? 'https://docs.example.com/'.fake()->slug(3) : null,
                     'estimated_acv' => fake()->randomFloat(2, 50000, 500000),
                     'deployment_duration_weeks' => fake()->numberBetween(4, 20),
                     'created_by' => $psm->id,

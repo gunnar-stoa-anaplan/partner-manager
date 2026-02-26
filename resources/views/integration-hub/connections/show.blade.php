@@ -4,9 +4,9 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> $connection->name,
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
         'pageSubTitle2' => 'Connections',
-        'pageSubTitle2Url' => route('integration-hub.connections.index'),
+        'pageSubTitle2Url' => route('integration_hub.connections.index'),
     ])
 @endsection
 
@@ -25,7 +25,7 @@
             <div class="card shadow-0 mb-g">
                 <div class="card-header d-flex align-items-center">
                     <div class="card-title flex-grow-1">Details</div>
-                    <a href="{{ route('integration-hub.connections.edit', $connection) }}" class="btn btn-outline-info btn-sm">
+                    <a href="{{ route('integration_hub.connections.edit', $connection) }}" class="btn btn-outline-info btn-sm">
                         <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#edit"></use></svg>
                         Edit
                     </a>
@@ -60,7 +60,7 @@
                     </dl>
 
                     <hr>
-                    <button class="btn btn-outline-info btn-sm w-100 btn-test-connection" data-url="{{ route('integration-hub.connections.test', $connection) }}">
+                    <button class="btn btn-outline-info btn-sm w-100 btn-test-connection" data-url="{{ route('integration_hub.connections.test', $connection) }}">
                         <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#zap"></use></svg>
                         Test Connection
                     </button>
@@ -72,11 +72,11 @@
             <div class="card shadow-0 mb-g">
                 <div class="card-header d-flex align-items-center">
                     <div class="card-title flex-grow-1">Field Mappings</div>
-                    <a href="{{ route('integration-hub.templates.index') }}" class="btn btn-outline-info btn-sm me-1">
+                    <a href="{{ route('integration_hub.templates.index') }}" class="btn btn-outline-info btn-sm me-1">
                         <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#copy"></use></svg>
                         Templates
                     </a>
-                    <a href="{{ route('integration-hub.mappings.create', ['connection_id' => $connection->id]) }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('integration_hub.mappings.create', ['connection_id' => $connection->id]) }}" class="btn btn-primary btn-sm">
                         <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#plus"></use></svg>
                         Add
                     </a>
@@ -85,7 +85,7 @@
                     @if($connection->mappings->isEmpty())
                         <div class="p-3 text-center text-muted small">
                             No field mappings configured.
-                            <a href="{{ route('integration-hub.templates.index') }}" class="d-block mt-1">Apply a template</a>
+                            <a href="{{ route('integration_hub.templates.index') }}" class="d-block mt-1">Apply a template</a>
                         </div>
                     @else
                         <div class="table-responsive">
@@ -118,7 +118,7 @@
             <div class="card shadow-0 mb-g">
                 <div class="card-header d-flex align-items-center">
                     <div class="card-title flex-grow-1">Job History</div>
-                    <form method="POST" action="{{ route('integration-hub.jobs.store') }}" class="d-inline">
+                    <form method="POST" action="{{ route('integration_hub.jobs.store') }}" class="d-inline">
                         @csrf
                         <input type="hidden" name="connection_id" value="{{ $connection->id }}">
                         <input type="hidden" name="direction" value="import">
@@ -127,7 +127,7 @@
                             Run Import
                         </button>
                     </form>
-                    <form method="POST" action="{{ route('integration-hub.jobs.store') }}" class="d-inline">
+                    <form method="POST" action="{{ route('integration_hub.jobs.store') }}" class="d-inline">
                         @csrf
                         <input type="hidden" name="connection_id" value="{{ $connection->id }}">
                         <input type="hidden" name="direction" value="export">
@@ -157,7 +157,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach($connection->jobs as $job)
-                                        <tr class="cursor-pointer" onclick="window.location='{{ route('integration-hub.jobs.show', $job) }}'">
+                                        <tr class="cursor-pointer" onclick="window.location='{{ route('integration_hub.jobs.show', $job) }}'">
                                             <td>{{ $job->id }}</td>
                                             <td>{{ ucfirst($job->direction) }}</td>
                                             <td>

@@ -4,9 +4,9 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'Review: ' . $template->name,
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
         'pageSubTitle2' => 'Templates',
-        'pageSubTitle2Url' => route('integration-hub.templates.index'),
+        'pageSubTitle2Url' => route('integration_hub.templates.index'),
     ])
 @endsection
 
@@ -55,7 +55,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('integration-hub.templates.apply', $template) }}">
+    <form method="POST" action="{{ route('integration_hub.templates.apply', $template) }}">
         @csrf
         <input type="hidden" name="connection_id" value="{{ $connection->id }}">
 
@@ -180,7 +180,7 @@
         @enderror
 
         <div class="d-flex justify-content-between">
-            <a href="{{ route('integration-hub.templates.index') }}" class="btn btn-light">
+            <a href="{{ route('integration_hub.templates.index') }}" class="btn btn-light">
                 <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#arrow-left"></use></svg>
                 Back to Templates
             </a>

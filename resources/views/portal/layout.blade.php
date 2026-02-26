@@ -125,7 +125,7 @@
                     </li>
                 </ul>
                 <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ \App\Models\Contact::PORTAL_ROLES[$portalUser->portal_role] ?? $portalUser->portal_role }}</span>
+                    <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ $portalUser->role?->display_name ?? '' }}</span>
                     <span class="text-white-50" style="font-size: 0.875rem;">{{ $portalUser->full_name }}</span>
                     @if(session('impersonating_portal'))
                         <form action="{{ route('portal.impersonate.stop') }}" method="POST" class="d-inline">

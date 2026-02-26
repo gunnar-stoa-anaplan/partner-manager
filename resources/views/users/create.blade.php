@@ -41,14 +41,25 @@
                         <label class="form-label" for="role">Role <span class="text-danger">*</span></label>
                         <select class="form-select" id="role" name="role" required>
                             <option value="">Select Role</option>
-                            <option value="super_admin" {{ old('role') === 'super_admin' ? 'selected' : '' }}>Super Admin - Unrestricted access</option>
-                            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin - Full system access</option>
-                            <option value="psm" {{ old('role') === 'psm' ? 'selected' : '' }}>PSM - Partner Success Manager</option>
-                            <option value="manager" {{ old('role') === 'manager' ? 'selected' : '' }}>Manager - Team oversight</option>
-                            <option value="coe" {{ old('role') === 'coe' ? 'selected' : '' }}>CoE - Center of Excellence</option>
-                            <option value="integration" {{ old('role') === 'integration' ? 'selected' : '' }}>Integration - Integration Hub access</option>
+                            @foreach($roles as $role)
+                                <option value="{{ $role->slug }}" {{ old('role') === $role->slug ? 'selected' : '' }}>
+                                    {{ $role->display_name }}{{ $role->description ? ' - ' . $role->description : '' }}
+                                </option>
+                            @endforeach
                         </select>
-                        <div class="form-text">PSMs can be assigned to manage partners</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="manager_id">Reports To</label>
+                        <select class="form-select" id="manager_id" name="manager_id">
+                            <option value="">-- None --</option>
+                            @foreach($managers as $manager)
+                                <option value="{{ $manager->id }}" {{ old('manager_id') == $manager->id ? 'selected' : '' }}>
+                                    {{ $manager->name }} ({{ $manager->role?->display_name ?? 'Unknown' }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">Assign this user's direct manager in the reporting hierarchy</div>
                     </div>
 
                     <div class="mb-3">

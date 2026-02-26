@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Contact;
 use App\Models\Partner;
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -53,7 +54,7 @@ class ContactFactory extends Factory
         ];
 
         return [
-            'partner_id' => Partner::inRandomOrder()->first()->id,
+            'partner_id' => Partner::factory(),
             'first_name' => $this->faker->firstName,
             'last_name' => $this->faker->lastName,
             'email' => $this->faker->unique()->safeEmail,
@@ -89,40 +90,34 @@ class ContactFactory extends Factory
         });
     }
 
-    public function portalAdmin(): static
+    /**
+     * Assign a portal role by slug (creates the role if it doesn't exist).
+     */
+    public function portalRole(string $slug): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn () => [
             'portal_access' => true,
-            'portal_role' => 'partner_admin',
+            'portal_role_id' => Role::firstOrCreate(
+                ['slug' => $slug, 'type' => 'portal'],
+                ['display_name' => ucwords(str_replace('_', ' ', $slug))]
+            )->id,
             'password' => 'password',
         ]);
+    }
+
+    public function portalAdmin(): static
+    {
+        return $this->portalRole('partner_admin');
     }
 
     public function portalSales(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'portal_access' => true,
-            'portal_role' => 'sales',
-            'password' => 'password',
-        ]);
+        return $this->portalRole('sales');
     }
 
     public function portalDelivery(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'portal_access' => true,
-            'portal_role' => 'delivery_lead',
-            'password' => 'password',
-        ]);
-    }
-
-    public function portalRole(string $role): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'portal_access' => true,
-            'portal_role' => $role,
-            'password' => 'password',
-        ]);
+        return $this->portalRole('delivery_lead');
     }
 
     public static function partnerDomain(string $partnerName): string

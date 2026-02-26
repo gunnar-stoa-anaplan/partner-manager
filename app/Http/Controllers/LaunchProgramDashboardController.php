@@ -9,6 +9,7 @@ use App\Models\LaunchProgramMilestone;
 use App\Models\LaunchProgramMilestoneCompletion;
 use App\Models\LaunchProgramPartner;
 use App\Models\Product;
+use App\Support\DatabasePortability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -144,7 +145,7 @@ class LaunchProgramDashboardController extends Controller
                 $q->whereHas('participant.programPartner', fn ($q2) => $q2->whereIn('launch_program_id', (clone $baseQuery)->select('id')));
             })
             ->select(
-                DB::raw("DATE_FORMAT(completed_at, '%Y-%m') as month"),
+                DB::raw(DatabasePortability::dateFormat('completed_at', '%Y-%m').' as month'),
                 DB::raw('count(*) as total')
             )
             ->groupBy('month')

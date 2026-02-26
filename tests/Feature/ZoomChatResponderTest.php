@@ -20,7 +20,7 @@ class ZoomChatResponderTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->admin = User::factory()->admin()->create();
         Feature::for(null)->activate('zoom_chat_admin');
     }
 

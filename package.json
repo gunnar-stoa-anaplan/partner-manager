@@ -34,6 +34,7 @@
         "jsvectormap": "^1.7.0",
         "masonry-layout": "^4.2.2",
         "node-waves": "^0.7.6",
+        "p5": "^2.2.2",
         "peity": "^3.3.0",
         "shepherd.js": "^15.2.1",
         "sortablejs": "^1.15.6",

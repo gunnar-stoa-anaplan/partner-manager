@@ -91,7 +91,7 @@
                         <select class="form-select" id="modal_user_id" name="user_id">
                             <option value="">-- Unassigned --</option>
                             @foreach($users as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }} ({{ ucfirst($user->role) }})</option>
+                                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->role?->display_name ?? 'Unknown' }})</option>
                             @endforeach
                         </select>
                     </div>

@@ -4,9 +4,9 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'New Field Mapping',
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
         'pageSubTitle2' => 'Field Mappings',
-        'pageSubTitle2Url' => route('integration-hub.mappings.index'),
+        'pageSubTitle2Url' => route('integration_hub.mappings.index'),
     ])
 @endsection
 
@@ -19,7 +19,7 @@
                     <div class="card-title">Mapping Details</div>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('integration-hub.mappings.store') }}">
+                    <form method="POST" action="{{ route('integration_hub.mappings.store') }}">
                         @csrf
 
                         <div class="mb-3">
@@ -102,7 +102,7 @@
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <a href="{{ route('integration-hub.mappings.index') }}" class="btn btn-light">Cancel</a>
+                            <a href="{{ route('integration_hub.mappings.index') }}" class="btn btn-light">Cancel</a>
                             <button type="submit" class="btn btn-primary">Create Mapping</button>
                         </div>
                     </form>

@@ -74,11 +74,11 @@
             <div class="card shadow-0 mb-g">
                 <div class="card-header d-flex align-items-center">
                     <div class="card-title flex-grow-1">Connections</div>
-                    <a href="{{ route('integration-hub.connectors.catalog') }}" class="btn btn-outline-info btn-sm me-1">
+                    <a href="{{ route('integration_hub.connectors.catalog') }}" class="btn btn-outline-info btn-sm me-1">
                         <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#package"></use></svg>
                         Connectors
                     </a>
-                    <a href="{{ route('integration-hub.connections.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('integration_hub.connections.create') }}" class="btn btn-primary btn-sm">
                         <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#plus"></use></svg>
                         New Connection
                     </a>
@@ -87,7 +87,7 @@
                     @if($connections->isEmpty())
                         <div class="p-4 text-center text-muted">
                             <p>No connections configured yet.</p>
-                            <a href="{{ route('integration-hub.connectors.catalog') }}" class="btn btn-primary btn-sm">
+                            <a href="{{ route('integration_hub.connectors.catalog') }}" class="btn btn-primary btn-sm">
                                 <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#package"></use></svg>
                                 Browse Connectors
                             </a>
@@ -106,7 +106,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach($connections as $connection)
-                                        <tr class="cursor-pointer" onclick="window.location='{{ route('integration-hub.connections.show', $connection) }}'">
+                                        <tr class="cursor-pointer" onclick="window.location='{{ route('integration_hub.connections.show', $connection) }}'">
                                             <td class="fw-bold">{{ $connection->name }}</td>
                                             <td>
                                                 <span class="badge bg-secondary">{{ ucfirst(str_replace('_', ' ', $connection->type)) }}</span>
@@ -137,7 +137,7 @@
             <div class="card shadow-0 mb-g">
                 <div class="card-header d-flex align-items-center">
                     <div class="card-title flex-grow-1">Recent Jobs</div>
-                    <a href="{{ route('integration-hub.jobs.index') }}" class="btn btn-outline-info btn-sm">View All</a>
+                    <a href="{{ route('integration_hub.jobs.index') }}" class="btn btn-outline-info btn-sm">View All</a>
                 </div>
                 <div class="card-body p-0">
                     @if($recentJobs->isEmpty())
@@ -158,7 +158,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach($recentJobs as $job)
-                                        <tr class="cursor-pointer" onclick="window.location='{{ route('integration-hub.jobs.show', $job) }}'">
+                                        <tr class="cursor-pointer" onclick="window.location='{{ route('integration_hub.jobs.show', $job) }}'">
                                             <td>{{ $job->connection->name ?? 'Deleted' }}</td>
                                             <td>
                                                 @if($job->direction === 'import')

@@ -6,6 +6,8 @@
     $focused = !empty($devFocus);
     $show = fn(string ...$features) => !$focused || in_array($devFocus, $features);
     $registry = app(\App\Services\ModuleRegistry::class);
+
+    $roleSlug = Auth::user()?->role?->slug;
 @endphp
 <ul id="js-nav-menu" class="nav-menu">
 
@@ -38,7 +40,7 @@
     @endauth
 
     @auth
-    @if(Auth::user()->role !== 'coe' && app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
+    @if(!in_array($roleSlug, ['coe', 'integration']) && app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
     <li class="nav-item">
         <a href="#" title="Idea Room" data-filter-tags>
             <svg class="sa-icon">
@@ -76,7 +78,7 @@
     </li>
     @endif
 
-    @if(Auth::user()->role !== 'coe')
+    @if(!in_array($roleSlug, ['coe', 'integration']))
     <li class="nav-item">
         <a href="#" title="Partners" data-filter-tags>
             <svg class="sa-icon">
@@ -98,7 +100,6 @@
             </li>
             @endif
             @if($show('analysis') && $registry->isAccessible('analytics'))
-            @if(!$focused || Auth::user()->isAdmin() || ($navSettings['nav_visible_analysis'] ?? '1') === '1')
             <li>
                 <a href="{{ route('custom-filters.index') }}">
                     <span class="nav-link-text">Custom Filters</span>
@@ -115,7 +116,6 @@
                 </a>
             </li>
             @endif
-            @endif
         </ul>
     </li>
     @endif
@@ -124,50 +124,7 @@
 
     {{-- Engage Section (temporarily removed) --}}
 
-    {{-- Key Metrics (Partner Profile) - only show when a partner is selected during focus mode --}}
-    @if(Auth::user()->role !== 'coe')
-    @if($focused ? session('selected_partner_id') : (Auth::user()->isAdmin() || session('selected_partner_id')))
-    @if(!$focused || ($navSettings['nav_visible_key_metrics'] ?? '1') === '1')
-    <li class="nav-item">
-        <a href="#" title="Key Metrics" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#activity"></use>
-            </svg>
-            <span class="nav-link-text">Key Metrics</span>
-            @if(!session('selected_partner_id'))
-            <span class="badge badge-warning fs-nano">select partner</span>
-            @endif
-        </a>
-        <ul>
-            <li>
-                <a href="{{ session('selected_partner_id') ? route('partners.show', session('selected_partner_id')) : '#' }}"@if(!session('selected_partner_id')) class="text-muted"@endif>
-                    <span class="nav-link-text">Partner Profile</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ session('selected_partner_id') ? route('partners.summary', session('selected_partner_id')) : '#' }}"@if(!session('selected_partner_id')) class="text-muted"@endif>
-                    <span class="nav-link-text">Summary</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ session('selected_partner_id') ? route('partners.insights', session('selected_partner_id')) : '#' }}"@if(!session('selected_partner_id')) class="text-muted"@endif>
-                    <span class="nav-link-text">Insights</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ session('selected_partner_id') ? route('partners.calendar', session('selected_partner_id')) : '#' }}"@if(!session('selected_partner_id')) class="text-muted"@endif>
-                    <span class="nav-link-text">Calendar</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ session('selected_partner_id') ? route('partners.blueprints', session('selected_partner_id')) : '#' }}"@if(!session('selected_partner_id')) class="text-muted"@endif>
-                    <span class="nav-link-text">Blueprints</span>
-                </a>
-            </li>
-        </ul>
-    </li>
-    @endif
-
+    @if(!in_array($roleSlug, ['coe', 'integration']))
     {{-- Business Development --}}
     @if($show('deal_registration') && $registry->isAccessible('deal_registration_user'))
     @if(!$focused || Auth::user()->isAdmin() || ($navSettings['nav_visible_business_dev'] ?? '1') === '1')
@@ -198,90 +155,8 @@
     </li>
     @endif
     @endif
-    @endif
-    @endif {{-- end coe exclusion for Key Metrics / Business Development --}}
 
-    {{-- Measure Section (temporarily removed) --}}
-
-    {{-- Act Section (temporarily removed) --}}
-
-    {{-- Partner Admin - Admin Only --}}
-    @if(Auth::user()->isAdmin())
-    @if($show('goals_scorecards', 'partner_paths', 'deal_registration', 'anaplan', 'blueprints', 'enablement_events', 'labs', 'launch_programs'))
-    <li class="nav-title"><span>Partner Administration</span></li>
-
-    @if($show('goals_scorecards') && $registry->isAccessible('goals_targets_admin'))
-    <li class="nav-item">
-        <a href="#" title="Goals" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#target"></use>
-            </svg>
-            <span class="nav-link-text">Goals</span>
-        </a>
-        <ul>
-            <li>
-                <a href="{{ route('partner-goals.index') }}">
-                    <span class="nav-link-text">Dashboard</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.goal-templates.index') }}">
-                    <span class="nav-link-text">Templates</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.scorecard-weights.index') }}">
-                    <span class="nav-link-text">Scorecards</span>
-                </a>
-            </li>
-        </ul>
-    </li>
-    @endif
-
-    @if($show('partner_paths'))
-    <li class="nav-item">
-        <a href="#" title="Partner Paths" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#map"></use>
-            </svg>
-            <span class="nav-link-text">Partner Paths</span>
-        </a>
-        <ul>
-            <li>
-                <a href="{{ route('plan.paths.index') }}">
-                    <span class="nav-link-text">Dashboard</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.paths.index') }}">
-                    <span class="nav-link-text">Path Configuration</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.task-templates.index') }}">
-                    <span class="nav-link-text">Task Templates</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('act.path-reviews.index') }}">
-                    <span class="nav-link-text">Path Reviews</span>
-                </a>
-            </li>
-        </ul>
-    </li>
-    @endif
-
-    @if($show('partner_paths', 'goals_scorecards'))
-    <li>
-        <a href="{{ route('partners.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#link"></use>
-            </svg>
-            <span class="nav-link-text">Partner Assignments</span>
-        </a>
-    </li>
-    @endif
-
+    {{-- Lead Assignment --}}
     @if($show('deal_registration') && $registry->isAccessible('deal_registration_admin'))
     <li class="nav-item">
         <a href="#" title="Lead Assignment" data-filter-tags>
@@ -310,120 +185,90 @@
     </li>
     @endif
 
-    @if($show('anaplan') && $registry->isAccessible('provisioning_admin'))
+    {{-- Deal Registration --}}
+    @if($show('deal_registration') && $registry->isAccessible('deal_registration_user'))
     <li class="nav-item">
-        <a href="#" title="Provisioning" data-filter-tags>
+        <a href="#" title="Deal Registration" data-filter-tags>
             <svg class="sa-icon">
-                <use href="/icons/sprite.svg#server"></use>
+                <use href="/icons/sprite.svg#file-text"></use>
             </svg>
-            <span class="nav-link-text">Provisioning</span>
+            <span class="nav-link-text">Deal Registration</span>
         </a>
         <ul>
             <li>
-                <a href="{{ route('admin.provisioning-summary') }}">
+                <a href="{{ route('engage.deal-registrations.dashboard') }}">
                     <span class="nav-link-text">Dashboard</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.provisioning-workspaces.index') }}">
-                    <span class="nav-link-text">Workspaces</span>
+                <a href="{{ route('engage.deal-registrations.index') }}">
+                    <span class="nav-link-text">Deal List</span>
                 </a>
             </li>
         </ul>
     </li>
     @endif
+    @endif {{-- end coe/integration exclusion for Business Development / Lead Assignment / Deal Registration --}}
 
-    @if($show('blueprints', 'enablement_events') && $registry->isAccessible('enablement_events_admin'))
-    <li class="nav-item">
-        <a href="#" title="Enablement" data-filter-tags>
+    {{-- Measure Section (temporarily removed) --}}
+
+    {{-- Act Section (temporarily removed) --}}
+
+    {{-- Team Management (admin, super_admin, coe, manager) --}}
+    @if(in_array($roleSlug, ['admin', 'super_admin', 'coe', 'manager']))
+    <li class="nav-title"><span>Team</span></li>
+
+    @if(in_array($roleSlug, ['admin', 'super_admin', 'coe']))
+    <li>
+        <a href="{{ route('users.index') }}">
             <svg class="sa-icon">
-                <use href="/icons/sprite.svg#layers"></use>
+                <use href="/icons/sprite.svg#users"></use>
             </svg>
-            <span class="nav-link-text">Enablement</span>
+            <span class="nav-link-text">Team Members</span>
         </a>
-        <ul>
-            <li>
-                <a href="{{ route('admin.enablement-dashboard') }}">
-                    <span class="nav-link-text">Dashboard</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ Auth::user()->isAdmin() ? route('blueprints.index') : route('blueprints.catalog') }}">
-                    <span class="nav-link-text">Blueprints</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('enablement-events.index') }}">
-                    <span class="nav-link-text">Enablement Events</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('enablement-calendar') }}">
-                    <span class="nav-link-text">Enablement Calendar</span>
-                </a>
-            </li>
-        </ul>
     </li>
     @endif
 
-    @if($show('labs') && $registry->isAccessible('workshop_labs_admin'))
-    <li class="nav-item">
-        <a href="#" title="Workshops" data-filter-tags>
+    <li>
+        <a href="{{ route('reporting-hierarchy.index') }}">
             <svg class="sa-icon">
-                <use href="/icons/sprite.svg#check-square"></use>
+                <use href="/icons/sprite.svg#git-merge"></use>
             </svg>
-            <span class="nav-link-text">Workshops</span>
+            <span class="nav-link-text">Reporting Hierarchy</span>
         </a>
-        <ul>
-            <li>
-                <a href="{{ route('labs.index') }}">
-                    <span class="nav-link-text">Dashboard</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('labs.index') }}">
-                    <span class="nav-link-text">Labs</span>
-                </a>
-            </li>
-        </ul>
     </li>
-    @endif
 
-    @if($show('launch_programs') && $registry->isAccessible('launch_programs_admin'))
-    <li class="nav-item">
-        <a href="#" title="Launch Programs" data-filter-tags>
+    <li>
+        <a href="{{ route('partners.index') }}">
             <svg class="sa-icon">
-                <use href="/icons/sprite.svg#zap"></use>
+                <use href="/icons/sprite.svg#link"></use>
             </svg>
-            <span class="nav-link-text">Launch Programs</span>
+            <span class="nav-link-text">Partner Assignments</span>
         </a>
-        <ul>
-            <li>
-                <a href="{{ route('admin.launch-programs.dashboard') }}">
-                    <span class="nav-link-text">Dashboard</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.launch-programs.index') }}">
-                    <span class="nav-link-text">Program Details</span>
-                </a>
-            </li>
-        </ul>
+    </li>
+
+    @if(in_array($roleSlug, ['admin', 'super_admin', 'coe']) && $registry->isAccessible('directory_sync_admin'))
+    <li>
+        <a href="{{ route('directory-sync.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#refresh-cw"></use>
+            </svg>
+            <span class="nav-link-text">Directory Sync</span>
+        </a>
     </li>
     @endif
     @endif
-    @endif {{-- end admin-only Partner Administration --}}
 
-    {{-- CoE Program Administration --}}
-    @if(Auth::user()->role === 'coe' || Auth::user()->role === 'super_admin')
-    <li class="nav-title"><span>Program Administration</span></li>
+    {{-- CoE Management --}}
+    @if($roleSlug === 'coe' || $roleSlug === 'super_admin')
+    <li class="nav-title"><span>CoE Management</span></li>
 
     <li>
         <a href="{{ route('program-dashboard') }}">
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#compass"></use>
             </svg>
-            <span class="nav-link-text">Program Dashboard</span>
+            <span class="nav-link-text">CoE Dashboard</span>
         </a>
     </li>
 
@@ -494,7 +339,7 @@
     </li>
     @endif
 
-    {{-- Goals for CoE users --}}
+    {{-- Goals --}}
     @if($show('goals_scorecards') && $registry->isAccessible('goals_targets_admin'))
     <li class="nav-item">
         <a href="#" title="Goals" data-filter-tags>
@@ -514,11 +359,143 @@
                     <span class="nav-link-text">Templates</span>
                 </a>
             </li>
+            <li>
+                <a href="{{ route('admin.scorecard-weights.index') }}">
+                    <span class="nav-link-text">Scorecards</span>
+                </a>
+            </li>
         </ul>
     </li>
     @endif
 
-    {{-- Launch Programs for CoE users --}}
+    {{-- Partner Assignments moved to Team section --}}
+
+    {{-- Lead Assignment Rules --}}
+    @if($show('deal_registration') && $registry->isAccessible('deal_registration_admin'))
+    <li class="nav-item">
+        <a href="#" title="Lead Assignment Rules" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#user-check"></use>
+            </svg>
+            <span class="nav-link-text">Lead Assignment Rules</span>
+        </a>
+        <ul>
+            <li>
+                <a href="#">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="nav-link-text">Assignment Rules</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    {{-- Provisioning --}}
+    @if($show('anaplan') && $registry->isAccessible('provisioning_admin'))
+    <li class="nav-item">
+        <a href="#" title="Provisioning" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#server"></use>
+            </svg>
+            <span class="nav-link-text">Provisioning</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('admin.provisioning-summary') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.provisioning-workspaces.index') }}">
+                    <span class="nav-link-text">Workspaces</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    {{-- Blueprints --}}
+    @if($show('blueprints') && $registry->isAccessible('enablement_events_admin'))
+    <li class="nav-item">
+        <a href="#" title="Blueprints" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#layers"></use>
+            </svg>
+            <span class="nav-link-text">Blueprints</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('admin.blueprint-dashboard') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('blueprints.index') }}">
+                    <span class="nav-link-text">Blueprints</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    {{-- Enablement --}}
+    @if($show('enablement_events') && $registry->isAccessible('enablement_events_admin'))
+    <li class="nav-item">
+        <a href="#" title="Enablement" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#award"></use>
+            </svg>
+            <span class="nav-link-text">Enablement</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('admin.enablement-dashboard') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('enablement-events.index') }}">
+                    <span class="nav-link-text">Enablement Events</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('enablement-calendar') }}">
+                    <span class="nav-link-text">Enablement Calendar</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    {{-- Workshops --}}
+    @if($show('labs') && $registry->isAccessible('workshop_labs_admin'))
+    <li class="nav-item">
+        <a href="#" title="Workshops" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#check-square"></use>
+            </svg>
+            <span class="nav-link-text">Workshops</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('labs.index') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('labs.index') }}">
+                    <span class="nav-link-text">Labs</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    {{-- Launch Programs --}}
     @if($show('launch_programs') && $registry->isAccessible('launch_programs_admin'))
     <li class="nav-item">
         <a href="#" title="Launch Programs" data-filter-tags>
@@ -542,7 +519,7 @@
     </li>
     @endif
 
-    {{-- Knowledge Base for CoE users --}}
+    {{-- Knowledge Base --}}
     @if($registry->isAccessible('knowledge_base_admin'))
     <li class="nav-item">
         <a href="#" title="Knowledge Base" data-filter-tags>
@@ -571,7 +548,7 @@
     </li>
     @endif
 
-    {{-- Branding for CoE users --}}
+    {{-- Branding --}}
     <li>
         <a href="{{ route('admin.branding') }}">
             <svg class="sa-icon">
@@ -581,31 +558,7 @@
         </a>
     </li>
 
-    {{-- Enablement Blueprints for CoE users --}}
-    @if($registry->isAccessible('enablement_admin'))
-    <li class="nav-item">
-        <a href="#" title="Enablement Blueprints" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#layers"></use>
-            </svg>
-            <span class="nav-link-text">Enablement Blueprints</span>
-        </a>
-        <ul>
-            <li>
-                <a href="{{ route('blueprints.catalog') }}">
-                    <span class="nav-link-text">Catalog</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('blueprints.index') }}">
-                    <span class="nav-link-text">Manage Blueprints</span>
-                </a>
-            </li>
-        </ul>
-    </li>
-    @endif
-
-    {{-- AI Agents for CoE users --}}
+    {{-- AI Agents --}}
     @if($registry->isAccessible('ai_agents_admin'))
     <li>
         <a href="{{ route('admin.ai-agents.index') }}">
@@ -618,35 +571,48 @@
     @endif
     @endif
 
-    {{-- Blueprint & Enablement Admin for non-admin users --}}
-    @if(!Auth::user()->isAdmin() && $registry->isAccessible('enablement_events_admin'))
+    {{-- Blueprint & Enablement Admin for CoE users --}}
+    @if(in_array($roleSlug, ['coe', 'super_admin']) && $registry->isAccessible('enablement_events_admin'))
     @if($show('blueprints', 'enablement_events'))
     <li class="nav-title"><span>Enablement Administration</span></li>
 
-    <li>
-        <a href="{{ route('admin.enablement-dashboard') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#trending-up"></use>
-            </svg>
-            <span class="nav-link-text">Dashboard</span>
-        </a>
-    </li>
-
+    @if($show('blueprints'))
     <li class="nav-item">
-        <a href="#" title="Enablement" data-filter-tags>
+        <a href="#" title="Blueprints" data-filter-tags>
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#layers"></use>
             </svg>
-            <span class="nav-link-text">Enablement</span>
+            <span class="nav-link-text">Blueprints</span>
         </a>
         <ul>
-            @if(Auth::user()->role !== 'coe')
+            <li>
+                <a href="{{ route('admin.blueprint-dashboard') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
             <li>
                 <a href="{{ route('blueprints.catalog') }}">
                     <span class="nav-link-text">Blueprints</span>
                 </a>
             </li>
-            @endif
+        </ul>
+    </li>
+    @endif
+
+    @if($show('enablement_events'))
+    <li class="nav-item">
+        <a href="#" title="Enablement" data-filter-tags>
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#award"></use>
+            </svg>
+            <span class="nav-link-text">Enablement</span>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('admin.enablement-dashboard') }}">
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
             <li>
                 <a href="{{ route('enablement-events.index') }}">
                     <span class="nav-link-text">Enablement Events</span>
@@ -661,10 +627,11 @@
     </li>
     @endif
     @endif
+    @endif
 
-    {{-- System - always show Configuration so dev can change focus --}}
-    @if(Auth::user()->role !== 'coe')
-    @if(!$focused || Auth::user()->isAdmin() || ($navSettings['nav_visible_system'] ?? '1') === '1')
+    {{-- System Administration - Admin & Super Admin only --}}
+    @if(Auth::user()->isAdmin())
+    @if(!$focused || ($navSettings['nav_visible_system'] ?? '1') === '1')
     <li class="nav-title"><span>System Administration</span></li>
 
     <li>
@@ -695,72 +662,15 @@
     </li>
 
     <li>
-        <a href="{{ route('admin.branding') }}">
+        <a href="{{ route('admin.roles.index') }}">
             <svg class="sa-icon">
-                <use href="/icons/sprite.svg#edit"></use>
+                <use href="/icons/sprite.svg#shield"></use>
             </svg>
-            <span class="nav-link-text">Branding</span>
+            <span class="nav-link-text">Roles &amp; Permissions</span>
         </a>
     </li>
-
-    @if($registry->isAccessible('ai_agents_admin'))
-    <li>
-        <a href="{{ route('admin.ai-agents.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#cpu"></use>
-            </svg>
-            <span class="nav-link-text">AI Agents</span>
-        </a>
-    </li>
-    @endif
-
-    @if($registry->isAccessible('knowledge_base_admin'))
-    <li class="nav-item">
-        <a href="#" title="Knowledge Base" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#book-open"></use>
-            </svg>
-            <span class="nav-link-text">Knowledge Base</span>
-        </a>
-        <ul>
-            <li>
-                <a href="{{ route('knowledge_base.dashboard') }}">
-                    <span class="nav-link-text">Dashboard</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('knowledge_base.documents.index') }}">
-                    <span class="nav-link-text">Documents</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('knowledge_base.ingest.create') }}">
-                    <span class="nav-link-text">Ingest</span>
-                </a>
-            </li>
-        </ul>
-    </li>
-    @endif
 
     @if(!$focused)
-    <li>
-        <a href="{{ route('imports.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#upload"></use>
-            </svg>
-            <span class="nav-link-text">Data Imports</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="{{ route('salesforce-credentials.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#cloud"></use>
-            </svg>
-            <span class="nav-link-text">Salesforce Credentials</span>
-        </a>
-    </li>
-
     <li>
         <a href="/pulse" target="_blank">
             <svg class="sa-icon">
@@ -781,31 +691,8 @@
         </a>
     </li>
     @endif
-
-    @if(app(\App\Services\ModuleRegistry::class)->isEnabled('idea_room'))
-    <li class="nav-item">
-        <a href="#" title="Idea Room" data-filter-tags>
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#star"></use>
-            </svg>
-            <span class="nav-link-text">Idea Room</span>
-        </a>
-        <ul>
-            <li>
-                <a href="{{ route('idea_room.admin.settings') }}">
-                    <span class="nav-link-text">Settings</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('idea_room.admin.themes.index') }}">
-                    <span class="nav-link-text">Gallery Themes</span>
-                </a>
-            </li>
-        </ul>
-    </li>
     @endif
-    @endif
-    @endif {{-- end coe exclusion for System Administration --}}
+    @endif {{-- end admin-only System Administration --}}
 
     {{-- Feature Activation — visible to admin and authorized CoE --}}
     @can('manage-activation')
@@ -841,6 +728,30 @@
         </ul>
     </li>
     @endcan
+
+    {{-- Dynamic Module Navigation — rendered for integration role (other roles have hardcoded nav) --}}
+    @if(in_array($roleSlug, ['integration', 'super_admin']) && !empty($moduleNav))
+    @foreach($moduleNav as $section => $items)
+    @php
+        // Only render modules whose routes the integration role can actually reach
+        $allowedItems = array_filter($items, fn($item) => Route::has($item['route'])
+            && str_starts_with($item['route'], 'integration_hub.') || $item['route'] === 'imports.index');
+    @endphp
+    @if(!empty($allowedItems))
+    <li class="nav-title"><span>{{ $section }}</span></li>
+    @foreach($allowedItems as $item)
+    <li>
+        <a href="{{ route($item['route'], $item['params'] ?? []) }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#{{ $item['icon'] ?? 'circle' }}"></use>
+            </svg>
+            <span class="nav-link-text">{{ $item['label'] }}</span>
+        </a>
+    </li>
+    @endforeach
+    @endif
+    @endforeach
+    @endif
 
     @endauth
 </ul>

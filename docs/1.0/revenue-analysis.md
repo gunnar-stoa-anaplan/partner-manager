@@ -1,5 +1,8 @@
 # Revenue Analysis
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator
+
 Revenue Analysis provides visibility into the partner's pipeline — from lead sourcing through opportunity progression to closed-won revenue.
 
 ## Pipeline Overview

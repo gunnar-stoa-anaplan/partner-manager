@@ -22,7 +22,9 @@ class ActivationPathAssignmentTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->admin = User::factory()->admin()->create();
         $this->path = ActivationPath::factory()->create([
             'feature_slug' => 'enablement_admin',
             'is_active' => true,
@@ -176,7 +178,7 @@ class ActivationPathAssignmentTest extends TestCase
 
     public function test_psm_cannot_view_assignments(): void
     {
-        $psm = User::factory()->create(['role' => 'psm']);
+        $psm = User::factory()->psm()->create();
 
         $response = $this->actingAs($psm)->get(
             route('admin.activation.paths.assignments', $this->path)
@@ -187,7 +189,7 @@ class ActivationPathAssignmentTest extends TestCase
 
     public function test_psm_cannot_assign_users(): void
     {
-        $psm = User::factory()->create(['role' => 'psm']);
+        $psm = User::factory()->psm()->create();
         $user = User::factory()->create();
 
         $response = $this->actingAs($psm)->post(

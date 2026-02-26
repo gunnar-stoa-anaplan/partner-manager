@@ -1,6 +1,9 @@
 # Blueprints Admin
 
-The Blueprints Admin interface allows administrators to create, manage, and publish learning paths for partners.
+> [!NOTE]
+> Available to: CoE, Administrator
+
+The Blueprints Admin interface allows CoE users and administrators to create, manage, and publish learning paths for partners.
 
 ## Creating a Blueprint
 
@@ -35,7 +38,7 @@ Each content item has a title, description, type, URL/resource link, and estimat
 
 ## Publishing
 
-Blueprints must be published before they can be assigned to partners. Draft blueprints are only visible to admins.
+Blueprints must be published before they can be assigned to partners. Draft blueprints are only visible to CoE users and administrators.
 
 > [!NOTE]
 > Once published, changes to a blueprint's content items will affect all active enrollments. If you need to make significant changes, consider creating a new version of the blueprint.

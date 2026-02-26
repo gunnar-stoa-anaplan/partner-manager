@@ -70,6 +70,9 @@ return [
         'webhook_secret_token' => env('ZOOM_WEBHOOK_SECRET_TOKEN'),
         'verification_token' => env('ZOOM_VERIFICATION_TOKEN'),
         'base_url' => env('ZOOM_API_BASE_URL', 'https://api.zoom.us/v2'),
+        'sdk_key' => env('ZOOM_SDK_KEY'),
+        'sdk_secret' => env('ZOOM_SDK_SECRET'),
+        'host_email' => env('ZOOM_HOST_EMAIL'),
     ],
 
 ];

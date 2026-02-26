@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Contact extends Authenticatable
@@ -29,7 +30,7 @@ class Contact extends Authenticatable
         'linkedin_synced_at',
         'resource_role',
         'portal_access',
-        'portal_role',
+        'portal_role_id',
     ];
 
     protected $hidden = [
@@ -71,45 +72,17 @@ class Contact extends Authenticatable
         'other' => 'Other',
     ];
 
-    const PORTAL_ROLES = [
-        'partner_admin' => 'Partner Admin',
-        'delivery_lead' => 'Delivery Lead',
-        'engagement_manager' => 'Engagement Manager',
-        'practice_lead' => 'Practice Lead',
-        'marketing' => 'Marketing',
-        'sales' => 'Sales',
-        'pre_sales' => 'Pre-Sales',
-        'technical_architect' => 'Technical Architect',
-        'delivery_resource' => 'Delivery Resource',
-    ];
-
-    const ROLE_CAPABILITIES = [
-        'partner_admin' => ['*'],
-        'delivery_lead' => ['projects', 'cases', 'enablement', 'blueprints', 'labs', 'workspaces', 'path'],
-        'engagement_manager' => ['projects', 'enablement', 'blueprints', 'path', 'goals', 'calendar', 'launch_programs'],
-        'practice_lead' => ['enablement', 'blueprints', 'labs', 'certifications', 'path', 'goals'],
-        'marketing' => ['enablement', 'blueprints'],
-        'sales' => ['deal_registrations', 'enablement', 'blueprints'],
-        'pre_sales' => ['deal_registrations', 'enablement', 'blueprints', 'labs'],
-        'technical_architect' => ['labs', 'workspaces', 'blueprints', 'enablement'],
-        'delivery_resource' => ['projects', 'cases', 'enablement', 'blueprints'],
-    ];
-
-    const DASHBOARD_GROUPS = [
-        'partner_admin' => 'admin',
-        'engagement_manager' => 'admin',
-        'practice_lead' => 'admin',
-        'sales' => 'sales',
-        'pre_sales' => 'sales',
-        'marketing' => 'sales',
-        'delivery_lead' => 'delivery',
-        'delivery_resource' => 'delivery',
-        'technical_architect' => 'delivery',
-    ];
-
     public function partner()
     {
         return $this->belongsTo(Partner::class);
+    }
+
+    /**
+     * The contact's assigned portal role.
+     */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'portal_role_id');
     }
 
     public function projects()
@@ -182,29 +155,27 @@ class Contact extends Authenticatable
 
     public function scopePortalUsers($query)
     {
-        return $query->where('portal_access', true)->whereNotNull('portal_role');
+        return $query->where('portal_access', true)->whereNotNull('portal_role_id');
     }
 
     public function isPortalAdmin(): bool
     {
-        return $this->portal_role === 'partner_admin';
+        return $this->role?->slug === 'partner_admin';
     }
 
     public function canAccess(string $capability): bool
     {
-        $capabilities = self::ROLE_CAPABILITIES[$this->portal_role] ?? [];
-
-        return in_array('*', $capabilities, true) || in_array($capability, $capabilities, true);
+        return $this->role?->hasPermission($capability) ?? false;
     }
 
     public function dashboardGroup(): string
     {
-        return self::DASHBOARD_GROUPS[$this->portal_role] ?? 'delivery';
+        return $this->role?->dashboard_group ?? 'delivery';
     }
 
     public function hasPortalRole(string|array $roles): bool
     {
-        return in_array($this->portal_role, (array) $roles, true);
+        return in_array($this->role?->slug, (array) $roles, true);
     }
 
     public function getFullNameAttribute(): string

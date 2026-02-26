@@ -15,10 +15,16 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! auth()->check() || ! in_array(auth()->user()->role, ['admin', 'super_admin', 'coe'])) {
+        $user = auth()->user();
+
+        if (! $user) {
             abort(403, 'Unauthorized. Admin access required.');
         }
 
-        return $next($request);
+        if ($user->bypassesPermissions()) {
+            return $next($request);
+        }
+
+        abort(403, 'Unauthorized. Admin access required.');
     }
 }

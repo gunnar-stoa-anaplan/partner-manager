@@ -14,7 +14,9 @@ class UserImpersonationController extends Controller
      */
     public function start(Request $request, User $user): RedirectResponse
     {
-        $admin = auth()->user();
+        // If already impersonating, preserve the original admin; otherwise use the current user.
+        $adminId = $request->session()->get('impersonator_id', auth()->id());
+        $admin = User::findOrFail($adminId);
 
         if ($user->id === $admin->id) {
             return back()->with('error', 'You cannot impersonate yourself.');

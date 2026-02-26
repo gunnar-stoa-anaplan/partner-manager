@@ -20,7 +20,7 @@ class PartnerAdvisorWebTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->admin = User::factory()->admin()->create();
         $this->partner = Partner::factory()->create();
     }
 

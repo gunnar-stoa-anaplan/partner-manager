@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->unsignedInteger('sort_order')->default(0);
-            $table->enum('checkpoint_type', ['formula', 'structure', 'config', 'value', 'list']);
+            $table->string('checkpoint_type', 50);
             $table->json('validation_config');
             $table->boolean('is_required')->default(true);
             $table->unsignedInteger('points')->default(1);

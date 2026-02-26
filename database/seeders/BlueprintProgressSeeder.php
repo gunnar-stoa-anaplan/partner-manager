@@ -18,11 +18,11 @@ class BlueprintProgressSeeder extends Seeder
         $this->command->info('Seeding blueprint assignments, enrollments & progress...');
 
         // Clear existing data
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        BlueprintProgress::truncate();
-        BlueprintEnrollment::truncate();
-        PartnerBlueprintAssignment::truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        \Schema::withoutForeignKeyConstraints(function () {
+            BlueprintProgress::truncate();
+            BlueprintEnrollment::truncate();
+            PartnerBlueprintAssignment::truncate();
+        });
 
         $blueprints = Blueprint::with('outcomes.contentItems')->get()->keyBy('id');
         $partners = Partner::with('contacts')->get();

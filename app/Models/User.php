@@ -8,6 +8,7 @@ use App\Models\IdeaRoom\Room;
 use App\Models\IdeaRoom\Snapshot;
 use App\Models\IdeaRoom\Tag;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -25,10 +26,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
+        'role_id',
+        'manager_id',
         'avatar',
         'preferences',
         'timezone',
+        'external_id',
+        'directory_source',
+        'last_synced_at',
     ];
 
     /**
@@ -48,6 +53,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'preferences' => 'array',
+            'last_synced_at' => 'datetime',
         ];
     }
 
@@ -88,11 +94,47 @@ class User extends Authenticatable
     }
 
     /**
+     * The user's assigned role.
+     */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    /**
+     * The user's direct manager.
+     */
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    /**
+     * Users who report directly to this user.
+     */
+    public function directReports(): HasMany
+    {
+        return $this->hasMany(User::class, 'manager_id');
+    }
+
+    /**
      * Check if user has admin-level access (admin or super_admin).
      */
     public function isAdmin(): bool
     {
-        return in_array($this->role, ['admin', 'super_admin']);
+        return in_array($this->role?->slug, ['admin', 'super_admin']);
+    }
+
+    /**
+     * Check if user can manage the reporting hierarchy.
+     */
+    public function canManageHierarchy(): bool
+    {
+        if ($this->bypassesPermissions()) {
+            return true;
+        }
+
+        return $this->hasModulePermission('user_management');
     }
 
     /**
@@ -100,7 +142,56 @@ class User extends Authenticatable
      */
     public function isPsm(): bool
     {
-        return $this->role === 'psm';
+        return $this->role?->slug === 'psm';
+    }
+
+    /**
+     * Check if this user's role bypasses all permission checks.
+     */
+    public function bypassesPermissions(): bool
+    {
+        return $this->role?->bypass_permissions ?? false;
+    }
+
+    /**
+     * Check if the user has any access (read or write) to the given module.
+     */
+    public function hasModulePermission(string $moduleSlug): bool
+    {
+        return $this->role?->hasPermission($moduleSlug) ?? false;
+    }
+
+    /**
+     * Check if the user has at least read access to the given module.
+     */
+    public function canReadModule(string $moduleSlug): bool
+    {
+        return $this->hasModulePermission($moduleSlug);
+    }
+
+    /**
+     * Check if the user has write access to the given module.
+     */
+    public function canWriteModule(string $moduleSlug): bool
+    {
+        return $this->role?->hasWritePermission($moduleSlug) ?? false;
+    }
+
+    /**
+     * Check if this user is synced from an external directory.
+     */
+    public function isSyncedFromDirectory(): bool
+    {
+        return $this->directory_source !== null;
+    }
+
+    /**
+     * Check if a given field is read-only because it's managed by directory sync.
+     */
+    public function isFieldReadOnly(string $field): bool
+    {
+        return $this->isSyncedFromDirectory()
+            && in_array($field, config('team.directory.synced_fields', []));
     }
 
     // ── Activation Path relationships ────────────────────────────

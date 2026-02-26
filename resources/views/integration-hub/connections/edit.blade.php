@@ -4,9 +4,9 @@
     @include('layouts.partials/app-pagetitle', [
         'pageTitle'=> 'Edit: ' . $connection->name,
         'pageSubTitle1' => 'Integration Hub',
-        'pageSubTitle1Url' => route('integration-hub.dashboard'),
+        'pageSubTitle1Url' => route('integration_hub.dashboard'),
         'pageSubTitle2' => 'Connections',
-        'pageSubTitle2Url' => route('integration-hub.connections.index'),
+        'pageSubTitle2Url' => route('integration_hub.connections.index'),
     ])
 @endsection
 
@@ -19,7 +19,7 @@
                     <div class="card-title">Edit Connection</div>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('integration-hub.connections.update', $connection) }}">
+                    <form method="POST" action="{{ route('integration_hub.connections.update', $connection) }}">
                         @csrf
                         @method('PUT')
 
@@ -76,7 +76,7 @@
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <a href="{{ route('integration-hub.connections.show', $connection) }}" class="btn btn-light">Cancel</a>
+                            <a href="{{ route('integration_hub.connections.show', $connection) }}" class="btn btn-light">Cancel</a>
                             <button type="submit" class="btn btn-primary">Save Changes</button>
                         </div>
                     </form>

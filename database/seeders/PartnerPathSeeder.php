@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\PartnerPath;
-use App\Models\PartnerPathStage;
 use App\Models\PartnerPathGate;
+use App\Models\PartnerPathStage;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class PartnerPathSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('role', 'admin')->first() ?? User::first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first() ?? User::first();
 
         $path = PartnerPath::create([
             'name' => 'Implementation Partner',

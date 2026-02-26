@@ -30,11 +30,13 @@ class LaunchProgramFeatureTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
         Feature::for(null)->activate('launch_programs_admin');
         Feature::for(null)->activate('launch_programs_user');
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->psm = User::factory()->create(['role' => 'psm']);
+        $this->admin = User::factory()->admin()->create();
+        $this->psm = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $this->psm->id]);
     }
 
@@ -374,7 +376,7 @@ class LaunchProgramFeatureTest extends TestCase
 
     public function test_psm_cannot_nominate_other_psms_partner(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
         $program = $this->createProgram('acceptingNominations');
 
@@ -470,7 +472,7 @@ class LaunchProgramFeatureTest extends TestCase
 
     public function test_psm_cannot_view_other_psms_partner_tab(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         $response = $this->actingAs($this->psm)->get(route('partners.tab', [
@@ -1114,7 +1116,7 @@ class LaunchProgramFeatureTest extends TestCase
 
     public function test_admin_can_set_owner_on_create(): void
     {
-        $owner = User::factory()->create(['role' => 'psm']);
+        $owner = User::factory()->psm()->create();
 
         $data = $this->validProgramData(['owner_id' => $owner->id]);
         $this->actingAs($this->admin)->post(route('admin.launch-programs.store'), $data);
@@ -1127,7 +1129,7 @@ class LaunchProgramFeatureTest extends TestCase
 
     public function test_owner_can_approve_nominated_partner(): void
     {
-        $owner = User::factory()->create(['role' => 'psm']);
+        $owner = User::factory()->psm()->create();
         $program = LaunchProgram::factory()->active()->create([
             'created_by' => $this->admin->id,
             'owner_id' => $owner->id,
@@ -1145,8 +1147,8 @@ class LaunchProgramFeatureTest extends TestCase
 
     public function test_non_owner_psm_cannot_approve_partner(): void
     {
-        $owner = User::factory()->create(['role' => 'psm']);
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $owner = User::factory()->psm()->create();
+        $otherPsm = User::factory()->psm()->create();
         $program = LaunchProgram::factory()->active()->create([
             'created_by' => $this->admin->id,
             'owner_id' => $owner->id,

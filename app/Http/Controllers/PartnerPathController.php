@@ -22,7 +22,7 @@ class PartnerPathController extends Controller
         $user = auth()->user();
 
         // Role-based partner scoping — manager and admin see all partners
-        $canSeeAll = $user->isAdmin() || $user->role === 'manager';
+        $canSeeAll = $user->isAdmin() || $user->role?->slug === 'manager';
         $partnerIds = $canSeeAll
             ? Partner::pluck('id')
             : Partner::where('user_id', $user->id)->pluck('id');
@@ -32,7 +32,7 @@ class PartnerPathController extends Controller
         // PSM filter (manager/admin only)
         $selectedPsmId = $canSeeAll ? $request->get('psm_id') : null;
         $psmUsers = $canSeeAll
-            ? User::where('role', 'psm')->orderBy('name')->get(['id', 'name'])
+            ? User::whereRelation('role', 'slug', 'psm')->orderBy('name')->get(['id', 'name'])
             : collect();
 
         // Optional partner filter

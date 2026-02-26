@@ -1,5 +1,8 @@
 # Deal Registration
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator. Requires the `deal_registration_user` or `deal_registration_admin` feature flag to be active.
+
 Deal Registration allows partners to register new opportunities for approval by their PSM. This creates visibility into the partner's pipeline and enables co-selling coordination.
 
 ## How It Works
@@ -9,9 +12,17 @@ Deal Registration allows partners to register new opportunities for approval by 
 3. The PSM approves, requests changes, or declines the registration
 4. Approved registrations are linked to the partner's opportunity pipeline
 
+## Dashboard
+
+Navigate to **Partner Management > Deal Registration > Dashboard** for an overview of registration activity across your portfolio:
+
+- Total registrations by status (pending, approved, declined)
+- Registration volume trends
+- Conversion metrics (registrations to closed deals)
+
 ## Viewing Deal Registrations
 
-Navigate to **Engage > Deal Registration** to see all registrations across your portfolio.
+Navigate to **Partner Management > Deal Registration > Deal List** to see all registrations across your portfolio. Individual partner deal registrations are also visible on the **Deal Registrations** tab of each [partner profile](partner-dashboard).
 
 <!-- ![Deal registration list](images/deal-registration-list.png) -->
 

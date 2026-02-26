@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('contact_id')->constrained()->cascadeOnDelete();
             $table->foreignId('partner_id')->constrained()->cascadeOnDelete();
             $table->foreignId('assigned_model_id')->nullable()->constrained('anaplan_models')->nullOnDelete();
-            $table->enum('status', ['not_started', 'in_progress', 'completed'])->default('not_started');
+            $table->string('status', 50)->default('not_started');
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->unsignedInteger('total_points_earned')->default(0);

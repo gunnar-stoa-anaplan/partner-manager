@@ -173,51 +173,113 @@
             </div>
         </div>
 
-        {{-- Dev Focus --}}
+        {{-- Salesforce Credentials --}}
         <div class="card shadow-0 mb-g">
             <div class="card-header">
-                <div class="card-title">
-                    Dev Focus
-                </div>
+                <div class="card-title">Salesforce Credentials</div>
             </div>
             <div class="card-body">
-                <p class="text-muted fs-sm mb-3">Select a feature to focus on. The sidebar will show only the screens relevant to that feature.</p>
+                <p class="text-muted fs-sm mb-3">Configure the connection between Partner Manager and your Salesforce instance to enable data synchronization.</p>
 
-                <form id="dev-focus-form" action="{{ route('configuration.update-dev-focus') }}" method="POST">
-                    @csrf
-                    @method('PUT')
+                @if($credential)
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 mb-2">Client ID</dt>
+                        <dd class="col-sm-8 mb-2"><code>{{ $credential->client_id }}</code></dd>
 
-                    @php
-                        $currentFocus = $settings['dev_focus_feature'] ?? '';
-                        $focusOptions = [
-                            '' => ['label' => 'Show All', 'desc' => 'Full navigation — all sections visible'],
-                            'blueprints' => ['label' => 'Blueprints', 'desc' => 'Enablement Blueprints, partner blueprint tab'],
-                            'labs' => ['label' => 'Workshop Labs', 'desc' => 'Lab admin, checkpoints, facilitator dashboard'],
-                            'launch_programs' => ['label' => 'Launch Programs', 'desc' => 'Program milestones, partner nominations'],
-                            'enablement_events' => ['label' => 'Enablement Events', 'desc' => 'Events, sessions, calendars, registration'],
-                            'partner_paths' => ['label' => 'Partner Paths', 'desc' => 'Stages, gates, path config, path reviews'],
-                            'goals_scorecards' => ['label' => 'Goals & Scorecards', 'desc' => 'Goals, scorecard weights, templates, benchmarks'],
-                            'health_alerts' => ['label' => 'Health & Alerts', 'desc' => 'Partner health, alerts, QBR workbench'],
-                            'deal_registration' => ['label' => 'Deal Registration', 'desc' => 'Deals, leads, solution lifecycle, funding'],
-                            'anaplan' => ['label' => 'Anaplan Integration', 'desc' => 'Workspace sync, versions, provisioning'],
-                        ];
-                    @endphp
+                        <dt class="col-sm-4 mb-2">Username</dt>
+                        <dd class="col-sm-8 mb-2">{{ $credential->username }}</dd>
 
-                    @foreach($focusOptions as $value => $option)
-                        <label class="d-flex align-items-start gap-2 py-2 cursor-pointer {{ !$loop->last ? 'border-bottom' : '' }}" style="cursor:pointer">
-                            <input type="radio" name="dev_focus_feature" value="{{ $value }}"
-                                   class="form-check-input mt-1"
-                                   {{ $currentFocus === $value ? 'checked' : '' }}
-                                   onchange="this.form.submit()">
-                            <div>
-                                <span class="fw-500 fs-sm">{{ $option['label'] }}</span>
-                                <small class="d-block text-muted">{{ $option['desc'] }}</small>
-                            </div>
-                        </label>
-                    @endforeach
-                </form>
+                        <dt class="col-sm-4 mb-2">Instance URL</dt>
+                        <dd class="col-sm-8 mb-2">
+                            <a href="{{ $credential->instance_url }}" target="_blank" class="text-info">
+                                {{ $credential->instance_url }}
+                                <svg class="sa-icon sa-icon-xs ms-1"><use href="/icons/sprite.svg#external-link"></use></svg>
+                            </a>
+                        </dd>
+
+                        <dt class="col-sm-4 mb-2">Auth Method</dt>
+                        <dd class="col-sm-8 mb-2">
+                            <span class="badge bg-primary">{{ strtoupper($credential->auth_method) }}</span>
+                        </dd>
+
+                        <dt class="col-sm-4 mb-2">Last Updated</dt>
+                        <dd class="col-sm-8 mb-2">{{ $credential->updated_at->format('M j, Y g:i A') }}</dd>
+                    </dl>
+
+                    <hr>
+
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('salesforce-credentials.edit', $credential->id) }}" class="btn btn-sm btn-primary">
+                            <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#edit-3"></use></svg>
+                            Update Credentials
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-info" id="test-connection">
+                            <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#zap"></use></svg>
+                            Test Connection
+                        </button>
+                    </div>
+
+                    <div id="connection-result" class="mt-3"></div>
+                @else
+                    <div class="text-center py-3">
+                        <svg class="sa-icon mb-2 text-muted opacity-50" style="width:48px;height:48px"><use href="/icons/sprite.svg#cloud"></use></svg>
+                        <h6 class="text-muted">No Salesforce credentials configured</h6>
+                        <p class="text-muted fs-sm mb-3">Set up your Salesforce Connected App credentials to enable data synchronization.</p>
+                        <a href="{{ route('salesforce-credentials.create') }}" class="btn btn-sm btn-primary">
+                            <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#plus"></use></svg>
+                            Add Credentials
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+@if($credential)
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var testBtn = document.getElementById('test-connection');
+    var resultBox = document.getElementById('connection-result');
+
+    if (testBtn) {
+        testBtn.addEventListener('click', function () {
+            testBtn.disabled = true;
+            testBtn.innerHTML = '<svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#loader"></use></svg> Testing...';
+            resultBox.innerHTML = '';
+
+            fetch("{{ route('salesforce-credentials.test') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    client_id: @json($credential->client_id),
+                    username: @json($credential->username ?? ''),
+                    instance_url: @json($credential->instance_url),
+                    auth_method: @json($credential->auth_method)
+                })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                resultBox.className = 'mt-3 alert alert-dismissible fade show ' + (data.success ? 'alert-success' : 'alert-danger');
+                resultBox.innerHTML = data.message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+            })
+            .catch(function(err) {
+                resultBox.className = 'mt-3 alert alert-danger alert-dismissible fade show';
+                resultBox.innerHTML = 'Error: ' + err.message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+            })
+            .finally(function() {
+                testBtn.disabled = false;
+                testBtn.innerHTML = '<svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#zap"></use></svg> Test Connection';
+            });
+        });
+    }
+});
+</script>
+@endif
 @endsection

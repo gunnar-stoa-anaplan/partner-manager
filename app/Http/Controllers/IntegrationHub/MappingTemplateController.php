@@ -108,7 +108,7 @@ class MappingTemplateController extends Controller
         $connection->update(['applied_templates' => $appliedTemplates]);
 
         return redirect()
-            ->route('integration-hub.connections.show', $connection)
+            ->route('integration_hub.connections.show', $connection)
             ->with('success', "Template applied — {$applied} field(s) created or updated.");
     }
 

@@ -26,7 +26,7 @@ class LabDesignerTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = User::factory()->create(['role' => 'admin']);
+        $this->user = User::factory()->admin()->create();
     }
 
     public function test_lab_designer_returns_structured_lab(): void

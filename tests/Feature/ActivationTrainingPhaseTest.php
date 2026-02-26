@@ -21,7 +21,7 @@ class ActivationTrainingPhaseTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->admin = User::factory()->admin()->create();
     }
 
     public function test_step_phase_is_cast_to_training_phase_enum(): void

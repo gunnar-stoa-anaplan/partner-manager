@@ -1,5 +1,8 @@
 # QBR Workbench
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator. Requires the `qbr_user` or `qbr_admin` feature flag to be active.
+
 The QBR (Quarterly Business Review) Workbench provides a structured framework for conducting quarterly review sessions with partners.
 
 ## How QBRs Work

@@ -58,6 +58,6 @@ Beyond roles, individual capabilities can be toggled per contact using the `port
 
 ## Impersonation
 
-Admins can impersonate any portal contact to see the portal from their perspective. This is useful for troubleshooting and verifying that the correct content is visible.
+Administrators can impersonate any portal contact to see the portal from their perspective. This is useful for troubleshooting and verifying that the correct content is visible.
 
 Navigate to the contact's profile and click **Impersonate** to enter their portal view. Click **Exit Impersonation** to return to the admin view.

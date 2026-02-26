@@ -1,5 +1,8 @@
 # Field Enablement
 
+> [!NOTE]
+> Available to: PSM, Manager, Administrator
+
 Field Enablement helps PSMs map and manage their relationships across the partner's organization — tracking key contacts, influence patterns, and engagement depth.
 
 ## Influence Map

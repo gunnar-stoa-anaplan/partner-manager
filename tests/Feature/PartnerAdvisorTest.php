@@ -23,7 +23,9 @@ class PartnerAdvisorTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = User::factory()->create(['role' => 'psm']);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->user = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $this->user->id]);
     }
 

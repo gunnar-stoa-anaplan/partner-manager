@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Partner;
 use App\Models\PartnerAssignedGoal;
 use App\Models\PartnerScorecard;
+use App\Support\DatabasePortability;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -138,7 +139,7 @@ class BenchmarkService
             ->whereIn('stage', ['Closed Won', 'Closed Lost'])
             ->where('close_date', '>=', now()->subMonths(12))
             ->groupBy('partner_id')
-            ->selectRaw('partner_id, SUM(CASE WHEN stage="Closed Won" THEN 1 ELSE 0 END) as won, COUNT(*) as total')
+            ->selectRaw('partner_id, SUM(CASE WHEN stage = \'Closed Won\' THEN 1 ELSE 0 END) as won, COUNT(*) as total')
             ->get()
             ->keyBy('partner_id');
 
@@ -153,7 +154,7 @@ class BenchmarkService
         $goalData = PartnerAssignedGoal::whereIn('partner_id', $partnerIds)
             ->where('target_value', '>', 0)
             ->groupBy('partner_id')
-            ->selectRaw('partner_id, AVG(LEAST((actual_value / target_value) * 100, 100)) as avg_attainment')
+            ->selectRaw('partner_id, AVG('.DatabasePortability::least('(actual_value / target_value) * 100', '100').') as avg_attainment')
             ->pluck('avg_attainment', 'partner_id');
 
         foreach ($partnerIds as $pid) {

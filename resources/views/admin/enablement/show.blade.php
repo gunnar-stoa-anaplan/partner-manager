@@ -169,6 +169,9 @@
                                     <th>Date & Time</th>
                                     <th>Title Override</th>
                                     <th>Location</th>
+                                    @if($event->type === 'workshop')
+                                        <th>Zoom Meeting</th>
+                                    @endif
                                     <th>Instructor</th>
                                     <th>Geography</th>
                                     <th>Registrations</th>
@@ -195,6 +198,33 @@
                                                 <br><a href="{{ $session->meeting_url }}" target="_blank" class="small">Meeting Link</a>
                                             @endif
                                         </td>
+                                        @if($event->type === 'workshop')
+                                            <td class="text-nowrap">
+                                                @if($session->zoomMeeting)
+                                                    @php $zm = $session->zoomMeeting; @endphp
+                                                    @if($zm->isLive())
+                                                        <span class="badge bg-success">Live</span>
+                                                    @elseif($zm->hasEnded())
+                                                        <span class="badge bg-secondary">Ended</span>
+                                                    @elseif($zm->status === \App\Enums\ZoomMeetingStatus::Cancelled)
+                                                        <span class="badge bg-danger">Cancelled</span>
+                                                    @elseif($zm->status === \App\Enums\ZoomMeetingStatus::Pending)
+                                                        <span class="badge bg-warning text-dark">Pending</span>
+                                                    @else
+                                                        <span class="badge bg-primary">Scheduled</span>
+                                                    @endif
+                                                    <br>
+                                                    <a href="{{ $zm->start_url }}" target="_blank" class="small">Host</a>
+                                                    <span class="text-muted mx-1">|</span>
+                                                    <a href="{{ $zm->join_url }}" target="_blank" class="small">Join</a>
+                                                    @if($zm->hasEnded() && $zm->participants_count)
+                                                        <br><small class="text-muted">{{ $zm->participants_count }} attended</small>
+                                                    @endif
+                                                @else
+                                                    <span class="text-muted small">—</span>
+                                                @endif
+                                            </td>
+                                        @endif
                                         <td>{{ $session->instructor ?? '—' }}</td>
                                         <td>{{ $session->geography ?? '—' }}</td>
                                         <td class="text-center">
@@ -234,7 +264,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center py-4">
+                                        <td colspan="{{ $event->type === 'workshop' ? 9 : 8 }}" class="text-center py-4">
                                             No sessions scheduled yet.
                                             <a href="{{ route('enablement-events.sessions.create', $event->id) }}">Add the first session</a>.
                                         </td>
