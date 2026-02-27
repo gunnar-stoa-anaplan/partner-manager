@@ -208,6 +208,7 @@
         </ul>
     </li>
     @endif
+
     @endif {{-- end coe/integration exclusion for Business Development / Lead Assignment / Deal Registration --}}
 
     {{-- Measure Section (temporarily removed) --}}
@@ -269,6 +270,19 @@
                 <use href="/icons/sprite.svg#compass"></use>
             </svg>
             <span class="nav-link-text">CoE Dashboard</span>
+        </a>
+    </li>
+
+    {{-- Marketplace Submissions --}}
+    <li>
+        <a href="{{ route('engage.marketplace-submissions.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#shopping-bag"></use>
+            </svg>
+            <span class="nav-link-text">Marketplace Submissions</span>
+            @if(($pendingMarketplace = \App\Models\Partner::where('marketplace_status', 'submitted')->count()) > 0)
+                <span class="badge bg-warning text-dark rounded-pill ms-1">{{ $pendingMarketplace }}</span>
+            @endif
         </a>
     </li>
 
@@ -419,7 +433,7 @@
     @endif
 
     {{-- Blueprints --}}
-    @if($show('blueprints') && $registry->isAccessible('enablement_events_admin'))
+    @if($show('blueprints') && $registry->isAccessible('blueprints_admin'))
     <li class="nav-item">
         <a href="#" title="Blueprints" data-filter-tags>
             <svg class="sa-icon">
@@ -572,11 +586,11 @@
     @endif
 
     {{-- Blueprint & Enablement Admin for CoE users --}}
-    @if(in_array($roleSlug, ['coe', 'super_admin']) && $registry->isAccessible('enablement_events_admin'))
+    @if(in_array($roleSlug, ['coe', 'super_admin']) && ($registry->isAccessible('blueprints_admin') || $registry->isAccessible('enablement_events_admin')))
     @if($show('blueprints', 'enablement_events'))
     <li class="nav-title"><span>Enablement Administration</span></li>
 
-    @if($show('blueprints'))
+    @if($show('blueprints') && $registry->isAccessible('blueprints_admin'))
     <li class="nav-item">
         <a href="#" title="Blueprints" data-filter-tags>
             <svg class="sa-icon">

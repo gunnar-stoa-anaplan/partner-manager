@@ -50,13 +50,22 @@ class PartnerTaskSeeder extends Seeder
             $selectedTemplates = $relevantTemplates->shuffle()->take($count);
 
             foreach ($selectedTemplates as $template) {
+                // If template has auto_verify_rule, check if partner already satisfies it
+                $autoSatisfied = false;
+                if ($template->auto_verify_rule && str_starts_with($template->auto_verify_rule, 'partner.')) {
+                    $autoSatisfied = app(\App\Services\TaskAutoVerificationService::class)
+                        ->evaluate($partner, $template->auto_verify_rule);
+                }
+
                 // Determine task status based on stage position
-                $status = fake()->randomElement(array_merge(
-                    array_fill(0, 3, 'completed'),
-                    array_fill(0, 2, 'in_progress'),
-                    array_fill(0, 2, 'not_started'),
-                    array_fill(0, 1, 'blocked'),
-                ));
+                $status = $autoSatisfied
+                    ? 'completed'
+                    : fake()->randomElement(array_merge(
+                        array_fill(0, 3, 'completed'),
+                        array_fill(0, 2, 'in_progress'),
+                        array_fill(0, 2, 'not_started'),
+                        array_fill(0, 1, 'blocked'),
+                    ));
 
                 $dueDate = fake()->dateTimeBetween('-3 months', '+3 months');
                 $isPastDue = $dueDate < now() && ! in_array($status, ['completed', 'waived']);
@@ -90,9 +99,11 @@ class PartnerTaskSeeder extends Seeder
                     'started_at' => $startedAt,
                     'completed_at' => $completedAt,
                     'completed_by' => $completedAt ? $psm->id : null,
-                    'completion_evidence' => $completedAt ? fake()->sentence(4) : null,
-                    'auto_verified' => $completedAt && fake()->boolean(20),
-                    'auto_verified_at' => ($completedAt && fake()->boolean(20)) ? $completedAt : null,
+                    'completion_evidence' => $autoSatisfied
+                        ? 'Automatically verified by system rule: '.$template->auto_verify_rule
+                        : ($completedAt ? fake()->sentence(4) : null),
+                    'auto_verified' => $autoSatisfied || ($completedAt && fake()->boolean(20)),
+                    'auto_verified_at' => $autoSatisfied ? $completedAt : (($completedAt && fake()->boolean(20)) ? $completedAt : null),
                     'notes' => fake()->boolean(25) ? fake()->sentence(6) : null,
                     'stage_id' => $template->stage_id ?? $currentStage->id,
                     'partner_path_enrollment_id' => $enrollment->id,

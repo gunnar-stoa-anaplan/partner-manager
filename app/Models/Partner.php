@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Partner extends Model
 {
@@ -18,12 +19,49 @@ class Partner extends Model
         'psm',
         'geography',
         'region',
+        'logo_path',
+        'phone',
+        'sales_territory',
+        'mailing_country',
+        'mailing_state',
+        'mailing_street',
+        'mailing_suite',
+        'mailing_city',
+        'mailing_postal_code',
+        'partner_locator_emails',
+        'headline',
+        'company_description',
+        'marketplace_status',
+        'marketplace_reviewed_by',
+        'marketplace_reviewed_at',
+        'marketplace_rejection_reason',
+    ];
+
+    public const MARKETPLACE_STATUSES = [
+        'draft' => 'Draft',
+        'submitted' => 'Submitted',
+        'approved' => 'Approved',
+        'rejected' => 'Rejected',
+    ];
+
+    public const MARKETPLACE_STATUS_COLORS = [
+        'draft' => 'secondary',
+        'submitted' => 'warning',
+        'approved' => 'success',
+        'rejected' => 'danger',
     ];
 
     /**
      * Eager load relationships commonly used
      */
     protected $with = ['projects', 'contacts'];
+
+    protected function casts(): array
+    {
+        return [
+            'marketplace_reviewed_at' => 'datetime',
+        ];
+    }
 
     /**
      * Relationships
@@ -193,6 +231,23 @@ class Partner extends Model
         return $this->hasManyThrough(AnaplanModel::class, AnaplanWorkspace::class);
     }
 
+    public function marketplaceEntries()
+    {
+        return $this->hasMany(PartnerMarketplaceEntry::class);
+    }
+
+    public function marketplaceReviewer()
+    {
+        return $this->belongsTo(User::class, 'marketplace_reviewed_by');
+    }
+
+    public function getLogoUrlAttribute(): ?string
+    {
+        return $this->logo_path
+            ? Storage::disk('public')->url($this->logo_path)
+            : null;
+    }
+
     /**
      * Get historical resource certification counts over time
      *
@@ -258,6 +313,7 @@ class Partner extends Model
             $partner->resources()->delete();
             $partner->goals()->delete();
             $partner->anaplanWorkspaces()->delete();
+            $partner->marketplaceEntries()->delete();
         });
     }
 }

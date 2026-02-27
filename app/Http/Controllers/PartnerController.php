@@ -79,7 +79,7 @@ class PartnerController extends Controller
      */
     public function show(string $id)
     {
-        $partner = Partner::with(['projects', 'contacts', 'opportunities', 'leads', 'certifications', 'anaplanWorkspaces'])
+        $partner = Partner::with(['projects', 'contacts', 'opportunities', 'leads', 'certifications', 'anaplanWorkspaces', 'blueprintAssignments'])
             ->findOrFail($id);
         $this->authorizePartnerAccess($partner);
 
@@ -122,6 +122,8 @@ class PartnerController extends Controller
             'workspaces' => $this->workspacesTabData($partner),
             'portal-users' => $this->portalUsersTabData($partner),
             'deal-registrations' => $this->dealRegistrationsTabData($partner),
+            'blueprints' => $this->blueprintsTabData($partner),
+            'marketplace' => $this->marketplaceTabData($partner),
             default => abort(404),
         };
 
@@ -1212,6 +1214,25 @@ class PartnerController extends Controller
     }
 
     /**
+     * Blueprints tab: assignment detail with enrollment progress.
+     *
+     * @return array<string, mixed>
+     */
+    private function blueprintsTabData(Partner $partner): array
+    {
+        $partner->load([
+            'blueprintAssignments.blueprint',
+            'blueprintAssignments.enrollments.contact',
+            'blueprintAssignments.enrollments.progress',
+            'blueprintAssignments.assignedBy',
+        ]);
+
+        return [
+            'assignments' => $partner->blueprintAssignments,
+        ];
+    }
+
+    /**
      * Show the full summary view aggregating all partners for the authenticated user.
      */
     public function fullSummary()
@@ -1595,6 +1616,95 @@ class PartnerController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * Marketplace tab: company profile + marketplace entries.
+     */
+    private function marketplaceTabData(Partner $partner): array
+    {
+        $entries = $partner->marketplaceEntries()
+            ->orderBy('category')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('category');
+
+        $categories = \App\Models\PartnerMarketplaceEntry::CATEGORIES;
+
+        $partner->load('marketplaceReviewer');
+
+        return compact('entries', 'categories');
+    }
+
+    public function marketplaceSubmissions(Request $request): \Illuminate\View\View
+    {
+        $query = Partner::with('user', 'marketplaceReviewer')
+            ->where(function ($q) {
+                $q->whereNotNull('headline')
+                    ->orWhereNotNull('company_description')
+                    ->orWhere('marketplace_status', '!=', 'draft');
+            })
+            ->withCount('marketplaceEntries');
+
+        if ($request->filled('status')) {
+            $query->where('marketplace_status', $request->status);
+        }
+
+        $partners = $query->orderByRaw("FIELD(marketplace_status, 'submitted', 'rejected', 'approved', 'draft')")
+            ->orderBy('name')
+            ->get();
+
+        $stats = [
+            'submitted' => Partner::where('marketplace_status', 'submitted')->count(),
+            'approved' => Partner::where('marketplace_status', 'approved')->count(),
+            'rejected' => Partner::where('marketplace_status', 'rejected')->count(),
+        ];
+
+        return view('engage.marketplace-submissions.index', compact('partners', 'stats'));
+    }
+
+    public function marketplaceSubmissionShow(Partner $partner): \Illuminate\View\View
+    {
+        $partner->load('user', 'marketplaceReviewer');
+
+        $entries = $partner->marketplaceEntries()
+            ->orderBy('category')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('category');
+
+        $categories = \App\Models\PartnerMarketplaceEntry::CATEGORIES;
+
+        return view('engage.marketplace-submissions.show', compact('partner', 'entries', 'categories'));
+    }
+
+    public function reviewMarketplace(Request $request, Partner $partner): \Illuminate\Http\RedirectResponse
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:approve,reject',
+            'rejection_reason' => 'required_if:action,reject|nullable|string',
+        ]);
+
+        $partner->marketplace_reviewed_by = auth()->id();
+        $partner->marketplace_reviewed_at = now();
+
+        if ($validated['action'] === 'approve') {
+            $partner->marketplace_status = 'approved';
+            $partner->marketplace_rejection_reason = null;
+        } else {
+            $partner->marketplace_status = 'rejected';
+            $partner->marketplace_rejection_reason = $validated['rejection_reason'];
+        }
+
+        $partner->save();
+
+        if ($validated['action'] === 'approve') {
+            app(\App\Services\TaskAutoVerificationService::class)->verifyForPartner($partner);
+        }
+
+        $action = $validated['action'] === 'approve' ? 'approved' : 'rejected';
+
+        return redirect()->back()->with('success', "Marketplace profile {$action}.");
     }
 
     /**

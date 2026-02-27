@@ -69,6 +69,12 @@
                            class="nav-link-portal {{ request()->routeIs('portal.calendar.*') ? 'active' : '' }}">Calendar</a>
                     </li>
                     @endif
+                    @if($portalUser->canAccess('company_profile'))
+                    <li class="nav-item">
+                        <a href="{{ route('portal.company-profile.edit') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.company-profile.*') ? 'active' : '' }}">Company Profile</a>
+                    </li>
+                    @endif
                     @if($portalUser->canAccess('contacts'))
                     <li class="nav-item">
                         <a href="{{ route('portal.contacts.index') }}"

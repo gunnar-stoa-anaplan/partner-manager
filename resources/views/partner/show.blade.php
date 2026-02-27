@@ -160,6 +160,14 @@
                 <i class="fal fa-user-hard-hat me-1 d-none d-md-inline"></i> Resources
             </a>
         </li>
+        @if($registry->isEnabled('blueprints_user'))
+        <li class="nav-item">
+            <a class="nav-link" href="#blueprints" data-tab="blueprints" role="tab">
+                <i class="fal fa-layers me-1 d-none d-md-inline"></i> Blueprints
+                <span class="badge bg-primary bg-opacity-25 text-primary ms-1">{{ $partner->blueprintAssignments->count() }}</span>
+            </a>
+        </li>
+        @endif
         @if($registry->isEnabled('enablement_user'))
         <li class="nav-item">
             <a class="nav-link" href="#app-enablement" data-tab="app-enablement" role="tab">
@@ -190,6 +198,11 @@
             </a>
         </li>
         @endif
+        <li class="nav-item">
+            <a class="nav-link" href="#marketplace" data-tab="marketplace" role="tab">
+                <i class="fal fa-store me-1 d-none d-md-inline"></i> Marketplace
+            </a>
+        </li>
     </ul>
 
     {{-- Tab Content --}}
@@ -261,6 +274,16 @@
             </div>
         </div>
 
+        @if($registry->isEnabled('blueprints_user'))
+        {{-- Blueprints (AJAX) --}}
+        <div class="tab-pane" id="tab-blueprints" style="display: none;">
+            <div class="spinner-loader">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading blueprint data...</p>
+            </div>
+        </div>
+        @endif
+
         @if($registry->isEnabled('enablement_user'))
         {{-- App Enablement (AJAX) --}}
         <div class="tab-pane" id="tab-app-enablement" style="display: none;">
@@ -300,6 +323,14 @@
             </div>
         </div>
         @endif
+
+        {{-- Marketplace (AJAX) --}}
+        <div class="tab-pane" id="tab-marketplace" style="display: none;">
+            <div class="spinner-loader">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading marketplace data...</p>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -309,7 +340,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     var PARTNER_ID = {{ $partner->id }};
     var TAB_BASE_URL = '{{ url("/partners") }}/' + PARTNER_ID + '/tab/';
-    var AJAX_TABS = ['pipeline', 'deal-registrations', 'projects', 'enablement', 'calendar', 'influencers', 'resources', 'app-enablement', 'launch-programs', 'workspaces', 'portal-users'];
+    var AJAX_TABS = ['pipeline', 'deal-registrations', 'projects', 'enablement', 'calendar', 'influencers', 'resources', 'blueprints', 'app-enablement', 'launch-programs', 'workspaces', 'portal-users', 'marketplace'];
     var ALL_TABS = ['overview'].concat(AJAX_TABS);
 
     // State

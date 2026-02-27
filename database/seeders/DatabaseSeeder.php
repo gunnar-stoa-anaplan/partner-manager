@@ -49,6 +49,7 @@ class DatabaseSeeder extends Seeder
             AnaplanWorkspaceSeeder::class,     // anaplan workspaces, models, modules, lists
             AnaplanVersionConfigSeeder::class, // version configs + notification template
             LabSeeder::class,                   // workshop labs, checkpoints, participants, results
+            MarketplaceSeeder::class,           // marketplace profiles + entries for select partners
 
             // === Phase 3: Plan Section ===
             PartnerPathEnrollmentSeeder::class, // enrollments + stage history

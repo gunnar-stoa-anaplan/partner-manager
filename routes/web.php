@@ -266,7 +266,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/partners/{partner}/advisor', [PartnerController::class, 'advisor'])->name('partners.advisor');
     Route::get('/partners/{id}/tab/{tab}', [PartnerController::class, 'partnerTab'])
         ->name('partners.tab')
-        ->where('tab', 'overview|pipeline|deal-registrations|enablement|projects|calendar|influencers|resources|app-enablement|launch-programs|workspaces|portal-users');
+        ->where('tab', 'overview|pipeline|deal-registrations|enablement|projects|calendar|influencers|resources|blueprints|app-enablement|launch-programs|workspaces|portal-users|marketplace');
+
+    // Marketplace Profile Review
+    Route::put('/partners/{partner}/marketplace-review', [PartnerController::class, 'reviewMarketplace'])->name('partners.marketplace-review');
 
     // Portal User Management (PSM/Admin)
     Route::patch('/partners/{partner}/portal-users/{contact}/toggle-access', [PortalUserController::class, 'toggleAccess'])->name('partners.portal-users.toggle-access');
@@ -397,6 +400,7 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::get('reporting-hierarchy', [ReportingHierarchyController::class, 'index'])->name('reporting-hierarchy.index');
+    Route::get('reporting-hierarchy/data', [ReportingHierarchyController::class, 'data'])->name('reporting-hierarchy.data');
     Route::put('reporting-hierarchy/{user}', [ReportingHierarchyController::class, 'update'])->name('reporting-hierarchy.update');
 
     /*
@@ -629,6 +633,10 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/deal-registrations/{dealRegistration}', [DealRegistrationController::class, 'show'])->name('deal-registrations.show');
             Route::put('/deal-registrations/{dealRegistration}/review', [DealRegistrationController::class, 'review'])->name('deal-registrations.review');
         });
+
+        // Marketplace Profile Submissions
+        Route::get('/marketplace-submissions', [PartnerController::class, 'marketplaceSubmissions'])->name('marketplace-submissions.index');
+        Route::get('/marketplace-submissions/{partner}', [PartnerController::class, 'marketplaceSubmissionShow'])->name('marketplace-submissions.show');
     });
 
     /*
