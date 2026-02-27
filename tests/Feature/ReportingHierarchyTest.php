@@ -173,4 +173,75 @@ class ReportingHierarchyTest extends TestCase
         $this->assertCount(1, $this->manager->directReports);
         $this->assertCount(1, $director->directReports);
     }
+
+    // ── JSON Data Endpoint ───────────────────────────────────────
+
+    public function test_data_endpoint_returns_json(): void
+    {
+        $this->actingAs($this->admin)
+            ->getJson(route('reporting-hierarchy.data'))
+            ->assertOk()
+            ->assertJsonStructure([
+                '*' => ['id', 'name', 'manager_id', 'role', 'role_slug'],
+            ]);
+    }
+
+    public function test_data_endpoint_forbidden_for_psm(): void
+    {
+        $this->actingAs($this->psm)
+            ->getJson(route('reporting-hierarchy.data'))
+            ->assertForbidden();
+    }
+
+    // ── JSON Update Responses ────────────────────────────────────
+
+    public function test_update_returns_json_when_requested(): void
+    {
+        $this->actingAs($this->admin)
+            ->putJson(route('reporting-hierarchy.update', $this->psm), [
+                'manager_id' => $this->manager->id,
+            ])
+            ->assertOk()
+            ->assertJson([
+                'success' => true,
+                'user' => [
+                    'id' => $this->psm->id,
+                    'manager_id' => $this->manager->id,
+                    'manager_name' => $this->manager->name,
+                ],
+            ]);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $this->psm->id,
+            'manager_id' => $this->manager->id,
+        ]);
+    }
+
+    public function test_update_json_validates_self_assignment(): void
+    {
+        $this->actingAs($this->admin)
+            ->putJson(route('reporting-hierarchy.update', $this->psm), [
+                'manager_id' => $this->psm->id,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('manager_id');
+    }
+
+    public function test_update_json_can_clear_manager(): void
+    {
+        $this->psm->update(['manager_id' => $this->manager->id]);
+
+        $this->actingAs($this->admin)
+            ->putJson(route('reporting-hierarchy.update', $this->psm), [
+                'manager_id' => null,
+            ])
+            ->assertOk()
+            ->assertJson([
+                'success' => true,
+                'user' => [
+                    'id' => $this->psm->id,
+                    'manager_id' => null,
+                ],
+            ]);
+    }
 }

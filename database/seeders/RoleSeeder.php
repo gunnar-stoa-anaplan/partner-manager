@@ -9,83 +9,6 @@ use Illuminate\Database\Seeder;
 class RoleSeeder extends Seeder
 {
     /**
-     * All _user module slugs that PSM and Manager roles get by default.
-     *
-     * @var string[]
-     */
-    private const USER_MODULES = [
-        'partner_management_user',
-        'enablement_user',
-        'enablement_events_user',
-        'deal_registration_user',
-        'launch_programs_user',
-        'project_health_user',
-        'qbr_user',
-        'provisioning_user',
-        'goals_targets_user',
-        'benchmark_user',
-        'action_plans_user',
-        'partner_portal_user',
-        'ai_agents_user',
-        'knowledge_base_user',
-        'zoom_chat_user',
-        'workshop_delivery_user',
-        'workshop_labs_user',
-        'analytics',
-        'competency',
-        'idea_room',
-    ];
-
-    /**
-     * Modules the CoE role gets write access to.
-     *
-     * @var string[]
-     */
-    private const COE_MODULES = [
-        'strategy',
-        'feature_activation_coe',
-        'enablement_events_admin',
-        'enablement_admin',
-        'knowledge_base_admin',
-        'ai_agents_admin',
-        'workshop_labs_admin',
-        'workshop_delivery_admin',
-        'launch_programs_admin',
-        'goals_targets_admin',
-        'deal_registration_admin',
-        'partner_management_admin',
-        'partner_management_user',
-        'benchmark_admin',
-        'provisioning_admin',
-        'action_plans_admin',
-        'project_health_admin',
-        'qbr_admin',
-        'partner_portal_admin',
-        'user_management',
-        'configuration',
-        'enablement_events_user',
-        'enablement_user',
-        'knowledge_base_user',
-        'ai_agents_user',
-        'workshop_labs_user',
-        'workshop_delivery_user',
-        'launch_programs_user',
-        'goals_targets_user',
-        'deal_registration_user',
-        'benchmark_user',
-        'provisioning_user',
-        'action_plans_user',
-        'project_health_user',
-        'qbr_user',
-        'partner_portal_user',
-        'analytics',
-        'competency',
-        'idea_room',
-        'directory_sync_admin',
-        'health_alerts',
-    ];
-
-    /**
      * All portal capability keys.
      *
      * @var string[]
@@ -105,6 +28,7 @@ class RoleSeeder extends Seeder
         'deal_registrations',
         'contacts',
         'scorecard',
+        'company_profile',
     ];
 
     public function run(): void
@@ -147,7 +71,30 @@ class RoleSeeder extends Seeder
             'sort_order' => 2,
             'description' => 'Strategy design, enablement program management, and knowledge base curation.',
         ]);
-        $this->syncPermissions($coe, self::COE_MODULES, 'write');
+        $this->syncPermissions($coe, [
+            'action_plans_admin' => 'write',
+            'ai_agents_admin' => 'write',
+            'analytics' => 'write',
+            'benchmark_admin' => 'write',
+            'blueprints_admin' => 'write',
+            'competency' => 'write',
+            'deal_registration_admin' => 'write',
+            'enablement_admin' => 'write',
+            'enablement_events_admin' => 'write',
+            'feature_activation_coe' => 'write',
+            'goals_targets_admin' => 'write',
+            'health_alerts' => 'write',
+            'knowledge_base_admin' => 'write',
+            'launch_programs_admin' => 'write',
+            'partner_management_admin' => 'write',
+            'partner_portal_admin' => 'write',
+            'project_health_admin' => 'write',
+            'qbr_admin' => 'write',
+            'strategy' => 'write',
+            'user_management' => 'write',
+            'workshop_delivery_admin' => 'write',
+            'workshop_labs_admin' => 'write',
+        ]);
 
         // Manager
         $manager = Role::updateOrCreate(['slug' => 'manager'], [
@@ -159,7 +106,23 @@ class RoleSeeder extends Seeder
             'sort_order' => 3,
             'description' => 'Team oversight, reporting hierarchy management, and portfolio-level analytics.',
         ]);
-        $this->syncPermissions($manager, [...self::USER_MODULES, 'user_management', 'health_alerts'], 'write');
+        $this->syncPermissions($manager, [
+            'action_plans_user' => 'read',
+            'analytics' => 'write',
+            'benchmark_user' => 'read',
+            'blueprints_user' => 'read',
+            'competency' => 'write',
+            'deal_registration_user' => 'read',
+            'enablement_events_user' => 'read',
+            'enablement_user' => 'read',
+            'goals_targets_user' => 'read',
+            'health_alerts' => 'write',
+            'launch_programs_user' => 'read',
+            'partner_management_user' => 'read',
+            'project_health_user' => 'read',
+            'qbr_user' => 'read',
+            'user_management' => 'write',
+        ]);
 
         // PSM
         $psm = Role::updateOrCreate(['slug' => 'psm'], [
@@ -171,7 +134,17 @@ class RoleSeeder extends Seeder
             'sort_order' => 4,
             'description' => 'Day-to-day partner management, task execution, and field enablement.',
         ]);
-        $this->syncPermissions($psm, [...self::USER_MODULES, 'health_alerts'], 'write');
+        $this->syncPermissions($psm, [
+            'blueprints_user' => 'write',
+            'deal_registration_user' => 'write',
+            'enablement_events_user' => 'write',
+            'enablement_user' => 'write',
+            'launch_programs_user' => 'write',
+            'partner_management_user' => 'write',
+            'project_health_user' => 'write',
+            'workshop_delivery_user' => 'write',
+            'workshop_labs_user' => 'write',
+        ]);
 
         // PAM
         $pam = Role::updateOrCreate(['slug' => 'pam'], [
@@ -183,7 +156,22 @@ class RoleSeeder extends Seeder
             'sort_order' => 5,
             'description' => 'Partner account ownership, relationship management, and commercial oversight.',
         ]);
-        $this->syncPermissions($pam, [...self::USER_MODULES, 'health_alerts'], 'write');
+        $this->syncPermissions($pam, [
+            'action_plans_user' => 'write',
+            'analytics' => 'read',
+            'benchmark_user' => 'read',
+            'blueprints_user' => 'read',
+            'competency' => 'read',
+            'deal_registration_user' => 'write',
+            'enablement_events_user' => 'read',
+            'enablement_user' => 'read',
+            'goals_targets_user' => 'write',
+            'health_alerts' => 'write',
+            'launch_programs_user' => 'read',
+            'partner_management_user' => 'write',
+            'project_health_user' => 'write',
+            'qbr_user' => 'write',
+        ]);
 
         // Integration
         $integration = Role::updateOrCreate(['slug' => 'integration'], [
@@ -195,7 +183,10 @@ class RoleSeeder extends Seeder
             'sort_order' => 6,
             'description' => 'Data connector operations, import/export jobs, and field mappings.',
         ]);
-        $this->syncPermissions($integration, ['integration_hub', 'data_imports'], 'write');
+        $this->syncPermissions($integration, [
+            'data_imports' => 'write',
+            'integration_hub' => 'write',
+        ]);
     }
 
     private function seedPortalRoles(): void
@@ -207,8 +198,7 @@ class RoleSeeder extends Seeder
                 'dashboard_group' => 'admin',
                 'sort_order' => 0,
                 'description' => 'Full access to all portal features and team management.',
-                'permissions' => self::ALL_PORTAL_CAPABILITIES,
-                'access_level' => 'write',
+                'permissions' => array_fill_keys(self::ALL_PORTAL_CAPABILITIES, 'write'),
             ],
             [
                 'slug' => 'delivery_lead',
@@ -216,8 +206,7 @@ class RoleSeeder extends Seeder
                 'dashboard_group' => 'delivery',
                 'sort_order' => 1,
                 'description' => 'Manages delivery projects, cases, and enablement content.',
-                'permissions' => ['projects', 'cases', 'enablement', 'blueprints', 'labs', 'workspaces', 'path'],
-                'access_level' => 'write',
+                'permissions' => array_fill_keys(['projects', 'cases', 'enablement', 'blueprints', 'labs', 'workspaces', 'path'], 'write'),
             ],
             [
                 'slug' => 'engagement_manager',
@@ -225,8 +214,7 @@ class RoleSeeder extends Seeder
                 'dashboard_group' => 'admin',
                 'sort_order' => 2,
                 'description' => 'Manages partner engagement, enablement programs, and goals.',
-                'permissions' => ['projects', 'enablement', 'blueprints', 'path', 'goals', 'calendar', 'launch_programs'],
-                'access_level' => 'write',
+                'permissions' => array_fill_keys(['projects', 'enablement', 'blueprints', 'path', 'goals', 'calendar', 'launch_programs'], 'write'),
             ],
             [
                 'slug' => 'practice_lead',
@@ -234,8 +222,7 @@ class RoleSeeder extends Seeder
                 'dashboard_group' => 'admin',
                 'sort_order' => 3,
                 'description' => 'Oversees enablement content, labs, certifications, and goal tracking.',
-                'permissions' => ['enablement', 'blueprints', 'labs', 'certifications', 'path', 'goals'],
-                'access_level' => 'write',
+                'permissions' => array_fill_keys(['enablement', 'blueprints', 'labs', 'certifications', 'path', 'goals'], 'write'),
             ],
             [
                 'slug' => 'marketing',
@@ -243,8 +230,7 @@ class RoleSeeder extends Seeder
                 'dashboard_group' => 'sales',
                 'sort_order' => 4,
                 'description' => 'View-only access to enablement content and blueprints.',
-                'permissions' => ['enablement', 'blueprints'],
-                'access_level' => 'read',
+                'permissions' => array_fill_keys(['enablement', 'blueprints'], 'read'),
             ],
             [
                 'slug' => 'sales',
@@ -252,8 +238,7 @@ class RoleSeeder extends Seeder
                 'dashboard_group' => 'sales',
                 'sort_order' => 5,
                 'description' => 'Deal registration, enablement content, and blueprints.',
-                'permissions' => ['deal_registrations', 'enablement', 'blueprints'],
-                'access_level' => 'write',
+                'permissions' => array_fill_keys(['deal_registrations', 'enablement', 'blueprints'], 'write'),
             ],
             [
                 'slug' => 'pre_sales',
@@ -261,8 +246,7 @@ class RoleSeeder extends Seeder
                 'dashboard_group' => 'sales',
                 'sort_order' => 6,
                 'description' => 'Deal registration, enablement content, blueprints, and lab access.',
-                'permissions' => ['deal_registrations', 'enablement', 'blueprints', 'labs'],
-                'access_level' => 'write',
+                'permissions' => array_fill_keys(['deal_registrations', 'enablement', 'blueprints', 'labs'], 'write'),
             ],
             [
                 'slug' => 'technical_architect',
@@ -270,8 +254,7 @@ class RoleSeeder extends Seeder
                 'dashboard_group' => 'delivery',
                 'sort_order' => 7,
                 'description' => 'Labs, workspaces, blueprints, and enablement content.',
-                'permissions' => ['labs', 'workspaces', 'blueprints', 'enablement'],
-                'access_level' => 'write',
+                'permissions' => array_fill_keys(['labs', 'workspaces', 'blueprints', 'enablement'], 'write'),
             ],
             [
                 'slug' => 'delivery_resource',
@@ -279,15 +262,13 @@ class RoleSeeder extends Seeder
                 'dashboard_group' => 'delivery',
                 'sort_order' => 8,
                 'description' => 'Project and case access with enablement content.',
-                'permissions' => ['projects', 'cases', 'enablement', 'blueprints'],
-                'access_level' => 'write',
+                'permissions' => array_fill_keys(['projects', 'cases', 'enablement', 'blueprints'], 'write'),
             ],
         ];
 
         foreach ($portalRoles as $roleData) {
             $permissions = $roleData['permissions'];
-            $accessLevel = $roleData['access_level'];
-            unset($roleData['permissions'], $roleData['access_level']);
+            unset($roleData['permissions']);
 
             $role = Role::updateOrCreate(['slug' => $roleData['slug']], [
                 ...$roleData,
@@ -296,24 +277,24 @@ class RoleSeeder extends Seeder
                 'bypass_permissions' => false,
             ]);
 
-            $this->syncPermissions($role, $permissions, $accessLevel);
+            $this->syncPermissions($role, $permissions);
         }
     }
 
     /**
      * Sync permissions for a role, removing stale entries and upserting current ones.
      *
-     * @param  string[]  $moduleSlugs
+     * @param  array<string, string>  $permissions  module_slug => access_level
      */
-    private function syncPermissions(Role $role, array $moduleSlugs, string $accessLevel): void
+    private function syncPermissions(Role $role, array $permissions): void
     {
         // Remove permissions not in the current set
         RolePermission::where('role_id', $role->id)
-            ->whereNotIn('module_slug', $moduleSlugs)
+            ->whereNotIn('module_slug', array_keys($permissions))
             ->delete();
 
         // Upsert current permissions
-        foreach ($moduleSlugs as $slug) {
+        foreach ($permissions as $slug => $accessLevel) {
             RolePermission::updateOrCreate(
                 ['role_id' => $role->id, 'module_slug' => $slug],
                 ['access_level' => $accessLevel],

@@ -13,74 +13,100 @@ use Laravel\Pennant\Feature;
 
 class GunnarSeeder extends Seeder
 {
+    /**
+     * All internal users to seed, grouped by role slug.
+     *
+     * @var array<string, list<array{email: string, name: string}>>
+     */
+    private const USERS = [
+        'super_admin' => [
+            ['email' => 'superadmin@example.com', 'name' => 'Alex Mercer'],
+        ],
+        'admin' => [
+            ['email' => 'admin@example.com', 'name' => 'Jordan Mitchell'],
+        ],
+        'manager' => [
+            ['email' => 'bikram.sen@example.com', 'name' => 'Bikram Sen'],
+            ['email' => 'ray.curbelo@example.com', 'name' => 'Ray Curbelo'],
+        ],
+        'coe' => [
+            ['email' => 'jennifer.blake@example.com', 'name' => 'Jennifer Blake'],
+            ['email' => 'kevin.nakamura@example.com', 'name' => 'Kevin Nakamura'],
+            ['email' => 'diana.costa@example.com', 'name' => 'Diana Costa'],
+        ],
+        'integration' => [
+            ['email' => 'integration@example.com', 'name' => 'Integration Hub'],
+        ],
+        'psm' => [
+            ['email' => 'gunnar.stoa@gmail.com', 'name' => 'Gunnar Stoa'],
+            ['email' => 'sarah.chen@example.com', 'name' => 'Sarah Chen'],
+            ['email' => 'marcus.johnson@example.com', 'name' => 'Marcus Johnson'],
+            ['email' => 'emily.rodriguez@example.com', 'name' => 'Emily Rodriguez'],
+            ['email' => 'david.kim@example.com', 'name' => 'David Kim'],
+        ],
+        'pam' => [
+            ['email' => 'rachel.morrison@example.com', 'name' => 'Rachel Morrison'],
+            ['email' => 'james.obrien@example.com', 'name' => "James O'Brien"],
+            ['email' => 'priya.sharma@example.com', 'name' => 'Priya Sharma'],
+            ['email' => 'michael.torres@example.com', 'name' => 'Michael Torres'],
+            ['email' => 'lisa.wang@example.com', 'name' => 'Lisa Wang'],
+            ['email' => 'chris.anderson@example.com', 'name' => 'Chris Anderson'],
+            ['email' => 'nina.patel@example.com', 'name' => 'Nina Patel'],
+            ['email' => 'robert.hayes@example.com', 'name' => 'Robert Hayes'],
+        ],
+    ];
+
+    /**
+     * Partners explicitly assigned to Gunnar (created before PartnerSeeder).
+     *
+     * @var list<array{name: string, website: string, industry: string}>
+     */
+    private const GUNNAR_PARTNERS = [
+        ['name' => 'Accenture', 'website' => 'https://www.accenture.com', 'industry' => 'Consulting'],
+        ['name' => 'Deloitte', 'website' => 'https://www.deloitte.com', 'industry' => 'Consulting'],
+        ['name' => 'PwC', 'website' => 'https://www.pwc.com', 'industry' => 'Consulting'],
+    ];
+
     public function run(): void
     {
-        $this->command->info('Creating admin and Gunnar users...');
+        $this->command->info('Creating all internal users...');
 
-        // Pre-resolve internal role IDs
         $roles = Role::internal()->pluck('id', 'slug');
+        $createdUsers = [];
 
-        // Create Admin user
-        $admin = User::updateOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => 'Admin',
-                'password' => bcrypt('password'),
-                'role_id' => $roles['admin'],
-            ]
-        );
-        $this->command->info('✓ Created/Updated Admin user (admin@example.com / password)');
-
-        // Create role-specific test users for dev switcher
-        $roleUsers = [
-            ['email' => 'superadmin@example.com', 'name' => 'Super Admin', 'role_slug' => 'super_admin'],
-            ['email' => 'manager@example.com', 'name' => 'Manager User', 'role_slug' => 'manager'],
-            ['email' => 'coe@example.com', 'name' => 'CoE User', 'role_slug' => 'coe'],
-            ['email' => 'integration@example.com', 'name' => 'Integration User', 'role_slug' => 'integration'],
-        ];
-
-        foreach ($roleUsers as $userData) {
-            User::updateOrCreate(
-                ['email' => $userData['email']],
-                [
-                    'name' => $userData['name'],
-                    'password' => bcrypt('password'),
-                    'role_id' => $roles[$userData['role_slug']],
-                ]
-            );
-            $this->command->info("✓ Created/Updated {$userData['name']} ({$userData['email']} / password)");
+        foreach (self::USERS as $roleSlug => $users) {
+            foreach ($users as $userData) {
+                $user = User::updateOrCreate(
+                    ['email' => $userData['email']],
+                    [
+                        'name' => $userData['name'],
+                        'password' => bcrypt('password'),
+                        'role_id' => $roles[$roleSlug],
+                    ]
+                );
+                $createdUsers[$roleSlug][] = $user;
+                $this->command->info("  ✓ {$userData['name']} ({$userData['email']}) → {$roleSlug}");
+            }
         }
 
-        // Create Gunnar Stoa as PSM user
-        $gunnar = User::updateOrCreate(
-            ['email' => 'gunnar.stoa@gmail.com'],
-            [
-                'name' => 'Gunnar Stoa',
-                'password' => bcrypt('password'),
-                'role_id' => $roles['psm'],
-            ]
-        );
+        // Assign reporting hierarchy: PSMs → Bikram, PAMs → Ray
+        $bikram = $createdUsers['manager'][0];
+        $ray = $createdUsers['manager'][1];
 
-        // Create specific partners assigned to Gunnar
-        $partnerData = [
-            [
-                'name' => 'Accenture',
-                'website' => 'https://www.accenture.com',
-                'industry' => 'Consulting',
-            ],
-            [
-                'name' => 'Deloitte',
-                'website' => 'https://www.deloitte.com',
-                'industry' => 'Consulting',
-            ],
-            [
-                'name' => 'PwC',
-                'website' => 'https://www.pwc.com',
-                'industry' => 'Consulting',
-            ],
-        ];
+        foreach ($createdUsers['psm'] as $psm) {
+            $psm->update(['manager_id' => $bikram->id]);
+        }
+        $this->command->info("  ✓ All PSMs report to {$bikram->name}");
 
-        foreach ($partnerData as $data) {
+        foreach ($createdUsers['pam'] as $pam) {
+            $pam->update(['manager_id' => $ray->id]);
+        }
+        $this->command->info("  ✓ All PAMs report to {$ray->name}");
+
+        // Create Gunnar's explicit partners
+        $gunnar = $createdUsers['psm'][0];
+
+        foreach (self::GUNNAR_PARTNERS as $data) {
             $partner = Partner::updateOrCreate(
                 ['name' => $data['name']],
                 [
@@ -91,18 +117,17 @@ class GunnarSeeder extends Seeder
                 ]
             );
 
-            // Assign partner to Gunnar via user_partner pivot table (many-to-many)
             if (! $partner->psms()->where('user_id', $gunnar->id)->exists()) {
                 $partner->psms()->attach($gunnar->id, ['role' => 'psm']);
             }
 
-            $this->command->info("✓ Created/Updated {$partner->name} and assigned to Gunnar");
+            $this->command->info("  ✓ {$partner->name} → assigned to Gunnar");
         }
 
         // Seed deal registrations
         if (DealRegistration::count() === 0) {
             DealRegistration::factory(30)->create();
-            $this->command->info('✓ Seeded 30 deal registrations');
+            $this->command->info('  ✓ Seeded 30 deal registrations');
         }
 
         // Activate all Pennant feature flags by discovering Feature classes
@@ -115,14 +140,13 @@ class GunnarSeeder extends Seeder
             Feature::for(null)->activate($class);
             $activated++;
         }
-        $this->command->info("✓ Activated all {$activated} Pennant feature flags");
+        $this->command->info("  ✓ Activated {$activated} Pennant feature flags");
 
         // Seed directory sync connector + sample connection
         $this->call(DirectorySyncConnectorSeeder::class);
 
-        $this->command->info('✅ Gunnar setup complete!');
-        $this->command->info("   Email: {$gunnar->email}");
-        $this->command->info("   Role: {$gunnar->role?->display_name}");
-        $this->command->info('   Assigned Partners: '.$gunnar->psmPartners()->count());
+        // Summary
+        $totalUsers = collect($createdUsers)->flatten()->count();
+        $this->command->info("✅ Setup complete: {$totalUsers} users created across all roles");
     }
 }

@@ -6,6 +6,32 @@
 
 @section('content')
 <p class="text-muted fst-italic mt-3 mb-4">Define who reports to whom across the partner team. Changes here determine the management chain used for visibility, approvals, and team-level reporting.</p>
+
+{{-- Organization Chart --}}
+<div class="row mb-4">
+    <div class="col-xl-12">
+        <div class="card shadow-0 mb-g">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <div class="card-title mb-0">Organization Chart</div>
+                <div class="d-flex align-items-center gap-3">
+                    <small class="text-muted d-none d-md-inline">Drag a person onto another to reassign their manager</small>
+                    <button type="button" class="btn btn-xs btn-outline-secondary" id="org-chart-reset-zoom" title="Reset zoom">
+                        <i class="fal fa-expand me-1"></i> Reset
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div id="org-chart-toast"></div>
+                <div id="org-chart-container"
+                     data-url="{{ route('reporting-hierarchy.data') }}"
+                     data-update-url="/reporting-hierarchy"
+                     style="width: 100%; min-height: 320px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-xl-12">
         <div class="card shadow-0 mb-g">
@@ -121,7 +147,7 @@
 @endsection
 
 @section('scripts')
-    @vite(['resources/scripts/pages/table-init.js'])
+    @vite(['resources/scripts/pages/table-init.js', 'resources/scripts/pages/org-chart.js'])
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // SmartTable initialization

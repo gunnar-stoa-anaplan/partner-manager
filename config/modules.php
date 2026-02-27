@@ -302,6 +302,20 @@ return [
         'enabled' => env('MODULE_ENABLEMENT_EVENTS_USER', true),
     ],
 
+    'blueprints_admin' => [
+        'name' => 'Blueprints Administration',
+        'description' => 'Administrative access to blueprint catalog, assignments, enrollments, and progress tracking.',
+        'icon' => 'layers',
+        'enabled' => env('MODULE_BLUEPRINTS_ADMIN', true),
+    ],
+
+    'blueprints_user' => [
+        'name' => 'Blueprints End Users',
+        'description' => 'End-user access to view assigned blueprints and track partner progress.',
+        'icon' => 'layers',
+        'enabled' => env('MODULE_BLUEPRINTS_USER', true),
+    ],
+
     'knowledge_base_admin' => [
         'name' => 'Knowledge Base Administration',
         'description' => 'Document ingestion, embedding management, and knowledge base configuration.',

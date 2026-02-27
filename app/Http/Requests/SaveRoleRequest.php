@@ -39,6 +39,15 @@ class SaveRoleRequest extends FormRequest
         ];
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('permissions')) {
+            $this->merge([
+                'permissions' => array_filter($this->input('permissions', []), fn ($v) => $v !== '' && $v !== null),
+            ]);
+        }
+    }
+
     /**
      * @return array<string, string>
      */

@@ -2,12 +2,12 @@
 @if(app()->environment('local'))
     @php
         $roleOrder = ['super_admin', 'admin', 'psm', 'manager', 'coe', 'integration'];
-        $devUsers = \App\Models\User::query()
+        $devUsers = \App\Models\User::with('role')
             ->orderBy('name')
             ->get()
-            ->groupBy('role')
-            ->sortBy(fn ($group, $role) => array_search($role, $roleOrder));
-        $currentRole = auth()->user()->role;
+            ->groupBy(fn ($u) => $u->role?->slug ?? 'none')
+            ->sortBy(fn ($group, $slug) => array_search($slug, $roleOrder));
+        $currentRole = auth()->user()->role?->slug ?? 'none';
         $isImpersonating = session('impersonating_user');
     @endphp
 

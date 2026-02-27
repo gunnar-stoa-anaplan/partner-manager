@@ -44,6 +44,7 @@ class PortalRolesTest extends TestCase
         $this->assertTrue($contact->canAccess('calendar'));
         $this->assertTrue($contact->canAccess('launch_programs'));
         $this->assertTrue($contact->canAccess('cases'));
+        $this->assertTrue($contact->canAccess('company_profile'));
     }
 
     public function test_sales_role_capabilities(): void
@@ -57,6 +58,7 @@ class PortalRolesTest extends TestCase
         $this->assertFalse($contact->canAccess('goals'));
         $this->assertFalse($contact->canAccess('contacts'));
         $this->assertFalse($contact->canAccess('path'));
+        $this->assertFalse($contact->canAccess('company_profile'));
     }
 
     public function test_delivery_lead_capabilities(): void
@@ -73,6 +75,7 @@ class PortalRolesTest extends TestCase
         $this->assertFalse($contact->canAccess('deal_registrations'));
         $this->assertFalse($contact->canAccess('goals'));
         $this->assertFalse($contact->canAccess('contacts'));
+        $this->assertFalse($contact->canAccess('company_profile'));
     }
 
     public function test_engagement_manager_capabilities(): void

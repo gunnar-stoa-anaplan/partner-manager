@@ -165,6 +165,8 @@ class RoleController extends Controller
             'enablement_user' => 'Enablement',
             'enablement_events_admin' => 'Enablement',
             'enablement_events_user' => 'Enablement',
+            'blueprints_admin' => 'Enablement',
+            'blueprints_user' => 'Enablement',
             'deal_registration_admin' => 'Deal Registration',
             'deal_registration_user' => 'Deal Registration',
             'launch_programs_admin' => 'Launch Programs',
