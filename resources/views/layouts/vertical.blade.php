@@ -17,8 +17,6 @@
 
     @include('layouts.partials/app-license-banner')
 
-    @include('layouts.partials/app-impersonation-banner')
-
     <main class="app-body">
 
         @include('layouts.partials/app-impersonation-banner')
