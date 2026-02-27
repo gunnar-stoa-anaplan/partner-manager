@@ -107,6 +107,8 @@
         </div>
     </div>
 
+    @php $registry = app(\App\Services\ModuleRegistry::class); @endphp
+
     {{-- Tab Navigation --}}
     <ul class="nav nav-tabs border-bottom mb-g" id="partner-tabs" role="tablist">
         <li class="nav-item">
@@ -114,6 +116,7 @@
                 <i class="fal fa-tachometer-alt me-1 d-none d-md-inline"></i> Overview
             </a>
         </li>
+        @if($registry->isEnabled('deal_registration_user'))
         <li class="nav-item">
             <a class="nav-link" href="#pipeline" data-tab="pipeline" role="tab">
                 <i class="fal fa-chart-line me-1 d-none d-md-inline"></i> Pipeline
@@ -121,11 +124,21 @@
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" href="#deal-registrations" data-tab="deal-registrations" role="tab">
+                <i class="fal fa-file-text me-1 d-none d-md-inline"></i> Deal Registrations
+                <span class="badge bg-info bg-opacity-25 text-info ms-1">{{ $partner->dealRegistrations->count() }}</span>
+            </a>
+        </li>
+        @endif
+        @if($registry->isEnabled('project_health_user'))
+        <li class="nav-item">
             <a class="nav-link" href="#projects" data-tab="projects" role="tab">
                 <i class="fal fa-project-diagram me-1 d-none d-md-inline"></i> Projects
                 <span class="badge bg-info bg-opacity-25 text-info ms-1">{{ $partner->projects->count() }}</span>
             </a>
         </li>
+        @endif
+        @if($registry->isEnabled('enablement_user'))
         <li class="nav-item">
             <a class="nav-link" href="#enablement" data-tab="enablement" role="tab">
                 <i class="fal fa-award me-1 d-none d-md-inline"></i> Enablement
@@ -141,31 +154,53 @@
                 <i class="fal fa-users me-1 d-none d-md-inline"></i> Influencers
             </a>
         </li>
+        @endif
         <li class="nav-item">
             <a class="nav-link" href="#resources" data-tab="resources" role="tab">
                 <i class="fal fa-user-hard-hat me-1 d-none d-md-inline"></i> Resources
             </a>
         </li>
+        @if($registry->isEnabled('blueprints_user'))
+        <li class="nav-item">
+            <a class="nav-link" href="#blueprints" data-tab="blueprints" role="tab">
+                <i class="fal fa-layers me-1 d-none d-md-inline"></i> Blueprints
+                <span class="badge bg-primary bg-opacity-25 text-primary ms-1">{{ $partner->blueprintAssignments->count() }}</span>
+            </a>
+        </li>
+        @endif
+        @if($registry->isEnabled('enablement_user'))
         <li class="nav-item">
             <a class="nav-link" href="#app-enablement" data-tab="app-enablement" role="tab">
                 <i class="fal fa-th me-1 d-none d-md-inline"></i> Nicole's View
             </a>
         </li>
+        @endif
+        @if($registry->isEnabled('launch_programs_user'))
         <li class="nav-item">
             <a class="nav-link" href="#launch-programs" data-tab="launch-programs" role="tab">
                 <i class="fal fa-rocket me-1 d-none d-md-inline"></i> Launch Programs
             </a>
         </li>
+        @endif
+        @if($registry->isEnabled('provisioning_user'))
         <li class="nav-item">
             <a class="nav-link" href="#workspaces" data-tab="workspaces" role="tab">
                 <i class="fal fa-server me-1 d-none d-md-inline"></i> Workspaces
                 <span class="badge bg-info bg-opacity-25 text-info ms-1">{{ $partner->anaplanWorkspaces->count() }}</span>
             </a>
         </li>
+        @endif
+        @if($registry->isEnabled('partner_portal_user'))
         <li class="nav-item">
             <a class="nav-link" href="#portal-users" data-tab="portal-users" role="tab">
                 <i class="fal fa-user-shield me-1 d-none d-md-inline"></i> Portal Users
                 <span class="badge bg-info bg-opacity-25 text-info ms-1">{{ $partner->contacts->where('portal_access', true)->count() }}</span>
+            </a>
+        </li>
+        @endif
+        <li class="nav-item">
+            <a class="nav-link" href="#marketplace" data-tab="marketplace" role="tab">
+                <i class="fal fa-store me-1 d-none d-md-inline"></i> Marketplace
             </a>
         </li>
     </ul>
@@ -177,6 +212,7 @@
             @include('partner.tabs.overview')
         </div>
 
+        @if($registry->isEnabled('deal_registration_user'))
         {{-- Pipeline (AJAX) --}}
         <div class="tab-pane" id="tab-pipeline" style="display: none;">
             <div class="spinner-loader">
@@ -185,6 +221,16 @@
             </div>
         </div>
 
+        {{-- Deal Registrations (AJAX) --}}
+        <div class="tab-pane" id="tab-deal-registrations" style="display: none;">
+            <div class="spinner-loader">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading deal registrations...</p>
+            </div>
+        </div>
+        @endif
+
+        @if($registry->isEnabled('project_health_user'))
         {{-- Projects (AJAX) --}}
         <div class="tab-pane" id="tab-projects" style="display: none;">
             <div class="spinner-loader">
@@ -192,7 +238,9 @@
                 <p class="mt-2 text-muted">Loading project data...</p>
             </div>
         </div>
+        @endif
 
+        @if($registry->isEnabled('enablement_user'))
         {{-- Enablement (AJAX) --}}
         <div class="tab-pane" id="tab-enablement" style="display: none;">
             <div class="spinner-loader">
@@ -216,6 +264,7 @@
                 <p class="mt-2 text-muted">Loading influencer data...</p>
             </div>
         </div>
+        @endif
 
         {{-- Resources (AJAX) --}}
         <div class="tab-pane" id="tab-resources" style="display: none;">
@@ -225,6 +274,17 @@
             </div>
         </div>
 
+        @if($registry->isEnabled('blueprints_user'))
+        {{-- Blueprints (AJAX) --}}
+        <div class="tab-pane" id="tab-blueprints" style="display: none;">
+            <div class="spinner-loader">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading blueprint data...</p>
+            </div>
+        </div>
+        @endif
+
+        @if($registry->isEnabled('enablement_user'))
         {{-- App Enablement (AJAX) --}}
         <div class="tab-pane" id="tab-app-enablement" style="display: none;">
             <div class="spinner-loader">
@@ -232,7 +292,9 @@
                 <p class="mt-2 text-muted">Loading app enablement data...</p>
             </div>
         </div>
+        @endif
 
+        @if($registry->isEnabled('launch_programs_user'))
         {{-- Launch Programs (AJAX) --}}
         <div class="tab-pane" id="tab-launch-programs" style="display: none;">
             <div class="spinner-loader">
@@ -240,7 +302,9 @@
                 <p class="mt-2 text-muted">Loading launch programs...</p>
             </div>
         </div>
+        @endif
 
+        @if($registry->isEnabled('provisioning_user'))
         {{-- Workspaces (AJAX) --}}
         <div class="tab-pane" id="tab-workspaces" style="display: none;">
             <div class="spinner-loader">
@@ -248,7 +312,9 @@
                 <p class="mt-2 text-muted">Loading workspace data...</p>
             </div>
         </div>
+        @endif
 
+        @if($registry->isEnabled('partner_portal_user'))
         {{-- Portal Users (AJAX) --}}
         <div class="tab-pane" id="tab-portal-users" style="display: none;">
             <div class="spinner-loader">
@@ -256,16 +322,25 @@
                 <p class="mt-2 text-muted">Loading portal users...</p>
             </div>
         </div>
+        @endif
+
+        {{-- Marketplace (AJAX) --}}
+        <div class="tab-pane" id="tab-marketplace" style="display: none;">
+            <div class="spinner-loader">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading marketplace data...</p>
+            </div>
+        </div>
     </div>
 @endsection
 
 @section('scripts')
-@vite(['resources/scripts/pages/table-init.js'])
+@vite(['resources/scripts/pages/table-init.js', 'resources/scripts/pages/ai-insights-partner.js'])
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var PARTNER_ID = {{ $partner->id }};
     var TAB_BASE_URL = '{{ url("/partners") }}/' + PARTNER_ID + '/tab/';
-    var AJAX_TABS = ['pipeline', 'projects', 'enablement', 'calendar', 'influencers', 'resources', 'app-enablement', 'launch-programs', 'workspaces', 'portal-users'];
+    var AJAX_TABS = ['pipeline', 'deal-registrations', 'projects', 'enablement', 'calendar', 'influencers', 'resources', 'blueprints', 'app-enablement', 'launch-programs', 'workspaces', 'portal-users', 'marketplace'];
     var ALL_TABS = ['overview'].concat(AJAX_TABS);
 
     // State

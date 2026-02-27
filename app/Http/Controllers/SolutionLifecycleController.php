@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Partner;
@@ -13,7 +14,7 @@ class SolutionLifecycleController extends Controller
         $user = auth()->user();
         $query = PartnerSolution::with('partner');
 
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
             $query->whereIn('partner_id', $partnerIds);
         }
@@ -27,7 +28,7 @@ class SolutionLifecycleController extends Controller
             $stageCounts[$s] = $grouped->get($s, collect())->count();
         }
 
-        $partners = $user->role === 'admin'
+        $partners = $user->isAdmin()
             ? Partner::select('id', 'name')->orderBy('name')->get()
             : Partner::where('user_id', $user->id)->select('id', 'name')->orderBy('name')->get();
 
@@ -66,7 +67,7 @@ class SolutionLifecycleController extends Controller
         $stages = ['build' => 'market', 'market' => 'sell', 'sell' => 'grow'];
         $nextStage = $stages[$solution->lifecycle_stage] ?? null;
 
-        if (!$nextStage) {
+        if (! $nextStage) {
             return redirect()->back()->with('error', 'Solution is already at final stage.');
         }
 

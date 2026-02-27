@@ -127,6 +127,39 @@
 </div>
 @endif
 
+@if(app(\App\Services\ModuleRegistry::class)->isEnabled('ai_agents_user'))
+{{-- AI Partner Insights --}}
+<div class="row mb-g" id="ai-insights-partner-panel" data-advisor-url="{{ route('partners.advisor', $partner) }}">
+    <div class="col-12">
+        <div class="card shadow-0 border-primary border-opacity-25 mb-0">
+            <div class="card-header bg-primary bg-opacity-10">
+                <div class="d-flex align-items-center">
+                    <svg class="sa-icon sa-icon-sm me-2"><use href="/icons/sprite.svg#cpu"></use></svg>
+                    <span class="fw-medium">AI Partner Insights</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="text-muted fs-sm mb-3">
+                    Get AI-powered health assessment and strategic recommendations for this partner based on their metrics, scorecards, and activity.
+                </p>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <button type="button" class="btn btn-sm btn-primary" id="ai-insights-btn">
+                        <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#cpu"></use></svg>
+                        Get AI Insights
+                    </button>
+                    <div class="ai-generate-spinner d-none">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        <span class="text-muted fs-sm ms-1">Analyzing partner (10-30s)...</span>
+                    </div>
+                </div>
+                <div class="ai-generate-error text-danger fs-sm d-none"></div>
+                <div class="ai-insights-results d-none"></div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <div class="row">
     {{-- Business Metrics --}}
     <div class="col-lg-{{ $latestScorecard ? '6' : '12' }}">

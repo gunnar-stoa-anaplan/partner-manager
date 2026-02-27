@@ -5,16 +5,93 @@ namespace App\Http\Controllers;
 use App\Models\DealRegistration;
 use App\Models\Opportunity;
 use App\Models\Partner;
+use App\Support\DatabasePortability;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DealRegistrationController extends Controller
 {
+    public function dashboard(): \Illuminate\View\View
+    {
+        // ── KPI Cards ──
+        $totalDeals = DealRegistration::count();
+        $pendingDeals = DealRegistration::pending()->count();
+        $approvedDeals = DealRegistration::where('status', 'approved')->count();
+        $rejectedDeals = DealRegistration::where('status', 'rejected')->count();
+        $totalPipelineValue = DealRegistration::active()->sum('estimated_value');
+        $approvedValue = DealRegistration::where('status', 'approved')->sum('estimated_value');
+        $avgDealSize = $totalDeals > 0 ? round(DealRegistration::avg('estimated_value'), 0) : 0;
+
+        // ── Deals by Status (donut) ──
+        $dealsByStatus = DealRegistration::select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        // ── Deals by Product Area (bar) ──
+        $dealsByProductArea = DealRegistration::select('product_area', DB::raw('count(*) as total'))
+            ->whereNotNull('product_area')
+            ->groupBy('product_area')
+            ->pluck('total', 'product_area');
+
+        // ── Pipeline Value by Product Area (bar) ──
+        $valueByProductArea = DealRegistration::select('product_area', DB::raw('sum(estimated_value) as total'))
+            ->whereNotNull('product_area')
+            ->where('status', '!=', 'rejected')
+            ->groupBy('product_area')
+            ->pluck('total', 'product_area');
+
+        // ── Deals by Month (area chart) ──
+        $dealsByMonth = DealRegistration::select(
+            DB::raw(DatabasePortability::dateFormat('submitted_at', '%Y-%m').' as month'),
+            DB::raw('count(*) as total')
+        )
+            ->whereNotNull('submitted_at')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total', 'month');
+
+        // ── Top Partners by Deal Count ──
+        $topPartners = DealRegistration::select('partner_id', DB::raw('count(*) as total'), DB::raw('sum(estimated_value) as value'))
+            ->groupBy('partner_id')
+            ->orderByDesc('total')
+            ->limit(10)
+            ->with('partner:id,name')
+            ->get()
+            ->map(fn ($row) => [
+                'name' => $row->partner->name ?? 'Unknown',
+                'count' => $row->total,
+                'value' => $row->value,
+            ]);
+
+        // ── Recent Deals Table ──
+        $recentDeals = DealRegistration::with(['partner:id,name', 'reviewer:id,name'])
+            ->latest()
+            ->limit(15)
+            ->get();
+
+        return view('engage.deal-registrations.dashboard', compact(
+            'totalDeals',
+            'pendingDeals',
+            'approvedDeals',
+            'rejectedDeals',
+            'totalPipelineValue',
+            'approvedValue',
+            'avgDealSize',
+            'dealsByStatus',
+            'dealsByProductArea',
+            'valueByProductArea',
+            'dealsByMonth',
+            'topPartners',
+            'recentDeals',
+        ));
+    }
+
     public function index(Request $request): \Illuminate\View\View
     {
         $user = auth()->user();
         $query = DealRegistration::with(['partner', 'contact', 'reviewer']);
 
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
             $query->whereIn('partner_id', $partnerIds);
         }
@@ -37,7 +114,7 @@ class DealRegistrationController extends Controller
     public function create(): \Illuminate\View\View
     {
         $user = auth()->user();
-        $partners = $user->role === 'admin'
+        $partners = $user->isAdmin()
             ? Partner::orderBy('name')->get(['id', 'name'])
             : Partner::where('user_id', $user->id)->orderBy('name')->get(['id', 'name']);
 

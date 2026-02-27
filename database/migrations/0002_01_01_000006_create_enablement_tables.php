@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('slug')->unique();
-            $table->enum('type', ['workshop', 'academy', 'certification_exam', 'webinar', 'bootcamp', 'onboarding', 'hackathon', 'connect', 'other']);
+            $table->string('type', 50);
             $table->string('category')->nullable();
             $table->text('description')->nullable();
             $table->text('objectives')->nullable();
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->unsignedInteger('max_participants')->nullable();
             $table->string('materials_url')->nullable();
             $table->string('thumbnail')->nullable();
-            $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
+            $table->string('status', 50)->default('draft');
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
             $table->softDeletes();
@@ -42,7 +42,7 @@ return new class extends Migration
             $table->string('geography')->nullable();
             $table->string('region')->nullable();
             $table->unsignedInteger('max_participants')->nullable();
-            $table->enum('status', ['scheduled', 'in_progress', 'completed', 'cancelled'])->default('scheduled');
+            $table->string('status', 50)->default('scheduled');
             $table->text('notes')->nullable();
             $table->text('summary')->nullable();
             $table->dateTime('registration_deadline')->nullable();
@@ -61,7 +61,7 @@ return new class extends Migration
             $table->foreignId('contact_id')->constrained('contacts')->cascadeOnDelete();
             $table->foreignId('partner_id')->constrained('partners')->cascadeOnDelete();
             $table->foreignId('nominated_by')->constrained('users')->cascadeOnDelete();
-            $table->enum('status', ['nominated', 'registered', 'confirmed', 'attended', 'no_show', 'cancelled'])->default('nominated');
+            $table->string('status', 50)->default('nominated');
             $table->dateTime('nominated_at')->nullable();
             $table->dateTime('registered_at')->nullable();
             $table->dateTime('confirmed_at')->nullable();

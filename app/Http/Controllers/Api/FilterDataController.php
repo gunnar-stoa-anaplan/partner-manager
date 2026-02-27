@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class FilterDataController extends Controller
@@ -19,8 +18,9 @@ class FilterDataController extends Controller
         // Get all PSM-Partner relationships from user_partner pivot table
         $psmPartnerMap = DB::table('user_partner')
             ->join('users', 'user_partner.user_id', '=', 'users.id')
+            ->join('roles', 'users.role_id', '=', 'roles.id')
             ->where('user_partner.role', 'psm')
-            ->where('users.role', 'psm')
+            ->where('roles.slug', 'psm')
             ->select('users.name as psm_name', 'user_partner.partner_id')
             ->get()
             ->groupBy('psm_name')
@@ -57,8 +57,8 @@ class FilterDataController extends Controller
      */
     public function allFilterOptions()
     {
-        // Get unique PSMs from users table with role='psm'
-        $psms = User::where('role', 'psm')
+        // Get unique PSMs from users table
+        $psms = User::whereRelation('role', 'slug', 'psm')
             ->orderBy('name')
             ->pluck('name')
             ->toArray();

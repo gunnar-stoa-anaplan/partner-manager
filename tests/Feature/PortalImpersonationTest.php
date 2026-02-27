@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Contact;
 use App\Models\Partner;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -22,9 +23,10 @@ class PortalImpersonationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(RoleSeeder::class);
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->psm = User::factory()->create(['role' => 'psm']);
+        $this->admin = User::factory()->admin()->create();
+        $this->psm = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $this->psm->id]);
     }
 
@@ -53,7 +55,7 @@ class PortalImpersonationTest extends TestCase
 
     public function test_admin_can_view_any_partners_portal_users_tab(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         $response = $this->actingAs($this->admin)->get(
@@ -65,7 +67,7 @@ class PortalImpersonationTest extends TestCase
 
     public function test_psm_cannot_view_other_partners_portal_users_tab(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
 
         $response = $this->actingAs($this->psm)->get(
@@ -124,7 +126,7 @@ class PortalImpersonationTest extends TestCase
     {
         $contact = Contact::factory()->create([
             'partner_id' => $this->partner->id,
-            'portal_role' => null,
+            'portal_role_id' => null,
         ]);
 
         $response = $this->actingAs($this->psm)->patch(
@@ -133,7 +135,7 @@ class PortalImpersonationTest extends TestCase
         );
 
         $response->assertRedirect();
-        $this->assertEquals('sales', $contact->fresh()->portal_role);
+        $this->assertEquals('sales', $contact->fresh()->role?->slug);
     }
 
     public function test_update_role_rejects_invalid_role(): void
@@ -160,7 +162,7 @@ class PortalImpersonationTest extends TestCase
         );
 
         $response->assertRedirect();
-        $this->assertNull($contact->fresh()->portal_role);
+        $this->assertNull($contact->fresh()->portal_role_id);
     }
 
     // ─── Set Password ─────────────────────────────────────────────
@@ -206,7 +208,7 @@ class PortalImpersonationTest extends TestCase
 
     public function test_admin_can_impersonate_any_contact(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
         $contact = $this->createPortalContact('admin', $otherPartner);
 
@@ -237,7 +239,7 @@ class PortalImpersonationTest extends TestCase
 
     public function test_psm_cannot_impersonate_other_partners_contact(): void
     {
-        $otherPsm = User::factory()->create(['role' => 'psm']);
+        $otherPsm = User::factory()->psm()->create();
         $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
         $contact = $this->createPortalContact('admin', $otherPartner);
 
@@ -250,10 +252,9 @@ class PortalImpersonationTest extends TestCase
 
     public function test_cannot_impersonate_contact_without_portal_access(): void
     {
-        $contact = Contact::factory()->create([
+        $contact = Contact::factory()->portalAdmin()->create([
             'partner_id' => $this->partner->id,
             'portal_access' => false,
-            'portal_role' => 'partner_admin',
         ]);
 
         $response = $this->actingAs($this->psm)->post(
@@ -270,7 +271,7 @@ class PortalImpersonationTest extends TestCase
         $contact = Contact::factory()->create([
             'partner_id' => $this->partner->id,
             'portal_access' => true,
-            'portal_role' => null,
+            'portal_role_id' => null,
         ]);
 
         $response = $this->actingAs($this->psm)->post(
@@ -303,10 +304,9 @@ class PortalImpersonationTest extends TestCase
 
     public function test_impersonated_session_bypasses_portal_access_check(): void
     {
-        $contact = Contact::factory()->create([
+        $contact = Contact::factory()->portalAdmin()->create([
             'partner_id' => $this->partner->id,
             'portal_access' => false,
-            'portal_role' => 'partner_admin',
             'password' => 'password',
         ]);
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\Portal\PortalBlueprintsController;
 use App\Http\Controllers\Portal\PortalCalendarController;
 use App\Http\Controllers\Portal\PortalCasesController;
 use App\Http\Controllers\Portal\PortalCertificationsController;
+use App\Http\Controllers\Portal\PortalCompanyProfileController;
 use App\Http\Controllers\Portal\PortalContactsController;
 use App\Http\Controllers\Portal\PortalDashboardController;
 use App\Http\Controllers\Portal\PortalDealRegistrationController;
@@ -62,6 +63,15 @@ Route::middleware('portal')->group(function () {
     Route::middleware('portal.can:calendar')->group(function () {
         Route::get('/calendar', [PortalCalendarController::class, 'index'])->name('calendar.index');
         Route::get('/calendar/events', [PortalCalendarController::class, 'events'])->name('calendar.events');
+    });
+
+    // Company profile — partner_admin only
+    Route::middleware('portal.can:company_profile')->group(function () {
+        Route::get('/company-profile', [PortalCompanyProfileController::class, 'edit'])->name('company-profile.edit');
+        Route::put('/company-profile', [PortalCompanyProfileController::class, 'update'])->name('company-profile.update');
+        Route::post('/company-profile/entries', [PortalCompanyProfileController::class, 'storeEntry'])->name('company-profile.entries.store');
+        Route::put('/company-profile/entries/{entry}', [PortalCompanyProfileController::class, 'updateEntry'])->name('company-profile.entries.update');
+        Route::delete('/company-profile/entries/{entry}', [PortalCompanyProfileController::class, 'destroyEntry'])->name('company-profile.entries.destroy');
     });
 
     // Team management — partner_admin only (has contacts via wildcard)

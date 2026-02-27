@@ -17,7 +17,7 @@ class LaunchProgramSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('role', 'admin')->first() ?? User::first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first() ?? User::first();
         $users = User::all();
 
         // ── Program 1: Active program with lots of data ──
@@ -33,7 +33,7 @@ class LaunchProgramSeeder extends Seeder
             'max_partners' => 8,
             'partner_strategy' => 'include',
             'created_by' => $admin->id,
-            'owner_id' => $users->where('role', 'psm')->random()?->id ?? $admin->id,
+            'owner_id' => $users->filter(fn ($u) => $u->role?->slug === 'psm')->random()?->id ?? $admin->id,
         ], [
             ['title' => 'Sign NDA', 'type' => 'document', 'is_required' => true, 'due_date' => now()->subWeeks(4)],
             ['title' => 'Complete Polaris Enablement Blueprint', 'type' => 'enablement', 'is_required' => true, 'due_date' => now()->subWeeks(2)],
@@ -94,7 +94,7 @@ class LaunchProgramSeeder extends Seeder
             'max_partners' => 5,
             'partner_strategy' => 'include',
             'created_by' => $admin->id,
-            'owner_id' => $users->where('role', 'psm')->random()?->id ?? $admin->id,
+            'owner_id' => $users->filter(fn ($u) => $u->role?->slug === 'psm')->random()?->id ?? $admin->id,
         ], [
             ['title' => 'Sign Participation Agreement', 'type' => 'document', 'is_required' => true, 'due_date' => now()->addWeeks(4)],
             ['title' => 'Assign Technical Lead', 'type' => 'task', 'is_required' => true, 'due_date' => now()->addWeeks(5)],
@@ -117,7 +117,7 @@ class LaunchProgramSeeder extends Seeder
             'max_partners' => 10,
             'partner_strategy' => 'include',
             'created_by' => $admin->id,
-            'owner_id' => $users->where('role', 'psm')->random()?->id ?? $admin->id,
+            'owner_id' => $users->filter(fn ($u) => $u->role?->slug === 'psm')->random()?->id ?? $admin->id,
         ], [
             ['title' => 'Complete Product Overview Training', 'type' => 'enablement', 'is_required' => true, 'due_date' => now()->subWeeks(6)],
             ['title' => 'Pass Certification Exam', 'type' => 'task', 'is_required' => true, 'due_date' => now()->subWeeks(2)],
@@ -174,7 +174,7 @@ class LaunchProgramSeeder extends Seeder
         if ($mustInclude) {
             $partners->prepend($mustInclude);
         }
-        $psms = User::where('role', 'psm')->get();
+        $psms = User::whereRelation('role', 'slug', 'psm')->get();
         $milestones = $program->milestones;
         $requiredMilestones = $milestones->where('is_required', true);
         $roles = array_keys(LaunchProgramParticipant::ROLES);

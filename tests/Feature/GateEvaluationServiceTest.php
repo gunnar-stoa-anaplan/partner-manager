@@ -33,9 +33,11 @@ class GateEvaluationServiceTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
         $this->service = app(GateEvaluationService::class);
 
-        $psm = User::factory()->create(['role' => 'psm']);
+        $psm = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $psm->id]);
 
         $this->path = PartnerPath::factory()->create();
@@ -308,5 +310,31 @@ class GateEvaluationServiceTest extends TestCase
         $this->assertArrayHasKey('actual_value', $result);
         $this->assertArrayHasKey('met', $result);
         $this->assertEquals($gate->id, $result['gate_id']);
+    }
+
+    // ─── Marketplace Approved ────────────────────────────────────
+
+    public function test_evaluates_marketplace_approved_gate(): void
+    {
+        $this->createGate('marketplace_approved', 1, 'gte', 'boolean');
+
+        $this->partner->update(['marketplace_status' => 'approved']);
+
+        $results = $this->service->evaluateGates($this->partner, $this->stage1->id, $this->stage2->id);
+
+        $this->assertTrue($results->first()['met']);
+        $this->assertEquals(1, $results->first()['actual_value']);
+    }
+
+    public function test_marketplace_not_approved_fails_gate(): void
+    {
+        $this->createGate('marketplace_approved', 1, 'gte', 'boolean');
+
+        $this->partner->update(['marketplace_status' => 'draft']);
+
+        $results = $this->service->evaluateGates($this->partner, $this->stage1->id, $this->stage2->id);
+
+        $this->assertFalse($results->first()['met']);
+        $this->assertEquals(0, $results->first()['actual_value']);
     }
 }

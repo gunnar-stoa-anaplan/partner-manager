@@ -17,16 +17,16 @@ class BlueprintSeeder extends Seeder
     {
         $this->command->info('Seeding Enablement Blueprints V2.0...');
 
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        BlueprintProgress::truncate();
-        BlueprintEnrollment::truncate();
-        PartnerBlueprintAssignment::truncate();
-        BlueprintContentItem::truncate();
-        BlueprintOutcome::truncate();
-        Blueprint::truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        \Schema::withoutForeignKeyConstraints(function () {
+            BlueprintProgress::truncate();
+            BlueprintEnrollment::truncate();
+            PartnerBlueprintAssignment::truncate();
+            BlueprintContentItem::truncate();
+            BlueprintOutcome::truncate();
+            Blueprint::truncate();
+        });
 
-        $adminId = User::where('role', 'admin')->first()->id ?? 1;
+        $adminId = User::whereRelation('role', 'slug', 'admin')->first()->id ?? 1;
 
         $this->seedPolarisEnablement($adminId);
         $this->seedPolarisWorkshop($adminId);

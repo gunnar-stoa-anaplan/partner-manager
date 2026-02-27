@@ -23,8 +23,10 @@ class ChatTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->psm = User::factory()->create(['role' => 'psm']);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->admin = User::factory()->admin()->create();
+        $this->psm = User::factory()->psm()->create();
     }
 
     // ─── Access Control ──────────────────────────────────────────

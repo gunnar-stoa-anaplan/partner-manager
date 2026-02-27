@@ -2,14 +2,47 @@
 
 namespace App\Http\Controllers;
 
+use App\Ai\Agents\EnablementDesigner;
+use App\Jobs\CancelZoomMeetingJob;
+use App\Jobs\CreateZoomMeetingJob;
+use App\Jobs\SyncZoomMeetingJob;
 use App\Models\EnablementEvent;
-use App\Models\EnablementSession;
 use App\Models\EnablementRegistration;
+use App\Models\EnablementSession;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class EnablementEventController extends Controller
 {
+    // ─── AI Generation ────────────────────────────────────────
+
+    public function generate(Request $request): JsonResponse
+    {
+        $request->validate([
+            'product_area' => ['required', 'string'],
+            'type' => ['required', 'string', 'in:'.implode(',', array_keys(EnablementEvent::TYPES))],
+            'topic' => ['nullable', 'string', 'max:500'],
+            'audience' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $type = EnablementEvent::TYPES[$request->input('type')] ?? $request->input('type');
+        $audience = $request->input('audience', 'Model Builders');
+        $topic = $request->input('topic');
+
+        $prompt = "Design a {$type} for the {$request->input('product_area')} application targeting {$audience}.";
+
+        if ($topic) {
+            $prompt .= " The workshop should focus on: {$topic}.";
+        }
+
+        $prompt .= ' First check the existing catalog to see what already exists for this product area,'
+            .' then design a complete workshop package that fills a gap or improves on existing offerings.';
+
+        $response = EnablementDesigner::make()->prompt($prompt);
+
+        return response()->json(['workshop' => $response->toArray()]);
+    }
+
     // ─── Event CRUD ────────────────────────────────────────────
 
     public function index()
@@ -31,7 +64,7 @@ class EnablementEventController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'type' => 'required|in:' . implode(',', array_keys(EnablementEvent::TYPES)),
+            'type' => 'required|in:'.implode(',', array_keys(EnablementEvent::TYPES)),
             'category' => 'nullable|string|max:255',
             'product_area' => 'nullable|string|max:255',
             'description' => 'nullable|string',
@@ -41,7 +74,7 @@ class EnablementEventController extends Controller
             'duration_hours' => 'nullable|numeric|min:0|max:999',
             'max_participants' => 'nullable|integer|min:1',
             'materials_url' => 'nullable|url|max:255',
-            'status' => 'required|in:' . implode(',', array_keys(EnablementEvent::STATUSES)),
+            'status' => 'required|in:'.implode(',', array_keys(EnablementEvent::STATUSES)),
         ]);
 
         $validated['created_by'] = auth()->id();
@@ -59,6 +92,7 @@ class EnablementEventController extends Controller
 
         $sessions = $event->sessions()
             ->withCount('registrations')
+            ->with(['zoomMeeting' => fn ($q) => $q->withCount('attendances')])
             ->orderBy('start_at')
             ->get();
 
@@ -68,6 +102,7 @@ class EnablementEventController extends Controller
     public function edit($id)
     {
         $event = EnablementEvent::findOrFail($id);
+
         return view('admin.enablement.edit', compact('event'));
     }
 
@@ -77,7 +112,7 @@ class EnablementEventController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'type' => 'required|in:' . implode(',', array_keys(EnablementEvent::TYPES)),
+            'type' => 'required|in:'.implode(',', array_keys(EnablementEvent::TYPES)),
             'category' => 'nullable|string|max:255',
             'product_area' => 'nullable|string|max:255',
             'description' => 'nullable|string',
@@ -87,7 +122,7 @@ class EnablementEventController extends Controller
             'duration_hours' => 'nullable|numeric|min:0|max:999',
             'max_participants' => 'nullable|integer|min:1',
             'materials_url' => 'nullable|url|max:255',
-            'status' => 'required|in:' . implode(',', array_keys(EnablementEvent::STATUSES)),
+            'status' => 'required|in:'.implode(',', array_keys(EnablementEvent::STATUSES)),
         ]);
 
         $event->update($validated);
@@ -110,6 +145,7 @@ class EnablementEventController extends Controller
     public function createSession($eventId)
     {
         $event = EnablementEvent::findOrFail($eventId);
+
         return view('admin.enablement.session-form', [
             'event' => $event,
             'session' => null,
@@ -132,7 +168,7 @@ class EnablementEventController extends Controller
             'geography' => 'nullable|string|max:255',
             'region' => 'nullable|string|max:255',
             'max_participants' => 'nullable|integer|min:1',
-            'status' => 'nullable|in:' . implode(',', array_keys(EnablementSession::STATUSES)),
+            'status' => 'nullable|in:'.implode(',', array_keys(EnablementSession::STATUSES)),
             'notes' => 'nullable|string',
             'registration_deadline' => 'nullable|date|before:start_at',
         ]);
@@ -141,7 +177,11 @@ class EnablementEventController extends Controller
         $validated['created_by'] = auth()->id();
         $validated['all_day'] = $request->boolean('all_day');
 
-        EnablementSession::create($validated);
+        $session = EnablementSession::create($validated);
+
+        if ($event->type === 'workshop') {
+            CreateZoomMeetingJob::dispatch($session->id, auth()->id());
+        }
 
         return redirect()->route('enablement-events.show', $event->id)
             ->with('success', 'Session added successfully.');
@@ -150,6 +190,7 @@ class EnablementEventController extends Controller
     public function editSession($sessionId)
     {
         $session = EnablementSession::with('event')->findOrFail($sessionId);
+
         return view('admin.enablement.session-form', [
             'event' => $session->event,
             'session' => $session,
@@ -172,7 +213,7 @@ class EnablementEventController extends Controller
             'geography' => 'nullable|string|max:255',
             'region' => 'nullable|string|max:255',
             'max_participants' => 'nullable|integer|min:1',
-            'status' => 'nullable|in:' . implode(',', array_keys(EnablementSession::STATUSES)),
+            'status' => 'nullable|in:'.implode(',', array_keys(EnablementSession::STATUSES)),
             'notes' => 'nullable|string',
             'summary' => 'nullable|string',
             'registration_deadline' => 'nullable|date|before:start_at',
@@ -182,14 +223,23 @@ class EnablementEventController extends Controller
 
         $session->update($validated);
 
+        if ($session->zoomMeeting && $session->wasChanged(['start_at', 'end_at', 'title_override', 'timezone'])) {
+            SyncZoomMeetingJob::dispatch($session->id);
+        }
+
         return redirect()->route('enablement-events.show', $session->enablement_event_id)
             ->with('success', 'Session updated successfully.');
     }
 
     public function destroySession($sessionId)
     {
-        $session = EnablementSession::findOrFail($sessionId);
+        $session = EnablementSession::with('zoomMeeting')->findOrFail($sessionId);
         $eventId = $session->enablement_event_id;
+
+        if ($session->zoomMeeting) {
+            CancelZoomMeetingJob::dispatch($session->id);
+        }
+
         $session->delete();
 
         return redirect()->route('enablement-events.show', $eventId)
@@ -211,7 +261,7 @@ class EnablementEventController extends Controller
         $registration = EnablementRegistration::findOrFail($registrationId);
 
         $validated = $request->validate([
-            'status' => 'required|in:' . implode(',', array_keys(EnablementRegistration::STATUSES)),
+            'status' => 'required|in:'.implode(',', array_keys(EnablementRegistration::STATUSES)),
             'notes' => 'nullable|string',
         ]);
 

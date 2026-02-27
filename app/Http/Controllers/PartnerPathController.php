@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Partner;
@@ -21,7 +22,7 @@ class PartnerPathController extends Controller
         $user = auth()->user();
 
         // Role-based partner scoping — manager and admin see all partners
-        $canSeeAll = in_array($user->role, ['admin', 'manager']);
+        $canSeeAll = $user->isAdmin() || $user->role?->slug === 'manager';
         $partnerIds = $canSeeAll
             ? Partner::pluck('id')
             : Partner::where('user_id', $user->id)->pluck('id');
@@ -31,7 +32,7 @@ class PartnerPathController extends Controller
         // PSM filter (manager/admin only)
         $selectedPsmId = $canSeeAll ? $request->get('psm_id') : null;
         $psmUsers = $canSeeAll
-            ? User::where('role', 'psm')->orderBy('name')->get(['id', 'name'])
+            ? User::whereRelation('role', 'slug', 'psm')->orderBy('name')->get(['id', 'name'])
             : collect();
 
         // Optional partner filter
@@ -51,7 +52,7 @@ class PartnerPathController extends Controller
             ? $partners->where('user_id', (int) $selectedPsmId)->values()
             : $partners;
 
-        $paths = PartnerPath::where('is_active', true)->with(['stages' => fn($q) => $q->orderBy('sort_order'), 'gates'])->get();
+        $paths = PartnerPath::where('is_active', true)->with(['stages' => fn ($q) => $q->orderBy('sort_order'), 'gates'])->get();
         $defaultPath = $paths->first();
 
         $enrollments = PartnerPathEnrollment::with(['partner.user', 'currentStage', 'path'])
@@ -59,14 +60,14 @@ class PartnerPathController extends Controller
             ->whereIn('partner_id', $filteredPartnerIds)
             ->get();
 
-        $stageGroups = $enrollments->groupBy(fn($e) => $e->current_stage_id);
+        $stageGroups = $enrollments->groupBy(fn ($e) => $e->current_stage_id);
 
         // Stage duration analytics
         $stageDurations = $this->computeStageDurations($defaultPath, $filteredPartnerIds);
 
         // Chart data for ApexCharts
         $stages = $defaultPath ? $defaultPath->stages->sortBy('sort_order') : collect();
-        $chartData = $stages->map(fn($stage) => [
+        $chartData = $stages->map(fn ($stage) => [
             'stage' => $stage->name,
             'color' => $stage->color,
             'avg_days' => $stageDurations[$stage->id]['avg'] ?? 0,
@@ -102,7 +103,9 @@ class PartnerPathController extends Controller
      */
     private function computeStageDurations(?PartnerPath $path, Collection $partnerIds): array
     {
-        if (!$path) return [];
+        if (! $path) {
+            return [];
+        }
 
         $stages = $path->stages->sortBy('sort_order');
 
@@ -141,7 +144,7 @@ class PartnerPathController extends Controller
                 }
 
                 // If still in this stage, use now()
-                if (!$leftAt) {
+                if (! $leftAt) {
                     $enrollment = $currentEnrollments->get($partnerId);
                     if ($enrollment && $enrollment->current_stage_id === $stageId) {
                         $leftAt = now();
@@ -161,6 +164,7 @@ class PartnerPathController extends Controller
             $days = $stageDays[$stage->id] ?? [];
             if (empty($days)) {
                 $result[$stage->id] = ['avg' => 0, 'median' => 0, 'min' => 0, 'max' => 0, 'count' => 0];
+
                 continue;
             }
 
@@ -192,14 +196,15 @@ class PartnerPathController extends Controller
         Collection $stages
     ): array {
         // PSM Breakdown: group enrollments by PSM
-        $psmBreakdown = $enrollments->groupBy(fn($e) => $e->partner->user_id)
+        $psmBreakdown = $enrollments->groupBy(fn ($e) => $e->partner->user_id)
             ->map(function ($group, $userId) {
                 $psmName = $group->first()->partner->user?->name ?? 'Unassigned';
+
                 return [
                     'psm_name' => $psmName,
                     'psm_id' => $userId,
                     'total' => $group->count(),
-                    'by_stage' => $group->groupBy(fn($e) => $e->currentStage->name)
+                    'by_stage' => $group->groupBy(fn ($e) => $e->currentStage->name)
                         ->map->count()
                         ->toArray(),
                 ];
@@ -212,6 +217,7 @@ class PartnerPathController extends Controller
             $isStalled = $stats && $stats['avg'] > 0 && $days > ($stats['avg'] * 1.5);
             $score = $scoreValues[$e->partner_id] ?? null;
             $isLowScore = $score !== null && $score < 30;
+
             return $isStalled || $isLowScore;
         })->map(function ($e) use ($stageDurations, $scoreValues) {
             $days = (int) $e->stage_entered_at->diffInDays(now());
@@ -219,11 +225,12 @@ class PartnerPathController extends Controller
             $score = $scoreValues[$e->partner_id] ?? null;
             $reasons = [];
             if ($stats && $stats['avg'] > 0 && $days > ($stats['avg'] * 1.5)) {
-                $reasons[] = 'Stalled (' . $days . 'd vs ' . $stats['avg'] . 'd avg)';
+                $reasons[] = 'Stalled ('.$days.'d vs '.$stats['avg'].'d avg)';
             }
             if ($score !== null && $score < 30) {
-                $reasons[] = 'Low score (' . number_format($score, 0) . ')';
+                $reasons[] = 'Low score ('.number_format($score, 0).')';
             }
+
             return [
                 'enrollment' => $e,
                 'days_in_stage' => $days,
@@ -244,6 +251,7 @@ class PartnerPathController extends Controller
             ->map(function ($group) {
                 $total = $group->sum('cnt');
                 $completed = $group->where('status', 'completed')->sum('cnt');
+
                 return [
                     'total' => $total,
                     'completed' => $completed,
@@ -253,7 +261,7 @@ class PartnerPathController extends Controller
 
         // Average enrollment age
         $avgEnrollmentAge = $enrollments->isNotEmpty()
-            ? round($enrollments->avg(fn($e) => $e->enrolled_at->diffInDays(now())))
+            ? round($enrollments->avg(fn ($e) => $e->enrolled_at->diffInDays(now())))
             : 0;
 
         return [

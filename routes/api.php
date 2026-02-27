@@ -1,10 +1,27 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\EnablementDesignerController;
+use App\Http\Controllers\Api\InternalActivationAggregateController;
+use App\Http\Controllers\Api\InternalMetricsController;
+use App\Http\Controllers\Api\InternalSignalAggregateController;
+use App\Http\Controllers\Api\LabDesignerController;
+use App\Http\Controllers\Api\PartnerAdvisorController;
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\EnablementController;
 use App\Http\Controllers\Api\V1\ImportController;
 use App\Http\Controllers\Api\V1\PartnerController;
-use App\Http\Controllers\Api\V1\EnablementController;
 use App\Http\Controllers\Api\V1\TokenController;
+use Illuminate\Support\Facades\Route;
+
+// --- Authentication (no token required) ---
+Route::post('/auth/login', [AuthController::class, 'login'])->name('api.auth.login');
+
+// --- Internal (agent-only, no auth) ---
+Route::get('/internal/metrics', InternalMetricsController::class);
+Route::get('/internal/signal-aggregate', InternalSignalAggregateController::class);
+Route::post('/internal/signal-benchmarks', [InternalSignalAggregateController::class, 'storeBenchmarks']);
+Route::get('/internal/activation-aggregate', InternalActivationAggregateController::class);
+Route::post('/internal/activation-benchmarks', [InternalActivationAggregateController::class, 'storeBenchmarks']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -29,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/partners/{id}', [PartnerController::class, 'show']);
         Route::get('/partners/{id}/pipeline', [PartnerController::class, 'pipeline']);
         Route::get('/partners/{id}/projects', [PartnerController::class, 'projects']);
+        Route::get('/partners/{partner}/advisor', PartnerAdvisorController::class)->name('api.partners.advisor');
     });
 
     // --- Enablement (read) ---
@@ -36,5 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/enablement/calendar', [EnablementController::class, 'calendar']);
         Route::get('/enablement/events', [EnablementController::class, 'events']);
         Route::get('/enablement/events/{id}', [EnablementController::class, 'show']);
+        Route::post('/enablement/designer', EnablementDesignerController::class)->name('api.enablement.designer');
+        Route::post('/enablement/lab-designer', LabDesignerController::class)->name('api.enablement.lab-designer');
     });
 });

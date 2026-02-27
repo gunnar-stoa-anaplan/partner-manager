@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="600" fill="#f8fafc" rx="12"/>
+
+  <!-- Title -->
+  <text x="480" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Phase 4: CoE Review &#38; Optimization</text>
+  <text x="480" y="58" text-anchor="middle" font-size="11" fill="#6b7280">The continuous improvement loop &#8212; review performance, model adjustments, feed corrections back into the program</text>
+
+  <!-- Review Cycle (main loop) -->
+  <!-- Weekly Review -->
+  <rect x="60" y="90" width="260" height="200" rx="10" fill="#fff" stroke="#7c3aed" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="60" y="90" width="260" height="36" rx="10" fill="#7c3aed"/>
+  <rect x="60" y="116" width="260" height="10" fill="#7c3aed"/>
+  <text x="190" y="114" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">Weekly Review</text>
+
+  <g font-size="10" fill="#374151">
+    <rect x="78" y="135" width="224" height="28" rx="4" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1"/>
+    <text x="190" y="154" text-anchor="middle" font-weight="600" fill="#6b21a8">Signal Triage</text>
+
+    <rect x="78" y="169" width="224" height="28" rx="4" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1"/>
+    <text x="190" y="188" text-anchor="middle" font-weight="600" fill="#6b21a8">Health Score Review</text>
+
+    <rect x="78" y="203" width="224" height="28" rx="4" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1"/>
+    <text x="190" y="222" text-anchor="middle" font-weight="600" fill="#6b21a8">Pipeline Coverage Check</text>
+
+    <rect x="78" y="237" width="224" height="28" rx="4" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1"/>
+    <text x="190" y="256" text-anchor="middle" font-weight="600" fill="#6b21a8">Urgent Escalations</text>
+  </g>
+
+  <!-- Monthly Review -->
+  <rect x="350" y="90" width="260" height="200" rx="10" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="350" y="90" width="260" height="36" rx="10" fill="#2563eb"/>
+  <rect x="350" y="116" width="260" height="10" fill="#2563eb"/>
+  <text x="480" y="114" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">Monthly Review</text>
+
+  <g font-size="10" fill="#374151">
+    <rect x="368" y="135" width="224" height="28" rx="4" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+    <text x="480" y="154" text-anchor="middle" font-weight="600" fill="#1e40af">Variance Analysis (Plan vs. Actuals)</text>
+
+    <rect x="368" y="169" width="224" height="28" rx="4" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+    <text x="480" y="188" text-anchor="middle" font-weight="600" fill="#1e40af">Portfolio Performance Review</text>
+
+    <rect x="368" y="203" width="224" height="28" rx="4" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+    <text x="480" y="222" text-anchor="middle" font-weight="600" fill="#1e40af">Enablement Progress Tracking</text>
+
+    <rect x="368" y="237" width="224" height="28" rx="4" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+    <text x="480" y="256" text-anchor="middle" font-weight="600" fill="#1e40af">Initiative &#38; Budget Status</text>
+  </g>
+
+  <!-- Quarterly Review -->
+  <rect x="640" y="90" width="280" height="200" rx="10" fill="#fff" stroke="#059669" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="640" y="90" width="280" height="36" rx="10" fill="#059669"/>
+  <rect x="640" y="116" width="280" height="10" fill="#059669"/>
+  <text x="780" y="114" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">Quarterly / Annual</text>
+
+  <g font-size="10" fill="#374151">
+    <rect x="658" y="135" width="244" height="28" rx="4" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="780" y="154" text-anchor="middle" font-weight="600" fill="#166534">QBR Preparation &#38; Execution</text>
+
+    <rect x="658" y="169" width="244" height="28" rx="4" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="780" y="188" text-anchor="middle" font-weight="600" fill="#166534">Strategic Plan Re-versioning</text>
+
+    <rect x="658" y="203" width="244" height="28" rx="4" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="780" y="222" text-anchor="middle" font-weight="600" fill="#166534">Scenario Modeling &#38; Forecasting</text>
+
+    <rect x="658" y="237" width="244" height="28" rx="4" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="780" y="256" text-anchor="middle" font-weight="600" fill="#166534">Benchmark Comparison (Cohort)</text>
+  </g>
+
+  <!-- Arrows between review cycles -->
+  <line x1="320" y1="190" x2="350" y2="190" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+  <line x1="610" y1="190" x2="640" y2="190" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+
+  <!-- Action Layer (bottom) -->
+  <rect x="60" y="320" width="860" height="40" rx="8" fill="#7c3aed" opacity="0.08"/>
+  <text x="480" y="346" text-anchor="middle" font-size="13" font-weight="700" fill="#7c3aed">CORRECTIVE ACTIONS &#38; ADJUSTMENTS</text>
+
+  <!-- Action boxes -->
+  <rect x="60" y="380" width="200" height="110" rx="8" fill="#fff" stroke="#d97706" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="60" y="380" width="200" height="28" rx="8" fill="#d97706"/>
+  <rect x="60" y="400" width="200" height="8" fill="#d97706"/>
+  <text x="160" y="400" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Target Adjustments</text>
+  <text x="78" y="428" font-size="10" fill="#374151">&#8226; Revise revenue targets</text>
+  <text x="78" y="444" font-size="10" fill="#374151">&#8226; Update enablement quotas</text>
+  <text x="78" y="460" font-size="10" fill="#374151">&#8226; Adjust scorecard weights</text>
+  <text x="78" y="476" font-size="10" fill="#374151">&#8226; Modify delivery benchmarks</text>
+
+  <rect x="280" y="380" width="200" height="110" rx="8" fill="#fff" stroke="#dc2626" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="280" y="380" width="200" height="28" rx="8" fill="#dc2626"/>
+  <rect x="280" y="400" width="200" height="8" fill="#dc2626"/>
+  <text x="380" y="400" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Resource Reallocation</text>
+  <text x="298" y="428" font-size="10" fill="#374151">&#8226; Reassign PSM-to-partner</text>
+  <text x="298" y="444" font-size="10" fill="#374151">&#8226; Shift enablement focus</text>
+  <text x="298" y="460" font-size="10" fill="#374151">&#8226; Reallocate budget lines</text>
+  <text x="298" y="476" font-size="10" fill="#374151">&#8226; Escalate at-risk partners</text>
+
+  <rect x="500" y="380" width="200" height="110" rx="8" fill="#fff" stroke="#2563eb" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="500" y="380" width="200" height="28" rx="8" fill="#2563eb"/>
+  <rect x="500" y="400" width="200" height="8" fill="#2563eb"/>
+  <text x="600" y="400" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Scenario Updates</text>
+  <text x="518" y="428" font-size="10" fill="#374151">&#8226; New what-if models</text>
+  <text x="518" y="444" font-size="10" fill="#374151">&#8226; Budget reforecast</text>
+  <text x="518" y="460" font-size="10" fill="#374151">&#8226; Assumption changes</text>
+  <text x="518" y="476" font-size="10" fill="#374151">&#8226; Compare to actuals</text>
+
+  <rect x="720" y="380" width="200" height="110" rx="8" fill="#fff" stroke="#059669" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="720" y="380" width="200" height="28" rx="8" fill="#059669"/>
+  <rect x="720" y="400" width="200" height="8" fill="#059669"/>
+  <text x="820" y="400" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Program Evolution</text>
+  <text x="738" y="428" font-size="10" fill="#374151">&#8226; Update strategic plans</text>
+  <text x="738" y="444" font-size="10" fill="#374151">&#8226; New initiative creation</text>
+  <text x="738" y="460" font-size="10" fill="#374151">&#8226; Path &#38; tier revisions</text>
+  <text x="738" y="476" font-size="10" fill="#374151">&#8226; New planning cycle</text>
+
+  <!-- Feedback loop arrow -->
+  <path d="M 480 500 L 480 530 Q 480 545 465 545 L 50 545 Q 35 545 35 530 L 35 200 Q 35 185 50 185 L 58 185" stroke="#6b7280" stroke-width="1.5" fill="none" stroke-dasharray="6,3" marker-end="url(#arrowGray)"/>
+
+  <rect x="20" y="535" width="140" height="20" rx="4" fill="#f3f4f6"/>
+  <text x="90" y="549" text-anchor="middle" font-size="9" font-weight="600" fill="#6b7280">FEEDS BACK TO PHASE 2</text>
+
+  <!-- Arrows from review to actions -->
+  <line x1="190" y1="290" x2="160" y2="380" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowPurple)"/>
+  <line x1="480" y1="290" x2="380" y2="380" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowPurple)"/>
+  <line x1="480" y1="290" x2="600" y2="380" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowPurple)"/>
+  <line x1="780" y1="290" x2="820" y2="380" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowPurple)"/>
+
+  <!-- Footer -->
+  <text x="700" y="575" text-anchor="middle" font-size="10" fill="#9ca3af">Corrections flow back into Phase 2, updating targets, assignments, and program structure automatically.</text>
+</svg>

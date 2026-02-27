@@ -19,10 +19,12 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
+            - '${HOME}/rag-data:/var/www/rag-data'
         networks:
             - sail
         depends_on:
             - mysql
+            - pgsql
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:
@@ -47,9 +49,55 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
+    pgsql:
+        image: 'pgvector/pgvector:pg17'
+        ports:
+            - '${FORWARD_PG_PORT:-5432}:5432'
+        environment:
+            PGPASSWORD: '${KB_DB_PASSWORD:-password}'
+            POSTGRES_DB: '${KB_DB_DATABASE:-knowledge_base}'
+            POSTGRES_USER: '${KB_DB_USERNAME:-sail}'
+            POSTGRES_PASSWORD: '${KB_DB_PASSWORD:-password}'
+        volumes:
+            - 'sail-pgsql:/var/lib/postgresql/data'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - pg_isready
+                - '-q'
+                - '-d'
+                - '${KB_DB_DATABASE:-knowledge_base}'
+                - '-U'
+                - '${KB_DB_USERNAME:-sail}'
+            retries: 3
+            timeout: 5s
+    pm-agent:
+        build:
+            context: ../pm-agent
+            dockerfile: Dockerfile
+        image: partner-manager-3-pm-agent
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./docker/agent/config.yaml:/etc/pm-agent/config.yaml:ro
+            - agent-status:/var/lib/pm-agent/status
+        networks:
+            sail:
+            pm-shared:
+                aliases:
+                    - pm-agent
+        depends_on:
+            - laravel.test
 networks:
     sail:
         driver: bridge
+    pm-shared:
+        external: true
 volumes:
     sail-mysql:
+        driver: local
+    sail-pgsql:
+        driver: local
+    agent-status:
         driver: local

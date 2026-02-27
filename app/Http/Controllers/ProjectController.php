@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Project;
 use App\Models\Partner;
-use Illuminate\Http\Request;
+use App\Models\Project;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
@@ -17,7 +17,7 @@ class ProjectController extends Controller
         $user = auth()->user();
 
         // Admin sees all projects; PSM sees only their assigned partners' projects
-        if ($user->role === 'admin') {
+        if ($user->isAdmin()) {
             $partnerIds = Partner::pluck('id');
         } else {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
@@ -39,8 +39,8 @@ class ProjectController extends Controller
         $statusDistribution = $projects->groupBy('status')->map->count()->sortDesc();
 
         // Chart data: ACV by partner (top 10)
-        $acvByPartner = $projects->groupBy(fn($p) => $p->partner->name ?? 'Unknown')
-            ->map(fn($group) => round($group->sum('acv'), 2))
+        $acvByPartner = $projects->groupBy(fn ($p) => $p->partner->name ?? 'Unknown')
+            ->map(fn ($group) => round($group->sum('acv'), 2))
             ->sortDesc()
             ->take(10);
 
@@ -67,7 +67,7 @@ class ProjectController extends Controller
 
         // Authorization: PSM can only view their own partners' projects
         $user = auth()->user();
-        if ($user->role !== 'admin' && $project->partner->user_id !== $user->id) {
+        if (! $user->isAdmin() && $project->partner->user_id !== $user->id) {
             abort(403, 'Unauthorized access to this project.');
         }
 
@@ -81,7 +81,7 @@ class ProjectController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->role === 'admin') {
+        if ($user->isAdmin()) {
             $partnerIds = Partner::pluck('id');
         } else {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
@@ -150,12 +150,18 @@ class ProjectController extends Controller
 
             // Resource risk: missing key roles
             $missingRoles = [];
-            if (!$project->cal_id) $missingRoles[] = 'CAL';
-            if (!$project->tal_id) $missingRoles[] = 'TAL';
-            if (!$project->ae_id) $missingRoles[] = 'AE';
+            if (! $project->cal_id) {
+                $missingRoles[] = 'CAL';
+            }
+            if (! $project->tal_id) {
+                $missingRoles[] = 'TAL';
+            }
+            if (! $project->ae_id) {
+                $missingRoles[] = 'AE';
+            }
             if (count($missingRoles) > 0) {
                 $severity = count($missingRoles) >= 2 ? 'high' : 'medium';
-                $risks[] = ['type' => 'Resource', 'detail' => 'Missing: ' . implode(', ', $missingRoles), 'severity' => $severity];
+                $risks[] = ['type' => 'Resource', 'detail' => 'Missing: '.implode(', ', $missingRoles), 'severity' => $severity];
                 $score += count($missingRoles) * 8;
             }
 
@@ -173,7 +179,7 @@ class ProjectController extends Controller
 
             // Low completion with high ACV
             if ($project->acv >= 100000 && $project->percent_complete < 25) {
-                $risks[] = ['type' => 'Financial', 'detail' => 'High ACV ($' . number_format($project->acv) . ') with low completion', 'severity' => 'high'];
+                $risks[] = ['type' => 'Financial', 'detail' => 'High ACV ($'.number_format($project->acv).') with low completion', 'severity' => 'high'];
                 $score += 20;
             }
 
@@ -200,20 +206,20 @@ class ProjectController extends Controller
         ];
 
         // Risk type breakdown (all individual risks flattened)
-        $allRisks = $riskedProjects->flatMap(fn($p) => collect($p->risks));
+        $allRisks = $riskedProjects->flatMap(fn ($p) => collect($p->risks));
         $riskTypeBreakdown = $allRisks->groupBy('type')->map->count()->sortDesc();
 
         // Risk by partner
         $riskByPartner = $riskedProjects->where('risk_score', '>', 0)
-            ->groupBy(fn($p) => $p->partner->name ?? 'Unknown')
-            ->map(fn($group) => round($group->avg('risk_score')))
+            ->groupBy(fn ($p) => $p->partner->name ?? 'Unknown')
+            ->map(fn ($group) => round($group->avg('risk_score')))
             ->sortDesc()
             ->take(10);
 
         // At-risk ACV by partner
         $atRiskAcvByPartner = $riskedProjects->where('risk_score', '>=', 35)
-            ->groupBy(fn($p) => $p->partner->name ?? 'Unknown')
-            ->map(fn($group) => round($group->sum('acv'), 2))
+            ->groupBy(fn ($p) => $p->partner->name ?? 'Unknown')
+            ->map(fn ($group) => round($group->sum('acv'), 2))
             ->sortDesc()
             ->take(10);
 

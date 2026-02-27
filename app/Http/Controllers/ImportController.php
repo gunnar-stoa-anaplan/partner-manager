@@ -368,16 +368,18 @@ class ImportController extends Controller
 
                     if (! $psmUser) {
                         // Create new PSM user
+                        $psmRoleId = \App\Models\Role::where('slug', 'psm')->where('type', 'internal')->value('id');
                         $psmUser = User::create([
                             'name' => $psmName,
                             'email' => Str::slug($psmName).'@placeholder.com', // Placeholder email
                             'password' => bcrypt(Str::random(16)), // Random password
-                            'role' => 'psm',
+                            'role_id' => $psmRoleId,
                         ]);
                         $usersCreated++;
-                    } elseif ($psmUser->role !== 'psm') {
+                    } elseif ($psmUser->role?->slug !== 'psm') {
                         // Update existing user to PSM role if needed
-                        $psmUser->update(['role' => 'psm']);
+                        $psmRoleId = \App\Models\Role::where('slug', 'psm')->where('type', 'internal')->value('id');
+                        $psmUser->update(['role_id' => $psmRoleId]);
                     }
 
                     $psmUserId = $psmUser->id;
@@ -627,8 +629,8 @@ class ImportController extends Controller
             'partner_id',
             'program',
             'role',
-            DB::raw('SUM(CASE WHEN status = "Started" THEN 1 ELSE 0 END) as started_count'),
-            DB::raw('SUM(CASE WHEN status = "Completed" THEN 1 ELSE 0 END) as completed_count'),
+            DB::raw('SUM(CASE WHEN status = \'Started\' THEN 1 ELSE 0 END) as started_count'),
+            DB::raw('SUM(CASE WHEN status = \'Completed\' THEN 1 ELSE 0 END) as completed_count'),
             DB::raw('COUNT(*) as total_count'),
             DB::raw('COUNT(DISTINCT name) as unique_people_count')
         )

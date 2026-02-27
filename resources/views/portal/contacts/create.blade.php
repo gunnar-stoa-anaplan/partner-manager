@@ -39,8 +39,8 @@
                     <label class="form-label">Portal Role</label>
                     <select name="portal_role" class="form-select">
                         <option value="">— None —</option>
-                        @foreach(\App\Models\Contact::PORTAL_ROLES as $key => $label)
-                            <option value="{{ $key }}" {{ old('portal_role') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                        @foreach(\App\Models\Role::portal()->orderBy('sort_order')->get() as $portalRole)
+                            <option value="{{ $portalRole->slug }}" {{ old('portal_role') === $portalRole->slug ? 'selected' : '' }}>{{ $portalRole->display_name }}</option>
                         @endforeach
                     </select>
                 </div>

@@ -20,8 +20,10 @@ class SystemUpdateTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->psm = User::factory()->create(['role' => 'psm']);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->admin = User::factory()->admin()->create();
+        $this->psm = User::factory()->psm()->create();
 
         $this->statusPath = sys_get_temp_dir().'/pm-agent-test-'.uniqid();
         mkdir($this->statusPath, 0755, true);

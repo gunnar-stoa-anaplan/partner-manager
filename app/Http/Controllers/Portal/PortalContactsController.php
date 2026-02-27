@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -40,11 +41,22 @@ class PortalContactsController extends Controller
             'phone' => 'nullable|string|max:255',
             'title' => 'nullable|string|max:255',
             'portal_access' => 'sometimes|boolean',
-            'portal_role' => ['nullable', 'string', 'in:'.implode(',', array_keys(Contact::PORTAL_ROLES))],
+            'portal_role' => ['nullable', 'string', 'exists:roles,slug,type,portal'],
         ]);
 
+        $portalRoleId = null;
+        if (! empty($validated['portal_role'])) {
+            $portalRoleId = Role::where('slug', $validated['portal_role'])->where('type', 'portal')->value('id');
+        }
+
         Contact::create([
-            ...$validated,
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'title' => $validated['title'] ?? null,
+            'portal_access' => $validated['portal_access'] ?? false,
+            'portal_role_id' => $portalRoleId,
             'partner_id' => $contact->partner_id,
             'contact_type' => 'general',
         ]);
@@ -73,10 +85,23 @@ class PortalContactsController extends Controller
             'phone' => 'nullable|string|max:255',
             'title' => 'nullable|string|max:255',
             'portal_access' => 'sometimes|boolean',
-            'portal_role' => ['nullable', 'string', 'in:'.implode(',', array_keys(Contact::PORTAL_ROLES))],
+            'portal_role' => ['nullable', 'string', 'exists:roles,slug,type,portal'],
         ]);
 
-        $contact->update($validated);
+        $portalRoleId = null;
+        if (! empty($validated['portal_role'])) {
+            $portalRoleId = Role::where('slug', $validated['portal_role'])->where('type', 'portal')->value('id');
+        }
+
+        $contact->update([
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'title' => $validated['title'] ?? null,
+            'portal_access' => $validated['portal_access'] ?? $contact->portal_access,
+            'portal_role_id' => $portalRoleId,
+        ]);
 
         return redirect()->route('portal.contacts.index')
             ->with('success', $contact->full_name.' updated successfully.');
@@ -107,10 +132,15 @@ class PortalContactsController extends Controller
         }
 
         $validated = $request->validate([
-            'portal_role' => ['nullable', 'string', 'in:'.implode(',', array_keys(Contact::PORTAL_ROLES))],
+            'portal_role' => ['nullable', 'string', 'exists:roles,slug,type,portal'],
         ]);
 
-        $contact->update(['portal_role' => $validated['portal_role']]);
+        $portalRoleId = null;
+        if (! empty($validated['portal_role'])) {
+            $portalRoleId = Role::where('slug', $validated['portal_role'])->where('type', 'portal')->value('id');
+        }
+
+        $contact->update(['portal_role_id' => $portalRoleId]);
 
         return back()->with('success', "Role updated for {$contact->full_name}.");
     }

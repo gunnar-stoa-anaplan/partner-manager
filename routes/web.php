@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\ActionPlanController;
+use App\Http\Controllers\Admin\ActivationBenchmarkController;
+use App\Http\Controllers\Admin\FeatureActivationController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AiAgentsController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AnaplanOverviewController;
 use App\Http\Controllers\AnaplanProvisioningController;
@@ -12,12 +15,14 @@ use App\Http\Controllers\ApiTokenController;
 use App\Http\Controllers\BenchmarkController;
 use App\Http\Controllers\BlueprintAssignmentController;
 use App\Http\Controllers\BlueprintController;
+use App\Http\Controllers\BlueprintDashboardController;
 use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CompetencyMatrixController;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DealRegistrationController;
+use App\Http\Controllers\DirectorySyncController;
 use App\Http\Controllers\EnablementDashboardController;
 use App\Http\Controllers\EnablementEventController;
 use App\Http\Controllers\FieldEnablementController;
@@ -44,15 +49,20 @@ use App\Http\Controllers\PortalUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\QbrController;
+use App\Http\Controllers\ReportingHierarchyController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoutingController;
 use App\Http\Controllers\SalesforceCredentialController;
 use App\Http\Controllers\ScorecardController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SolutionLifecycleController;
+use App\Http\Controllers\Strategy\CoeProgramDashboardController;
 use App\Http\Controllers\SystemStatusController;
 use App\Http\Controllers\TaskBoardController;
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserImpersonationController;
+use App\Http\Controllers\WorkshopGuideAdminController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -61,6 +71,15 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 Auth::routes();
+
+// GET /logout convenience — logs out via session invalidation (dev-friendly)
+Route::get('/logout', function (\Illuminate\Http\Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/');
+})->middleware('auth')->name('logout.get');
 
 /*
 |--------------------------------------------------------------------------
@@ -85,9 +104,24 @@ Route::middleware(['auth'])->group(function () {
         return view('welcome', ['data' => '']);
     })->name('welcome');
 
+    Route::get('/program-dashboard', CoeProgramDashboardController::class)->name('program-dashboard');
+
+    /*
+    |--------------------------------------------------------------------------
+    | My Training (Tell / Show / Do)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('training')->name('training.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\TrainingController::class, 'index'])->name('index');
+        Route::get('/paths/{path}', [\App\Http\Controllers\TrainingController::class, 'show'])->name('path');
+        Route::get('/steps/{step}', [\App\Http\Controllers\TrainingController::class, 'step'])->name('step');
+        Route::post('/steps/{step}/complete', [\App\Http\Controllers\TrainingController::class, 'completeStep'])->name('step.complete');
+        Route::get('/steps/{step}/tour-data', [\App\Http\Controllers\TrainingController::class, 'tourData'])->name('step.tour-data');
+    });
+
     Route::get('/dashboard', function () {
         return view('index');
-    })->name('dashboard');
+    })->name('dashboard')->middleware('module:partner_management_user');
 
     /*
     |--------------------------------------------------------------------------
@@ -98,7 +132,7 @@ Route::middleware(['auth'])->group(function () {
     Route::view('relationship_overview', 'relationship_overview')->name('relationship_overview');
     Route::get('/influence-map', [FieldEnablementController::class, 'influenceMap'])->name('influence_map');
     Route::get('/calendar', function () {
-        $query = auth()->user()->role === 'admin'
+        $query = auth()->user()->isAdmin()
             ? \App\Models\Partner::query()
             : \App\Models\Partner::where('user_id', auth()->id());
 
@@ -112,7 +146,7 @@ Route::middleware(['auth'])->group(function () {
             'opportunities:id,partner_id,opportunity_name',
             'projects:id,partner_id,name',
         ])->findOrFail($id);
-        if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
+        if ($partner->user_id !== auth()->id() && ! auth()->user()->isAdmin()) {
             abort(403);
         }
 
@@ -131,30 +165,34 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Project Delivery
+    | Project Delivery (gated by project_health_user feature flag)
     |--------------------------------------------------------------------------
     */
-    Route::get('/projects/risks', [ProjectController::class, 'risks'])->name('projects.risks');
-    Route::resource('projects', ProjectController::class);
+    Route::middleware('module:project_health_user')->group(function () {
+        Route::get('/projects/risks', [ProjectController::class, 'risks'])->name('projects.risks');
+        Route::resource('projects', ProjectController::class);
+    });
 
     /*
     |--------------------------------------------------------------------------
-    | Field Enablement
+    | Field Enablement (gated by enablement_user feature flag)
     |--------------------------------------------------------------------------
     */
-    Route::resource('influencers', ContactController::class);
-    Route::post('/influencers/{influencer}/interactions', [ContactController::class, 'storeInteraction'])
-        ->name('influencers.interactions.store');
-    Route::delete('/interactions/{interaction}', [ContactController::class, 'destroyInteraction'])
-        ->name('interactions.destroy');
-    Route::post('/influencers/{influencer}/linkedin', [ContactController::class, 'storeLinkedIn'])
-        ->name('influencers.linkedin.store');
-    Route::delete('/influencers/{influencer}/linkedin', [ContactController::class, 'removeLinkedIn'])
-        ->name('influencers.linkedin.remove');
-    Route::prefix('field')->name('field.')->group(function () {
-        Route::get('/key-influencers', [FieldEnablementController::class, 'keyInfluencers'])->name('key-influencers');
-        Route::get('/breadth', [FieldEnablementController::class, 'breadth'])->name('breadth');
-        Route::get('/depth', [FieldEnablementController::class, 'depth'])->name('depth');
+    Route::middleware('module:enablement_user')->group(function () {
+        Route::resource('influencers', ContactController::class);
+        Route::post('/influencers/{influencer}/interactions', [ContactController::class, 'storeInteraction'])
+            ->name('influencers.interactions.store');
+        Route::delete('/interactions/{interaction}', [ContactController::class, 'destroyInteraction'])
+            ->name('interactions.destroy');
+        Route::post('/influencers/{influencer}/linkedin', [ContactController::class, 'storeLinkedIn'])
+            ->name('influencers.linkedin.store');
+        Route::delete('/influencers/{influencer}/linkedin', [ContactController::class, 'removeLinkedIn'])
+            ->name('influencers.linkedin.remove');
+        Route::prefix('field')->name('field.')->group(function () {
+            Route::get('/key-influencers', [FieldEnablementController::class, 'keyInfluencers'])->name('key-influencers');
+            Route::get('/breadth', [FieldEnablementController::class, 'breadth'])->name('breadth');
+            Route::get('/depth', [FieldEnablementController::class, 'depth'])->name('depth');
+        });
     });
 
     /*
@@ -220,14 +258,18 @@ Route::middleware(['auth'])->group(function () {
     | Partner Assignments and Selection
     |--------------------------------------------------------------------------
     */
-    Route::get('/my-partners', [PartnerController::class, 'myPartners'])->name('partners.my');
+    Route::get('/my-partners', [PartnerController::class, 'myPartners'])->name('partners.my')->middleware('module:partner_management_user');
     Route::get('/partners/{id}', [PartnerController::class, 'show'])->name('partners.show');
     Route::get('/partners/{id}/summary', [PartnerController::class, 'summary'])->name('partners.summary');
     Route::get('/partners/{id}/insights', [PartnerController::class, 'insights'])->name('partners.insights');
     Route::get('/partners/{id}/blueprints', [PartnerController::class, 'blueprints'])->name('partners.blueprints');
+    Route::post('/partners/{partner}/advisor', [PartnerController::class, 'advisor'])->name('partners.advisor');
     Route::get('/partners/{id}/tab/{tab}', [PartnerController::class, 'partnerTab'])
         ->name('partners.tab')
-        ->where('tab', 'overview|pipeline|enablement|projects|calendar|influencers|resources|app-enablement|launch-programs|workspaces|portal-users');
+        ->where('tab', 'overview|pipeline|deal-registrations|enablement|projects|calendar|influencers|resources|blueprints|app-enablement|launch-programs|workspaces|portal-users|marketplace');
+
+    // Marketplace Profile Review
+    Route::put('/partners/{partner}/marketplace-review', [PartnerController::class, 'reviewMarketplace'])->name('partners.marketplace-review');
 
     // Portal User Management (PSM/Admin)
     Route::patch('/partners/{partner}/portal-users/{contact}/toggle-access', [PortalUserController::class, 'toggleAccess'])->name('partners.portal-users.toggle-access');
@@ -236,15 +278,21 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/partners/{partner}/portal-users/import', [PortalUserController::class, 'import'])->name('partners.portal-users.import');
     Route::get('/partners/portal-users/template', [PortalUserController::class, 'downloadTemplate'])->name('partners.portal-users.template');
 
+    // User Impersonation — switch between user roles during development
+    Route::post('/impersonate/{user}', [UserImpersonationController::class, 'start'])->name('impersonate.start');
+    Route::post('/impersonate-stop', [UserImpersonationController::class, 'stop'])->name('impersonate.stop');
+
     // Portal Impersonation (PSM/Admin) — stop must be before start to avoid {contact} matching "stop"
     Route::post('/portal/impersonate/stop', [PortalImpersonationController::class, 'stop'])->name('portal.impersonate.stop');
     Route::post('/portal/impersonate/{contact}', [PortalImpersonationController::class, 'start'])->name('portal.impersonate.start');
 
-    // Launch Program: PSM nomination + participant management
-    Route::post('/partners/{partner}/launch-programs/{launchProgram}/nominate', [PartnerController::class, 'nominateForProgram'])->name('partners.launch-programs.nominate');
-    Route::post('/launch-program-partners/{programPartner}/participants', [PartnerController::class, 'addParticipant'])->name('launch-program-partners.participants.store');
-    Route::delete('/launch-program-participants/{participant}', [PartnerController::class, 'removeParticipant'])->name('launch-program-participants.destroy');
-    Route::put('/launch-program-partners/{programPartner}', [LaunchProgramController::class, 'updatePartnerStatus'])->name('admin.launch-program-partners.update');
+    // Launch Program: PSM nomination + participant management (gated by launch_programs_user feature flag)
+    Route::middleware('module:launch_programs_user')->group(function () {
+        Route::post('/partners/{partner}/launch-programs/{launchProgram}/nominate', [PartnerController::class, 'nominateForProgram'])->name('partners.launch-programs.nominate');
+        Route::post('/launch-program-partners/{programPartner}/participants', [PartnerController::class, 'addParticipant'])->name('launch-program-partners.participants.store');
+        Route::delete('/launch-program-participants/{participant}', [PartnerController::class, 'removeParticipant'])->name('launch-program-participants.destroy');
+        Route::put('/launch-program-partners/{programPartner}', [LaunchProgramController::class, 'updatePartnerStatus'])->name('admin.launch-program-partners.update');
+    });
     Route::get('/full-summary', [PartnerController::class, 'fullSummary'])->name('partners.full-summary');
     Route::get('/full-insights', [PartnerController::class, 'fullInsights'])->name('partners.full-insights');
 
@@ -267,29 +315,31 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Enablement Calendar (all authenticated users)
+    | Enablement Calendar (gated by enablement_user feature flag)
     |--------------------------------------------------------------------------
     */
-    Route::get('/enablement', function () {
-        return view('enablement.calendar');
-    })->name('enablement.calendar');
-    Route::get('/enablement/my-nominations', function () {
-        return view('enablement.my-nominations');
-    })->name('enablement.my-nominations');
-    Route::get('/partners/{id}/enablement', function ($id) {
-        $partner = \App\Models\Partner::with('contacts:id,partner_id,first_name,last_name,email')
-            ->findOrFail($id);
-        if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
-            abort(403);
-        }
+    Route::middleware('module:enablement_user')->group(function () {
+        Route::get('/enablement', function () {
+            return view('enablement.calendar');
+        })->name('enablement.calendar');
+        Route::get('/enablement/my-nominations', function () {
+            return view('enablement.my-nominations');
+        })->name('enablement.my-nominations');
+        Route::get('/partners/{id}/enablement', function ($id) {
+            $partner = \App\Models\Partner::with('contacts:id,partner_id,first_name,last_name,email')
+                ->findOrFail($id);
+            if ($partner->user_id !== auth()->id() && ! auth()->user()->isAdmin()) {
+                abort(403);
+            }
 
-        return view('enablement.partner', compact('partner'));
-    })->name('partners.enablement');
+            return view('enablement.partner', compact('partner'));
+        })->name('partners.enablement');
 
-    // Lab Facilitator Dashboard
-    Route::get('/enablement-sessions/{session}/lab-dashboard', [LabFacilitatorController::class, 'dashboard'])->name('sessions.lab-dashboard');
-    Route::post('/enablement-sessions/{session}/validate-all', [LabFacilitatorController::class, 'validateAll'])->name('sessions.validate-all');
-    Route::post('/lab-participants/{participant}/checkpoints/{checkpoint}/validate', [LabFacilitatorController::class, 'validateParticipant'])->name('lab-participants.validate');
+        // Lab Facilitator Dashboard
+        Route::get('/enablement-sessions/{session}/lab-dashboard', [LabFacilitatorController::class, 'dashboard'])->name('sessions.lab-dashboard');
+        Route::post('/enablement-sessions/{session}/validate-all', [LabFacilitatorController::class, 'validateAll'])->name('sessions.validate-all');
+        Route::post('/lab-participants/{participant}/checkpoints/{checkpoint}/validate', [LabFacilitatorController::class, 'validateParticipant'])->name('lab-participants.validate');
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -330,8 +380,28 @@ Route::middleware(['auth'])->group(function () {
     | Partner Goals (PSM + Admin)
     |--------------------------------------------------------------------------
     */
-    Route::get('/partner-goals', [PartnerGoalController::class, 'index'])->name('partner-goals.index');
-    Route::put('/partner-goals', [PartnerGoalController::class, 'update'])->name('partner-goals.update');
+    Route::middleware('module:goals_targets_user')->group(function () {
+        Route::get('/partner-goals', [PartnerGoalController::class, 'index'])->name('partner-goals.index');
+        Route::put('/partner-goals', [PartnerGoalController::class, 'update'])->name('partner-goals.update');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin + Integration Routes (Data Imports)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['admin_or_integration'])->group(function () {
+        Route::resource('imports', ImportController::class)->except(['edit', 'update']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reporting Hierarchy (admin, super_admin, coe, manager)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('reporting-hierarchy', [ReportingHierarchyController::class, 'index'])->name('reporting-hierarchy.index');
+    Route::get('reporting-hierarchy/data', [ReportingHierarchyController::class, 'data'])->name('reporting-hierarchy.data');
+    Route::put('reporting-hierarchy/{user}', [ReportingHierarchyController::class, 'update'])->name('reporting-hierarchy.update');
 
     /*
     |--------------------------------------------------------------------------
@@ -345,7 +415,6 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('objectives', ObjectiveController::class);
         Route::resource('salesforce-credentials', SalesforceCredentialController::class);
         Route::post('/salesforce-credentials/test', [SalesforceCredentialController::class, 'testConnection'])->name('salesforce-credentials.test');
-        Route::resource('imports', ImportController::class)->except(['edit', 'update']);
         Route::resource('users', UserController::class);
 
         // API Token Management
@@ -359,60 +428,89 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/configuration/dev-focus', [ConfigurationController::class, 'updateDevFocus'])->name('configuration.update-dev-focus');
         Route::put('/configuration/ai', [ConfigurationController::class, 'updateAi'])->name('configuration.update-ai');
 
-        // Blueprint CRUD
-        Route::resource('blueprints', BlueprintController::class);
-        Route::post('/blueprints/{blueprint}/duplicate', [BlueprintController::class, 'duplicate'])->name('blueprints.duplicate');
-        Route::post('/blueprints/{blueprint}/outcomes', [BlueprintController::class, 'addOutcome'])->name('blueprints.outcomes.store');
-        Route::put('/blueprint-outcomes/{outcome}', [BlueprintController::class, 'updateOutcome'])->name('blueprint-outcomes.update');
-        Route::delete('/blueprint-outcomes/{outcome}', [BlueprintController::class, 'destroyOutcome'])->name('blueprint-outcomes.destroy');
-        Route::post('/blueprint-outcomes/{outcome}/items', [BlueprintController::class, 'addContentItem'])->name('blueprint-outcomes.items.store');
-        Route::put('/blueprint-content-items/{item}', [BlueprintController::class, 'updateContentItem'])->name('blueprint-content-items.update');
-        Route::delete('/blueprint-content-items/{item}', [BlueprintController::class, 'destroyContentItem'])->name('blueprint-content-items.destroy');
+        // Enablement Events Admin (gated by enablement_events_admin feature flag)
+        Route::middleware('module:enablement_events_admin')->group(function () {
+            // Blueprint CRUD
+            Route::resource('blueprints', BlueprintController::class);
+            Route::post('/blueprints/{blueprint}/duplicate', [BlueprintController::class, 'duplicate'])->name('blueprints.duplicate');
+            Route::get('/blueprints/{blueprint}/export', [BlueprintController::class, 'export'])->name('blueprints.export');
+            Route::post('/blueprints/{blueprint}/outcomes', [BlueprintController::class, 'addOutcome'])->name('blueprints.outcomes.store');
+            Route::put('/blueprint-outcomes/{outcome}', [BlueprintController::class, 'updateOutcome'])->name('blueprint-outcomes.update');
+            Route::delete('/blueprint-outcomes/{outcome}', [BlueprintController::class, 'destroyOutcome'])->name('blueprint-outcomes.destroy');
+            Route::post('/blueprint-outcomes/{outcome}/items', [BlueprintController::class, 'addContentItem'])->name('blueprint-outcomes.items.store');
+            Route::put('/blueprint-content-items/{item}', [BlueprintController::class, 'updateContentItem'])->name('blueprint-content-items.update');
+            Route::delete('/blueprint-content-items/{item}', [BlueprintController::class, 'destroyContentItem'])->name('blueprint-content-items.destroy');
 
-        // Enablement Events CRUD
-        Route::resource('enablement-events', EnablementEventController::class);
-        Route::get('/enablement-events/{id}/sessions/create', [EnablementEventController::class, 'createSession'])->name('enablement-events.sessions.create');
-        Route::post('/enablement-events/{id}/sessions', [EnablementEventController::class, 'storeSession'])->name('enablement-events.sessions.store');
-        Route::get('/enablement-sessions/{id}/edit', [EnablementEventController::class, 'editSession'])->name('enablement-sessions.edit');
-        Route::put('/enablement-sessions/{id}', [EnablementEventController::class, 'updateSession'])->name('enablement-sessions.update');
-        Route::delete('/enablement-sessions/{id}', [EnablementEventController::class, 'destroySession'])->name('enablement-sessions.destroy');
-        Route::get('/enablement-sessions/{id}/registrations', [EnablementEventController::class, 'sessionRegistrations'])->name('enablement-sessions.registrations');
-        Route::put('/enablement-registrations/{id}', [EnablementEventController::class, 'updateRegistration'])->name('enablement-registrations.update');
-        Route::get('/enablement-calendar', [EnablementEventController::class, 'calendar'])->name('enablement-calendar');
+            // Enablement Events CRUD
+            Route::post('/enablement-events/generate', [EnablementEventController::class, 'generate'])->name('enablement-events.generate');
+            Route::resource('enablement-events', EnablementEventController::class);
+            Route::get('/enablement-events/{id}/sessions/create', [EnablementEventController::class, 'createSession'])->name('enablement-events.sessions.create');
+            Route::post('/enablement-events/{id}/sessions', [EnablementEventController::class, 'storeSession'])->name('enablement-events.sessions.store');
+            Route::get('/enablement-sessions/{id}/edit', [EnablementEventController::class, 'editSession'])->name('enablement-sessions.edit');
+            Route::put('/enablement-sessions/{id}', [EnablementEventController::class, 'updateSession'])->name('enablement-sessions.update');
+            Route::delete('/enablement-sessions/{id}', [EnablementEventController::class, 'destroySession'])->name('enablement-sessions.destroy');
+            Route::get('/enablement-sessions/{id}/registrations', [EnablementEventController::class, 'sessionRegistrations'])->name('enablement-sessions.registrations');
+            Route::put('/enablement-registrations/{id}', [EnablementEventController::class, 'updateRegistration'])->name('enablement-registrations.update');
+            Route::get('/enablement-calendar', [EnablementEventController::class, 'calendar'])->name('enablement-calendar');
 
-        // Enablement Dashboard
-        Route::get('/enablement-dashboard', [EnablementDashboardController::class, 'index'])->name('admin.enablement-dashboard');
+            // Enablement Dashboard
+            Route::get('/enablement-dashboard', [EnablementDashboardController::class, 'index'])->name('admin.enablement-dashboard');
 
-        // Launch Programs Dashboard (must be before resource to avoid {launchProgram} conflict)
-        Route::get('/launch-programs/dashboard', [LaunchProgramDashboardController::class, 'index'])->name('admin.launch-programs.dashboard');
+            // Blueprint Dashboard
+            Route::get('/blueprint-dashboard', [BlueprintDashboardController::class, 'index'])->name('admin.blueprint-dashboard');
+        });
 
-        // Launch Programs CRUD
-        Route::resource('launch-programs', LaunchProgramController::class)->names('admin.launch-programs')->parameters(['launch-programs' => 'launchProgram']);
-        Route::post('/launch-programs/{launchProgram}/milestones', [LaunchProgramController::class, 'addMilestone'])->name('admin.launch-programs.milestones.store');
-        Route::post('/launch-programs/{launchProgram}/admin-nominate', [LaunchProgramController::class, 'adminNominate'])->name('admin.launch-programs.admin-nominate');
-        Route::put('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'updateMilestone'])->name('admin.launch-program-milestones.update');
-        Route::delete('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'destroyMilestone'])->name('admin.launch-program-milestones.destroy');
+        // Launch Programs Admin (gated by launch_programs_admin feature flag)
+        Route::middleware('module:launch_programs_admin')->group(function () {
+            // Launch Programs Dashboard (must be before resource to avoid {launchProgram} conflict)
+            Route::get('/launch-programs/dashboard', [LaunchProgramDashboardController::class, 'index'])->name('admin.launch-programs.dashboard');
 
-        // Workshop Labs
-        Route::resource('labs', LabController::class);
-        Route::post('/labs/{lab}/publish', [LabController::class, 'publish'])->name('labs.publish');
-        Route::post('/labs/{lab}/checkpoints', [LabController::class, 'addCheckpoint'])->name('labs.checkpoints.store');
-        Route::put('/lab-checkpoints/{checkpoint}', [LabController::class, 'updateCheckpoint'])->name('lab-checkpoints.update');
-        Route::delete('/lab-checkpoints/{checkpoint}', [LabController::class, 'destroyCheckpoint'])->name('lab-checkpoints.destroy');
-        Route::get('/labs/{lab}/browse-model', [LabController::class, 'browseModel'])->name('labs.browse-model');
-        Route::get('/labs/{lab}/browse-module/{moduleId}', [LabController::class, 'browseModule'])->name('labs.browse-module');
-        Route::get('/labs/{lab}/browse-lists', [LabController::class, 'browseLists'])->name('labs.browse-lists');
-        Route::post('/labs/{lab}/participants', [LabController::class, 'addParticipant'])->name('labs.participants.store');
-        Route::delete('/lab-participants/{participant}', [LabController::class, 'removeParticipant'])->name('lab-participants.destroy');
+            // Launch Programs CRUD
+            Route::resource('launch-programs', LaunchProgramController::class)->names('admin.launch-programs')->parameters(['launch-programs' => 'launchProgram']);
+            Route::post('/launch-programs/{launchProgram}/milestones', [LaunchProgramController::class, 'addMilestone'])->name('admin.launch-programs.milestones.store');
+            Route::post('/launch-programs/{launchProgram}/admin-nominate', [LaunchProgramController::class, 'adminNominate'])->name('admin.launch-programs.admin-nominate');
+            Route::put('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'updateMilestone'])->name('admin.launch-program-milestones.update');
+            Route::delete('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'destroyMilestone'])->name('admin.launch-program-milestones.destroy');
+        });
 
-        // Provisioning
-        Route::get('/provisioning-workspaces', [AnaplanProvisioningController::class, 'index'])->name('admin.provisioning-workspaces.index');
-        Route::put('/provisioning-workspaces/{workspace}/assign', [AnaplanProvisioningController::class, 'assignPartner'])->name('admin.provisioning-workspaces.assign');
-        Route::post('/provisioning-workspaces/sync', [AnaplanProvisioningController::class, 'sync'])->name('admin.provisioning-workspaces.sync');
+        // Workshop Labs (gated by workshop_labs_admin feature flag)
+        Route::middleware('module:workshop_labs_admin')->group(function () {
+            Route::post('/labs/generate', [LabController::class, 'generate'])->name('labs.generate');
+            Route::resource('labs', LabController::class);
+            Route::post('/labs/{lab}/publish', [LabController::class, 'publish'])->name('labs.publish');
+            Route::post('/labs/{lab}/checkpoints', [LabController::class, 'addCheckpoint'])->name('labs.checkpoints.store');
+            Route::put('/lab-checkpoints/{checkpoint}', [LabController::class, 'updateCheckpoint'])->name('lab-checkpoints.update');
+            Route::delete('/lab-checkpoints/{checkpoint}', [LabController::class, 'destroyCheckpoint'])->name('lab-checkpoints.destroy');
+            Route::get('/labs/{lab}/browse-model', [LabController::class, 'browseModel'])->name('labs.browse-model');
+            Route::get('/labs/{lab}/browse-module/{moduleId}', [LabController::class, 'browseModule'])->name('labs.browse-module');
+            Route::get('/labs/{lab}/browse-lists', [LabController::class, 'browseLists'])->name('labs.browse-lists');
+            Route::post('/labs/{lab}/participants', [LabController::class, 'addParticipant'])->name('labs.participants.store');
+            Route::delete('/lab-participants/{participant}', [LabController::class, 'removeParticipant'])->name('lab-participants.destroy');
+        });
 
-        // Provisioning Summary
-        Route::get('/provisioning-summary', [AnaplanOverviewController::class, 'index'])->name('admin.provisioning-summary');
-        Route::put('/provisioning-summary/version-config', [AnaplanOverviewController::class, 'updateVersionConfig'])->name('admin.provisioning-summary.update-version');
+        // Workshop Guides Admin (gated by enablement_admin feature flag)
+        Route::middleware('module:enablement_admin')->group(function () {
+            Route::resource('workshop-guides', WorkshopGuideAdminController::class)->names('admin.workshop-guides');
+            Route::post('/workshop-guides/{workshopGuide}/publish', [WorkshopGuideAdminController::class, 'publish'])->name('admin.workshop-guides.publish');
+            Route::post('/workshop-guides/{workshopGuide}/pages', [WorkshopGuideAdminController::class, 'addPage'])->name('admin.workshop-guides.pages.store');
+            Route::post('/workshop-guides/{workshopGuide}/images', [WorkshopGuideAdminController::class, 'uploadImage'])->name('admin.workshop-guides.images.store');
+        });
+
+        // Provisioning Admin (gated by provisioning_admin feature flag)
+        Route::middleware('module:provisioning_admin')->group(function () {
+            Route::get('/provisioning-workspaces', [AnaplanProvisioningController::class, 'index'])->name('admin.provisioning-workspaces.index');
+            Route::put('/provisioning-workspaces/{workspace}/assign', [AnaplanProvisioningController::class, 'assignPartner'])->name('admin.provisioning-workspaces.assign');
+            Route::post('/provisioning-workspaces/sync', [AnaplanProvisioningController::class, 'sync'])->name('admin.provisioning-workspaces.sync');
+
+            // Provisioning Summary
+            Route::get('/provisioning-summary', [AnaplanOverviewController::class, 'index'])->name('admin.provisioning-summary');
+            Route::put('/provisioning-summary/version-config', [AnaplanOverviewController::class, 'updateVersionConfig'])->name('admin.provisioning-summary.update-version');
+        });
+
+        // AI Agents Admin (gated by ai_agents_admin feature flag)
+        Route::middleware('module:ai_agents_admin')->group(function () {
+            Route::get('/ai-agents', [AiAgentsController::class, 'index'])->name('admin.ai-agents.index');
+        });
 
         // System Status & Updates
         Route::get('/system-status', [SystemStatusController::class, 'index'])->name('admin.system-status');
@@ -422,6 +520,46 @@ Route::middleware(['auth'])->group(function () {
         // Branding
         Route::get('/branding', [BrandingController::class, 'index'])->name('admin.branding');
         Route::put('/branding', [BrandingController::class, 'update'])->name('admin.branding.update');
+
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Directory Sync (gated by directory_sync_admin module permission)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('module:directory_sync_admin')->group(function () {
+        Route::get('/directory-sync', [DirectorySyncController::class, 'index'])->name('directory-sync.index');
+        Route::post('/directory-sync/upload', [DirectorySyncController::class, 'upload'])->name('directory-sync.upload');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Feature Activation (admin + authorized CoE)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['can:manage-activation'])->group(function () {
+        Route::get('/activation/flags', [FeatureActivationController::class, 'flags'])->name('admin.activation.flags');
+        Route::post('/activation/toggle', [FeatureActivationController::class, 'toggle'])->name('admin.activation.toggle');
+        Route::get('/activation/progression', [FeatureActivationController::class, 'progression'])->name('admin.activation.progression');
+        Route::get('/activation/log', [FeatureActivationController::class, 'log'])->name('admin.activation.log');
+
+        Route::get('/activation/paths', [FeatureActivationController::class, 'paths'])->name('admin.activation.paths');
+        Route::post('/activation/paths', [FeatureActivationController::class, 'storePath'])->name('admin.activation.paths.store');
+        Route::get('/activation/paths/{path}', [FeatureActivationController::class, 'showPath'])->name('admin.activation.paths.show');
+        Route::put('/activation/paths/{path}', [FeatureActivationController::class, 'updatePath'])->name('admin.activation.paths.update');
+        Route::delete('/activation/paths/{path}', [FeatureActivationController::class, 'destroyPath'])->name('admin.activation.paths.destroy');
+        Route::post('/activation/paths/{path}/steps', [FeatureActivationController::class, 'storeStep'])->name('admin.activation.steps.store');
+        Route::put('/activation/steps/{step}', [FeatureActivationController::class, 'updateStep'])->name('admin.activation.steps.update');
+        Route::delete('/activation/steps/{step}', [FeatureActivationController::class, 'destroyStep'])->name('admin.activation.steps.destroy');
+        Route::post('/activation/steps/{step}/toggle-progress', [FeatureActivationController::class, 'toggleStepProgress'])->name('admin.activation.steps.toggle-progress');
+
+        Route::get('/activation/paths/{path}/assignments', [FeatureActivationController::class, 'assignments'])->name('admin.activation.paths.assignments');
+        Route::post('/activation/paths/{path}/assignments', [FeatureActivationController::class, 'assignUsers'])->name('admin.activation.paths.assign-users');
+        Route::post('/activation/paths/{path}/assignments/role', [FeatureActivationController::class, 'assignRole'])->name('admin.activation.paths.assign-role');
+        Route::delete('/activation/paths/{path}/assignments/{user}', [FeatureActivationController::class, 'unassignUser'])->name('admin.activation.paths.unassign-user');
+        Route::get('/activation/users/{user}/progress', [FeatureActivationController::class, 'userProgress'])->name('admin.activation.user-progress');
+        Route::get('/activation/benchmarks', ActivationBenchmarkController::class)->name('admin.activation.benchmarks');
     });
 
     /*
@@ -436,33 +574,43 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/paths/{enrollment}', [PartnerPathController::class, 'show'])->name('paths.show');
         Route::post('/paths/{enrollment}/advance', [PartnerPathController::class, 'advanceStage'])->name('paths.advance');
 
-        // Scorecard
-        Route::get('/scorecard', [ScorecardController::class, 'index'])->name('scorecard.index');
-        Route::get('/scorecard/{partner}', [ScorecardController::class, 'show'])->name('scorecard.show');
+        // Scorecard (gated by analytics feature flag)
+        Route::middleware('module:analytics')->group(function () {
+            Route::get('/scorecard', [ScorecardController::class, 'index'])->name('scorecard.index');
+            Route::get('/scorecard/{partner}', [ScorecardController::class, 'show'])->name('scorecard.show');
+        });
 
-        // Competency Matrix
-        Route::get('/competency-matrix', [CompetencyMatrixController::class, 'index'])->name('competency-matrix.index');
-        Route::get('/competency-matrix/{partner}', [CompetencyMatrixController::class, 'show'])->name('competency-matrix.show');
+        // Competency Matrix (gated by enablement_user feature flag)
+        Route::middleware('module:enablement_user')->group(function () {
+            Route::get('/competency-matrix', [CompetencyMatrixController::class, 'index'])->name('competency-matrix.index');
+            Route::get('/competency-matrix/{partner}', [CompetencyMatrixController::class, 'show'])->name('competency-matrix.show');
+        });
 
-        // Task Board
-        Route::get('/tasks', [TaskBoardController::class, 'index'])->name('tasks.index');
-        Route::post('/tasks', [TaskBoardController::class, 'store'])->name('tasks.store');
-        Route::put('/tasks/{task}/status', [TaskBoardController::class, 'updateStatus'])->name('tasks.update-status');
-        Route::post('/tasks/{task}/comments', [TaskBoardController::class, 'addComment'])->name('tasks.comments.store');
+        // Task Board (gated by action_plans_user feature flag)
+        Route::middleware('module:action_plans_user')->group(function () {
+            Route::get('/tasks', [TaskBoardController::class, 'index'])->name('tasks.index');
+            Route::post('/tasks', [TaskBoardController::class, 'store'])->name('tasks.store');
+            Route::put('/tasks/{task}/status', [TaskBoardController::class, 'updateStatus'])->name('tasks.update-status');
+            Route::post('/tasks/{task}/comments', [TaskBoardController::class, 'addComment'])->name('tasks.comments.store');
+        });
 
-        // Goals & Targets
-        Route::get('/goals', [GoalsController::class, 'index'])->name('goals.index');
-        Route::post('/goals', [GoalsController::class, 'store'])->name('goals.store');
-        Route::put('/goals/{goal}', [GoalsController::class, 'update'])->name('goals.update');
-        Route::delete('/goals/{goal}', [GoalsController::class, 'destroy'])->name('goals.destroy');
-        Route::post('/goals/refresh-actuals', [GoalsController::class, 'refreshActuals'])->name('goals.refresh-actuals');
+        // Goals & Targets (gated by goals_targets_user feature flag)
+        Route::middleware('module:goals_targets_user')->group(function () {
+            Route::get('/goals', [GoalsController::class, 'index'])->name('goals.index');
+            Route::post('/goals', [GoalsController::class, 'store'])->name('goals.store');
+            Route::put('/goals/{goal}', [GoalsController::class, 'update'])->name('goals.update');
+            Route::delete('/goals/{goal}', [GoalsController::class, 'destroy'])->name('goals.destroy');
+            Route::post('/goals/refresh-actuals', [GoalsController::class, 'refreshActuals'])->name('goals.refresh-actuals');
+        });
 
-        // Action Plans
-        Route::get('/action-plans', [ActionPlanController::class, 'index'])->name('action-plans.index');
-        Route::post('/action-plans', [ActionPlanController::class, 'store'])->name('action-plans.store');
-        Route::put('/action-plans/{plan}', [ActionPlanController::class, 'update'])->name('action-plans.update');
-        Route::post('/action-plans/{plan}/items', [ActionPlanController::class, 'addItem'])->name('action-plans.items.store');
-        Route::put('/action-plan-items/{item}', [ActionPlanController::class, 'updateItem'])->name('action-plan-items.update');
+        // Action Plans (gated by action_plans_user feature flag)
+        Route::middleware('module:action_plans_user')->group(function () {
+            Route::get('/action-plans', [ActionPlanController::class, 'index'])->name('action-plans.index');
+            Route::post('/action-plans', [ActionPlanController::class, 'store'])->name('action-plans.store');
+            Route::put('/action-plans/{plan}', [ActionPlanController::class, 'update'])->name('action-plans.update');
+            Route::post('/action-plans/{plan}/items', [ActionPlanController::class, 'addItem'])->name('action-plans.items.store');
+            Route::put('/action-plan-items/{item}', [ActionPlanController::class, 'updateItem'])->name('action-plan-items.update');
+        });
     });
 
     /*
@@ -476,12 +624,19 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/solutions/{solution}', [SolutionLifecycleController::class, 'update'])->name('solutions.update');
         Route::post('/solutions/{solution}/advance', [SolutionLifecycleController::class, 'advanceStage'])->name('solutions.advance');
 
-        // Deal Registrations
-        Route::get('/deal-registrations', [DealRegistrationController::class, 'index'])->name('deal-registrations.index');
-        Route::get('/deal-registrations/create', [DealRegistrationController::class, 'create'])->name('deal-registrations.create');
-        Route::post('/deal-registrations', [DealRegistrationController::class, 'store'])->name('deal-registrations.store');
-        Route::get('/deal-registrations/{dealRegistration}', [DealRegistrationController::class, 'show'])->name('deal-registrations.show');
-        Route::put('/deal-registrations/{dealRegistration}/review', [DealRegistrationController::class, 'review'])->name('deal-registrations.review');
+        // Deal Registrations (gated by deal_registration_user feature flag)
+        Route::middleware('module:deal_registration_user')->group(function () {
+            Route::get('/deal-registrations/dashboard', [DealRegistrationController::class, 'dashboard'])->name('deal-registrations.dashboard');
+            Route::get('/deal-registrations', [DealRegistrationController::class, 'index'])->name('deal-registrations.index');
+            Route::get('/deal-registrations/create', [DealRegistrationController::class, 'create'])->name('deal-registrations.create');
+            Route::post('/deal-registrations', [DealRegistrationController::class, 'store'])->name('deal-registrations.store');
+            Route::get('/deal-registrations/{dealRegistration}', [DealRegistrationController::class, 'show'])->name('deal-registrations.show');
+            Route::put('/deal-registrations/{dealRegistration}/review', [DealRegistrationController::class, 'review'])->name('deal-registrations.review');
+        });
+
+        // Marketplace Profile Submissions
+        Route::get('/marketplace-submissions', [PartnerController::class, 'marketplaceSubmissions'])->name('marketplace-submissions.index');
+        Route::get('/marketplace-submissions/{partner}', [PartnerController::class, 'marketplaceSubmissionShow'])->name('marketplace-submissions.show');
     });
 
     /*
@@ -500,9 +655,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/enablement', fn () => redirect()->route('measure.index', ['tab' => 'enablement']))->name('enablement');
         Route::get('/delivery', fn () => redirect()->route('measure.index', ['tab' => 'delivery']))->name('delivery');
 
-        // Benchmarks
-        Route::get('/benchmarks', [BenchmarkController::class, 'index'])->name('benchmarks.index');
-        Route::get('/benchmarks/{partner}', [BenchmarkController::class, 'partner'])->name('benchmarks.partner');
+        // Benchmarks (gated by benchmark_user feature flag)
+        Route::middleware('module:benchmark_user')->group(function () {
+            Route::get('/benchmarks', [BenchmarkController::class, 'index'])->name('benchmarks.index');
+            Route::get('/benchmarks/{partner}', [BenchmarkController::class, 'partner'])->name('benchmarks.partner');
+        });
     });
 
     /*
@@ -511,9 +668,11 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('act')->name('act.')->group(function () {
-        // Partner Health
-        Route::get('/health', [HealthDashboardController::class, 'index'])->name('health.index');
-        Route::get('/health/{partner}', [HealthDashboardController::class, 'show'])->name('health.show');
+        // Partner Health (gated by enablement_user feature flag)
+        Route::middleware('module:enablement_user')->group(function () {
+            Route::get('/health', [HealthDashboardController::class, 'index'])->name('health.index');
+            Route::get('/health/{partner}', [HealthDashboardController::class, 'show'])->name('health.show');
+        });
 
         // Alerts & Recommendations
         Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');
@@ -521,13 +680,15 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/alerts/{alert}/resolve', [AlertController::class, 'resolve'])->name('alerts.resolve');
         Route::put('/alerts/{alert}/dismiss', [AlertController::class, 'dismiss'])->name('alerts.dismiss');
 
-        // QBR Workbench
-        Route::get('/qbr', [QbrController::class, 'index'])->name('qbr.index');
-        Route::post('/qbr', [QbrController::class, 'store'])->name('qbr.store');
-        Route::get('/qbr/{session}', [QbrController::class, 'show'])->name('qbr.show');
-        Route::put('/qbr/{session}', [QbrController::class, 'update'])->name('qbr.update');
-        Route::put('/qbr/{session}/sections/{section}', [QbrController::class, 'updateSection'])->name('qbr.sections.update');
-        Route::post('/qbr/{session}/complete', [QbrController::class, 'complete'])->name('qbr.complete');
+        // QBR Workbench (gated by qbr_user feature flag)
+        Route::middleware('module:qbr_user')->group(function () {
+            Route::get('/qbr', [QbrController::class, 'index'])->name('qbr.index');
+            Route::post('/qbr', [QbrController::class, 'store'])->name('qbr.store');
+            Route::get('/qbr/{session}', [QbrController::class, 'show'])->name('qbr.show');
+            Route::put('/qbr/{session}', [QbrController::class, 'update'])->name('qbr.update');
+            Route::put('/qbr/{session}/sections/{section}', [QbrController::class, 'updateSection'])->name('qbr.sections.update');
+            Route::post('/qbr/{session}/complete', [QbrController::class, 'complete'])->name('qbr.complete');
+        });
 
         // Path Reviews
         Route::get('/path-reviews', [PathReviewController::class, 'index'])->name('path-reviews.index');
@@ -542,6 +703,9 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
+        // Role Management
+        Route::resource('roles', RoleController::class)->except(['show']);
+
         // Path Configuration
         Route::get('/paths', [PathConfigurationController::class, 'index'])->name('paths.index');
         Route::post('/paths', [PathConfigurationController::class, 'store'])->name('paths.store');
@@ -564,12 +728,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/scorecard-weights', [ScorecardController::class, 'weights'])->name('scorecard-weights.index');
         Route::put('/scorecard-weights', [ScorecardController::class, 'updateWeights'])->name('scorecard-weights.update');
 
-        // Goal Templates
-        Route::get('/goal-templates', [GoalTemplateController::class, 'index'])->name('goal-templates.index');
-        Route::post('/goal-templates', [GoalTemplateController::class, 'store'])->name('goal-templates.store');
-        Route::put('/goal-templates/{template}', [GoalTemplateController::class, 'update'])->name('goal-templates.update');
-        Route::delete('/goal-templates/{template}', [GoalTemplateController::class, 'destroy'])->name('goal-templates.destroy');
-        Route::post('/goal-templates/{template}/assign', [GoalTemplateController::class, 'assign'])->name('goal-templates.assign');
+        // Goal Templates (gated by goals_targets_admin feature flag)
+        Route::middleware('module:goals_targets_admin')->group(function () {
+            Route::get('/goal-templates', [GoalTemplateController::class, 'index'])->name('goal-templates.index');
+            Route::post('/goal-templates', [GoalTemplateController::class, 'store'])->name('goal-templates.store');
+            Route::put('/goal-templates/{template}', [GoalTemplateController::class, 'update'])->name('goal-templates.update');
+            Route::delete('/goal-templates/{template}', [GoalTemplateController::class, 'destroy'])->name('goal-templates.destroy');
+            Route::post('/goal-templates/{template}/assign', [GoalTemplateController::class, 'assign'])->name('goal-templates.assign');
+        });
 
         // Notification Templates
         Route::get('/notification-templates', [NotificationTemplateController::class, 'index'])->name('notification-templates.index');

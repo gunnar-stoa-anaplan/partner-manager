@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use App\Models\Partner;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -28,10 +29,15 @@ class PortalUserController extends Controller
         $this->ensureContactBelongsToPartner($partner, $contact);
 
         $validated = $request->validate([
-            'portal_role' => ['nullable', 'string', 'in:'.implode(',', array_keys(Contact::PORTAL_ROLES))],
+            'portal_role' => ['nullable', 'string', 'exists:roles,slug,type,portal'],
         ]);
 
-        $contact->update(['portal_role' => $validated['portal_role']]);
+        $portalRoleId = null;
+        if (! empty($validated['portal_role'])) {
+            $portalRoleId = Role::where('slug', $validated['portal_role'])->where('type', 'portal')->value('id');
+        }
+
+        $contact->update(['portal_role_id' => $portalRoleId]);
 
         return redirect(route('partners.show', $partner).'#portal-users')
             ->with('success', "Portal role updated for {$contact->full_name}.");
@@ -82,7 +88,7 @@ class PortalUserController extends Controller
         $created = 0;
         $updated = 0;
         $skipped = 0;
-        $validRoles = array_keys(Contact::PORTAL_ROLES);
+        $validRoleSlugs = Role::portal()->pluck('slug')->toArray();
 
         foreach ($rows as $row) {
             $email = trim($row[$colMap['email'] ?? -1] ?? '');
@@ -96,15 +102,19 @@ class PortalUserController extends Controller
             $lastName = trim($row[$colMap['last name'] ?? $colMap['last_name'] ?? -1] ?? '');
             $phone = trim($row[$colMap['phone'] ?? -1] ?? '');
             $title = trim($row[$colMap['title'] ?? -1] ?? '');
-            $portalRole = strtolower(trim($row[$colMap['portal role'] ?? $colMap['portal_role'] ?? -1] ?? ''));
-            $portalRole = str_replace([' ', '-'], '_', $portalRole);
+            $portalRoleSlug = strtolower(trim($row[$colMap['portal role'] ?? $colMap['portal_role'] ?? -1] ?? ''));
+            $portalRoleSlug = str_replace([' ', '-'], '_', $portalRoleSlug);
+
+            $portalRoleId = in_array($portalRoleSlug, $validRoleSlugs, true)
+                ? Role::where('slug', $portalRoleSlug)->where('type', 'portal')->value('id')
+                : null;
 
             $data = array_filter([
                 'first_name' => $firstName ?: null,
                 'last_name' => $lastName ?: null,
                 'phone' => $phone ?: null,
                 'title' => $title ?: null,
-                'portal_role' => in_array($portalRole, $validRoles, true) ? $portalRole : null,
+                'portal_role_id' => $portalRoleId,
             ]);
 
             $contact = Contact::where('email', $email)
@@ -131,7 +141,7 @@ class PortalUserController extends Controller
     public function downloadTemplate(): StreamedResponse
     {
         $headers = ['First Name', 'Last Name', 'Email', 'Phone', 'Title', 'Portal Role'];
-        $roleKeys = implode(' / ', array_keys(Contact::PORTAL_ROLES));
+        $roleKeys = Role::portal()->orderBy('sort_order')->pluck('slug')->implode(' / ');
 
         return response()->streamDownload(function () use ($headers, $roleKeys) {
             $out = fopen('php://output', 'w');
@@ -146,7 +156,7 @@ class PortalUserController extends Controller
 
     private function authorizePartnerAccess(Partner $partner): void
     {
-        if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
+        if ($partner->user_id !== auth()->id() && ! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access to this partner.');
         }
     }

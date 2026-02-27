@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Partner;
@@ -12,7 +13,7 @@ class ScorecardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $partnersQuery = $user->role === 'admin'
+        $partnersQuery = $user->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', $user->id);
 
@@ -57,12 +58,14 @@ class ScorecardController extends Controller
     public function recalculate(Partner $partner, ScorecardCalculationService $service)
     {
         $service->calculateForPartner($partner);
+
         return redirect()->back()->with('success', 'Scorecard recalculated.');
     }
 
     public function weights()
     {
         $weights = ScorecardWeight::orderBy('dimension')->get();
+
         return view('admin.scorecard-weights.index', compact('weights'));
     }
 

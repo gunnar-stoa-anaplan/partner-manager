@@ -1,18 +1,17 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Partner;
 use App\Models\Certification;
 use App\Models\CertificationRequirement;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\Partner;
 
 class CompetencyMatrixController extends Controller
 {
     public function index()
     {
         $user = auth()->user();
-        $partnersQuery = $user->role === 'admin'
+        $partnersQuery = $user->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', $user->id);
 

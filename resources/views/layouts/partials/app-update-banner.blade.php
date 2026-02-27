@@ -1,5 +1,5 @@
 @auth
-@if(auth()->user()->role === 'admin')
+@if(auth()->user()->isAdmin())
     @inject('versionCheck', 'App\Services\VersionCheckService')
     @php
         $availableUpdate = $versionCheck->getAvailableUpdate();

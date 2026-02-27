@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class OpportunityHistorySeeder extends Seeder
 {
@@ -71,14 +72,14 @@ class OpportunityHistorySeeder extends Seeder
         $this->command->info('Seeding opportunity history (52 weeks)...');
 
         // Clear only opportunity-related data (non-destructive to partners/users/contacts/etc.)
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        OpportunitySnapshot::truncate();
-        Opportunity::truncate();
-        Import::where('type', 'opportunities')->delete();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        Schema::withoutForeignKeyConstraints(function () {
+            OpportunitySnapshot::truncate();
+            Opportunity::truncate();
+            Import::where('type', 'opportunities')->delete();
+        });
 
         $partners = Partner::orderBy('id')->get();
-        $admin = User::where('role', 'admin')->first() ?? User::first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first() ?? User::first();
 
         // Group products by product_line for assigning product_id to opportunities
         $productsByLine = Product::all()->groupBy('product_line');

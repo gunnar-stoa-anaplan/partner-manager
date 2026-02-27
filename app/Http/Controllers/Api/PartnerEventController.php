@@ -23,7 +23,7 @@ class PartnerEventController extends Controller
             'end' => 'required|date',
             'partner_id' => 'nullable|integer|exists:partners,id',
             'types' => 'nullable|array',
-            'types.*' => 'string|in:' . implode(',', array_keys(PartnerEvent::TYPES)),
+            'types.*' => 'string|in:'.implode(',', array_keys(PartnerEvent::TYPES)),
             'status' => 'nullable|string|in:scheduled,completed,cancelled',
         ]);
 
@@ -35,14 +35,14 @@ class PartnerEventController extends Controller
             ->whereNull('parent_event_id');
 
         // Scope to user's partners unless admin
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
             $query->whereIn('partner_id', $partnerIds);
         }
 
         if ($request->partner_id) {
             $partner = Partner::findOrFail($request->partner_id);
-            if ($partner->user_id !== $user->id && $user->role !== 'admin') {
+            if ($partner->user_id !== $user->id && ! $user->isAdmin()) {
                 abort(403);
             }
             $query->where('partner_id', $request->partner_id);
@@ -69,14 +69,14 @@ class PartnerEventController extends Controller
                     });
             })
             // Recurring events that could produce occurrences in range
-            ->orWhere(function ($sub) use ($rangeStart, $rangeEnd) {
-                $sub->where('recurrence_type', '!=', 'none')
-                    ->where('start_at', '<', $rangeEnd)
-                    ->where(function ($inner) use ($rangeStart) {
-                        $inner->whereNull('recurrence_end')
-                            ->orWhere('recurrence_end', '>=', $rangeStart);
-                    });
-            });
+                ->orWhere(function ($sub) use ($rangeStart, $rangeEnd) {
+                    $sub->where('recurrence_type', '!=', 'none')
+                        ->where('start_at', '<', $rangeEnd)
+                        ->where(function ($inner) use ($rangeStart) {
+                            $inner->whereNull('recurrence_end')
+                                ->orWhere('recurrence_end', '>=', $rangeStart);
+                        });
+                });
         });
 
         $events = $query->get();
@@ -91,7 +91,7 @@ class PartnerEventController extends Controller
         }
 
         // Fetch exception children in range
-        $recurringIds = $events->filter(fn($e) => $e->recurrence_type !== 'none')->pluck('id');
+        $recurringIds = $events->filter(fn ($e) => $e->recurrence_type !== 'none')->pluck('id');
         if ($recurringIds->isNotEmpty()) {
             $exceptions = PartnerEvent::with(['partner:id,name', 'participants:id,first_name,last_name'])
                 ->whereIn('parent_event_id', $recurringIds)
@@ -114,7 +114,7 @@ class PartnerEventController extends Controller
         $validated = $request->validate([
             'partner_id' => 'required|integer|exists:partners,id',
             'title' => 'required|string|max:255',
-            'type' => 'required|string|in:' . implode(',', array_keys(PartnerEvent::TYPES)),
+            'type' => 'required|string|in:'.implode(',', array_keys(PartnerEvent::TYPES)),
             'status' => 'nullable|string|in:scheduled,completed,cancelled',
             'start_at' => 'required|date',
             'end_at' => 'nullable|date|after_or_equal:start_at',
@@ -133,7 +133,7 @@ class PartnerEventController extends Controller
 
         $partner = Partner::findOrFail($validated['partner_id']);
         $user = auth()->user();
-        if ($partner->user_id !== $user->id && $user->role !== 'admin') {
+        if ($partner->user_id !== $user->id && ! $user->isAdmin()) {
             abort(403);
         }
 
@@ -143,7 +143,7 @@ class PartnerEventController extends Controller
 
         $event = PartnerEvent::create($validated);
 
-        if (!empty($validated['participant_ids'])) {
+        if (! empty($validated['participant_ids'])) {
             $validContactIds = $partner->contacts()
                 ->whereIn('id', $validated['participant_ids'])
                 ->pluck('id');
@@ -164,7 +164,7 @@ class PartnerEventController extends Controller
             ->findOrFail($id);
 
         $user = auth()->user();
-        if ($event->partner->user_id !== $user->id && $user->role !== 'admin') {
+        if ($event->partner->user_id !== $user->id && ! $user->isAdmin()) {
             abort(403);
         }
 
@@ -192,9 +192,9 @@ class PartnerEventController extends Controller
             'recurrence_type' => $event->recurrence_type,
             'recurrence_end' => $event->recurrence_end?->toDateString(),
             'parent_event_id' => $event->parent_event_id,
-            'participants' => $event->participants->map(fn($c) => [
+            'participants' => $event->participants->map(fn ($c) => [
                 'id' => $c->id,
-                'name' => $c->first_name . ' ' . $c->last_name,
+                'name' => $c->first_name.' '.$c->last_name,
                 'email' => $c->email,
                 'title' => $c->title,
             ]),
@@ -208,13 +208,13 @@ class PartnerEventController extends Controller
     {
         $event = PartnerEvent::findOrFail($id);
         $user = auth()->user();
-        if ($event->partner->user_id !== $user->id && $user->role !== 'admin') {
+        if ($event->partner->user_id !== $user->id && ! $user->isAdmin()) {
             abort(403);
         }
 
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
-            'type' => 'sometimes|string|in:' . implode(',', array_keys(PartnerEvent::TYPES)),
+            'type' => 'sometimes|string|in:'.implode(',', array_keys(PartnerEvent::TYPES)),
             'status' => 'sometimes|string|in:scheduled,completed,cancelled',
             'start_at' => 'sometimes|date',
             'end_at' => 'nullable|date',
@@ -252,7 +252,7 @@ class PartnerEventController extends Controller
     {
         $event = PartnerEvent::findOrFail($id);
         $user = auth()->user();
-        if ($event->partner->user_id !== $user->id && $user->role !== 'admin') {
+        if ($event->partner->user_id !== $user->id && ! $user->isAdmin()) {
             abort(403);
         }
 
@@ -272,7 +272,7 @@ class PartnerEventController extends Controller
     {
         $partner = Partner::findOrFail($partnerId);
         $user = auth()->user();
-        if ($partner->user_id !== $user->id && $user->role !== 'admin') {
+        if ($partner->user_id !== $user->id && ! $user->isAdmin()) {
             abort(403);
         }
 

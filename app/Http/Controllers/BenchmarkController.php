@@ -10,7 +10,7 @@ class BenchmarkController extends Controller
     public function index(BenchmarkService $service): \Illuminate\View\View
     {
         $user = auth()->user();
-        $partnersQuery = $user->role === 'admin'
+        $partnersQuery = $user->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', $user->id);
 
@@ -28,7 +28,7 @@ class BenchmarkController extends Controller
     public function partner(Partner $partner, BenchmarkService $service): \Illuminate\View\View
     {
         $user = auth()->user();
-        $allPartnersQuery = $user->role === 'admin'
+        $allPartnersQuery = $user->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', $user->id);
 

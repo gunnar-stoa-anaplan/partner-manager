@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Ai\Agents\PartnerAdvisor;
+use App\Enums\StepType;
 use App\Helpers\FiscalYearHelper;
 use App\Models\Blueprint;
 use App\Models\Certification;
@@ -18,8 +20,11 @@ use App\Models\PartnerPathEnrollment;
 use App\Models\PartnerScorecard;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\ActivationTracker;
 use App\Services\GateEvaluationService;
+use App\Support\DatabasePortability;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -41,7 +46,7 @@ class PartnerController extends Controller
      */
     public function myPartners()
     {
-        $query = auth()->user()->role === 'admin'
+        $query = auth()->user()->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', auth()->id());
 
@@ -74,9 +79,11 @@ class PartnerController extends Controller
      */
     public function show(string $id)
     {
-        $partner = Partner::with(['projects', 'contacts', 'opportunities', 'leads', 'certifications', 'anaplanWorkspaces'])
+        $partner = Partner::with(['projects', 'contacts', 'opportunities', 'leads', 'certifications', 'anaplanWorkspaces', 'blueprintAssignments'])
             ->findOrFail($id);
         $this->authorizePartnerAccess($partner);
+
+        app(ActivationTracker::class)->track(auth()->user(), 'partner_management_user', StepType::UsageThreshold);
 
         // KPI metrics (always visible above tabs)
         $activeProjects = $partner->projects->whereNotIn('status', ['Completed'])->count();
@@ -114,6 +121,9 @@ class PartnerController extends Controller
             'launch-programs' => $this->launchProgramsTabData($partner),
             'workspaces' => $this->workspacesTabData($partner),
             'portal-users' => $this->portalUsersTabData($partner),
+            'deal-registrations' => $this->dealRegistrationsTabData($partner),
+            'blueprints' => $this->blueprintsTabData($partner),
+            'marketplace' => $this->marketplaceTabData($partner),
             default => abort(404),
         };
 
@@ -125,7 +135,7 @@ class PartnerController extends Controller
      */
     private function authorizePartnerAccess(Partner $partner): void
     {
-        if ($partner->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
+        if ($partner->user_id !== auth()->id() && ! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access to this partner.');
         }
     }
@@ -198,7 +208,7 @@ class PartnerController extends Controller
             ->join('imports', 'opportunity_snapshots.import_id', '=', 'imports.id')
             ->join('opportunities', 'opportunity_snapshots.opportunity_id', '=', 'opportunities.id')
             ->where('opportunities.partner_id', $partner->id)
-            ->whereRaw('DATE_FORMAT(imports.started_at, "%Y-%m") = ?', [$yearAgoMonth])
+            ->whereRaw(DatabasePortability::dateFormat('imports.started_at', '%Y-%m').' = ?', [$yearAgoMonth])
             ->sum('opportunity_snapshots.amount');
         $pipelineGrowthYoY = $yearAgoPipeline > 0
             ? round(($currentPipeline - $yearAgoPipeline) / $yearAgoPipeline * 100, 1)
@@ -370,7 +380,7 @@ class PartnerController extends Controller
             ->where('opportunities.partner_id', $partner->id)
             ->where('imports.started_at', '<=', now()->subDays(90))
             ->orderByDesc('imports.started_at')
-            ->value(\DB::raw('DATE(imports.started_at)'));
+            ->value(\DB::raw(DatabasePortability::extractDate('imports.started_at')));
 
         if ($nearestSnapshotDate) {
             $historicalPipelineValue = (float) \DB::table('opportunity_snapshots')
@@ -378,7 +388,7 @@ class PartnerController extends Controller
                 ->join('opportunities', 'opportunity_snapshots.opportunity_id', '=', 'opportunities.id')
                 ->where('opportunities.partner_id', $partner->id)
                 ->whereNotIn('opportunity_snapshots.stage', ['Closed Won', 'Closed Lost'])
-                ->whereRaw('DATE(imports.started_at) = ?', [$nearestSnapshotDate])
+                ->whereRaw(DatabasePortability::extractDate('imports.started_at').' = ?', [$nearestSnapshotDate])
                 ->sum('opportunity_snapshots.amount');
         }
 
@@ -400,13 +410,13 @@ class PartnerController extends Controller
             ->where('opportunities.partner_id', $partner->id)
             ->whereBetween('imports.started_at', [now()->subWeeks(52), now()])
             ->select(
-                \DB::raw('DATE_FORMAT(imports.started_at, "%Y-%m") as snapshot_month'),
-                \DB::raw('SUM(CASE WHEN opportunity_snapshots.revenue_type = "sourced" THEN opportunity_snapshots.amount ELSE 0 END) as sourced_amount'),
-                \DB::raw('SUM(CASE WHEN opportunity_snapshots.revenue_type = "influenced" THEN opportunity_snapshots.amount ELSE 0 END) as influenced_amount'),
+                \DB::raw(DatabasePortability::dateFormat('imports.started_at', '%Y-%m').' as snapshot_month'),
+                \DB::raw('SUM(CASE WHEN opportunity_snapshots.revenue_type = \'sourced\' THEN opportunity_snapshots.amount ELSE 0 END) as sourced_amount'),
+                \DB::raw('SUM(CASE WHEN opportunity_snapshots.revenue_type = \'influenced\' THEN opportunity_snapshots.amount ELSE 0 END) as influenced_amount'),
                 \DB::raw('COUNT(DISTINCT opportunity_snapshots.opportunity_id) as opportunity_count')
             )
-            ->groupBy(\DB::raw('DATE_FORMAT(imports.started_at, "%Y-%m")'))
-            ->orderBy(\DB::raw('DATE_FORMAT(imports.started_at, "%Y-%m")'))
+            ->groupBy(\DB::raw(DatabasePortability::dateFormat('imports.started_at', '%Y-%m')))
+            ->orderBy(\DB::raw(DatabasePortability::dateFormat('imports.started_at', '%Y-%m')))
             ->get();
 
         // ── Pipeline Funnel ── (existing)
@@ -467,7 +477,7 @@ class PartnerController extends Controller
         $serverAlerts = PartnerAlert::where('partner_id', $partner->id)
             ->whereIn('type', ['new_opportunity', 'stage_change', 'close_date_slip', 'pipeline_risk'])
             ->where('status', 'active')
-            ->orderByRaw("FIELD(severity, 'critical', 'warning', 'info', 'positive')")
+            ->orderByRaw(DatabasePortability::orderByValues('severity', DatabasePortability::SEVERITY_ORDER))
             ->take(10)
             ->get();
 
@@ -1204,12 +1214,31 @@ class PartnerController extends Controller
     }
 
     /**
+     * Blueprints tab: assignment detail with enrollment progress.
+     *
+     * @return array<string, mixed>
+     */
+    private function blueprintsTabData(Partner $partner): array
+    {
+        $partner->load([
+            'blueprintAssignments.blueprint',
+            'blueprintAssignments.enrollments.contact',
+            'blueprintAssignments.enrollments.progress',
+            'blueprintAssignments.assignedBy',
+        ]);
+
+        return [
+            'assignments' => $partner->blueprintAssignments,
+        ];
+    }
+
+    /**
      * Show the full summary view aggregating all partners for the authenticated user.
      */
     public function fullSummary()
     {
         // Get all partners assigned to the authenticated user (admins see all)
-        $query = auth()->user()->role === 'admin'
+        $query = auth()->user()->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', auth()->id());
 
@@ -1228,13 +1257,13 @@ class PartnerController extends Controller
             ->whereIn('opportunities.partner_id', $partners->pluck('id'))
             ->whereBetween('imports.started_at', [$startDate, $endDate])
             ->select(
-                \DB::raw('DATE(imports.started_at) as snapshot_date'),
+                \DB::raw(DatabasePortability::extractDate('imports.started_at').' as snapshot_date'),
                 \DB::raw('SUM(opportunity_snapshots.amount) as total_amount'),
                 \DB::raw('COUNT(DISTINCT opportunity_snapshots.opportunity_id) as opportunity_count'),
-                \DB::raw('SUM(CASE WHEN opportunity_snapshots.stage = "Closed Won" THEN 1 ELSE 0 END) as closed_won_count')
+                \DB::raw('SUM(CASE WHEN opportunity_snapshots.stage = \'Closed Won\' THEN 1 ELSE 0 END) as closed_won_count')
             )
-            ->groupBy(\DB::raw('DATE(imports.started_at)'))
-            ->orderBy(\DB::raw('DATE(imports.started_at)'))
+            ->groupBy(\DB::raw(DatabasePortability::extractDate('imports.started_at')))
+            ->orderBy(\DB::raw(DatabasePortability::extractDate('imports.started_at')))
             ->get();
 
         // Query resource snapshots for all user's partners
@@ -1243,12 +1272,12 @@ class PartnerController extends Controller
             ->whereIn('resource_snapshots.partner_id', $partners->pluck('id'))
             ->whereBetween('imports.started_at', [$startDate, $endDate])
             ->select(
-                \DB::raw('DATE(imports.started_at) as snapshot_date'),
+                \DB::raw(DatabasePortability::extractDate('imports.started_at').' as snapshot_date'),
                 \DB::raw('SUM(resource_snapshots.total_count) as total_resources'),
                 \DB::raw('SUM(resource_snapshots.completed_count) as certified_resources')
             )
-            ->groupBy(\DB::raw('DATE(imports.started_at)'))
-            ->orderBy(\DB::raw('DATE(imports.started_at)'))
+            ->groupBy(\DB::raw(DatabasePortability::extractDate('imports.started_at')))
+            ->orderBy(\DB::raw(DatabasePortability::extractDate('imports.started_at')))
             ->get();
 
         // Calculate aggregate metrics
@@ -1281,7 +1310,7 @@ class PartnerController extends Controller
     public function fullInsights()
     {
         // Get all partners (admins see all, PSMs see their own)
-        $query = auth()->user()->role === 'admin'
+        $query = auth()->user()->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', auth()->id());
 
@@ -1314,7 +1343,7 @@ class PartnerController extends Controller
             ->select(
                 'role',
                 \DB::raw('COUNT(*) as total'),
-                \DB::raw('SUM(CASE WHEN status = "Completed" THEN 1 ELSE 0 END) as completed')
+                \DB::raw('SUM(CASE WHEN status = \'Completed\' THEN 1 ELSE 0 END) as completed')
             )
             ->whereIn('role', ['Delivery', 'Sales', 'Pre-Sales'])
             ->groupBy('role')
@@ -1378,6 +1407,8 @@ class PartnerController extends Controller
             'user_id' => $request->user_id,
         ]);
 
+        app(ActivationTracker::class)->track(auth()->user(), 'partner_management_user', StepType::FeatureUsage);
+
         return redirect()->route('partners.index')->with('success', 'Partner assignment updated successfully.');
     }
 
@@ -1386,7 +1417,7 @@ class PartnerController extends Controller
      */
     public function analysis()
     {
-        $isAdmin = auth()->user()->role === 'admin';
+        $isAdmin = auth()->user()->isAdmin();
 
         if ($isAdmin) {
             $partners = Partner::with(['projects', 'contacts', 'opportunities', 'leads', 'resources'])
@@ -1399,7 +1430,7 @@ class PartnerController extends Controller
                 ->get();
         }
 
-        $psms = User::where('role', 'psm')
+        $psms = User::whereRelation('role', 'slug', 'psm')
             ->orderBy('name')
             ->get();
 
@@ -1442,7 +1473,7 @@ class PartnerController extends Controller
      */
     public function guidedAnalysis()
     {
-        $query = auth()->user()->role === 'admin'
+        $query = auth()->user()->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', auth()->id());
 
@@ -1482,13 +1513,13 @@ class PartnerController extends Controller
             ->whereIn('opportunities.partner_id', $partners->pluck('id'))
             ->whereBetween('imports.started_at', [$startDate, $endDate])
             ->select(
-                \DB::raw('DATE(imports.started_at) as snapshot_date'),
+                \DB::raw(DatabasePortability::extractDate('imports.started_at').' as snapshot_date'),
                 \DB::raw('SUM(opportunity_snapshots.amount) as total_amount'),
                 \DB::raw('COUNT(DISTINCT opportunity_snapshots.opportunity_id) as opportunity_count'),
-                \DB::raw('SUM(CASE WHEN opportunity_snapshots.stage = "Closed Won" THEN 1 ELSE 0 END) as closed_won_count')
+                \DB::raw('SUM(CASE WHEN opportunity_snapshots.stage = \'Closed Won\' THEN 1 ELSE 0 END) as closed_won_count')
             )
-            ->groupBy(\DB::raw('DATE(imports.started_at)'))
-            ->orderBy(\DB::raw('DATE(imports.started_at)'))
+            ->groupBy(\DB::raw(DatabasePortability::extractDate('imports.started_at')))
+            ->orderBy(\DB::raw(DatabasePortability::extractDate('imports.started_at')))
             ->get();
 
         return view('analysis.guided', compact(
@@ -1505,7 +1536,7 @@ class PartnerController extends Controller
      */
     public function partnerCoach()
     {
-        $query = auth()->user()->role === 'admin'
+        $query = auth()->user()->isAdmin()
             ? Partner::query()
             : Partner::where('user_id', auth()->id());
 
@@ -1524,13 +1555,13 @@ class PartnerController extends Controller
             ->whereIn('opportunities.partner_id', $partners->pluck('id'))
             ->whereBetween('imports.started_at', [$startDate, $endDate])
             ->select(
-                \DB::raw('DATE(imports.started_at) as snapshot_date'),
+                \DB::raw(DatabasePortability::extractDate('imports.started_at').' as snapshot_date'),
                 \DB::raw('SUM(opportunity_snapshots.amount) as total_amount'),
                 \DB::raw('COUNT(DISTINCT opportunity_snapshots.opportunity_id) as opportunity_count'),
-                \DB::raw('SUM(CASE WHEN opportunity_snapshots.stage = "Closed Won" THEN 1 ELSE 0 END) as closed_won_count')
+                \DB::raw('SUM(CASE WHEN opportunity_snapshots.stage = \'Closed Won\' THEN 1 ELSE 0 END) as closed_won_count')
             )
-            ->groupBy(\DB::raw('DATE(imports.started_at)'))
-            ->orderBy(\DB::raw('DATE(imports.started_at)'))
+            ->groupBy(\DB::raw(DatabasePortability::extractDate('imports.started_at')))
+            ->orderBy(\DB::raw(DatabasePortability::extractDate('imports.started_at')))
             ->get();
 
         $resourceHistory = \DB::table('resource_snapshots')
@@ -1538,12 +1569,12 @@ class PartnerController extends Controller
             ->whereIn('resource_snapshots.partner_id', $partners->pluck('id'))
             ->whereBetween('imports.started_at', [$startDate, $endDate])
             ->select(
-                \DB::raw('DATE(imports.started_at) as snapshot_date'),
+                \DB::raw(DatabasePortability::extractDate('imports.started_at').' as snapshot_date'),
                 \DB::raw('SUM(resource_snapshots.total_count) as total_resources'),
                 \DB::raw('SUM(resource_snapshots.completed_count) as certified_resources')
             )
-            ->groupBy(\DB::raw('DATE(imports.started_at)'))
-            ->orderBy(\DB::raw('DATE(imports.started_at)'))
+            ->groupBy(\DB::raw(DatabasePortability::extractDate('imports.started_at')))
+            ->orderBy(\DB::raw(DatabasePortability::extractDate('imports.started_at')))
             ->get();
 
         return view('analysis.coach', compact(
@@ -1554,11 +1585,126 @@ class PartnerController extends Controller
     }
 
     /**
+     * Get AI-powered insights for a partner.
+     */
+    public function advisor(Partner $partner): JsonResponse
+    {
+        $response = PartnerAdvisor::make(partner: $partner)
+            ->prompt('Analyze this partner and provide your health assessment with recommendations.');
+
+        return response()->json([
+            'partner_id' => $partner->id,
+            'partner_name' => $partner->name,
+            'analysis' => [
+                'health_score' => $response['health_score'],
+                'risk_level' => $response['risk_level'],
+                'summary' => $response['summary'],
+                'recommendations' => [
+                    $response['top_recommendation'],
+                    $response['second_recommendation'],
+                    $response['third_recommendation'],
+                ],
+                'key_strength' => $response['key_strength'],
+                'key_risk' => $response['key_risk'],
+            ],
+        ]);
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * Marketplace tab: company profile + marketplace entries.
+     */
+    private function marketplaceTabData(Partner $partner): array
+    {
+        $entries = $partner->marketplaceEntries()
+            ->orderBy('category')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('category');
+
+        $categories = \App\Models\PartnerMarketplaceEntry::CATEGORIES;
+
+        $partner->load('marketplaceReviewer');
+
+        return compact('entries', 'categories');
+    }
+
+    public function marketplaceSubmissions(Request $request): \Illuminate\View\View
+    {
+        $query = Partner::with('user', 'marketplaceReviewer')
+            ->where(function ($q) {
+                $q->whereNotNull('headline')
+                    ->orWhereNotNull('company_description')
+                    ->orWhere('marketplace_status', '!=', 'draft');
+            })
+            ->withCount('marketplaceEntries');
+
+        if ($request->filled('status')) {
+            $query->where('marketplace_status', $request->status);
+        }
+
+        $partners = $query->orderByRaw("FIELD(marketplace_status, 'submitted', 'rejected', 'approved', 'draft')")
+            ->orderBy('name')
+            ->get();
+
+        $stats = [
+            'submitted' => Partner::where('marketplace_status', 'submitted')->count(),
+            'approved' => Partner::where('marketplace_status', 'approved')->count(),
+            'rejected' => Partner::where('marketplace_status', 'rejected')->count(),
+        ];
+
+        return view('engage.marketplace-submissions.index', compact('partners', 'stats'));
+    }
+
+    public function marketplaceSubmissionShow(Partner $partner): \Illuminate\View\View
+    {
+        $partner->load('user', 'marketplaceReviewer');
+
+        $entries = $partner->marketplaceEntries()
+            ->orderBy('category')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('category');
+
+        $categories = \App\Models\PartnerMarketplaceEntry::CATEGORIES;
+
+        return view('engage.marketplace-submissions.show', compact('partner', 'entries', 'categories'));
+    }
+
+    public function reviewMarketplace(Request $request, Partner $partner): \Illuminate\Http\RedirectResponse
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:approve,reject',
+            'rejection_reason' => 'required_if:action,reject|nullable|string',
+        ]);
+
+        $partner->marketplace_reviewed_by = auth()->id();
+        $partner->marketplace_reviewed_at = now();
+
+        if ($validated['action'] === 'approve') {
+            $partner->marketplace_status = 'approved';
+            $partner->marketplace_rejection_reason = null;
+        } else {
+            $partner->marketplace_status = 'rejected';
+            $partner->marketplace_rejection_reason = $validated['rejection_reason'];
+        }
+
+        $partner->save();
+
+        if ($validated['action'] === 'approve') {
+            app(\App\Services\TaskAutoVerificationService::class)->verifyForPartner($partner);
+        }
+
+        $action = $validated['action'] === 'approve' ? 'approved' : 'rejected';
+
+        return redirect()->back()->with('success', "Marketplace profile {$action}.");
     }
 
     /**
@@ -1624,6 +1770,49 @@ class PartnerController extends Controller
             ->get();
 
         return compact('contacts');
+    }
+
+    /**
+     * Deal Registrations tab: partner-specific deal registration metrics.
+     */
+    private function dealRegistrationsTabData(Partner $partner): array
+    {
+        $deals = $partner->dealRegistrations()
+            ->with('reviewer:id,name')
+            ->latest()
+            ->get();
+
+        $totalDeals = $deals->count();
+        $pendingDeals = $deals->whereIn('status', ['submitted', 'under_review'])->count();
+        $approvedDeals = $deals->where('status', 'approved')->count();
+        $rejectedDeals = $deals->where('status', 'rejected')->count();
+        $totalValue = $deals->whereNotIn('status', ['expired', 'rejected'])->sum('estimated_value');
+        $approvedValue = $deals->where('status', 'approved')->sum('estimated_value');
+
+        $dealsByStatus = $deals->groupBy('status')
+            ->map(fn ($group) => $group->count());
+
+        $dealsByProduct = $deals->whereNotNull('product_area')
+            ->groupBy('product_area')
+            ->map(fn ($group) => $group->count());
+
+        $valueByProduct = $deals->whereNotIn('status', ['expired', 'rejected'])
+            ->whereNotNull('product_area')
+            ->groupBy('product_area')
+            ->map(fn ($group) => $group->sum('estimated_value'));
+
+        return compact(
+            'deals',
+            'totalDeals',
+            'pendingDeals',
+            'approvedDeals',
+            'rejectedDeals',
+            'totalValue',
+            'approvedValue',
+            'dealsByStatus',
+            'dealsByProduct',
+            'valueByProduct',
+        );
     }
 
     /**

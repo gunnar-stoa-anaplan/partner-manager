@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Partner;
 use App\Models\PartnerTask;
 use App\Models\TaskComment;
+use App\Support\DatabasePortability;
 use Illuminate\Http\Request;
 
 class TaskBoardController extends Controller
@@ -13,7 +15,7 @@ class TaskBoardController extends Controller
         $user = auth()->user();
         $query = PartnerTask::with(['partner', 'template', 'assignedUser', 'assignedContact']);
 
-        if ($user->role !== 'admin') {
+        if (! $user->isAdmin()) {
             $partnerIds = Partner::where('user_id', $user->id)->pluck('id');
             $query->whereIn('partner_id', $partnerIds);
         }
@@ -31,11 +33,11 @@ class TaskBoardController extends Controller
             $query->where('requirement_level', $request->requirement_level);
         }
 
-        $tasks = $query->orderByRaw("FIELD(priority, 'critical', 'high', 'medium', 'low')")
+        $tasks = $query->orderByRaw(DatabasePortability::orderByValues('priority', DatabasePortability::PRIORITY_ORDER))
             ->orderBy('due_date')
             ->get();
 
-        $partners = $user->role === 'admin'
+        $partners = $user->isAdmin()
             ? Partner::select('id', 'name')->orderBy('name')->get()
             : Partner::where('user_id', $user->id)->select('id', 'name')->orderBy('name')->get();
 
@@ -60,7 +62,7 @@ class TaskBoardController extends Controller
 
         $data = ['status' => $request->status];
 
-        if ($request->status === 'in_progress' && !$task->started_at) {
+        if ($request->status === 'in_progress' && ! $task->started_at) {
             $data['started_at'] = now();
         }
         if ($request->status === 'completed') {

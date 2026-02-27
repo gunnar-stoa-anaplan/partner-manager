@@ -9,6 +9,7 @@ use App\Models\EnablementRegistration;
 use App\Models\EnablementSession;
 use App\Models\Lab;
 use App\Models\PartnerBlueprintAssignment;
+use App\Support\DatabasePortability;
 use Illuminate\Support\Facades\DB;
 
 class EnablementDashboardController extends Controller
@@ -65,7 +66,7 @@ class EnablementDashboardController extends Controller
 
         // ── Sessions by Month (area chart) ──
         $sessionsByMonth = EnablementSession::select(
-            DB::raw("DATE_FORMAT(start_at, '%Y-%m') as month"),
+            DB::raw(DatabasePortability::dateFormat('start_at', '%Y-%m').' as month'),
             DB::raw('count(*) as total')
         )
             ->whereNotNull('start_at')

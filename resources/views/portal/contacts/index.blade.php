@@ -41,15 +41,15 @@
                         </td>
                         <td>
                             @if($c->id === $contact->id)
-                                <span class="badge bg-primary">{{ \App\Models\Contact::PORTAL_ROLES[$c->portal_role] ?? '—' }}</span>
+                                <span class="badge bg-primary">{{ $c->role?->display_name ?? '—' }}</span>
                             @else
                                 <form action="{{ route('portal.contacts.update-role', $c) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('PATCH')
                                     <select name="portal_role" onchange="this.form.submit()" class="form-select form-select-sm" style="width: auto; font-size: 0.8rem;">
                                         <option value="">— None —</option>
-                                        @foreach(\App\Models\Contact::PORTAL_ROLES as $key => $label)
-                                            <option value="{{ $key }}" {{ $c->portal_role === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                        @foreach(\App\Models\Role::portal()->orderBy('sort_order')->get() as $portalRole)
+                                            <option value="{{ $portalRole->slug }}" {{ $c->portal_role_id === $portalRole->id ? 'selected' : '' }}>{{ $portalRole->display_name }}</option>
                                         @endforeach
                                     </select>
                                 </form>

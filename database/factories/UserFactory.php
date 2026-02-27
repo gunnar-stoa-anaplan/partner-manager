@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -40,5 +41,61 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Assign an internal role by slug (creates the role if it doesn't exist).
+     */
+    public function withRole(string $slug, array $attributes = []): static
+    {
+        return $this->state(fn () => [
+            'role_id' => Role::firstOrCreate(
+                ['slug' => $slug, 'type' => 'internal'],
+                array_merge(['display_name' => ucwords(str_replace('_', ' ', $slug))], $attributes)
+            )->id,
+        ]);
+    }
+
+    public function admin(): static
+    {
+        return $this->withRole('admin', [
+            'display_name' => 'Administrator',
+            'bypass_permissions' => true,
+            'is_protected' => true,
+        ]);
+    }
+
+    public function superAdmin(): static
+    {
+        return $this->withRole('super_admin', [
+            'display_name' => 'Super Admin',
+            'bypass_permissions' => true,
+            'is_protected' => true,
+        ]);
+    }
+
+    public function psm(): static
+    {
+        return $this->withRole('psm', ['display_name' => 'Partner Success Manager']);
+    }
+
+    public function pam(): static
+    {
+        return $this->withRole('pam', ['display_name' => 'Partner Account Manager']);
+    }
+
+    public function coe(): static
+    {
+        return $this->withRole('coe', ['display_name' => 'Center of Excellence']);
+    }
+
+    public function manager(): static
+    {
+        return $this->withRole('manager', ['display_name' => 'Manager']);
+    }
+
+    public function integration(): static
+    {
+        return $this->withRole('integration', ['display_name' => 'Integration']);
     }
 }

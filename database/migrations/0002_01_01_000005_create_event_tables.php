@@ -13,12 +13,8 @@ return new class extends Migration
             $table->foreignId('partner_id')->constrained()->cascadeOnDelete();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->string('title');
-            $table->enum('type', [
-                'qbr', 'training', 'workshop', 'demo',
-                'joint_sales_call', 'check_in', 'escalation_review',
-                'certification_exam', 'kickoff', 'other'
-            ]);
-            $table->enum('status', ['scheduled', 'completed', 'cancelled'])->default('scheduled');
+            $table->string('type', 50);
+            $table->string('status', 50)->default('scheduled');
             $table->dateTime('start_at');
             $table->dateTime('end_at')->nullable();
             $table->boolean('all_day')->default(false);
@@ -30,7 +26,7 @@ return new class extends Migration
             $table->foreignId('opportunity_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('project_id')->nullable()->constrained()->nullOnDelete();
 
-            $table->enum('recurrence_type', ['none', 'daily', 'weekly', 'biweekly', 'monthly'])->default('none');
+            $table->string('recurrence_type', 50)->default('none');
             $table->date('recurrence_end')->nullable();
             $table->foreignId('parent_event_id')->nullable()->constrained('partner_events')->nullOnDelete();
 

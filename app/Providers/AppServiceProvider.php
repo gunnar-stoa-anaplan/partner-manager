@@ -4,10 +4,16 @@ namespace App\Providers;
 
 use App\Contracts\ChatServiceInterface;
 use App\Models\AppSetting;
+use App\Models\User;
 use App\Services\SimulatedChatService;
+use App\Services\ZoomApiService;
+use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Pennant\Feature;
 use Laravel\Pulse\Facades\Pulse;
 
 class AppServiceProvider extends ServiceProvider
@@ -18,6 +24,16 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(ChatServiceInterface::class, SimulatedChatService::class);
+
+        $this->app->singleton(ZoomApiService::class, function () {
+            return new ZoomApiService(
+                accountId: config('services.zoom.account_id') ?? '',
+                clientId: config('services.zoom.client_id') ?? '',
+                clientSecret: config('services.zoom.client_secret') ?? '',
+                webhookSecretToken: config('services.zoom.webhook_secret_token') ?? '',
+                baseUrl: config('services.zoom.base_url') ?? 'https://api.zoom.us/v2',
+            );
+        });
     }
 
     /**
@@ -26,7 +42,16 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('viewPulse', function ($user) {
-            return $user->role === 'admin';
+            return $user->isAdmin();
+        });
+
+        Gate::define('manage-activation', function (User $user) {
+            if ($user->bypassesPermissions()) {
+                return true;
+            }
+
+            return $user->hasModulePermission('feature_activation_coe')
+                && Feature::for(null)->active('feature_activation_coe');
         });
 
         Pulse::user(fn ($user) => [
@@ -34,6 +59,12 @@ class AppServiceProvider extends ServiceProvider
             'extra' => $user->email,
             'avatar' => $user->avatar_url,
         ]);
+
+        Scramble::afterOpenApiGenerated(function (OpenApi $openApi) {
+            $openApi->secure(
+                SecurityScheme::http('bearer')
+            );
+        });
 
         View::composer('layouts.partials.generated-navigation', function ($view) {
             $navSettings = AppSetting::where('key', 'like', 'nav_visible_%')

@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="700" fill="#f8fafc" rx="12"/>
+
+  <!-- Title -->
+  <text x="500" y="42" text-anchor="middle" font-size="22" font-weight="700" fill="#111827">Partner Manager Platform Lifecycle</text>
+  <text x="500" y="64" text-anchor="middle" font-size="12" fill="#6b7280">Four phases of partner program operation &#8212; from setup through continuous optimization</text>
+
+  <!-- Phase 1: Setup & CoE Activation (top-left) -->
+  <rect x="40" y="95" width="440" height="250" rx="10" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="95" width="440" height="36" rx="10" fill="#2563eb"/>
+  <rect x="40" y="121" width="440" height="10" fill="#2563eb"/>
+  <circle cx="64" cy="113" r="10" fill="#fff" opacity="0.3"/>
+  <text x="64" y="118" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">1</text>
+  <text x="85" y="118" font-size="14" font-weight="600" fill="#fff">Setup &#38; CoE Activation</text>
+
+  <g font-size="11" fill="#374151">
+    <rect x="60" y="145" width="10" height="10" rx="2" fill="#dbeafe"/>
+    <text x="78" y="154" font-weight="600" fill="#1e40af">Admin</text>
+    <text x="115" y="154">Creates users, roles, API tokens, branding</text>
+
+    <rect x="60" y="168" width="10" height="10" rx="2" fill="#dcfce7"/>
+    <text x="78" y="177" font-weight="600" fill="#166534">Integration</text>
+    <text x="138" y="177">Configures connectors, runs initial data load</text>
+
+    <rect x="60" y="191" width="10" height="10" rx="2" fill="#fef3c7"/>
+    <text x="78" y="200" font-weight="600" fill="#92400e">CoE</text>
+    <text x="104" y="200">Defines strategic plans, targets, budgets</text>
+
+    <rect x="60" y="214" width="10" height="10" rx="2" fill="#f3e8ff"/>
+    <text x="78" y="223" font-weight="600" fill="#6b21a8">Assignments</text>
+    <text x="148" y="223">Geo &#8594; Region &#8594; Manager &#8594; PSM &#8594; Partner</text>
+
+    <rect x="60" y="237" width="10" height="10" rx="2" fill="#e0f2fe"/>
+    <text x="78" y="246" font-weight="600" fill="#0369a1">Objectives</text>
+    <text x="140" y="246">Business goals, quotas, scorecard weights</text>
+
+    <rect x="60" y="260" width="10" height="10" rx="2" fill="#fce7f3"/>
+    <text x="78" y="269" font-weight="600" fill="#9d174d">Enablement</text>
+    <text x="146" y="269">Blueprints, paths, certification targets</text>
+  </g>
+
+  <!-- Data flow icons for Phase 1 -->
+  <g transform="translate(390, 295)">
+    <rect width="70" height="24" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="1"/>
+    <text x="35" y="16" text-anchor="middle" font-size="9" fill="#2563eb" font-weight="600">FOUNDATION</text>
+  </g>
+
+  <!-- Phase 2: Core Partner Management (top-right) -->
+  <rect x="520" y="95" width="440" height="250" rx="10" fill="#fff" stroke="#059669" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="520" y="95" width="440" height="36" rx="10" fill="#059669"/>
+  <rect x="520" y="121" width="440" height="10" fill="#059669"/>
+  <circle cx="544" cy="113" r="10" fill="#fff" opacity="0.3"/>
+  <text x="544" y="118" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">2</text>
+  <text x="565" y="118" font-size="14" font-weight="600" fill="#fff">Core Partner Management</text>
+
+  <g font-size="11" fill="#374151">
+    <rect x="540" y="145" width="10" height="10" rx="2" fill="#dcfce7"/>
+    <text x="558" y="154" font-weight="600" fill="#166534">Salesforce Sync</text>
+    <text x="640" y="154">Continuous data feeds &#8212; opps, contacts, projects</text>
+
+    <rect x="540" y="168" width="10" height="10" rx="2" fill="#dbeafe"/>
+    <text x="558" y="177" font-weight="600" fill="#1e40af">Pipeline</text>
+    <text x="602" y="177">Opportunities, stages, coverage, velocity</text>
+
+    <rect x="540" y="191" width="10" height="10" rx="2" fill="#fef3c7"/>
+    <text x="558" y="200" font-weight="600" fill="#92400e">Enablement</text>
+    <text x="622" y="200">Certifications, blueprints, events, attendance</text>
+
+    <rect x="540" y="214" width="10" height="10" rx="2" fill="#f3e8ff"/>
+    <text x="558" y="223" font-weight="600" fill="#6b21a8">Health &#38; Signals</text>
+    <text x="640" y="223">Automated scoring, risk detection, alerts</text>
+
+    <rect x="540" y="237" width="10" height="10" rx="2" fill="#e0f2fe"/>
+    <text x="558" y="246" font-weight="600" fill="#0369a1">Analytics</text>
+    <text x="608" y="246">Revenue, portfolio, delivery, benchmarks</text>
+
+    <rect x="540" y="260" width="10" height="10" rx="2" fill="#fce7f3"/>
+    <text x="558" y="269" font-weight="600" fill="#9d174d">QBRs</text>
+    <text x="590" y="269">Quarterly reviews, session tracking, actions</text>
+  </g>
+
+  <g transform="translate(860, 295)">
+    <rect width="80" height="24" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="1"/>
+    <text x="40" y="16" text-anchor="middle" font-size="9" fill="#059669" font-weight="600">CONTINUOUS</text>
+  </g>
+
+  <!-- Phase 3: Partner Portal (bottom-left) -->
+  <rect x="40" y="385" width="440" height="250" rx="10" fill="#fff" stroke="#d97706" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="385" width="440" height="36" rx="10" fill="#d97706"/>
+  <rect x="40" y="411" width="440" height="10" fill="#d97706"/>
+  <circle cx="64" cy="403" r="10" fill="#fff" opacity="0.3"/>
+  <text x="64" y="408" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">3</text>
+  <text x="85" y="408" font-size="14" font-weight="600" fill="#fff">Partner Portal</text>
+
+  <g font-size="11" fill="#374151">
+    <rect x="60" y="435" width="10" height="10" rx="2" fill="#fef3c7"/>
+    <text x="78" y="444" font-weight="600" fill="#92400e">Deal Registration</text>
+    <text x="162" y="444">Partners submit and track deal registrations</text>
+
+    <rect x="60" y="458" width="10" height="10" rx="2" fill="#dbeafe"/>
+    <text x="78" y="467" font-weight="600" fill="#1e40af">Resource Assignment</text>
+    <text x="178" y="467">Allocate consultants and teams to projects</text>
+
+    <rect x="60" y="481" width="10" height="10" rx="2" fill="#dcfce7"/>
+    <text x="78" y="490" font-weight="600" fill="#166534">Business Plans</text>
+    <text x="156" y="490">Joint plans created and published by PSM &#38; partner</text>
+
+    <rect x="60" y="504" width="10" height="10" rx="2" fill="#fee2e2"/>
+    <text x="78" y="513" font-weight="600" fill="#991b1b">Alerts</text>
+    <text x="108" y="513">Automated notifications, business updates</text>
+
+    <rect x="60" y="527" width="10" height="10" rx="2" fill="#f3e8ff"/>
+    <text x="78" y="536" font-weight="600" fill="#6b21a8">Enablement</text>
+    <text x="143" y="536">Training events, certification progress, blueprints</text>
+
+    <rect x="60" y="550" width="10" height="10" rx="2" fill="#e0f2fe"/>
+    <text x="78" y="559" font-weight="600" fill="#0369a1">Delivery</text>
+    <text x="122" y="559">Project health, milestones, risk tracking</text>
+  </g>
+
+  <g transform="translate(380, 585)">
+    <rect width="80" height="24" rx="12" fill="#fffbeb" stroke="#d97706" stroke-width="1"/>
+    <text x="40" y="16" text-anchor="middle" font-size="9" fill="#d97706" font-weight="600">COLLABORATIVE</text>
+  </g>
+
+  <!-- Phase 4: CoE Review & Optimization (bottom-right) -->
+  <rect x="520" y="385" width="440" height="250" rx="10" fill="#fff" stroke="#7c3aed" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="520" y="385" width="440" height="36" rx="10" fill="#7c3aed"/>
+  <rect x="520" y="411" width="440" height="10" fill="#7c3aed"/>
+  <circle cx="544" cy="403" r="10" fill="#fff" opacity="0.3"/>
+  <text x="544" y="408" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">4</text>
+  <text x="565" y="408" font-size="14" font-weight="600" fill="#fff">CoE Review &#38; Optimization</text>
+
+  <g font-size="11" fill="#374151">
+    <rect x="540" y="435" width="10" height="10" rx="2" fill="#f3e8ff"/>
+    <text x="558" y="444" font-weight="600" fill="#6b21a8">Variance Analysis</text>
+    <text x="648" y="444">Actuals vs. plan targets &#8212; weekly, monthly</text>
+
+    <rect x="540" y="458" width="10" height="10" rx="2" fill="#dbeafe"/>
+    <text x="558" y="467" font-weight="600" fill="#1e40af">Scenario Modeling</text>
+    <text x="652" y="467">What-if analysis on budgets and assumptions</text>
+
+    <rect x="540" y="481" width="10" height="10" rx="2" fill="#dcfce7"/>
+    <text x="558" y="490" font-weight="600" fill="#166534">Performance Review</text>
+    <text x="660" y="490">Portfolio analytics, benchmarks, scorecards</text>
+
+    <rect x="540" y="504" width="10" height="10" rx="2" fill="#fef3c7"/>
+    <text x="558" y="513" font-weight="600" fill="#92400e">Course Corrections</text>
+    <text x="660" y="513">Adjust targets, reassign resources, update plans</text>
+
+    <rect x="540" y="527" width="10" height="10" rx="2" fill="#fee2e2"/>
+    <text x="558" y="536" font-weight="600" fill="#991b1b">Initiative Governance</text>
+    <text x="670" y="536">Track budgets, milestones, cross-team programs</text>
+
+    <rect x="540" y="550" width="10" height="10" rx="2" fill="#e0f2fe"/>
+    <text x="558" y="559" font-weight="600" fill="#0369a1">Signal Review</text>
+    <text x="630" y="559">Triage risk signals, acknowledge, resolve</text>
+  </g>
+
+  <g transform="translate(855, 585)">
+    <rect width="85" height="24" rx="12" fill="#faf5ff" stroke="#7c3aed" stroke-width="1"/>
+    <text x="42" y="16" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="600">OPTIMIZATION</text>
+  </g>
+
+  <!-- Connecting arrows (clockwise cycle) -->
+  <!-- Phase 1 to Phase 2 -->
+  <line x1="480" y1="220" x2="520" y2="220" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <!-- Phase 2 to Phase 3 (down and left) -->
+  <path d="M 740 345 L 740 370 Q 740 380 730 380 L 280 380 Q 270 380 270 390 L 270 385" stroke="#6b7280" stroke-width="1.5" fill="none" stroke-dasharray="6,3" marker-end="url(#arrowGray)"/>
+
+  <!-- Phase 3 to Phase 4 -->
+  <line x1="480" y1="510" x2="520" y2="510" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowGray)"/>
+
+  <!-- Phase 4 back to Phase 2 (up) -->
+  <path d="M 940 385 L 940 370 Q 940 360 930 360 L 780 360 Q 770 360 770 350 L 770 345" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowGray)"/>
+
+  <!-- Center cycle indicator -->
+  <circle cx="500" cy="365" r="22" fill="#fff" stroke="#6b7280" stroke-width="1.5"/>
+  <path d="M 492 358 A 10 10 0 1 1 492 372" fill="none" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowGray)"/>
+  <text x="500" y="382" text-anchor="middle" font-size="8" fill="#6b7280" font-weight="600">CYCLE</text>
+
+  <!-- Footer -->
+  <text x="500" y="666" text-anchor="middle" font-size="10" fill="#9ca3af">Phase 1 runs once at setup. Phases 2&#8211;4 repeat continuously as the partner program matures.</text>
+  <text x="500" y="684" text-anchor="middle" font-size="10" fill="#9ca3af">Data flows between all phases via the Signal Engine, Salesforce sync, and the Integration Hub.</text>
+</svg>

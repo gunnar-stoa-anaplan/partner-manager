@@ -39,13 +39,13 @@ class EnablementSessionFactory extends Factory
             'status' => 'scheduled',
             'notes' => null,
             'registration_deadline' => null,
-            'created_by' => User::where('role', 'admin')->first()?->id ?? 1,
+            'created_by' => User::whereRelation('role', 'slug', 'admin')->first()?->id ?? 1,
         ];
     }
 
     public function completed(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'status' => 'completed',
             'start_at' => $this->faker->dateTimeBetween('-3 months', '-1 week'),
         ]);
@@ -53,6 +53,6 @@ class EnablementSessionFactory extends Factory
 
     public function cancelled(): static
     {
-        return $this->state(fn() => ['status' => 'cancelled']);
+        return $this->state(fn () => ['status' => 'cancelled']);
     }
 }

@@ -149,13 +149,17 @@
                 <div class="profile-page-header-info ms-md-4 text-center text-md-start">
                     <h1 class="fs-xxl fw-700 mb-2">{{ $user->name }}</h1>
                     <p class="text-muted mb-2">{{ $user->email }}</p>
+                    @php
+                        $profileRoleSlug = $user->role?->slug;
+                        $profileRoleName = $user->role?->display_name ?? 'Unknown';
+                    @endphp
                     <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start">
-                        @if($user->role === 'admin')
-                            <span class="badge bg-danger-100 text-danger">Admin</span>
-                        @elseif($user->role === 'psm')
-                            <span class="badge bg-success-100 text-success">Partner Success Manager</span>
+                        @if(in_array($profileRoleSlug, ['super_admin', 'admin']))
+                            <span class="badge bg-{{ $profileRoleSlug === 'super_admin' ? 'dark text-white' : 'danger-100 text-danger' }}">{{ $profileRoleName }}</span>
+                        @elseif($profileRoleSlug === 'psm')
+                            <span class="badge bg-success-100 text-success">{{ $profileRoleName }}</span>
                         @else
-                            <span class="badge bg-info-100 text-info">{{ ucfirst($user->role) }}</span>
+                            <span class="badge bg-info-100 text-info">{{ $profileRoleName }}</span>
                         @endif
                         <span class="badge bg-primary-100 text-primary">{{ $user->partners()->count() }} Partners</span>
                         <span class="badge bg-primary-100 text-primary">Member since {{ $user->created_at->format('M Y') }}</span>
@@ -226,12 +230,12 @@
                                                 <use href="/icons/sprite.svg#shield"></use>
                                             </svg>
                                             <strong class="me-2">Role:</strong>
-                                            @if($user->role === 'admin')
-                                                <span class="badge bg-danger">Admin</span>
-                                            @elseif($user->role === 'psm')
-                                                <span class="badge bg-success">PSM</span>
+                                            @if(in_array($profileRoleSlug, ['super_admin', 'admin']))
+                                                <span class="badge bg-{{ $profileRoleSlug === 'super_admin' ? 'dark' : 'danger' }}">{{ $profileRoleName }}</span>
+                                            @elseif($profileRoleSlug === 'psm')
+                                                <span class="badge bg-success">{{ $profileRoleName }}</span>
                                             @else
-                                                <span class="badge bg-info">{{ ucfirst($user->role) }}</span>
+                                                <span class="badge bg-info">{{ $profileRoleName }}</span>
                                             @endif
                                         </div>
                                         <div class="d-flex align-items-center">

@@ -1,0 +1,16 @@
+instance_id: "inst_test001"
+control_plane_url: "http://control-plane"
+heartbeat_interval: "10s"
+
+tls:
+  ca_cert_path: ""
+  client_cert_path: ""
+  client_key_path: ""
+
+docker:
+  host: "unix:///var/run/docker.sock"
+  app_container: "partner-manager-3-laravel.test-1"
+  app_url: "http://laravel.test:80"
+
+status:
+  path: "/var/lib/pm-agent/status"

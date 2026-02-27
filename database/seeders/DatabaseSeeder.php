@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Contact;
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,9 +12,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(10)->create();
-
         $this->call([
+            // === Roles & Permissions ===
+            RoleSeeder::class,
+
             // === Core Users & Entities ===
             GunnarSeeder::class,
             UserSeeder::class,
@@ -50,6 +49,7 @@ class DatabaseSeeder extends Seeder
             AnaplanWorkspaceSeeder::class,     // anaplan workspaces, models, modules, lists
             AnaplanVersionConfigSeeder::class, // version configs + notification template
             LabSeeder::class,                   // workshop labs, checkpoints, participants, results
+            MarketplaceSeeder::class,           // marketplace profiles + entries for select partners
 
             // === Phase 3: Plan Section ===
             PartnerPathEnrollmentSeeder::class, // enrollments + stage history
@@ -63,6 +63,10 @@ class DatabaseSeeder extends Seeder
             SupportCaseSeeder::class,          // support cases
             PartnerAlertSeeder::class,         // alerts across all types
             QbrSessionSeeder::class,           // QBR sessions + 9 sections each
+
+            // === Idea Room ===
+            GalleryThemeSeeder::class,         // gallery wall templates + frame slots
+            IdeaRoomSeeder::class,             // ideas, buckets, tags, edges, rooms
         ]);
     }
 }

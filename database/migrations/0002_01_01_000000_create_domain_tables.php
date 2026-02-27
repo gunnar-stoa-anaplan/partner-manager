@@ -89,8 +89,8 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('company')->nullable();
             $table->string('title')->nullable();
-            $table->enum('source', ['website', 'partner', 'webcast', 'linkedin', 'referral', 'other']);
-            $table->enum('status', ['unassigned', 'assigned', 'accepted', 'rejected'])->default('unassigned');
+            $table->string('source', 50);
+            $table->string('status', 50)->default('unassigned');
             $table->foreignId('partner_id')->nullable()->constrained()->nullOnDelete();
             $table->text('notes')->nullable();
             $table->timestamps();

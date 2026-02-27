@@ -12,7 +12,7 @@ class DealRegistrationSeeder extends Seeder
     public function run(): void
     {
         $partners = Partner::take(5)->get();
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereRelation('role', 'slug', 'admin')->first();
 
         if ($partners->isEmpty() || ! $admin) {
             $this->command->warn('Need partners and admin user. Skipping DealRegistrationSeeder.');

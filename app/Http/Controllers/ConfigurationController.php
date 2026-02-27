@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
+use App\Models\SalesforceCredential;
 use Illuminate\Http\Request;
 
 class ConfigurationController extends Controller
@@ -10,8 +11,9 @@ class ConfigurationController extends Controller
     public function index()
     {
         $settings = AppSetting::pluck('value', 'key');
+        $credential = SalesforceCredential::first();
 
-        return view('configuration.index', compact('settings'));
+        return view('configuration.index', compact('settings', 'credential'));
     }
 
     public function update(Request $request)

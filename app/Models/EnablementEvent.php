@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class EnablementEvent extends Model
@@ -108,6 +109,11 @@ class EnablementEvent extends Model
         return $this->hasManyThrough(EnablementRegistration::class, EnablementSession::class);
     }
 
+    public function workshopGuide(): HasOne
+    {
+        return $this->hasOne(WorkshopGuide::class);
+    }
+
     // ─── Scopes ────────────────────────────────────────────────
 
     public function scopePublished($query)
@@ -120,7 +126,7 @@ class EnablementEvent extends Model
         return $query->where('status', 'published')
             ->whereHas('sessions', function ($q) {
                 $q->where('start_at', '>', now())
-                  ->where('status', '!=', 'cancelled');
+                    ->where('status', '!=', 'cancelled');
             });
     }
 
@@ -150,7 +156,7 @@ class EnablementEvent extends Model
                 $original = $event->slug;
                 $count = 1;
                 while (static::withTrashed()->where('slug', $event->slug)->exists()) {
-                    $event->slug = $original . '-' . $count++;
+                    $event->slug = $original.'-'.$count++;
                 }
             }
         });

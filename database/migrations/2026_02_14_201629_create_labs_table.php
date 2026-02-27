@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('instructions')->nullable();
             $table->foreignId('golden_model_id')->constrained('anaplan_models')->cascadeOnDelete();
             $table->json('golden_snapshot')->nullable();
-            $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
+            $table->string('status', 50)->default('draft');
             $table->timestamp('published_at')->nullable();
             $table->unsignedInteger('duration_minutes')->nullable();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();

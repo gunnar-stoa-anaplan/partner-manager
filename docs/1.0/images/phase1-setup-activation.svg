@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+    </marker>
+    <marker id="arrowAmber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#d97706"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="620" fill="#f8fafc" rx="12"/>
+
+  <!-- Title -->
+  <text x="480" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Phase 1: Setup &#38; CoE Activation</text>
+  <text x="480" y="58" text-anchor="middle" font-size="11" fill="#6b7280">One-time foundation &#8212; three roles configure the platform before partner management begins</text>
+
+  <!-- Timeline bar -->
+  <rect x="60" y="80" width="840" height="4" rx="2" fill="#e5e7eb"/>
+  <circle cx="180" cy="82" r="8" fill="#2563eb"/>
+  <circle cx="480" cy="82" r="8" fill="#059669"/>
+  <circle cx="780" cy="82" r="8" fill="#d97706"/>
+  <text x="180" y="72" text-anchor="middle" font-size="10" font-weight="600" fill="#2563eb">STEP 1</text>
+  <text x="480" y="72" text-anchor="middle" font-size="10" font-weight="600" fill="#059669">STEP 2</text>
+  <text x="780" y="72" text-anchor="middle" font-size="10" font-weight="600" fill="#d97706">STEP 3</text>
+
+  <!-- STEP 1: Admin Setup -->
+  <rect x="40" y="105" width="280" height="480" rx="10" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="105" width="280" height="40" rx="10" fill="#2563eb"/>
+  <rect x="40" y="135" width="280" height="10" fill="#2563eb"/>
+  <text x="180" y="131" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">Administrator</text>
+
+  <!-- Admin tasks -->
+  <g font-size="11" fill="#374151">
+    <rect x="60" y="160" width="240" height="48" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="80" y="178" font-weight="600" fill="#1e40af">Create Users &#38; Roles</text>
+    <text x="80" y="198" fill="#6b7280" font-size="10">PSM, CoE, Integration accounts</text>
+
+    <rect x="60" y="218" width="240" height="48" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="80" y="236" font-weight="600" fill="#1e40af">Configure Branding</text>
+    <text x="80" y="256" fill="#6b7280" font-size="10">Logo, colors, application name, theme</text>
+
+    <rect x="60" y="276" width="240" height="48" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="80" y="294" font-weight="600" fill="#1e40af">Salesforce Credentials</text>
+    <text x="80" y="314" fill="#6b7280" font-size="10">Connect org, validate, enable sync</text>
+
+    <rect x="60" y="334" width="240" height="48" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="80" y="352" font-weight="600" fill="#1e40af">API Token Management</text>
+    <text x="80" y="372" fill="#6b7280" font-size="10">Generate tokens for integrations</text>
+
+    <rect x="60" y="392" width="240" height="48" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="80" y="410" font-weight="600" fill="#1e40af">Enable Modules</text>
+    <text x="80" y="430" fill="#6b7280" font-size="10">Integration Hub, Strategy, Analytics</text>
+
+    <rect x="60" y="450" width="240" height="48" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="80" y="468" font-weight="600" fill="#1e40af">Navigation &#38; Visibility</text>
+    <text x="80" y="488" fill="#6b7280" font-size="10">Show/hide sections per program needs</text>
+
+    <rect x="60" y="508" width="240" height="48" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="80" y="526" font-weight="600" fill="#1e40af">Signal Network Opt-In</text>
+    <text x="80" y="546" fill="#6b7280" font-size="10">Enable anonymized benchmark sharing</text>
+  </g>
+
+  <!-- Arrow 1 to 2 -->
+  <line x1="320" y1="345" x2="340" y2="345" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- STEP 2: Integration Data Load -->
+  <rect x="340" y="105" width="280" height="480" rx="10" fill="#fff" stroke="#059669" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="340" y="105" width="280" height="40" rx="10" fill="#059669"/>
+  <rect x="340" y="135" width="280" height="10" fill="#059669"/>
+  <text x="480" y="131" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">Integration Role</text>
+
+  <g font-size="11" fill="#374151">
+    <rect x="360" y="160" width="240" height="48" rx="6" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+    <text x="380" y="178" font-weight="600" fill="#166534">Configure Connectors</text>
+    <text x="380" y="198" fill="#6b7280" font-size="10">Salesforce, CSV, API sources</text>
+
+    <rect x="360" y="218" width="240" height="48" rx="6" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+    <text x="380" y="236" font-weight="600" fill="#166534">Field Mappings</text>
+    <text x="380" y="256" fill="#6b7280" font-size="10">Map source fields to PM3 objects</text>
+
+    <rect x="360" y="276" width="240" height="48" rx="6" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+    <text x="380" y="294" font-weight="600" fill="#166534">Initial Data Import</text>
+    <text x="380" y="314" fill="#6b7280" font-size="10">Partners, contacts, opportunities, projects</text>
+
+    <rect x="360" y="334" width="240" height="48" rx="6" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+    <text x="380" y="352" font-weight="600" fill="#166534">Certification Data</text>
+    <text x="380" y="372" fill="#6b7280" font-size="10">Import certification records and history</text>
+
+    <rect x="360" y="392" width="240" height="48" rx="6" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+    <text x="380" y="410" font-weight="600" fill="#166534">Validate &#38; Verify</text>
+    <text x="380" y="430" fill="#6b7280" font-size="10">Review import results, resolve data issues</text>
+
+    <rect x="360" y="450" width="240" height="48" rx="6" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+    <text x="380" y="468" font-weight="600" fill="#166534">Schedule Sync Jobs</text>
+    <text x="380" y="488" fill="#6b7280" font-size="10">Automate recurring data feeds</text>
+  </g>
+
+  <!-- Arrow 2 to 3 -->
+  <line x1="620" y1="345" x2="640" y2="345" stroke="#059669" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+  <!-- STEP 3: CoE Activation -->
+  <rect x="640" y="105" width="280" height="480" rx="10" fill="#fff" stroke="#d97706" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="640" y="105" width="280" height="40" rx="10" fill="#d97706"/>
+  <rect x="640" y="135" width="280" height="10" fill="#d97706"/>
+  <text x="780" y="131" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">CoE Team</text>
+
+  <g font-size="11" fill="#374151">
+    <rect x="660" y="160" width="240" height="48" rx="6" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="680" y="178" font-weight="600" fill="#92400e">Create Strategic Plans</text>
+    <text x="680" y="198" fill="#6b7280" font-size="10">Annual/quarterly planning cycles</text>
+
+    <rect x="660" y="218" width="240" height="48" rx="6" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="680" y="236" font-weight="600" fill="#92400e">Set Targets &#38; Budgets</text>
+    <text x="680" y="256" fill="#6b7280" font-size="10">Revenue, enablement, delivery KPIs</text>
+
+    <rect x="660" y="276" width="240" height="48" rx="6" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="680" y="294" font-weight="600" fill="#92400e">Establish Hierarchy</text>
+    <text x="680" y="314" fill="#6b7280" font-size="10">Geo &#8594; Region &#8594; Manager &#8594; PSM &#8594; Partner</text>
+
+    <rect x="660" y="334" width="240" height="48" rx="6" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="680" y="352" font-weight="600" fill="#92400e">Define Partner Paths</text>
+    <text x="680" y="372" fill="#6b7280" font-size="10">Stages, gates, progression criteria</text>
+
+    <rect x="660" y="392" width="240" height="48" rx="6" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="680" y="410" font-weight="600" fill="#92400e">Configure Scorecards</text>
+    <text x="680" y="430" fill="#6b7280" font-size="10">Weights, dimensions, health thresholds</text>
+
+    <rect x="660" y="450" width="240" height="48" rx="6" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="680" y="468" font-weight="600" fill="#92400e">Plan Initiatives</text>
+    <text x="680" y="488" fill="#6b7280" font-size="10">Cross-functional programs and milestones</text>
+
+    <rect x="660" y="508" width="240" height="48" rx="6" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+    <text x="680" y="526" font-weight="600" fill="#92400e">Model Scenarios</text>
+    <text x="680" y="546" fill="#6b7280" font-size="10">What-if budget and target assumptions</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="480" y="604" text-anchor="middle" font-size="10" fill="#9ca3af">Once all three steps are complete, the platform is ready for Phase 2: Core Partner Management</text>
+</svg>

@@ -69,6 +69,12 @@
                            class="nav-link-portal {{ request()->routeIs('portal.calendar.*') ? 'active' : '' }}">Calendar</a>
                     </li>
                     @endif
+                    @if($portalUser->canAccess('company_profile'))
+                    <li class="nav-item">
+                        <a href="{{ route('portal.company-profile.edit') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.company-profile.*') ? 'active' : '' }}">Company Profile</a>
+                    </li>
+                    @endif
                     @if($portalUser->canAccess('contacts'))
                     <li class="nav-item">
                         <a href="{{ route('portal.contacts.index') }}"
@@ -125,7 +131,7 @@
                     </li>
                 </ul>
                 <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ \App\Models\Contact::PORTAL_ROLES[$portalUser->portal_role] ?? $portalUser->portal_role }}</span>
+                    <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ $portalUser->role?->display_name ?? '' }}</span>
                     <span class="text-white-50" style="font-size: 0.875rem;">{{ $portalUser->full_name }}</span>
                     @if(session('impersonating_portal'))
                         <form action="{{ route('portal.impersonate.stop') }}" method="POST" class="d-inline">

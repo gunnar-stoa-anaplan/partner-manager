@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Partner;
-use App\Models\PartnerPathEnrollment;
 use App\Models\PartnerPathGate;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -16,11 +15,11 @@ class GateEvaluationService
             ->where('to_stage_id', $toStageId)
             ->orderBy('sort_order')
             ->get();
-        
+
         return $gates->map(function ($gate) use ($partner) {
             $actualValue = $this->getActualValue($partner, $gate->requirement_key);
             $met = $this->compare($actualValue, $gate->comparison, (float) $gate->threshold_value);
-            
+
             return [
                 'gate_id' => $gate->id,
                 'requirement_key' => $gate->requirement_key,
@@ -33,13 +32,13 @@ class GateEvaluationService
             ];
         });
     }
-    
+
     public function allGatesMet(Partner $partner, int $fromStageId, int $toStageId): bool
     {
         return $this->evaluateGates($partner, $fromStageId, $toStageId)
             ->every(fn ($g) => $g['met']);
     }
-    
+
     protected function getActualValue(Partner $partner, string $key): float
     {
         return match ($key) {
@@ -79,10 +78,11 @@ class GateEvaluationService
                 ->where('status', 'active')->count(),
             'referenceable_pct' => $this->getReferenceablePct($partner),
             'expansion_rate' => $this->getExpansionRate($partner),
+            'marketplace_approved' => $partner->marketplace_status === 'approved' ? 1 : 0,
             default => 0,
         };
     }
-    
+
     protected function compare(float $actual, string $comparison, float $threshold): bool
     {
         return match ($comparison) {
@@ -94,7 +94,7 @@ class GateEvaluationService
             default => false,
         };
     }
-    
+
     protected function getTaskCompletionPct(Partner $partner, string $category): float
     {
         $total = DB::table('partner_tasks')->where('partner_id', $partner->id)
@@ -102,73 +102,97 @@ class GateEvaluationService
         $completed = DB::table('partner_tasks')->where('partner_id', $partner->id)
             ->where('category', $category)->where('requirement_level', 'required')
             ->where('status', 'completed')->count();
+
         return $total > 0 ? round(($completed / $total) * 100, 1) : 0;
     }
-    
+
     protected function getRevenueAchievementPct(Partner $partner): float
     {
         $fyStart = (int) \App\Models\AppSetting::get('fiscal_year_start_month', 2);
         $now = now();
-        $fy = $now->month >= $fyStart ? 'FY' . substr($now->year + 1, 2) : 'FY' . substr($now->year, 2);
+        $fy = $now->month >= $fyStart ? 'FY'.substr($now->year + 1, 2) : 'FY'.substr($now->year, 2);
         $goal = $partner->goals()->where('fiscal_year', $fy)->first();
-        if (!$goal) return 0;
+        if (! $goal) {
+            return 0;
+        }
         $target = $goal->sourced_nnacv_target + $goal->influenced_nnacv_target;
-        if ($target <= 0) return 0;
+        if ($target <= 0) {
+            return 0;
+        }
         $won = $partner->opportunities()->where('stage', 'Closed Won')->where('fiscal_year', $fy)->sum('amount');
+
         return round(($won / $target) * 100, 1);
     }
-    
+
     protected function getWinRate(Partner $partner): float
     {
         $won = $partner->opportunities()->where('stage', 'Closed Won')
             ->where('close_date', '>=', now()->subMonths(12))->count();
         $lost = $partner->opportunities()->where('stage', 'Closed Lost')
             ->where('close_date', '>=', now()->subMonths(12))->count();
+
         return ($won + $lost) > 0 ? round(($won / ($won + $lost)) * 100, 1) : 0;
     }
-    
+
     protected function getPipelineCoverage(Partner $partner): float
     {
         $goal = $partner->goals()->orderByDesc('fiscal_year')->first();
-        if (!$goal) return 0;
+        if (! $goal) {
+            return 0;
+        }
         $target = $goal->sourced_nnacv_target + $goal->influenced_nnacv_target;
-        if ($target <= 0) return 0;
+        if ($target <= 0) {
+            return 0;
+        }
         $pipeline = $partner->opportunities()->whereNotIn('stage', ['Closed Won', 'Closed Lost'])->sum('amount');
+
         return round($pipeline / $target, 2);
     }
-    
+
     protected function getOnTimeDeliveryPct(Partner $partner): float
     {
         $completed = DB::table('projects')->where('partner_id', $partner->id)->where('status', 'completed')->count();
-        if ($completed === 0) return 0;
+        if ($completed === 0) {
+            return 0;
+        }
         $onTime = DB::table('projects')->where('partner_id', $partner->id)->where('status', 'completed')
             ->where('percent_complete', '>=', 100)->count();
+
         return round(($onTime / $completed) * 100, 1);
     }
-    
+
     protected function getPartnerOriginatedPct(Partner $partner): float
     {
         $total = $partner->opportunities()->whereNotIn('stage', ['Closed Lost'])->count();
-        if ($total === 0) return 0;
+        if ($total === 0) {
+            return 0;
+        }
         $originated = $partner->opportunities()->where('origin', 'partner_originated')->count();
+
         return round(($originated / $total) * 100, 1);
     }
-    
+
     protected function getReferenceablePct(Partner $partner): float
     {
         $completed = DB::table('projects')->where('partner_id', $partner->id)->where('status', 'completed')->count();
-        if ($completed === 0) return 0;
+        if ($completed === 0) {
+            return 0;
+        }
         $ref = DB::table('projects')->where('partner_id', $partner->id)->where('status', 'completed')
             ->where('is_referenceable', true)->count();
+
         return round(($ref / $completed) * 100, 1);
     }
-    
+
     protected function getExpansionRate(Partner $partner): float
     {
         $completed = DB::table('projects')->where('partner_id', $partner->id)->where('status', 'completed')->count();
-        if ($completed === 0) return 0;
+        if ($completed === 0) {
+            return 0;
+        }
         $expanded = DB::table('projects')->where('partner_id', $partner->id)->where('status', 'completed')
             ->where('led_to_expansion', true)->count();
+
         return round(($expanded / $completed) * 100, 1);
     }
 }

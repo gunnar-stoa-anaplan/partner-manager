@@ -6,6 +6,7 @@ use App\Models\Contact;
 use App\Models\ContactInteraction;
 use App\Models\Partner;
 use App\Models\Project;
+use App\Models\Role;
 use App\Models\User;
 use Database\Factories\ContactFactory;
 use Illuminate\Database\Seeder;
@@ -38,7 +39,7 @@ class ContactSeeder extends Seeder
             'contact_type' => 'resource',
             'resource_role' => 'solution_architect',
             'portal_access' => true,
-            'portal_role' => 'partner_admin',
+            'portal_role_slug' => 'partner_admin',
         ],
         [
             'first_name' => 'Jordan',
@@ -47,7 +48,7 @@ class ContactSeeder extends Seeder
             'contact_type' => 'resource',
             'resource_role' => 'project_manager',
             'portal_access' => true,
-            'portal_role' => 'delivery_lead',
+            'portal_role_slug' => 'delivery_lead',
         ],
         [
             'first_name' => 'Alvina',
@@ -56,7 +57,7 @@ class ContactSeeder extends Seeder
             'contact_type' => 'resource',
             'resource_role' => 'solution_architect',
             'portal_access' => true,
-            'portal_role' => 'technical_architect',
+            'portal_role_slug' => 'technical_architect',
         ],
     ];
 
@@ -64,6 +65,9 @@ class ContactSeeder extends Seeder
     {
         $partners = Partner::all();
         $users = User::all();
+
+        // Pre-resolve portal role IDs
+        $portalRoleIds = Role::portal()->pluck('id', 'slug');
 
         foreach ($partners as $partner) {
             $domain = ContactFactory::partnerDomain($partner->name);
@@ -74,9 +78,12 @@ class ContactSeeder extends Seeder
                 $first = strtolower($template['first_name']);
                 $last = strtolower($template['last_name']);
 
+                $data = collect($template)->except('portal_role_slug')->all();
+
                 $portalContacts->push(Contact::create([
-                    ...$template,
+                    ...$data,
                     'partner_id' => $partner->id,
+                    'portal_role_id' => $portalRoleIds[$template['portal_role_slug']],
                     'email' => "{$first}.{$last}@{$domain}",
                     'password' => 'password',
                     'phone' => fake()->phoneNumber,

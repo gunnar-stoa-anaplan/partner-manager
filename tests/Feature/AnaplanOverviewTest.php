@@ -9,10 +9,11 @@ use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Traits\WithActivationSetup;
 
 class AnaplanOverviewTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithActivationSetup;
 
     private User $admin;
 
@@ -22,8 +23,11 @@ class AnaplanOverviewTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->psm = User::factory()->create(['role' => 'psm']);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->admin = User::factory()->admin()->create();
+        $this->psm = User::factory()->psm()->create();
+        $this->activateModuleForUser('provisioning_admin', $this->admin);
     }
 
     // ─── Index ──────────────────────────────────────────────────────
