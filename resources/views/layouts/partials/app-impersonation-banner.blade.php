@@ -7,7 +7,7 @@
         <div class="flex-grow-1">
             <strong>Impersonation Mode</strong> &mdash; Viewing as
             <strong>{{ auth()->user()->name }}</strong>
-            ({{ auth()->user()->role }})
+            ({{ auth()->user()->role?->display_name ?? 'No Role' }})
             &middot; started by {{ session('impersonator_name', 'Admin') }}
         </div>
         <form action="{{ route('impersonate.stop') }}" method="POST" class="d-inline ms-3 flex-shrink-0">
