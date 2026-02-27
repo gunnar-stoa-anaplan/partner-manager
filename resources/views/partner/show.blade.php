@@ -116,7 +116,7 @@
                 <i class="fal fa-tachometer-alt me-1 d-none d-md-inline"></i> Overview
             </a>
         </li>
-        @if($registry->isEnabled('deal_registration_user'))
+        @if($registry->isEnabled('deal_registration'))
         <li class="nav-item">
             <a class="nav-link" href="#pipeline" data-tab="pipeline" role="tab">
                 <i class="fal fa-chart-line me-1 d-none d-md-inline"></i> Pipeline
@@ -130,7 +130,7 @@
             </a>
         </li>
         @endif
-        @if($registry->isEnabled('project_health_user'))
+        @if($registry->isEnabled('project_health'))
         <li class="nav-item">
             <a class="nav-link" href="#projects" data-tab="projects" role="tab">
                 <i class="fal fa-project-diagram me-1 d-none d-md-inline"></i> Projects
@@ -138,7 +138,7 @@
             </a>
         </li>
         @endif
-        @if($registry->isEnabled('enablement_user'))
+        @if($registry->isEnabled('enablement'))
         <li class="nav-item">
             <a class="nav-link" href="#enablement" data-tab="enablement" role="tab">
                 <i class="fal fa-award me-1 d-none d-md-inline"></i> Enablement
@@ -160,7 +160,7 @@
                 <i class="fal fa-user-hard-hat me-1 d-none d-md-inline"></i> Resources
             </a>
         </li>
-        @if($registry->isEnabled('blueprints_user'))
+        @if($registry->isEnabled('blueprints'))
         <li class="nav-item">
             <a class="nav-link" href="#blueprints" data-tab="blueprints" role="tab">
                 <i class="fal fa-layers me-1 d-none d-md-inline"></i> Blueprints
@@ -168,21 +168,21 @@
             </a>
         </li>
         @endif
-        @if($registry->isEnabled('enablement_user'))
+        @if($registry->isEnabled('enablement'))
         <li class="nav-item">
             <a class="nav-link" href="#app-enablement" data-tab="app-enablement" role="tab">
                 <i class="fal fa-th me-1 d-none d-md-inline"></i> Nicole's View
             </a>
         </li>
         @endif
-        @if($registry->isEnabled('launch_programs_user'))
+        @if($registry->isEnabled('launch_programs'))
         <li class="nav-item">
             <a class="nav-link" href="#launch-programs" data-tab="launch-programs" role="tab">
                 <i class="fal fa-rocket me-1 d-none d-md-inline"></i> Launch Programs
             </a>
         </li>
         @endif
-        @if($registry->isEnabled('provisioning_user'))
+        @if($registry->isEnabled('provisioning'))
         <li class="nav-item">
             <a class="nav-link" href="#workspaces" data-tab="workspaces" role="tab">
                 <i class="fal fa-server me-1 d-none d-md-inline"></i> Workspaces
@@ -190,7 +190,7 @@
             </a>
         </li>
         @endif
-        @if($registry->isEnabled('partner_portal_user'))
+        @if($registry->isEnabled('partner_portal'))
         <li class="nav-item">
             <a class="nav-link" href="#portal-users" data-tab="portal-users" role="tab">
                 <i class="fal fa-user-shield me-1 d-none d-md-inline"></i> Portal Users
@@ -212,7 +212,7 @@
             @include('partner.tabs.overview')
         </div>
 
-        @if($registry->isEnabled('deal_registration_user'))
+        @if($registry->isEnabled('deal_registration'))
         {{-- Pipeline (AJAX) --}}
         <div class="tab-pane" id="tab-pipeline" style="display: none;">
             <div class="spinner-loader">
@@ -230,7 +230,7 @@
         </div>
         @endif
 
-        @if($registry->isEnabled('project_health_user'))
+        @if($registry->isEnabled('project_health'))
         {{-- Projects (AJAX) --}}
         <div class="tab-pane" id="tab-projects" style="display: none;">
             <div class="spinner-loader">
@@ -240,7 +240,7 @@
         </div>
         @endif
 
-        @if($registry->isEnabled('enablement_user'))
+        @if($registry->isEnabled('enablement'))
         {{-- Enablement (AJAX) --}}
         <div class="tab-pane" id="tab-enablement" style="display: none;">
             <div class="spinner-loader">
@@ -274,7 +274,7 @@
             </div>
         </div>
 
-        @if($registry->isEnabled('blueprints_user'))
+        @if($registry->isEnabled('blueprints'))
         {{-- Blueprints (AJAX) --}}
         <div class="tab-pane" id="tab-blueprints" style="display: none;">
             <div class="spinner-loader">
@@ -284,7 +284,7 @@
         </div>
         @endif
 
-        @if($registry->isEnabled('enablement_user'))
+        @if($registry->isEnabled('enablement'))
         {{-- App Enablement (AJAX) --}}
         <div class="tab-pane" id="tab-app-enablement" style="display: none;">
             <div class="spinner-loader">
@@ -294,7 +294,7 @@
         </div>
         @endif
 
-        @if($registry->isEnabled('launch_programs_user'))
+        @if($registry->isEnabled('launch_programs'))
         {{-- Launch Programs (AJAX) --}}
         <div class="tab-pane" id="tab-launch-programs" style="display: none;">
             <div class="spinner-loader">
@@ -304,7 +304,7 @@
         </div>
         @endif
 
-        @if($registry->isEnabled('provisioning_user'))
+        @if($registry->isEnabled('provisioning'))
         {{-- Workspaces (AJAX) --}}
         <div class="tab-pane" id="tab-workspaces" style="display: none;">
             <div class="spinner-loader">
@@ -314,7 +314,7 @@
         </div>
         @endif
 
-        @if($registry->isEnabled('partner_portal_user'))
+        @if($registry->isEnabled('partner_portal'))
         {{-- Portal Users (AJAX) --}}
         <div class="tab-pane" id="tab-portal-users" style="display: none;">
             <div class="spinner-loader">

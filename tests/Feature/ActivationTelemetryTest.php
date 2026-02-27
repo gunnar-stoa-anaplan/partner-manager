@@ -39,7 +39,7 @@ class ActivationTelemetryTest extends TestCase
     public function test_snapshot_reports_correct_assigned_and_completed_counts(): void
     {
         $path = ActivationPath::factory()->create([
-            'feature_slug' => 'enablement_admin',
+            'feature_slug' => 'enablement',
             'is_active' => true,
         ]);
 
@@ -62,7 +62,7 @@ class ActivationTelemetryTest extends TestCase
         $service = app(ActivationService::class);
         $snapshot = $service->getSnapshot();
 
-        $this->assertEquals('enablement_admin', $snapshot[0]['feature']);
+        $this->assertEquals('enablement', $snapshot[0]['feature']);
         $this->assertEquals(3, $snapshot[0]['assigned_count']);
         $this->assertEquals(2, $snapshot[0]['completed_count']);
     }
@@ -70,13 +70,13 @@ class ActivationTelemetryTest extends TestCase
     public function test_snapshot_reports_instance_active_flag(): void
     {
         $path = ActivationPath::factory()->create([
-            'feature_slug' => 'enablement_admin',
+            'feature_slug' => 'enablement',
             'is_active' => true,
         ]);
 
         ActivationStep::factory()->create(['activation_path_id' => $path->id]);
 
-        Feature::for(null)->activate('enablement_admin');
+        Feature::for(null)->activate('enablement');
 
         $service = app(ActivationService::class);
         $snapshot = $service->getSnapshot();
@@ -87,13 +87,13 @@ class ActivationTelemetryTest extends TestCase
     public function test_snapshot_reports_instance_inactive_flag(): void
     {
         $path = ActivationPath::factory()->create([
-            'feature_slug' => 'enablement_admin',
+            'feature_slug' => 'enablement',
             'is_active' => true,
         ]);
 
         ActivationStep::factory()->create(['activation_path_id' => $path->id]);
 
-        Feature::for(null)->deactivate('enablement_admin');
+        Feature::for(null)->deactivate('enablement');
 
         $service = app(ActivationService::class);
         $snapshot = $service->getSnapshot();
@@ -106,7 +106,7 @@ class ActivationTelemetryTest extends TestCase
     public function test_snapshot_includes_step_completion_counts(): void
     {
         $path = ActivationPath::factory()->create([
-            'feature_slug' => 'enablement_admin',
+            'feature_slug' => 'enablement',
             'is_active' => true,
         ]);
 

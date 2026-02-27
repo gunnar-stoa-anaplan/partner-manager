@@ -51,11 +51,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
             }
 
-            // Knowledge Base (admin routes use knowledge_base_admin gate)
+            // Knowledge Base (uses knowledge_base gate)
             $knowledgeBaseWeb = base_path('routes/modules/knowledge-base.php');
 
             if (file_exists($knowledgeBaseWeb)) {
-                Route::middleware(['web', 'auth', 'module:knowledge_base_admin'])
+                Route::middleware(['web', 'auth', 'module:knowledge_base'])
                     ->prefix('knowledge-base')
                     ->name('knowledge_base.')
                     ->group($knowledgeBaseWeb);
@@ -74,7 +74,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $knowledgeBaseApi = base_path('routes/modules/knowledge-base-api.php');
 
             if (file_exists($knowledgeBaseApi)) {
-                Route::middleware(['web', 'auth', 'module:knowledge_base_user'])
+                Route::middleware(['web', 'auth', 'module:knowledge_base'])
                     ->prefix('api/v1/knowledge-base')
                     ->name('knowledge_base.api.')
                     ->group($knowledgeBaseApi);

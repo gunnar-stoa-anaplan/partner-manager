@@ -83,7 +83,7 @@ class PartnerController extends Controller
             ->findOrFail($id);
         $this->authorizePartnerAccess($partner);
 
-        app(ActivationTracker::class)->track(auth()->user(), 'partner_management_user', StepType::UsageThreshold);
+        app(ActivationTracker::class)->track(auth()->user(), 'partner_management', StepType::UsageThreshold);
 
         // KPI metrics (always visible above tabs)
         $activeProjects = $partner->projects->whereNotIn('status', ['Completed'])->count();
@@ -1407,7 +1407,7 @@ class PartnerController extends Controller
             'user_id' => $request->user_id,
         ]);
 
-        app(ActivationTracker::class)->track(auth()->user(), 'partner_management_user', StepType::FeatureUsage);
+        app(ActivationTracker::class)->track(auth()->user(), 'partner_management', StepType::FeatureUsage);
 
         return redirect()->route('partners.index')->with('success', 'Partner assignment updated successfully.');
     }

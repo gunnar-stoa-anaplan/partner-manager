@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('qbr_admin')]
-class QbrAdmin
+#[Name('zoom_chat')]
+class ZoomChat
 {
     /**
      * Resolve the feature's initial value.

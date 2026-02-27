@@ -30,8 +30,7 @@ class EnablementFeatureTest extends TestCase
 
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
-        Feature::for(null)->activate('enablement_admin');
-        Feature::for(null)->activate('enablement_user');
+        Feature::for(null)->activate('enablement');
 
         $this->admin = User::factory()->admin()->create();
         $this->psm = User::factory()->psm()->create();

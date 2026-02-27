@@ -34,7 +34,7 @@ class BlueprintFeatureTest extends TestCase
         $this->admin = User::factory()->admin()->create();
         $this->psm = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $this->psm->id]);
-        $this->activateModuleForUser('enablement_admin', $this->admin);
+        $this->activateModuleForUser('enablement', $this->admin);
     }
 
     // ─── Admin CRUD ─────────────────────────────────────────────

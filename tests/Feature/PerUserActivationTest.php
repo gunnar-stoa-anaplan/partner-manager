@@ -36,16 +36,16 @@ class PerUserActivationTest extends TestCase
 
     public function test_user_allowed_when_no_activation_path_exists(): void
     {
-        Feature::for(null)->activate('enablement_admin');
+        Feature::for(null)->activate('enablement');
 
         $registry = app(ModuleRegistry::class);
 
-        $this->assertTrue($registry->isEnabled('enablement_admin', $this->admin));
+        $this->assertTrue($registry->isEnabled('enablement', $this->admin));
     }
 
     public function test_admin_allowed_when_pennant_active_and_no_path(): void
     {
-        Feature::for(null)->activate('enablement_admin');
+        Feature::for(null)->activate('enablement');
 
         $response = $this->actingAs($this->admin)->get(route('blueprints.index'));
 
@@ -56,25 +56,25 @@ class PerUserActivationTest extends TestCase
 
     public function test_non_admin_blocked_when_pennant_inactive(): void
     {
-        Feature::for(null)->deactivate('enablement_admin');
+        Feature::for(null)->deactivate('enablement');
 
         $registry = app(ModuleRegistry::class);
 
-        $this->assertFalse($registry->isEnabled('enablement_admin', $this->psm));
+        $this->assertFalse($registry->isEnabled('enablement', $this->psm));
     }
 
     public function test_admin_bypasses_pennant_inactive(): void
     {
-        Feature::for(null)->deactivate('enablement_admin');
+        Feature::for(null)->deactivate('enablement');
 
         $registry = app(ModuleRegistry::class);
 
-        $this->assertTrue($registry->isEnabled('enablement_admin', $this->admin));
+        $this->assertTrue($registry->isEnabled('enablement', $this->admin));
     }
 
     public function test_route_returns_403_for_non_admin_when_pennant_inactive(): void
     {
-        Feature::for(null)->deactivate('enablement_admin');
+        Feature::for(null)->deactivate('enablement');
 
         $response = $this->actingAs($this->psm)->get(route('blueprints.index'));
 
@@ -83,7 +83,7 @@ class PerUserActivationTest extends TestCase
 
     public function test_admin_route_allowed_when_pennant_inactive(): void
     {
-        Feature::for(null)->deactivate('enablement_admin');
+        Feature::for(null)->deactivate('enablement');
 
         $response = $this->actingAs($this->admin)->get(route('blueprints.index'));
 
@@ -94,10 +94,10 @@ class PerUserActivationTest extends TestCase
 
     public function test_user_blocked_with_incomplete_activation_path(): void
     {
-        Feature::for(null)->activate('enablement_admin');
+        Feature::for(null)->activate('enablement');
 
         $path = ActivationPath::factory()->create([
-            'feature_slug' => 'enablement_admin',
+            'feature_slug' => 'enablement',
             'is_active' => true,
         ]);
 
@@ -116,27 +116,27 @@ class PerUserActivationTest extends TestCase
         $registry = app(ModuleRegistry::class);
 
         // Non-admin with incomplete path is blocked
-        $this->assertFalse($registry->isEnabled('enablement_admin', $this->psm));
+        $this->assertFalse($registry->isEnabled('enablement', $this->psm));
 
         // Admin always passes
-        $this->assertTrue($registry->isEnabled('enablement_admin', $this->admin));
+        $this->assertTrue($registry->isEnabled('enablement', $this->admin));
     }
 
     public function test_user_allowed_with_completed_activation_path(): void
     {
-        $this->activateModuleForUser('enablement_admin', $this->admin);
+        $this->activateModuleForUser('enablement', $this->admin);
 
         $registry = app(ModuleRegistry::class);
 
-        $this->assertTrue($registry->isEnabled('enablement_admin', $this->admin));
+        $this->assertTrue($registry->isEnabled('enablement', $this->admin));
     }
 
     public function test_non_admin_blocked_with_incomplete_tell(): void
     {
-        Feature::for(null)->activate('enablement_user');
+        Feature::for(null)->activate('enablement');
 
         $path = ActivationPath::factory()->create([
-            'feature_slug' => 'enablement_user',
+            'feature_slug' => 'enablement',
             'is_active' => true,
         ]);
 
@@ -156,7 +156,7 @@ class PerUserActivationTest extends TestCase
 
     public function test_route_allowed_with_completed_path(): void
     {
-        $this->activateModuleForUser('enablement_admin', $this->admin);
+        $this->activateModuleForUser('enablement', $this->admin);
 
         $response = $this->actingAs($this->admin)->get(route('blueprints.index'));
 
@@ -167,10 +167,10 @@ class PerUserActivationTest extends TestCase
 
     public function test_admin_bypasses_activation_gating(): void
     {
-        Feature::for(null)->activate('enablement_admin');
+        Feature::for(null)->activate('enablement');
 
         $path = ActivationPath::factory()->create([
-            'feature_slug' => 'enablement_admin',
+            'feature_slug' => 'enablement',
             'is_active' => true,
         ]);
 
@@ -188,10 +188,10 @@ class PerUserActivationTest extends TestCase
 
     public function test_module_accessible_once_tell_phase_completed(): void
     {
-        Feature::for(null)->activate('enablement_user');
+        Feature::for(null)->activate('enablement');
 
         $path = ActivationPath::factory()->create([
-            'feature_slug' => 'enablement_user',
+            'feature_slug' => 'enablement',
             'is_active' => true,
         ]);
 
@@ -236,10 +236,10 @@ class PerUserActivationTest extends TestCase
 
     public function test_different_users_have_independent_access(): void
     {
-        Feature::for(null)->activate('enablement_admin');
+        Feature::for(null)->activate('enablement');
 
         $path = ActivationPath::factory()->create([
-            'feature_slug' => 'enablement_admin',
+            'feature_slug' => 'enablement',
             'is_active' => true,
         ]);
 
@@ -259,18 +259,18 @@ class PerUserActivationTest extends TestCase
 
         $registry = app(ModuleRegistry::class);
 
-        $this->assertTrue($registry->isEnabled('enablement_admin', $this->admin));
-        $this->assertFalse($registry->isEnabled('enablement_admin', $this->psm));
+        $this->assertTrue($registry->isEnabled('enablement', $this->admin));
+        $this->assertFalse($registry->isEnabled('enablement', $this->psm));
     }
 
     // ─── ActivationService evaluate ────────────────────────────
 
     public function test_evaluate_marks_pivot_complete_when_all_steps_done(): void
     {
-        Feature::for(null)->activate('enablement_admin');
+        Feature::for(null)->activate('enablement');
 
         $path = ActivationPath::factory()->create([
-            'feature_slug' => 'enablement_admin',
+            'feature_slug' => 'enablement',
             'is_active' => true,
         ]);
 
@@ -372,22 +372,22 @@ class PerUserActivationTest extends TestCase
 
     public function test_config_disabled_blocks_non_admin_even_with_pennant_and_path(): void
     {
-        config(['modules.enablement_admin.enabled' => false]);
-        Feature::for(null)->activate('enablement_admin');
+        config(['modules.enablement.enabled' => false]);
+        Feature::for(null)->activate('enablement');
 
-        $this->activateModuleForUser('enablement_admin', $this->psm);
+        $this->activateModuleForUser('enablement', $this->psm);
 
         $registry = app(ModuleRegistry::class);
 
-        $this->assertFalse($registry->isEnabled('enablement_admin', $this->psm));
+        $this->assertFalse($registry->isEnabled('enablement', $this->psm));
     }
 
     public function test_admin_bypasses_config_disabled(): void
     {
-        config(['modules.enablement_admin.enabled' => false]);
+        config(['modules.enablement.enabled' => false]);
 
         $registry = app(ModuleRegistry::class);
 
-        $this->assertTrue($registry->isEnabled('enablement_admin', $this->admin));
+        $this->assertTrue($registry->isEnabled('enablement', $this->admin));
     }
 }

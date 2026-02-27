@@ -11,12 +11,14 @@ class LeadController extends Controller
     public function index()
     {
         $leads = Lead::with('assignedPartner')->latest()->get();
+
         return view('business-development.leads.index', compact('leads'));
     }
 
     public function create()
     {
         $partners = Partner::all();
+
         return view('business-development.leads.create', compact('partners'));
     }
 
@@ -45,6 +47,7 @@ class LeadController extends Controller
     public function edit(Lead $lead)
     {
         $partners = Partner::all();
+
         return view('business-development.leads.edit', compact('lead', 'partners'));
     }
 
@@ -68,24 +71,42 @@ class LeadController extends Controller
     public function destroy(Lead $lead)
     {
         $lead->delete();
+
         return redirect()->route('leads.index')->with('success', 'Lead deleted.');
+    }
+
+    public function sourced(): \Illuminate\View\View
+    {
+        $leads = Lead::with('partner')->where('source', 'partner')->latest()->get();
+
+        return view('business-development.leads.sourced', compact('leads'));
+    }
+
+    public function influenced(): \Illuminate\View\View
+    {
+        $leads = Lead::with('partner')->where('source', 'referral')->latest()->get();
+
+        return view('business-development.leads.influenced', compact('leads'));
     }
 
     public function unassigned()
     {
         $leads = Lead::where('status', 'Unassigned')->get();
+
         return view('business-development.leads.unassigned', compact('leads'));
     }
-    
+
     public function assigned()
     {
         $leads = Lead::where('status', 'Assigned')->get();
+
         return view('business-development.leads.assigned', compact('leads'));
     }
-    
+
     public function rejected()
     {
         $leads = Lead::where('status', 'Rejected')->get();
+
         return view('business-development.leads.rejected', compact('leads'));
     }
 }

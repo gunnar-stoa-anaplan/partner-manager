@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('workshop_labs_user')]
-class WorkshopLabsUser
+#[Name('enablement_events')]
+class EnablementEvents
 {
     /**
      * Resolve the feature's initial value.

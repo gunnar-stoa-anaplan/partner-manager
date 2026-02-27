@@ -99,15 +99,15 @@
             </div>
         </div>
 
-        {{-- Top Partners --}}
+        {{-- Deals by Partner --}}
         <div class="col-lg-6">
-            <div class="panel panel-icon" id="panel-top-partners">
+            <div class="panel panel-icon" id="panel-deals-by-partner">
                 <div class="panel-hdr">
-                    <h2>Top Partners by <span class="fw-light"><i>Deals</i></span></h2>
+                    <h2>Deals by <span class="fw-light"><i>Partner</i></span></h2>
                 </div>
                 <div class="panel-container">
                     <div class="panel-content">
-                        <div id="chart-top-partners" style="height: 350px;"></div>
+                        <div id="chart-deals-by-partner" style="height: 350px;"></div>
                     </div>
                 </div>
             </div>
@@ -291,22 +291,28 @@
             document.querySelector('#chart-deals-month').innerHTML = '<div class="text-center text-muted py-5"><p>No submission data</p></div>';
         }
 
-        // ── Top Partners (horizontal bar) ──
+        // ── Deals by Partner (dual-axis column: count + value) ──
         var partnersData = @json($topPartners);
         if (partnersData.length > 0) {
-            new ApexCharts(document.querySelector('#chart-top-partners'), {
+            new ApexCharts(document.querySelector('#chart-deals-by-partner'), {
                 chart: { type: 'bar', height: 350, toolbar: dlToolbar, fontFamily: 'inherit', events: { mounted: addCopyMenuItem, updated: addCopyMenuItem } },
-                series: [{ name: 'Deals', data: partnersData.map(function(p) { return p.count; }) }],
-                plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '65%' } },
-                colors: ['#886ab5'],
-                dataLabels: { enabled: true, style: { fontSize: '12px' } },
-                xaxis: { categories: partnersData.map(function(p) { return p.name; }), labels: { style: { colors: bodyColorHex } } },
-                yaxis: { labels: { style: { colors: bodyColorHex } } },
-                tooltip: { theme: 'dark' },
+                series: [
+                    { name: 'Deals', data: partnersData.map(function(p) { return p.count; }) },
+                    { name: 'Value', data: partnersData.map(function(p) { return Number(p.value); }) }
+                ],
+                plotOptions: { bar: { columnWidth: '60%', borderRadius: 4 } },
+                colors: ['#886ab5', '#0d6efd'],
+                xaxis: { categories: partnersData.map(function(p) { return p.name; }), labels: { style: { colors: bodyColorHex, fontSize: '10px' }, rotate: -45, rotateAlways: partnersData.length > 5 } },
+                yaxis: [
+                    { title: { text: '# Deals' }, labels: { style: { colors: bodyColorHex } } },
+                    { opposite: true, title: { text: 'Value ($)' }, labels: { style: { colors: bodyColorHex }, formatter: function(val) { return '$' + (val / 1000).toFixed(0) + 'K'; } } }
+                ],
+                tooltip: { theme: 'dark', shared: true, intersect: false, y: { formatter: function(val, opts) { return opts.seriesIndex === 1 ? '$' + val.toLocaleString() : val; } } },
+                legend: { position: 'top', labels: { colors: bodyColorHex } },
                 grid: { borderColor: 'rgba(108,117,125,0.08)', strokeDashArray: 5 }
             }).render();
         } else {
-            document.querySelector('#chart-top-partners').innerHTML = '<div class="text-center text-muted py-5"><p>No partner data</p></div>';
+            document.querySelector('#chart-deals-by-partner').innerHTML = '<div class="text-center text-muted py-5"><p>No partner data</p></div>';
         }
 
         // ── SmartTables ──

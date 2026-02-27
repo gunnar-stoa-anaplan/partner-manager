@@ -63,8 +63,8 @@ class RoleManagementTest extends TestCase
             'type' => 'internal',
             'description' => 'A custom role for testing',
             'permissions' => [
-                'enablement_user' => 'write',
-                'partner_management_user' => 'read',
+                'enablement' => 'write',
+                'partner_management' => 'read',
             ],
         ]);
 
@@ -75,9 +75,9 @@ class RoleManagementTest extends TestCase
         $this->assertEquals('Custom Role', $role->display_name);
         $this->assertEquals('internal', $role->type);
 
-        $this->assertTrue($role->hasWritePermission('enablement_user'));
-        $this->assertTrue($role->hasPermission('partner_management_user'));
-        $this->assertFalse($role->hasWritePermission('partner_management_user'));
+        $this->assertTrue($role->hasWritePermission('enablement'));
+        $this->assertTrue($role->hasPermission('partner_management'));
+        $this->assertFalse($role->hasWritePermission('partner_management'));
     }
 
     public function test_create_role_validates_slug_format(): void
@@ -141,13 +141,13 @@ class RoleManagementTest extends TestCase
             'display_name' => 'Updated Name',
             'type' => 'internal',
             'permissions' => [
-                'enablement_user' => 'write',
+                'enablement' => 'write',
             ],
         ]);
 
         $response->assertRedirect(route('admin.roles.index'));
         $this->assertEquals('Updated Name', $role->fresh()->display_name);
-        $this->assertTrue($role->fresh()->hasWritePermission('enablement_user'));
+        $this->assertTrue($role->fresh()->hasWritePermission('enablement'));
     }
 
     public function test_protected_role_only_allows_limited_field_updates(): void
@@ -189,7 +189,7 @@ class RoleManagementTest extends TestCase
             'display_name' => 'Bypass Role',
             'type' => 'internal',
             'permissions' => [
-                'enablement_user' => 'write',
+                'enablement' => 'write',
             ],
         ]);
 
@@ -255,7 +255,7 @@ class RoleManagementTest extends TestCase
 
         RolePermission::create([
             'role_id' => $role->id,
-            'module_slug' => 'enablement_user',
+            'module_slug' => 'enablement',
             'access_level' => 'write',
         ]);
 

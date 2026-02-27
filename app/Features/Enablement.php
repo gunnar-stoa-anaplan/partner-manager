@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('launch_programs_user')]
-class LaunchProgramsUser
+#[Name('enablement')]
+class Enablement
 {
     /**
      * Resolve the feature's initial value.

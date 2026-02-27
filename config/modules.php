@@ -16,6 +16,9 @@ return [
     | Keys used here must match the feature slugs returned in the license
     | response (e.g. "integration_hub", "mcp_server").
     |
+    | Role permissions (read/write) control what each user can do within
+    | an enabled module. A single Pennant flag gates the entire capability.
+    |
     */
 
     'integration_hub' => [
@@ -89,182 +92,97 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Paired Features — Administration & End-User Access
+    | Unified Feature Modules
     |--------------------------------------------------------------------------
     |
-    | Each capability has two feature flags: one to gate the administration
-    | and setup screens (admin role), and one to gate end-user access (PSM
-    | and other roles). This allows progressive activation where admins
-    | configure a feature before it is exposed to end users.
+    | Each module has a single Pennant feature flag. Role permissions
+    | (read/write per module_slug) control what each user role can do
+    | within the module.
     |
     */
 
-    'enablement_admin' => [
-        'name' => 'Enablement Administration',
-        'description' => 'Admin setup for enablement events, blueprints, labs, and calendars.',
+    'enablement' => [
+        'name' => 'Enablement',
+        'description' => 'Enablement events, blueprints, labs, calendars, influence maps, and field enablement.',
         'icon' => 'layers',
-        'enabled' => env('MODULE_ENABLEMENT_ADMIN', true),
+        'enabled' => env('MODULE_ENABLEMENT', true),
     ],
 
-    'enablement_user' => [
-        'name' => 'Field Enablement End Users',
-        'description' => 'End-user access to field enablement, influence maps, breadth and depth views.',
-        'icon' => 'users',
-        'enabled' => env('MODULE_ENABLEMENT_USER', true),
-    ],
-
-    'deal_registration_admin' => [
-        'name' => 'Deal Registration Administration',
-        'description' => 'Admin setup for deal registration workflows and lead assignment.',
+    'deal_registration' => [
+        'name' => 'Deal Registration',
+        'description' => 'Deal registration workflows, lead assignment, and deal tracking.',
         'icon' => 'file-text',
-        'enabled' => env('MODULE_DEAL_REGISTRATION_ADMIN', true),
+        'enabled' => env('MODULE_DEAL_REGISTRATION', true),
     ],
 
-    'deal_registration_user' => [
-        'name' => 'Deal Registration End User',
-        'description' => 'End-user access to submit and track deal registrations.',
-        'icon' => 'file-text',
-        'enabled' => env('MODULE_DEAL_REGISTRATION_USER', true),
-    ],
-
-    'launch_programs_admin' => [
-        'name' => 'Launch Program Administration',
-        'description' => 'Admin setup for launch programs, milestones, and partner nominations.',
+    'launch_programs' => [
+        'name' => 'Launch Programs',
+        'description' => 'Launch programs, milestones, partner nominations, and participant tracking.',
         'icon' => 'zap',
-        'enabled' => env('MODULE_LAUNCH_PROGRAMS_ADMIN', true),
+        'enabled' => env('MODULE_LAUNCH_PROGRAMS', true),
     ],
 
-    'launch_programs_user' => [
-        'name' => 'Launch Program End User',
-        'description' => 'End-user access to view and participate in launch programs.',
-        'icon' => 'zap',
-        'enabled' => env('MODULE_LAUNCH_PROGRAMS_USER', true),
-    ],
-
-    'project_health_admin' => [
-        'name' => 'Project Health Administration',
-        'description' => 'Admin setup for project tracking, risk categories, and delivery metrics.',
+    'project_health' => [
+        'name' => 'Project Health',
+        'description' => 'Project tracking, risk categories, delivery metrics, and health dashboards.',
         'icon' => 'clipboard',
-        'enabled' => env('MODULE_PROJECT_HEALTH_ADMIN', true),
+        'enabled' => env('MODULE_PROJECT_HEALTH', true),
     ],
 
-    'project_health_user' => [
-        'name' => 'Project Health End User',
-        'description' => 'End-user access to project health dashboards and risk tracking.',
+    'qbr' => [
+        'name' => 'QBR Workbench',
+        'description' => 'QBR templates, session configuration, review workflows, and quarterly reviews.',
         'icon' => 'clipboard',
-        'enabled' => env('MODULE_PROJECT_HEALTH_USER', true),
+        'enabled' => env('MODULE_QBR', true),
     ],
 
-    'qbr_admin' => [
-        'name' => 'QBR Workbench Administration',
-        'description' => 'Admin setup for QBR templates, session configuration, and review workflows.',
-        'icon' => 'clipboard',
-        'enabled' => env('MODULE_QBR_ADMIN', true),
-    ],
-
-    'qbr_user' => [
-        'name' => 'QBR Workbench End User',
-        'description' => 'End-user access to conduct and complete quarterly business reviews.',
-        'icon' => 'clipboard',
-        'enabled' => env('MODULE_QBR_USER', true),
-    ],
-
-    'provisioning_admin' => [
-        'name' => 'Provisioning Administration',
-        'description' => 'Admin setup for workspace provisioning, version configuration, and partner assignment.',
+    'provisioning' => [
+        'name' => 'Provisioning',
+        'description' => 'Workspace provisioning, version configuration, and partner assignment.',
         'icon' => 'server',
-        'enabled' => env('MODULE_PROVISIONING_ADMIN', true),
+        'enabled' => env('MODULE_PROVISIONING', true),
     ],
 
-    'provisioning_user' => [
-        'name' => 'Provisioning End User',
-        'description' => 'End-user access to view provisioned workspaces and workspace status.',
-        'icon' => 'server',
-        'enabled' => env('MODULE_PROVISIONING_USER', true),
-    ],
-
-    'goals_targets_admin' => [
-        'name' => 'Goals & Targets Administration',
-        'description' => 'Admin setup for goal templates, target configuration, and assignment rules.',
+    'goals_targets' => [
+        'name' => 'Goals & Targets',
+        'description' => 'Goal templates, target configuration, assignment rules, and progress tracking.',
         'icon' => 'target',
-        'enabled' => env('MODULE_GOALS_TARGETS_ADMIN', true),
+        'enabled' => env('MODULE_GOALS_TARGETS', true),
     ],
 
-    'goals_targets_user' => [
-        'name' => 'Goals & Targets End User',
-        'description' => 'End-user access to view, track, and manage partner goals and targets.',
-        'icon' => 'target',
-        'enabled' => env('MODULE_GOALS_TARGETS_USER', true),
-    ],
-
-    'benchmark_admin' => [
-        'name' => 'Benchmark Administration',
-        'description' => 'Admin setup for benchmark definitions, peer groups, and scoring criteria.',
+    'benchmark' => [
+        'name' => 'Benchmarking',
+        'description' => 'Benchmark definitions, peer groups, scoring criteria, and partner comparisons.',
         'icon' => 'award',
-        'enabled' => env('MODULE_BENCHMARK_ADMIN', true),
+        'enabled' => env('MODULE_BENCHMARK', true),
     ],
 
-    'benchmark_user' => [
-        'name' => 'Benchmark End User',
-        'description' => 'End-user access to partner benchmarking, peer comparisons, and ranking views.',
-        'icon' => 'award',
-        'enabled' => env('MODULE_BENCHMARK_USER', true),
-    ],
-
-    'action_plans_admin' => [
-        'name' => 'Action Plans Administration',
-        'description' => 'Admin setup for action plan templates, categories, and assignment rules.',
+    'action_plans' => [
+        'name' => 'Action Plans',
+        'description' => 'Action plan templates, categories, assignment rules, and task board.',
         'icon' => 'list',
-        'enabled' => env('MODULE_ACTION_PLANS_ADMIN', true),
+        'enabled' => env('MODULE_ACTION_PLANS', true),
     ],
 
-    'action_plans_user' => [
-        'name' => 'Action Plans End User',
-        'description' => 'End-user access to create, manage, and track partner action plans and task board.',
-        'icon' => 'list',
-        'enabled' => env('MODULE_ACTION_PLANS_USER', true),
-    ],
-
-    'partner_portal_admin' => [
-        'name' => 'Partner Portal Administration',
-        'description' => 'Admin setup for partner portal configuration, branding, and access policies.',
+    'partner_portal' => [
+        'name' => 'Partner Portal',
+        'description' => 'Partner portal configuration, branding, access policies, and portal user management.',
         'icon' => 'globe',
-        'enabled' => env('MODULE_PARTNER_PORTAL_ADMIN', true),
+        'enabled' => env('MODULE_PARTNER_PORTAL', true),
     ],
 
-    'partner_portal_user' => [
-        'name' => 'Partner Portal End User',
-        'description' => 'End-user access to manage portal users and portal-facing views.',
+    'partner_portal_partner' => [
+        'name' => 'Partner Portal (Partner Side)',
+        'description' => 'Partner-side portal access, team settings, and portal experience.',
         'icon' => 'globe',
-        'enabled' => env('MODULE_PARTNER_PORTAL_USER', true),
+        'enabled' => env('MODULE_PARTNER_PORTAL_PARTNER', true),
     ],
 
-    'partner_portal_partner_admin' => [
-        'name' => 'Partner Portal Partner Administration',
-        'description' => 'Partner-side admin access to configure their portal presence and team settings.',
-        'icon' => 'globe',
-        'enabled' => env('MODULE_PARTNER_PORTAL_PARTNER_ADMIN', true),
-    ],
-
-    'partner_portal_partner_user' => [
-        'name' => 'Partner Portal Partner End User',
-        'description' => 'Partner-side user access to the partner portal experience.',
-        'icon' => 'globe',
-        'enabled' => env('MODULE_PARTNER_PORTAL_PARTNER_USER', true),
-    ],
-
-    'partner_management_admin' => [
-        'name' => 'Partner Management Administration',
-        'description' => 'Administrative access to partner management, assignments, and partner CRUD.',
+    'partner_management' => [
+        'name' => 'Partner Management',
+        'description' => 'Partner management, assignments, CRUD, dashboard, and partner details.',
         'icon' => 'briefcase',
-        'enabled' => env('MODULE_PARTNER_MANAGEMENT_ADMIN', true),
-    ],
-
-    'partner_management_user' => [
-        'name' => 'Partner Management End User',
-        'description' => 'End-user access to dashboard, my partners, and partner details.',
-        'icon' => 'briefcase',
-        'enabled' => env('MODULE_PARTNER_MANAGEMENT_USER', true),
+        'enabled' => env('MODULE_PARTNER_MANAGEMENT', true),
     ],
 
     'feature_activation_coe' => [
@@ -274,102 +192,53 @@ return [
         'enabled' => env('MODULE_FEATURE_ACTIVATION_COE', true),
     ],
 
-    'ai_agents_admin' => [
-        'name' => 'AI Agents Administration',
-        'description' => 'Configure and manage AI-powered agents for partner insights, enablement design, and lab generation.',
+    'ai_agents' => [
+        'name' => 'AI Agents',
+        'description' => 'AI-powered agents for partner insights, enablement design, lab generation, and content creation.',
         'icon' => 'cpu',
-        'enabled' => env('MODULE_AI_AGENTS_ADMIN', true),
+        'enabled' => env('MODULE_AI_AGENTS', true),
     ],
 
-    'ai_agents_user' => [
-        'name' => 'AI Agents End Users',
-        'description' => 'Access AI-powered insights and content generation across partner, enablement, and lab modules.',
-        'icon' => 'cpu',
-        'enabled' => env('MODULE_AI_AGENTS_USER', true),
-    ],
-
-    'enablement_events_admin' => [
-        'name' => 'Enablement Events Administration',
-        'description' => 'Administrative access to enablement event catalog, sessions, registrations, and calendar.',
+    'enablement_events' => [
+        'name' => 'Enablement Events',
+        'description' => 'Enablement event catalog, sessions, registrations, and calendar.',
         'icon' => 'layers',
-        'enabled' => env('MODULE_ENABLEMENT_EVENTS_ADMIN', true),
+        'enabled' => env('MODULE_ENABLEMENT_EVENTS', true),
     ],
 
-    'enablement_events_user' => [
-        'name' => 'Enablement Events End Users',
-        'description' => 'End-user access to browse and register for enablement events and view the calendar.',
+    'blueprints' => [
+        'name' => 'Blueprints',
+        'description' => 'Blueprint catalog, assignments, enrollments, and progress tracking.',
         'icon' => 'layers',
-        'enabled' => env('MODULE_ENABLEMENT_EVENTS_USER', true),
+        'enabled' => env('MODULE_BLUEPRINTS', true),
     ],
 
-    'blueprints_admin' => [
-        'name' => 'Blueprints Administration',
-        'description' => 'Administrative access to blueprint catalog, assignments, enrollments, and progress tracking.',
-        'icon' => 'layers',
-        'enabled' => env('MODULE_BLUEPRINTS_ADMIN', true),
-    ],
-
-    'blueprints_user' => [
-        'name' => 'Blueprints End Users',
-        'description' => 'End-user access to view assigned blueprints and track partner progress.',
-        'icon' => 'layers',
-        'enabled' => env('MODULE_BLUEPRINTS_USER', true),
-    ],
-
-    'knowledge_base_admin' => [
-        'name' => 'Knowledge Base Administration',
-        'description' => 'Document ingestion, embedding management, and knowledge base configuration.',
+    'knowledge_base' => [
+        'name' => 'Knowledge Base',
+        'description' => 'Document ingestion, embedding management, knowledge base configuration, and search.',
         'icon' => 'book-open',
-        'enabled' => env('MODULE_KNOWLEDGE_BASE_ADMIN', true),
+        'enabled' => env('MODULE_KNOWLEDGE_BASE', true),
     ],
 
-    'knowledge_base_user' => [
-        'name' => 'Knowledge Base End Users',
-        'description' => 'Search the organizational knowledge base.',
-        'icon' => 'book-open',
-        'enabled' => env('MODULE_KNOWLEDGE_BASE_USER', true),
-    ],
-
-    'zoom_chat_admin' => [
-        'name' => 'Zoom Chat Responder Administration',
-        'description' => 'Configure AI-powered chat responders for Zoom meetings and webcasts.',
-        'icon' => 'video',
-        'enabled' => env('MODULE_ZOOM_CHAT_ADMIN', true),
-    ],
-
-    'zoom_chat_user' => [
+    'zoom_chat' => [
         'name' => 'Zoom Chat Responder',
-        'description' => 'AI chat responder for live Zoom meetings and webcasts.',
+        'description' => 'AI-powered chat responders for Zoom meetings and webcasts.',
         'icon' => 'video',
-        'enabled' => env('MODULE_ZOOM_CHAT_USER', true),
+        'enabled' => env('MODULE_ZOOM_CHAT', true),
     ],
 
-    'workshop_delivery_admin' => [
-        'name' => 'Workshop Delivery Administration',
-        'description' => 'Host workshops via embedded Zoom meetings with breakout rooms, attendance tracking, and AI chat.',
+    'workshop_delivery' => [
+        'name' => 'Workshop Delivery',
+        'description' => 'Workshops via embedded Zoom with breakout rooms, attendance tracking, and AI chat.',
         'icon' => 'video',
-        'enabled' => env('MODULE_WORKSHOP_DELIVERY_ADMIN', true),
+        'enabled' => env('MODULE_WORKSHOP_DELIVERY', true),
     ],
 
-    'workshop_delivery_user' => [
-        'name' => 'Workshop Delivery End Users',
-        'description' => 'Join and participate in interactive workshop sessions delivered via embedded Zoom.',
-        'icon' => 'video',
-        'enabled' => env('MODULE_WORKSHOP_DELIVERY_USER', true),
-    ],
-
-    'workshop_labs_admin' => [
-        'name' => 'Workshop Labs Administration',
-        'description' => 'Administrative access to create and manage workshop labs, checkpoints, and participants.',
+    'workshop_labs' => [
+        'name' => 'Workshop Labs',
+        'description' => 'Workshop labs, checkpoints, participants, and checkpoint exercises.',
         'icon' => 'check-square',
-        'enabled' => env('MODULE_WORKSHOP_LABS_ADMIN', true),
-    ],
-
-    'workshop_labs_user' => [
-        'name' => 'Workshop Labs End Users',
-        'description' => 'End-user access to participate in workshop labs and complete checkpoint exercises.',
-        'icon' => 'check-square',
-        'enabled' => env('MODULE_WORKSHOP_LABS_USER', true),
+        'enabled' => env('MODULE_WORKSHOP_LABS', true),
     ],
 
     'directory_sync_admin' => [

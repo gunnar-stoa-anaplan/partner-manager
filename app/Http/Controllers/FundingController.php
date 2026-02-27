@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 class FundingController extends Controller
 {
-    //
+    public function development(): \Illuminate\View\View
+    {
+        return view('business-development.funding.development');
+    }
 }
