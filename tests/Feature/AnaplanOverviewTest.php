@@ -27,7 +27,7 @@ class AnaplanOverviewTest extends TestCase
 
         $this->admin = User::factory()->admin()->create();
         $this->psm = User::factory()->psm()->create();
-        $this->activateModuleForUser('provisioning_admin', $this->admin);
+        $this->activateModuleForUser('provisioning', $this->admin);
     }
 
     // ─── Index ──────────────────────────────────────────────────────

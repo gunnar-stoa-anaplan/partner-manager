@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('deal_registration_user')]
-class DealRegistrationUser
+#[Name('partner_portal')]
+class PartnerPortal
 {
     /**
      * Resolve the feature's initial value.

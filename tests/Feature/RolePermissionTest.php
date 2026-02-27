@@ -57,13 +57,13 @@ class RolePermissionTest extends TestCase
         $role = Role::factory()->create(['type' => 'internal']);
         RolePermission::create([
             'role_id' => $role->id,
-            'module_slug' => 'enablement_user',
+            'module_slug' => 'enablement',
             'access_level' => 'read',
         ]);
 
         $user = User::factory()->create(['role_id' => $role->id]);
 
-        $this->assertTrue($user->hasModulePermission('enablement_user'));
+        $this->assertTrue($user->hasModulePermission('enablement'));
         $this->assertFalse($user->hasModulePermission('other_module'));
     }
 
@@ -72,13 +72,13 @@ class RolePermissionTest extends TestCase
         $role = Role::factory()->create(['type' => 'internal']);
         RolePermission::create([
             'role_id' => $role->id,
-            'module_slug' => 'enablement_admin',
+            'module_slug' => 'enablement',
             'access_level' => 'write',
         ]);
 
         $user = User::factory()->create(['role_id' => $role->id]);
 
-        $this->assertTrue($user->hasModulePermission('enablement_admin'));
+        $this->assertTrue($user->hasModulePermission('enablement'));
     }
 
     // ─── canWriteModule ──────────────────────────────────────────
@@ -88,13 +88,13 @@ class RolePermissionTest extends TestCase
         $role = Role::factory()->create(['type' => 'internal']);
         RolePermission::create([
             'role_id' => $role->id,
-            'module_slug' => 'enablement_admin',
+            'module_slug' => 'enablement',
             'access_level' => 'write',
         ]);
 
         $user = User::factory()->create(['role_id' => $role->id]);
 
-        $this->assertTrue($user->canWriteModule('enablement_admin'));
+        $this->assertTrue($user->canWriteModule('enablement'));
     }
 
     public function test_can_write_module_returns_false_for_read_only_access(): void
@@ -102,14 +102,14 @@ class RolePermissionTest extends TestCase
         $role = Role::factory()->create(['type' => 'internal']);
         RolePermission::create([
             'role_id' => $role->id,
-            'module_slug' => 'enablement_admin',
+            'module_slug' => 'enablement',
             'access_level' => 'read',
         ]);
 
         $user = User::factory()->create(['role_id' => $role->id]);
 
-        $this->assertFalse($user->canWriteModule('enablement_admin'));
-        $this->assertTrue($user->hasModulePermission('enablement_admin'));
+        $this->assertFalse($user->canWriteModule('enablement'));
+        $this->assertTrue($user->hasModulePermission('enablement'));
     }
 
     // ─── isAdmin / isPsm ─────────────────────────────────────────
@@ -141,11 +141,11 @@ class RolePermissionTest extends TestCase
         $role = Role::factory()->create(['type' => 'internal']);
         RolePermission::create([
             'role_id' => $role->id,
-            'module_slug' => 'enablement_user',
+            'module_slug' => 'enablement',
             'access_level' => 'write',
         ]);
 
-        $this->assertTrue($role->hasPermission('enablement_user'));
+        $this->assertTrue($role->hasPermission('enablement'));
         $this->assertFalse($role->hasPermission('other_module'));
     }
 
@@ -154,12 +154,12 @@ class RolePermissionTest extends TestCase
         $role = Role::factory()->create(['type' => 'internal']);
         RolePermission::create([
             'role_id' => $role->id,
-            'module_slug' => 'enablement_user',
+            'module_slug' => 'enablement',
             'access_level' => 'read',
         ]);
 
-        $this->assertFalse($role->hasWritePermission('enablement_user'));
-        $this->assertTrue($role->hasPermission('enablement_user'));
+        $this->assertFalse($role->hasWritePermission('enablement'));
+        $this->assertTrue($role->hasPermission('enablement'));
     }
 
     public function test_role_access_level(): void
@@ -167,11 +167,11 @@ class RolePermissionTest extends TestCase
         $role = Role::factory()->create(['type' => 'internal']);
         RolePermission::create([
             'role_id' => $role->id,
-            'module_slug' => 'enablement_user',
+            'module_slug' => 'enablement',
             'access_level' => 'read',
         ]);
 
-        $this->assertEquals('read', $role->accessLevel('enablement_user'));
+        $this->assertEquals('read', $role->accessLevel('enablement'));
         $this->assertNull($role->accessLevel('other_module'));
     }
 

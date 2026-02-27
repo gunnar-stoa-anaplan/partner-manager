@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('blueprints_user')]
-class BlueprintsUser
+#[Name('ai_agents')]
+class AiAgents
 {
     /**
      * Resolve the feature's initial value.

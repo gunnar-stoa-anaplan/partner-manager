@@ -21,7 +21,7 @@ class ZoomChatResponderTest extends TestCase
         parent::setUp();
 
         $this->admin = User::factory()->admin()->create();
-        Feature::for(null)->activate('zoom_chat_admin');
+        Feature::for(null)->activate('zoom_chat');
     }
 
     public function test_index_lists_responders(): void

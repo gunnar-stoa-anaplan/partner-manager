@@ -13,35 +13,42 @@ class DealRegistrationController extends Controller
 {
     public function dashboard(): \Illuminate\View\View
     {
+        $user = auth()->user();
+        $partnerIds = $user->isAdmin() ? null : $user->partners()->pluck('id');
+
+        $scoped = fn () => $partnerIds
+            ? DealRegistration::whereIn('partner_id', $partnerIds)
+            : DealRegistration::query();
+
         // ── KPI Cards ──
-        $totalDeals = DealRegistration::count();
-        $pendingDeals = DealRegistration::pending()->count();
-        $approvedDeals = DealRegistration::where('status', 'approved')->count();
-        $rejectedDeals = DealRegistration::where('status', 'rejected')->count();
-        $totalPipelineValue = DealRegistration::active()->sum('estimated_value');
-        $approvedValue = DealRegistration::where('status', 'approved')->sum('estimated_value');
-        $avgDealSize = $totalDeals > 0 ? round(DealRegistration::avg('estimated_value'), 0) : 0;
+        $totalDeals = $scoped()->count();
+        $pendingDeals = $scoped()->where('status', 'submitted')->count();
+        $approvedDeals = $scoped()->where('status', 'approved')->count();
+        $rejectedDeals = $scoped()->where('status', 'rejected')->count();
+        $totalPipelineValue = $scoped()->whereIn('status', ['submitted', 'approved'])->sum('estimated_value');
+        $approvedValue = $scoped()->where('status', 'approved')->sum('estimated_value');
+        $avgDealSize = $totalDeals > 0 ? round($scoped()->avg('estimated_value'), 0) : 0;
 
         // ── Deals by Status (donut) ──
-        $dealsByStatus = DealRegistration::select('status', DB::raw('count(*) as total'))
+        $dealsByStatus = $scoped()->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status');
 
         // ── Deals by Product Area (bar) ──
-        $dealsByProductArea = DealRegistration::select('product_area', DB::raw('count(*) as total'))
+        $dealsByProductArea = $scoped()->select('product_area', DB::raw('count(*) as total'))
             ->whereNotNull('product_area')
             ->groupBy('product_area')
             ->pluck('total', 'product_area');
 
         // ── Pipeline Value by Product Area (bar) ──
-        $valueByProductArea = DealRegistration::select('product_area', DB::raw('sum(estimated_value) as total'))
+        $valueByProductArea = $scoped()->select('product_area', DB::raw('sum(estimated_value) as total'))
             ->whereNotNull('product_area')
             ->where('status', '!=', 'rejected')
             ->groupBy('product_area')
             ->pluck('total', 'product_area');
 
         // ── Deals by Month (area chart) ──
-        $dealsByMonth = DealRegistration::select(
+        $dealsByMonth = $scoped()->select(
             DB::raw(DatabasePortability::dateFormat('submitted_at', '%Y-%m').' as month'),
             DB::raw('count(*) as total')
         )
@@ -51,7 +58,7 @@ class DealRegistrationController extends Controller
             ->pluck('total', 'month');
 
         // ── Top Partners by Deal Count ──
-        $topPartners = DealRegistration::select('partner_id', DB::raw('count(*) as total'), DB::raw('sum(estimated_value) as value'))
+        $topPartners = $scoped()->select('partner_id', DB::raw('count(*) as total'), DB::raw('sum(estimated_value) as value'))
             ->groupBy('partner_id')
             ->orderByDesc('total')
             ->limit(10)
@@ -64,7 +71,7 @@ class DealRegistrationController extends Controller
             ]);
 
         // ── Recent Deals Table ──
-        $recentDeals = DealRegistration::with(['partner:id,name', 'reviewer:id,name'])
+        $recentDeals = $scoped()->with(['partner:id,name', 'reviewer:id,name'])
             ->latest()
             ->limit(15)
             ->get();

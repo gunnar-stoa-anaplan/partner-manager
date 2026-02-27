@@ -23,7 +23,7 @@ class BlueprintExportTest extends TestCase
         parent::setUp();
 
         $this->admin = User::factory()->admin()->create();
-        $this->activateModuleForUser('enablement_admin', $this->admin);
+        $this->activateModuleForUser('enablement', $this->admin);
     }
 
     public function test_admin_can_export_blueprint(): void

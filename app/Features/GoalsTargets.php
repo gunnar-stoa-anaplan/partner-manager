@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('project_health_admin')]
-class ProjectHealthAdmin
+#[Name('goals_targets')]
+class GoalsTargets
 {
     /**
      * Resolve the feature's initial value.

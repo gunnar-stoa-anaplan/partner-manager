@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('workshop_labs_admin')]
-class WorkshopLabsAdmin
+#[Name('blueprints')]
+class Blueprints
 {
     /**
      * Resolve the feature's initial value.

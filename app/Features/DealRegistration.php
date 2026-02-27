@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('ai_agents_user')]
-class AiAgentsUser
+#[Name('deal_registration')]
+class DealRegistration
 {
     /**
      * Resolve the feature's initial value.

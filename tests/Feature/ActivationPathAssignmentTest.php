@@ -26,7 +26,7 @@ class ActivationPathAssignmentTest extends TestCase
 
         $this->admin = User::factory()->admin()->create();
         $this->path = ActivationPath::factory()->create([
-            'feature_slug' => 'enablement_admin',
+            'feature_slug' => 'enablement',
             'is_active' => true,
         ]);
     }

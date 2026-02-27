@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('deal_registration_admin')]
-class DealRegistrationAdmin
+#[Name('launch_programs')]
+class LaunchPrograms
 {
     /**
      * Resolve the feature's initial value.

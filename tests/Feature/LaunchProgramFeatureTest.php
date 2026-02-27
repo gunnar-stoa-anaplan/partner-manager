@@ -32,8 +32,7 @@ class LaunchProgramFeatureTest extends TestCase
 
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
-        Feature::for(null)->activate('launch_programs_admin');
-        Feature::for(null)->activate('launch_programs_user');
+        Feature::for(null)->activate('launch_programs');
 
         $this->admin = User::factory()->admin()->create();
         $this->psm = User::factory()->psm()->create();

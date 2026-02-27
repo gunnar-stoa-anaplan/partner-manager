@@ -24,7 +24,7 @@ class WorkshopGuideAdminTest extends TestCase
 
         $this->withoutVite();
         Storage::fake('local');
-        Feature::for(null)->activate('enablement_admin');
+        Feature::for(null)->activate('enablement');
 
         $this->admin = User::factory()->admin()->create();
     }

@@ -87,7 +87,7 @@
             <span class="nav-link-text">Partners</span>
         </a>
         <ul>
-            @if($registry->isAccessible('partner_management_user'))
+            @if($registry->isAccessible('partner_management'))
             <li>
                 <a href="{{ route('dashboard') }}">
                     <span class="nav-link-text">Dashboard</span>
@@ -126,8 +126,7 @@
 
     @if(!in_array($roleSlug, ['coe', 'integration']))
     {{-- Business Development --}}
-    @if($show('deal_registration') && $registry->isAccessible('deal_registration_user'))
-    @if(!$focused || Auth::user()->isAdmin() || ($navSettings['nav_visible_business_dev'] ?? '1') === '1')
+    @if($show('deal_registration') && $registry->isAccessible('deal_registration'))
     <li class="nav-item">
         <a href="#" title="Business Development" data-filter-tags>
             <svg class="sa-icon">
@@ -154,10 +153,9 @@
         </ul>
     </li>
     @endif
-    @endif
 
     {{-- Lead Assignment --}}
-    @if($show('deal_registration') && $registry->isAccessible('deal_registration_admin'))
+    @if($show('deal_registration') && $registry->isAccessible('deal_registration'))
     <li class="nav-item">
         <a href="#" title="Lead Assignment" data-filter-tags>
             <svg class="sa-icon">
@@ -186,7 +184,7 @@
     @endif
 
     {{-- Deal Registration --}}
-    @if($show('deal_registration') && $registry->isAccessible('deal_registration_user'))
+    @if($show('deal_registration') && $registry->isAccessible('deal_registration'))
     <li class="nav-item">
         <a href="#" title="Deal Registration" data-filter-tags>
             <svg class="sa-icon">
@@ -354,7 +352,7 @@
     @endif
 
     {{-- Goals --}}
-    @if($show('goals_scorecards') && $registry->isAccessible('goals_targets_admin'))
+    @if($show('goals_scorecards') && $registry->isAccessible('goals_targets'))
     <li class="nav-item">
         <a href="#" title="Goals" data-filter-tags>
             <svg class="sa-icon">
@@ -385,7 +383,7 @@
     {{-- Partner Assignments moved to Team section --}}
 
     {{-- Lead Assignment Rules --}}
-    @if($show('deal_registration') && $registry->isAccessible('deal_registration_admin'))
+    @if($show('deal_registration') && $registry->isAccessible('deal_registration'))
     <li class="nav-item">
         <a href="#" title="Lead Assignment Rules" data-filter-tags>
             <svg class="sa-icon">
@@ -409,7 +407,7 @@
     @endif
 
     {{-- Provisioning --}}
-    @if($show('anaplan') && $registry->isAccessible('provisioning_admin'))
+    @if($show('anaplan') && $registry->isAccessible('provisioning'))
     <li class="nav-item">
         <a href="#" title="Provisioning" data-filter-tags>
             <svg class="sa-icon">
@@ -433,7 +431,7 @@
     @endif
 
     {{-- Blueprints --}}
-    @if($show('blueprints') && $registry->isAccessible('blueprints_admin'))
+    @if($show('blueprints') && $registry->isAccessible('blueprints'))
     <li class="nav-item">
         <a href="#" title="Blueprints" data-filter-tags>
             <svg class="sa-icon">
@@ -457,7 +455,7 @@
     @endif
 
     {{-- Enablement --}}
-    @if($show('enablement_events') && $registry->isAccessible('enablement_events_admin'))
+    @if($show('enablement_events') && $registry->isAccessible('enablement_events'))
     <li class="nav-item">
         <a href="#" title="Enablement" data-filter-tags>
             <svg class="sa-icon">
@@ -486,7 +484,7 @@
     @endif
 
     {{-- Workshops --}}
-    @if($show('labs') && $registry->isAccessible('workshop_labs_admin'))
+    @if($show('labs') && $registry->isAccessible('workshop_labs'))
     <li class="nav-item">
         <a href="#" title="Workshops" data-filter-tags>
             <svg class="sa-icon">
@@ -510,7 +508,7 @@
     @endif
 
     {{-- Launch Programs --}}
-    @if($show('launch_programs') && $registry->isAccessible('launch_programs_admin'))
+    @if($show('launch_programs') && $registry->isAccessible('launch_programs'))
     <li class="nav-item">
         <a href="#" title="Launch Programs" data-filter-tags>
             <svg class="sa-icon">
@@ -534,7 +532,7 @@
     @endif
 
     {{-- Knowledge Base --}}
-    @if($registry->isAccessible('knowledge_base_admin'))
+    @if($registry->isAccessible('knowledge_base'))
     <li class="nav-item">
         <a href="#" title="Knowledge Base" data-filter-tags>
             <svg class="sa-icon">
@@ -573,7 +571,7 @@
     </li>
 
     {{-- AI Agents --}}
-    @if($registry->isAccessible('ai_agents_admin'))
+    @if($registry->isAccessible('ai_agents'))
     <li>
         <a href="{{ route('admin.ai-agents.index') }}">
             <svg class="sa-icon">
@@ -586,11 +584,11 @@
     @endif
 
     {{-- Blueprint & Enablement Admin for CoE users --}}
-    @if(in_array($roleSlug, ['coe', 'super_admin']) && ($registry->isAccessible('blueprints_admin') || $registry->isAccessible('enablement_events_admin')))
+    @if(in_array($roleSlug, ['coe', 'super_admin']) && ($registry->isAccessible('blueprints') || $registry->isAccessible('enablement_events')))
     @if($show('blueprints', 'enablement_events'))
     <li class="nav-title"><span>Enablement Administration</span></li>
 
-    @if($show('blueprints') && $registry->isAccessible('blueprints_admin'))
+    @if($show('blueprints') && $registry->isAccessible('blueprints'))
     <li class="nav-item">
         <a href="#" title="Blueprints" data-filter-tags>
             <svg class="sa-icon">

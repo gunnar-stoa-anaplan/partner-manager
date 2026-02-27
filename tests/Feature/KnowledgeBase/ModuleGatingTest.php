@@ -19,7 +19,7 @@ class ModuleGatingTest extends TestCase
 
     public function test_knowledge_base_returns_403_when_module_disabled(): void
     {
-        config(['modules.knowledge_base_admin.enabled' => false]);
+        config(['modules.knowledge_base.enabled' => false]);
 
         $user = User::factory()->psm()->create();
 

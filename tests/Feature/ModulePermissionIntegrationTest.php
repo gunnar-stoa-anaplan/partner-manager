@@ -88,7 +88,7 @@ class ModulePermissionIntegrationTest extends TestCase
         $registry = app(ModuleRegistry::class);
         $user = User::factory()->admin()->create();
 
-        $this->assertTrue($registry->isEnabled('enablement_user', $user));
+        $this->assertTrue($registry->isEnabled('enablement', $user));
     }
 
     public function test_module_registry_checks_role_permission(): void
@@ -127,19 +127,19 @@ class ModulePermissionIntegrationTest extends TestCase
         $role = Role::factory()->create(['type' => 'internal']);
         RolePermission::create([
             'role_id' => $role->id,
-            'module_slug' => 'enablement_user',
+            'module_slug' => 'enablement',
             'access_level' => 'read',
         ]);
 
         // Enable the module
-        config(['modules.enablement_user.enabled' => true]);
-        Feature::for(null)->activate('enablement_user');
+        config(['modules.enablement.enabled' => true]);
+        Feature::for(null)->activate('enablement');
 
         $user = User::factory()->create(['role_id' => $role->id]);
 
         $this->actingAs($user);
-        $this->assertTrue($user->hasModulePermission('enablement_user'));
-        $this->assertFalse($user->canWriteModule('enablement_user'));
+        $this->assertTrue($user->hasModulePermission('enablement'));
+        $this->assertFalse($user->canWriteModule('enablement'));
     }
 
     // ─── PortalCan Middleware ────────────────────────────────────

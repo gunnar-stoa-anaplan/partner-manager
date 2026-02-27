@@ -121,7 +121,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', function () {
         return view('index');
-    })->name('dashboard')->middleware('module:partner_management_user');
+    })->name('dashboard')->middleware('module:partner_management');
 
     /*
     |--------------------------------------------------------------------------
@@ -165,20 +165,20 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Project Delivery (gated by project_health_user feature flag)
+    | Project Delivery (gated by project_health feature flag)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('module:project_health_user')->group(function () {
+    Route::middleware('module:project_health')->group(function () {
         Route::get('/projects/risks', [ProjectController::class, 'risks'])->name('projects.risks');
         Route::resource('projects', ProjectController::class);
     });
 
     /*
     |--------------------------------------------------------------------------
-    | Field Enablement (gated by enablement_user feature flag)
+    | Field Enablement (gated by enablement feature flag)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('module:enablement_user')->group(function () {
+    Route::middleware('module:enablement')->group(function () {
         Route::resource('influencers', ContactController::class);
         Route::post('/influencers/{influencer}/interactions', [ContactController::class, 'storeInteraction'])
             ->name('influencers.interactions.store');
@@ -258,7 +258,7 @@ Route::middleware(['auth'])->group(function () {
     | Partner Assignments and Selection
     |--------------------------------------------------------------------------
     */
-    Route::get('/my-partners', [PartnerController::class, 'myPartners'])->name('partners.my')->middleware('module:partner_management_user');
+    Route::get('/my-partners', [PartnerController::class, 'myPartners'])->name('partners.my')->middleware('module:partner_management');
     Route::get('/partners/{id}', [PartnerController::class, 'show'])->name('partners.show');
     Route::get('/partners/{id}/summary', [PartnerController::class, 'summary'])->name('partners.summary');
     Route::get('/partners/{id}/insights', [PartnerController::class, 'insights'])->name('partners.insights');
@@ -286,8 +286,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/portal/impersonate/stop', [PortalImpersonationController::class, 'stop'])->name('portal.impersonate.stop');
     Route::post('/portal/impersonate/{contact}', [PortalImpersonationController::class, 'start'])->name('portal.impersonate.start');
 
-    // Launch Program: PSM nomination + participant management (gated by launch_programs_user feature flag)
-    Route::middleware('module:launch_programs_user')->group(function () {
+    // Launch Program: PSM nomination + participant management (gated by launch_programs feature flag)
+    Route::middleware('module:launch_programs')->group(function () {
         Route::post('/partners/{partner}/launch-programs/{launchProgram}/nominate', [PartnerController::class, 'nominateForProgram'])->name('partners.launch-programs.nominate');
         Route::post('/launch-program-partners/{programPartner}/participants', [PartnerController::class, 'addParticipant'])->name('launch-program-partners.participants.store');
         Route::delete('/launch-program-participants/{participant}', [PartnerController::class, 'removeParticipant'])->name('launch-program-participants.destroy');
@@ -315,10 +315,10 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Enablement Calendar (gated by enablement_user feature flag)
+    | Enablement Calendar (gated by enablement feature flag)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('module:enablement_user')->group(function () {
+    Route::middleware('module:enablement')->group(function () {
         Route::get('/enablement', function () {
             return view('enablement.calendar');
         })->name('enablement.calendar');
@@ -380,7 +380,7 @@ Route::middleware(['auth'])->group(function () {
     | Partner Goals (PSM + Admin)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('module:goals_targets_user')->group(function () {
+    Route::middleware('module:goals_targets')->group(function () {
         Route::get('/partner-goals', [PartnerGoalController::class, 'index'])->name('partner-goals.index');
         Route::put('/partner-goals', [PartnerGoalController::class, 'update'])->name('partner-goals.update');
     });
@@ -428,8 +428,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/configuration/dev-focus', [ConfigurationController::class, 'updateDevFocus'])->name('configuration.update-dev-focus');
         Route::put('/configuration/ai', [ConfigurationController::class, 'updateAi'])->name('configuration.update-ai');
 
-        // Enablement Events Admin (gated by enablement_events_admin feature flag)
-        Route::middleware('module:enablement_events_admin')->group(function () {
+        // Enablement Events Admin (gated by enablement_events feature flag)
+        Route::middleware('module:enablement_events')->group(function () {
             // Blueprint CRUD
             Route::resource('blueprints', BlueprintController::class);
             Route::post('/blueprints/{blueprint}/duplicate', [BlueprintController::class, 'duplicate'])->name('blueprints.duplicate');
@@ -460,8 +460,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/blueprint-dashboard', [BlueprintDashboardController::class, 'index'])->name('admin.blueprint-dashboard');
         });
 
-        // Launch Programs Admin (gated by launch_programs_admin feature flag)
-        Route::middleware('module:launch_programs_admin')->group(function () {
+        // Launch Programs Admin (gated by launch_programs feature flag)
+        Route::middleware('module:launch_programs')->group(function () {
             // Launch Programs Dashboard (must be before resource to avoid {launchProgram} conflict)
             Route::get('/launch-programs/dashboard', [LaunchProgramDashboardController::class, 'index'])->name('admin.launch-programs.dashboard');
 
@@ -473,8 +473,8 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'destroyMilestone'])->name('admin.launch-program-milestones.destroy');
         });
 
-        // Workshop Labs (gated by workshop_labs_admin feature flag)
-        Route::middleware('module:workshop_labs_admin')->group(function () {
+        // Workshop Labs (gated by workshop_labs feature flag)
+        Route::middleware('module:workshop_labs')->group(function () {
             Route::post('/labs/generate', [LabController::class, 'generate'])->name('labs.generate');
             Route::resource('labs', LabController::class);
             Route::post('/labs/{lab}/publish', [LabController::class, 'publish'])->name('labs.publish');
@@ -488,16 +488,16 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/lab-participants/{participant}', [LabController::class, 'removeParticipant'])->name('lab-participants.destroy');
         });
 
-        // Workshop Guides Admin (gated by enablement_admin feature flag)
-        Route::middleware('module:enablement_admin')->group(function () {
+        // Workshop Guides Admin (gated by enablement feature flag)
+        Route::middleware('module:enablement')->group(function () {
             Route::resource('workshop-guides', WorkshopGuideAdminController::class)->names('admin.workshop-guides');
             Route::post('/workshop-guides/{workshopGuide}/publish', [WorkshopGuideAdminController::class, 'publish'])->name('admin.workshop-guides.publish');
             Route::post('/workshop-guides/{workshopGuide}/pages', [WorkshopGuideAdminController::class, 'addPage'])->name('admin.workshop-guides.pages.store');
             Route::post('/workshop-guides/{workshopGuide}/images', [WorkshopGuideAdminController::class, 'uploadImage'])->name('admin.workshop-guides.images.store');
         });
 
-        // Provisioning Admin (gated by provisioning_admin feature flag)
-        Route::middleware('module:provisioning_admin')->group(function () {
+        // Provisioning Admin (gated by provisioning feature flag)
+        Route::middleware('module:provisioning')->group(function () {
             Route::get('/provisioning-workspaces', [AnaplanProvisioningController::class, 'index'])->name('admin.provisioning-workspaces.index');
             Route::put('/provisioning-workspaces/{workspace}/assign', [AnaplanProvisioningController::class, 'assignPartner'])->name('admin.provisioning-workspaces.assign');
             Route::post('/provisioning-workspaces/sync', [AnaplanProvisioningController::class, 'sync'])->name('admin.provisioning-workspaces.sync');
@@ -507,8 +507,8 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/provisioning-summary/version-config', [AnaplanOverviewController::class, 'updateVersionConfig'])->name('admin.provisioning-summary.update-version');
         });
 
-        // AI Agents Admin (gated by ai_agents_admin feature flag)
-        Route::middleware('module:ai_agents_admin')->group(function () {
+        // AI Agents Admin (gated by ai_agents feature flag)
+        Route::middleware('module:ai_agents')->group(function () {
             Route::get('/ai-agents', [AiAgentsController::class, 'index'])->name('admin.ai-agents.index');
         });
 
@@ -580,22 +580,22 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/scorecard/{partner}', [ScorecardController::class, 'show'])->name('scorecard.show');
         });
 
-        // Competency Matrix (gated by enablement_user feature flag)
-        Route::middleware('module:enablement_user')->group(function () {
+        // Competency Matrix (gated by enablement feature flag)
+        Route::middleware('module:enablement')->group(function () {
             Route::get('/competency-matrix', [CompetencyMatrixController::class, 'index'])->name('competency-matrix.index');
             Route::get('/competency-matrix/{partner}', [CompetencyMatrixController::class, 'show'])->name('competency-matrix.show');
         });
 
-        // Task Board (gated by action_plans_user feature flag)
-        Route::middleware('module:action_plans_user')->group(function () {
+        // Task Board (gated by action_plans feature flag)
+        Route::middleware('module:action_plans')->group(function () {
             Route::get('/tasks', [TaskBoardController::class, 'index'])->name('tasks.index');
             Route::post('/tasks', [TaskBoardController::class, 'store'])->name('tasks.store');
             Route::put('/tasks/{task}/status', [TaskBoardController::class, 'updateStatus'])->name('tasks.update-status');
             Route::post('/tasks/{task}/comments', [TaskBoardController::class, 'addComment'])->name('tasks.comments.store');
         });
 
-        // Goals & Targets (gated by goals_targets_user feature flag)
-        Route::middleware('module:goals_targets_user')->group(function () {
+        // Goals & Targets (gated by goals_targets feature flag)
+        Route::middleware('module:goals_targets')->group(function () {
             Route::get('/goals', [GoalsController::class, 'index'])->name('goals.index');
             Route::post('/goals', [GoalsController::class, 'store'])->name('goals.store');
             Route::put('/goals/{goal}', [GoalsController::class, 'update'])->name('goals.update');
@@ -603,8 +603,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/goals/refresh-actuals', [GoalsController::class, 'refreshActuals'])->name('goals.refresh-actuals');
         });
 
-        // Action Plans (gated by action_plans_user feature flag)
-        Route::middleware('module:action_plans_user')->group(function () {
+        // Action Plans (gated by action_plans feature flag)
+        Route::middleware('module:action_plans')->group(function () {
             Route::get('/action-plans', [ActionPlanController::class, 'index'])->name('action-plans.index');
             Route::post('/action-plans', [ActionPlanController::class, 'store'])->name('action-plans.store');
             Route::put('/action-plans/{plan}', [ActionPlanController::class, 'update'])->name('action-plans.update');
@@ -624,8 +624,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/solutions/{solution}', [SolutionLifecycleController::class, 'update'])->name('solutions.update');
         Route::post('/solutions/{solution}/advance', [SolutionLifecycleController::class, 'advanceStage'])->name('solutions.advance');
 
-        // Deal Registrations (gated by deal_registration_user feature flag)
-        Route::middleware('module:deal_registration_user')->group(function () {
+        // Deal Registrations (gated by deal_registration feature flag)
+        Route::middleware('module:deal_registration')->group(function () {
             Route::get('/deal-registrations/dashboard', [DealRegistrationController::class, 'dashboard'])->name('deal-registrations.dashboard');
             Route::get('/deal-registrations', [DealRegistrationController::class, 'index'])->name('deal-registrations.index');
             Route::get('/deal-registrations/create', [DealRegistrationController::class, 'create'])->name('deal-registrations.create');
@@ -655,8 +655,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/enablement', fn () => redirect()->route('measure.index', ['tab' => 'enablement']))->name('enablement');
         Route::get('/delivery', fn () => redirect()->route('measure.index', ['tab' => 'delivery']))->name('delivery');
 
-        // Benchmarks (gated by benchmark_user feature flag)
-        Route::middleware('module:benchmark_user')->group(function () {
+        // Benchmarks (gated by benchmark feature flag)
+        Route::middleware('module:benchmark')->group(function () {
             Route::get('/benchmarks', [BenchmarkController::class, 'index'])->name('benchmarks.index');
             Route::get('/benchmarks/{partner}', [BenchmarkController::class, 'partner'])->name('benchmarks.partner');
         });
@@ -668,8 +668,8 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('act')->name('act.')->group(function () {
-        // Partner Health (gated by enablement_user feature flag)
-        Route::middleware('module:enablement_user')->group(function () {
+        // Partner Health (gated by enablement feature flag)
+        Route::middleware('module:enablement')->group(function () {
             Route::get('/health', [HealthDashboardController::class, 'index'])->name('health.index');
             Route::get('/health/{partner}', [HealthDashboardController::class, 'show'])->name('health.show');
         });
@@ -680,8 +680,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/alerts/{alert}/resolve', [AlertController::class, 'resolve'])->name('alerts.resolve');
         Route::put('/alerts/{alert}/dismiss', [AlertController::class, 'dismiss'])->name('alerts.dismiss');
 
-        // QBR Workbench (gated by qbr_user feature flag)
-        Route::middleware('module:qbr_user')->group(function () {
+        // QBR Workbench (gated by qbr feature flag)
+        Route::middleware('module:qbr')->group(function () {
             Route::get('/qbr', [QbrController::class, 'index'])->name('qbr.index');
             Route::post('/qbr', [QbrController::class, 'store'])->name('qbr.store');
             Route::get('/qbr/{session}', [QbrController::class, 'show'])->name('qbr.show');
@@ -728,8 +728,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/scorecard-weights', [ScorecardController::class, 'weights'])->name('scorecard-weights.index');
         Route::put('/scorecard-weights', [ScorecardController::class, 'updateWeights'])->name('scorecard-weights.update');
 
-        // Goal Templates (gated by goals_targets_admin feature flag)
-        Route::middleware('module:goals_targets_admin')->group(function () {
+        // Goal Templates (gated by goals_targets feature flag)
+        Route::middleware('module:goals_targets')->group(function () {
             Route::get('/goal-templates', [GoalTemplateController::class, 'index'])->name('goal-templates.index');
             Route::post('/goal-templates', [GoalTemplateController::class, 'store'])->name('goal-templates.store');
             Route::put('/goal-templates/{template}', [GoalTemplateController::class, 'update'])->name('goal-templates.update');
