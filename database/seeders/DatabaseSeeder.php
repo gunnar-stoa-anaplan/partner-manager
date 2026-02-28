@@ -34,6 +34,9 @@ class DatabaseSeeder extends Seeder
             NotificationTemplateSeeder::class, // notification templates
             BlueprintSeeder::class,            // blueprints, outcomes, content items
             ProductSeeder::class,              // product catalog (needed before opportunities)
+            MappingTemplateSeeder::class,      // field mapping templates for integration hub
+            ConnectorProfileSeeder::class,     // connector profiles + template slug references
+            GoalTemplateSeeder::class,         // goal templates + demo assignments to first 5 partners
 
             // === Phase 2: Business Data ===
             OpportunityHistorySeeder::class,   // 52 weeks of opportunities + snapshots for analytics
@@ -51,6 +54,9 @@ class DatabaseSeeder extends Seeder
             LabSeeder::class,                   // workshop labs, checkpoints, participants, results
             MarketplaceSeeder::class,           // marketplace profiles + entries for select partners
 
+            // === Strategy Workbench ===
+            StrategySeeder::class,             // CoE users, FY27/FY28 plans, scenarios, reviews
+
             // === Phase 3: Plan Section ===
             PartnerPathEnrollmentSeeder::class, // enrollments + stage history
             PartnerTaskSeeder::class,           // tasks + comments (depends on enrollments)
@@ -63,10 +69,14 @@ class DatabaseSeeder extends Seeder
             SupportCaseSeeder::class,          // support cases
             PartnerAlertSeeder::class,         // alerts across all types
             QbrSessionSeeder::class,           // QBR sessions + 9 sections each
+            SignalSeeder::class,               // signals + engine runs across all partners
 
             // === Idea Room ===
             GalleryThemeSeeder::class,         // gallery wall templates + frame slots
             IdeaRoomSeeder::class,             // ideas, buckets, tags, edges, rooms
+
+            // === Activation Paths (must run last — purges and resets all Pennant feature flags) ===
+            ActivationPathSeeder::class,       // activation paths, steps, user assignments, feature flag state
         ]);
     }
 }

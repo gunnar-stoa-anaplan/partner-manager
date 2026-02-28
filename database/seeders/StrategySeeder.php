@@ -22,34 +22,10 @@ class StrategySeeder extends Seeder
 
         $coeRoleId = Role::where('slug', 'coe')->value('id');
 
-        // === CoE Users ===
-        $sarah = User::updateOrCreate(
-            ['email' => 'sarah.chen@example.com'],
-            [
-                'name' => 'Sarah Chen',
-                'password' => bcrypt('password'),
-                'role_id' => $coeRoleId,
-            ]
-        );
-
-        $marcus = User::updateOrCreate(
-            ['email' => 'marcus.williams@example.com'],
-            [
-                'name' => 'Marcus Williams',
-                'password' => bcrypt('password'),
-                'role_id' => $coeRoleId,
-            ]
-        );
-
-        $emily = User::updateOrCreate(
-            ['email' => 'emily.rodriguez@example.com'],
-            [
-                'name' => 'Emily Rodriguez',
-                'password' => bcrypt('password'),
-                'role_id' => $coeRoleId,
-            ]
-        );
-
+        // === CoE Users (reuse existing CoE users from GunnarSeeder) ===
+        $sarah = User::where('email', 'jennifer.blake@example.com')->first();
+        $marcus = User::where('email', 'kevin.nakamura@example.com')->first();
+        $emily = User::where('email', 'diana.costa@example.com')->first();
         $james = User::updateOrCreate(
             ['email' => 'james.park@example.com'],
             [
@@ -575,8 +551,7 @@ class StrategySeeder extends Seeder
         $this->command->info('  ✓ Created 3 reviews (2 completed, 1 scheduled)');
 
         $this->command->info('✅ Strategy Workbench seeding complete!');
-        $this->command->info('   CoE Users: sarah.chen@example.com, marcus.williams@example.com, emily.rodriguez@example.com, james.park@example.com');
-        $this->command->info('   Password: password (all CoE users)');
+        $this->command->info('   CoE Users: jennifer.blake@example.com, kevin.nakamura@example.com, diana.costa@example.com, james.park@example.com');
         $this->command->info('   Plans: FY27 (active), FY28 (draft)');
         $this->command->info('   Scenarios: Aggressive Growth, Conservative Approach, APAC Expansion Focus');
     }
