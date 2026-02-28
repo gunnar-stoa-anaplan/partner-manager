@@ -15,7 +15,7 @@ class BlueprintSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('Seeding Enablement Blueprints V2.0...');
+        $this->command->info('Seeding Enablement Blueprints...');
 
         \Schema::withoutForeignKeyConstraints(function () {
             BlueprintProgress::truncate();
@@ -45,6 +45,22 @@ class BlueprintSeeder extends Seeder
         $this->seedDeliveryExcellencePolaris($adminId);
         $this->seedDeliveryExcellenceADO($adminId);
         $this->seedDeliveryExcellenceForecaster($adminId);
+
+        // Draft versions (V2.0) with standardized IBP outcomes
+        $this->seedDraftPolarisEnablement($adminId);
+        $this->seedDraftPolarisWorkshop($adminId);
+        $this->seedDraftADOEnablement($adminId);
+        $this->seedDraftInventoryDemandPlanning($adminId);
+        $this->seedDraftIntegratedBusinessPlanning($adminId);
+        $this->seedDraftMerchandiseFinancialPlanning($adminId);
+        $this->seedDraftIFP($adminId);
+        $this->seedDraftFPC($adminId);
+        $this->seedDraftFCR($adminId);
+        $this->seedDraftAXL($adminId);
+        $this->seedDraftADM($adminId);
+        $this->seedDraftRPM($adminId);
+        $this->seedDraftOWP($adminId);
+        $this->seedDraftForecaster($adminId);
 
         $count = Blueprint::count();
         $this->command->info("Seeded {$count} blueprints successfully.");
@@ -82,11 +98,62 @@ class BlueprintSeeder extends Seeder
         }
     }
 
+    // ─── IBP Outcome Template ─────────────────────────────────────
+
+    private const IBP_OUTCOME_TITLES = [
+        1 => 'Partners understand App Strategy & Positioning',
+        2 => 'Partners understand Sales Plays & GTM Strategies',
+        3 => 'Partners understand application functionality, configurations, and setup',
+        4 => 'Partners understand dependent components',
+        5 => 'Partners provisioned access to application',
+        6 => 'Partners receive hands-on experience with application configuration, methodology, and extension',
+        7 => 'Partners can Demo',
+        8 => 'Partners have completed "delivery readiness"',
+        9 => 'Partners can independently deliver',
+    ];
+
+    /** Standard content items for outcomes 7, 8, 9 — shared across all blueprints. */
+    private const IBP_STANDARD_CLOSING_ITEMS = [
+        7 => [
+            ['title' => 'Conceptual Demo Assessment (read here for further instructions)', 'source' => 'PSM', 'prerequisites' => 'PreSales Blueprint', 'gtm' => 'na', 'pre_sales' => 'optional', 'delivery' => 'na'],
+            ['title' => 'Conceptual Demos copied into Partner Workspace', 'source' => 'Anaplan', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'na'],
+        ],
+        8 => [
+            ['title' => "First project is primed by PS, Partner co-prime,\nSecond is primed by Partner, co-primed by PS,\nThird is primed by Partner with PS on call", 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+        ],
+        9 => [
+            ['title' => 'Partners have co-delivered with Anaplan', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+        ],
+    ];
+
+    private function seedDraftWithIBPOutcomes(int $adminId, string $name, string $category, ?string $productArea, string $description, array $outcomeItems): void
+    {
+        $bp = $this->createBlueprint($adminId, $name, $category, $productArea, 'V2.0', $description, 'draft');
+
+        // Merge standard closing items (7, 8, 9) as defaults — explicit items take precedence
+        $outcomeItems += self::IBP_STANDARD_CLOSING_ITEMS;
+
+        foreach (self::IBP_OUTCOME_TITLES as $sortOrder => $title) {
+            $outcome = BlueprintOutcome::create([
+                'blueprint_id' => $bp->id,
+                'sort_order' => $sortOrder,
+                'title' => $title,
+            ]);
+
+            if (isset($outcomeItems[$sortOrder])) {
+                $this->addItems($outcome, $outcomeItems[$sortOrder]);
+            }
+        }
+
+        $totalItems = collect($outcomeItems)->flatten(1)->count();
+        $this->command->info("  Created (Draft): {$name} (9 outcomes, {$totalItems} items)");
+    }
+
     // --- Polaris Enablement ─────────────────────────────────────
 
     private function seedPolarisEnablement(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Polaris Enablement', 'application', 'Platform', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Polaris Enablement', 'application', 'Platform', 'V1.0',
             'App Enablement Prerequisite: Polaris Enablement. Required foundation for all Polaris-based application blueprints.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand Polaris']);
@@ -105,7 +172,7 @@ class BlueprintSeeder extends Seeder
 
     private function seedPolarisWorkshop(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Polaris Workshop', 'application', 'Platform', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Polaris Workshop', 'application', 'Platform', 'V1.0',
             'Polaris workshop blueprint covering live workshops, hands-on enablement, and provisioning.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand Polaris']);
@@ -136,7 +203,7 @@ class BlueprintSeeder extends Seeder
 
     private function seedADOEnablement(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'ADO Enablement', 'application', 'Platform', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'ADO Enablement', 'application', 'Platform', 'V1.0',
             'Application enablement blueprint for Anaplan Data Orchestrator (ADO) covering certification, positioning, and data management.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand ADO']);
@@ -153,7 +220,7 @@ class BlueprintSeeder extends Seeder
 
     private function seedInventoryDemandPlanning(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Inventory & Demand Planning', 'application', 'Supply Chain', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Inventory & Demand Planning', 'application', 'Supply Chain', 'V1.0',
             'Supply Chain application blueprint covering demand planning, forecasting, and inventory optimization.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand App Strategy & Positioning']);
@@ -224,7 +291,7 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
 
     private function seedIntegratedBusinessPlanning(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Integrated Business Planning', 'application', 'Supply Chain', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Integrated Business Planning', 'application', 'Supply Chain', 'V1.0',
             'Supply Chain application blueprint for integrated business planning across sales, operations, and finance.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand App Strategy & Positioning']);
@@ -294,7 +361,7 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
 
     private function seedMerchandiseFinancialPlanning(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Merchandise Financial Planning', 'application', 'Supply Chain', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Merchandise Financial Planning', 'application', 'Supply Chain', 'V1.0',
             'Supply Chain application blueprint for merchandise financial planning in retail.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand App Strategy & Positioning']);
@@ -364,7 +431,7 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
 
     private function seedIFP(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Integrated Financial Planning (IFP)', 'application', 'Finance', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Integrated Financial Planning (IFP)', 'application', 'Finance', 'V1.0',
             'Finance application blueprint for integrated financial planning and budgeting.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand App Strategy & Positioning']);
@@ -414,7 +481,7 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
 
     private function seedFPC(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Financial Planning & Consolidation (FPC)', 'application', 'Finance', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Financial Planning & Consolidation (FPC)', 'application', 'Finance', 'V1.0',
             'Finance application blueprint for financial planning and consolidation.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand FPC']);
@@ -432,7 +499,7 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
 
     private function seedFCR(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Financial Close & Reporting (FCR)', 'application', 'Finance', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Financial Close & Reporting (FCR)', 'application', 'Finance', 'V1.0',
             'Finance application blueprint for financial close and reporting processes.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand App Strategy & Positioning']);
@@ -484,7 +551,7 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
 
     private function seedAXL(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'AnaplanXL (AXL)', 'application', 'Finance', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'AnaplanXL (AXL)', 'application', 'Finance', 'V1.0',
             'Finance application blueprint for AnaplanXL reporting add-in.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand App Strategy & Positioning']);
@@ -531,7 +598,7 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
 
     private function seedADM(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Anaplan Disclosure Management (ADM)', 'application', 'Finance', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Anaplan Disclosure Management (ADM)', 'application', 'Finance', 'V1.0',
             'Finance application blueprint for disclosure management and narrative reporting.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand App Strategy & Positioning']);
@@ -578,7 +645,7 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
 
     private function seedRPM(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Revenue Performance Management (RPM)', 'application', 'Sales', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Revenue Performance Management (RPM)', 'application', 'Sales', 'V1.0',
             'Sales application blueprint for territory, quota, capacity planning, and segmentation.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand App Strategy & Positioning']);
@@ -634,7 +701,7 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
 
     private function seedOWP(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Operational Workforce Planning (OWP)', 'application', 'Workforce', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Operational Workforce Planning (OWP)', 'application', 'Workforce', 'V1.0',
             'Workforce application blueprint for operational workforce planning.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand App Strategy & Positioning']);
@@ -686,7 +753,7 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
 
     private function seedForecaster(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Forecaster', 'application', 'Platform', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Forecaster', 'application', 'Platform', 'V1.0',
             'Forecaster enablement blueprint for AI-powered forecasting product.');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand how to position the product´s value proposition']);
@@ -719,11 +786,532 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
         $this->command->info('  Created: Forecaster (4 outcomes, 11 items)');
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // DRAFT VERSIONS (V2.0) — Standardized IBP Outcomes
+    // ═══════════════════════════════════════════════════════════════
+
+    // --- Draft: Polaris Enablement ──────────────────────────────
+
+    private function seedDraftPolarisEnablement(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'Polaris Enablement', 'application', 'Platform',
+            'App Enablement Prerequisite: Polaris Enablement. Required foundation for all Polaris-based application blueprints.',
+            [
+                1 => [
+                    ['title' => 'Anaplan Polaris', 'url' => 'https://academy.anaplan.com/learn/courses/10/anaplan-polaris/lessons', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'PLANUAL now updated to include Polaris', 'url' => 'https://support.anaplan.com/polaris-c265a8ac-e457-46a7-b307-1fe62ffa4730', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Anapedia', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Differences between calculation engines', 'url' => 'https://help.anaplan.com/differences-between-calculation-engines-88334098-e311-4496-b6c2-a5fecf0e3b47', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Anapedia', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Anaplan Calculation Engines — Statement of Direction: 2025', 'url' => 'https://help.anaplan.com/-anaplan-calculation-engines--statement-of-direction-2025-a68b54b9-170b-4584-867a-6b6600914a31', 'duration_display' => '10 min', 'duration_minutes' => 10, 'source' => 'Support', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'OEG Best Practice Series : Polaris', 'url' => 'https://community.anaplan.com/categories/best-practices?tagID=713', 'duration_display' => '20 min', 'duration_minutes' => 20, 'source' => 'Community', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: Polaris Workshop ────────────────────────────────
+
+    private function seedDraftPolarisWorkshop(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'Polaris Workshop', 'application', 'Platform',
+            'Polaris workshop blueprint covering live workshops, hands-on enablement, and provisioning.',
+            [
+                4 => [
+                    ['title' => 'Anaplan Polaris Prerequisites', 'duration_display' => '3.5 hours', 'duration_minutes' => 210, 'source' => 'multiple', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                5 => [
+                    ['title' => 'Provision Partner Workspace & App copies in Anaplan Tenant', 'source' => 'App COE', 'prerequisites' => 'SC Apps GTM Workshop', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Technical Documentation (https://applications.anaplan.com)', 'url' => 'https://applications.anaplan.com/', 'source' => 'PSM', 'prerequisites' => '2 SAs completed 1+3+4', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Shared Folder w/ additional App Documentation', 'source' => 'App COE', 'prerequisites' => '2 SAs completed 1+3+4', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                6 => [
+                    ['title' => 'Regional in-person SC Apps GTM workshop', 'duration_display' => '3 days', 'duration_minutes' => 1440, 'source' => 'App COE', 'prerequisites' => 'Presales 1+2', 'gtm' => 'optional', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Regional in-person SC Apps Implementer workshop', 'duration_display' => '3 days', 'duration_minutes' => 1440, 'source' => 'App COE', 'prerequisites' => 'Delivery 1+3+4', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Hands-on Enablement with PS (on project)', 'source' => 'PS/App COE', 'prerequisites' => 'Project Won', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Virtual Office Hours w/ CoE', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'App COE', 'gtm' => 'optional', 'pre_sales' => 'optional', 'delivery' => 'optional'],
+                ],
+                7 => [
+                    ['title' => 'Conceptual Demos copied into Partner Workspace', 'source' => 'App COE', 'prerequisites' => 'SC Apps GTM Workshop', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: ADO Enablement ──────────────────────────────────
+
+    private function seedDraftADOEnablement(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'ADO Enablement', 'application', 'Platform',
+            'Application enablement blueprint for Anaplan Data Orchestrator (ADO) covering certification, positioning, and data management.',
+            [
+                1 => [
+                    ['title' => 'Anaplan Data Orchestrator (ADO)', 'url' => 'https://academy.anaplan.com/learn/learning-plans/25/anaplan-data-orchestrator-ado-certification', 'duration' => '6 Hours', 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'ADO 5 Challenges Video', 'url' => 'https://anaplan.seismic.com/apps/doccenter/f4c8d4fe-f6c0-46d8-85cc-d94645d413ce/doc/%25252Fdd434fd8b9-9551-65e4-1b84-7cc32af3d43e%25252FdfNjhjNWQyNGUtMzdhOC00ZDYzLWE5NzQtYmJhZTgyYTQyNjg4%25252CPT0%25253D%25252CU29sdXRpb24gUHJvbW8gVmlkZW8%25253D%25252Flfc858f88c-44df-4c68-a6ed-013de5412116/?mode=viewproperties&searchId=f07d9d68-77db-4a8a-9411-e2ba92d05a7e', 'duration' => '5 min', 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Dataspaces', 'url' => 'https://community.anaplan.com/kb/articles/153845-dataspaces', 'duration' => '15 min', 'source' => 'Community', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: Forecaster ──────────────────────────────────────
+
+    private function seedDraftForecaster(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'Forecaster', 'application', 'Platform',
+            'Forecaster enablement blueprint for AI-powered forecasting product.',
+            [
+                1 => [
+                    ['title' => 'Forecaster 101', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Forecaster Data Sheet', 'url' => 'https://anaplan.highspot.com/items/68e575744d89ee0d350352b9', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Forecaster Highpot Page', 'url' => 'https://anaplan.highspot.com/items/68f003d758505351745b3984?layout=details', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Forecaster Pitch Deck', 'url' => 'https://anaplan.highspot.com/items/68e575744d89ee0d350352ae#1', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+                3 => [
+                    ['title' => 'Forecaster Technical Guide', 'url' => 'https://anaplan.highspot.com/items/68e7e1c767d685d71a3e7715', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Forecaster Documentation on Anapedia', 'url' => 'https://help.anaplan.com/forecaster-bb892f43-a6bd-4353-8e07-4004f2495fa2', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Anapedia', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Anaplan Academy Training', 'url' => 'https://academy.anaplan.com/learn/courses/473/setting-up-anaplan-forecaster/lessons', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                5 => [
+                    ['title' => 'Partner tenant(s) provisioned with product functionality', 'source' => 'Tenant', 'prerequisites' => 'Request with PSM', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                6 => [
+                    ['title' => 'Hands-on Enablement with PS / CoE (on project)', 'source' => 'PS/App COE', 'prerequisites' => 'Project Won', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                7 => [
+                    ['title' => 'Conceptual Demo Assessment (to come)', 'source' => 'PSM', 'prerequisites' => 'PreSales Blueprint (to come)', 'gtm' => 'na', 'pre_sales' => 'optional', 'delivery' => 'na'],
+                    ['title' => 'Conceptual Demos copied into Partner Workspace', 'source' => 'Tenant', 'prerequisites' => 'Demo Assessment', 'gtm' => 'na', 'pre_sales' => 'optional', 'delivery' => 'na'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: Inventory & Demand Planning ─────────────────────
+
+    private function seedDraftInventoryDemandPlanning(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'Inventory & Demand Planning', 'application', 'Supply Chain',
+            'Supply Chain application blueprint covering demand planning, forecasting, and inventory optimization.',
+            [
+                1 => [
+                    ['title' => 'Anaplan Applications 101 for Partners', 'url' => 'https://academy.anaplan.com/learn/courses/377/anaplan-applications-101-for-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Inventory & Demand Planning (familiarize yourself with available materials)', 'url' => 'https://anaplan.seismic.com/apps/search?appType=All&keyword=Inventory%2520Planning%2520Demand%2520Planning&contentType=All%20Documents&folderId=&folderName=&fromAppType=&currentTeamSiteId=&sharedTeamSiteId=&profileItemId=&selectedProperties=ContentProfiles%3APartner%3BAuto-detected%20Language%3AEnglish%3BAuto-detected%20Language%3AGerman%3BAuto-detected%20Language%3ASpanish%3B&pageIndex=1&strategy=', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => '01. An Introduction to Anaplan\'s Supply Chain Planning Applications', 'url' => 'https://anaplan.seismic.com/Link/Content/DCBBX6mQXJ6288qVPBGbgdXDcCPj', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => '05. Customer Stories', 'url' => 'https://anaplan.seismic.com/Link/Content/DCbj2BVmfRh9RGMVgcJD6gFCRG9V', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                2 => [
+                    ['title' => 'Business Value Framework (BVS) for Supply Chain', 'url' => 'https://anaplan.seismic.com/apps/search?appType=DocCenter&keyword=Business%2520Value%2520Framework%2520(BVS)%2520for%2520Supply%2520Chain&contentType=All%20Documents&folderId=&folderName=&fromAppType=&currentTeamSiteId=&sharedTeamSiteId=&profileItemId=&selectedProperties=ContentProfiles%3APartner%3BAuto-detected%20Language%3AEnglish%3BAuto-detected%20Language%3AGerman%3BAuto-detected%20Language%3ASpanish%3B&pageIndex=0&strategy=', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'SCM Transformation – First Meeting Deck', 'url' => 'https://anaplan.seismic.com/apps/search?appType=DocCenter&keyword=SCM%2520Transformation%2520%25E2%2580%2593%2520First%2520Meeting%2520Deck&contentType=All%20Documents&folderId=&folderName=&fromAppType=&currentTeamSiteId=&sharedTeamSiteId=&profileItemId=&selectedProperties=ContentProfiles%3APartner%3BAuto-detected%2520Language%3AEnglish%3BAuto-detected%2520Language%3AGerman%3BAuto-detected%2520Language%3ASpanish%3B&pageIndex=0&strategy=', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => '02. How to sell SCP Applications', 'url' => 'https://anaplan.seismic.com/Link/Content/DCR432fT46mpM8TFbfB22h4JPq2P', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+                3 => [
+                    ['title' => '03. Demand Planning and Forecasting', 'url' => 'https://anaplan.seismic.com/Link/Content/DCcj39FHFBQ6MGcDhbbcgq4Xqq8d', 'duration_display' => '1.5 hours', 'duration_minutes' => 90, 'source' => 'Seismic', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => '04. Inventory Planning', 'url' => 'https://anaplan.seismic.com/Link/Content/DCRVFm7DJGBD48WGfGBMpHHPGRqP', 'duration_display' => '50 min', 'duration_minutes' => 50, 'source' => 'Seismic', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => '07. Data Hub', 'url' => 'https://anaplan.seismic.com/Link/Content/DCgTCT8GHjpQVG2JVDQ89mVJTWDB', 'duration_display' => '40 min', 'duration_minutes' => 40, 'source' => 'Seismic', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => '08. Implementation', 'url' => 'https://anaplan.seismic.com/Link/Content/DCgqHj4b6B7PT87Hq3G9Q8qm3WDP', 'duration_display' => '35 min', 'duration_minutes' => 35, 'source' => 'Seismic', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => '09. Rough Effort Estimation', 'url' => 'https://anaplan.seismic.com/Link/Content/DCHmFX7J7b4hgGCMjmbVPVCcTdbV', 'duration_display' => '17 min', 'duration_minutes' => 17, 'source' => 'Seismic', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => '10. Customization Support and Upgrade', 'url' => 'https://anaplan.seismic.com/Link/Content/DCM3d3J9JjMmQG9CjQ2FPCPgXhMV', 'duration_display' => '27 min', 'duration_minutes' => 27, 'source' => 'Seismic', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => '11. Partner Support for Implementation', 'url' => 'https://anaplan.seismic.com/Link/Content/DCJ87fVWB6cgT8CQ87TBgXpd8JDG', 'duration_display' => '9 min', 'duration_minutes' => 9, 'source' => 'Seismic', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                4 => [
+                    ['title' => 'Anaplan Polaris Prerequisites', 'duration_display' => '3.5 hours', 'duration_minutes' => 210, 'source' => 'multiple', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                5 => [
+                    ['title' => 'Provision Partner Workspace & App copies in Anaplan Tenant', 'source' => 'Anaplan', 'prerequisites' => 'SC Apps GTM or Implementer Workshop', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Technical Documentation (https://applications.anaplan.com)', 'url' => 'https://applications.anaplan.com/', 'source' => 'Anapedia', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                6 => [
+                    ['title' => 'Regional in-person SC Apps GTM workshop', 'duration_display' => '2 days', 'duration_minutes' => 960, 'source' => 'App COE', 'prerequisites' => 'GTM / Presales 1+2+3', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'Regional in-person SC Apps Implementer workshop', 'duration_display' => '3 days', 'duration_minutes' => 1440, 'source' => 'App COE', 'prerequisites' => 'Delivery 1+3+4', 'gtm' => 'na', 'pre_sales' => 'optional', 'delivery' => 'required'],
+                ],
+                7 => [
+                    ['title' => 'Conceptual Demo Assessment (read here for further instructions)', 'source' => 'PSM', 'prerequisites' => 'PreSales Blueprint', 'gtm' => 'na', 'pre_sales' => 'optional', 'delivery' => 'na'],
+                    ['title' => 'Conceptual Demos copied into Partner Workspace', 'source' => 'Anaplan', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'na'],
+                ],
+                8 => [
+                    ['title' => 'First project is primed by PS, Partner co-prime,
+Second is primed by Partner, co-primed by PS,
+Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                9 => [
+                    ['title' => 'Partners have co-delivered with Anaplan', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: Integrated Business Planning ────────────────────
+
+    private function seedDraftIntegratedBusinessPlanning(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'Integrated Business Planning', 'application', 'Supply Chain',
+            'Supply Chain application blueprint for integrated business planning across sales, operations, and finance.',
+            [
+                1 => [
+                    ['title' => 'Anaplan Applications 101 for Partners', 'url' => 'https://academy.anaplan.com/learn/courses/377/anaplan-applications-101-for-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Integrated Business Planning (familiarize yourself with available materials)', 'url' => 'https://anaplan.seismic.com/apps/search?appType=All&keyword=Integrated%2520Business%2520Planning%2520IBP&contentType=All%20Documents&folderId=&folderName=&fromAppType=&currentTeamSiteId=&sharedTeamSiteId=&profileItemId=&selectedProperties=ContentProfiles%3APartner%3BAuto-detected%20Language%3AEnglish%3BAuto-detected%20Language%3AGerman%3BAuto-detected%20Language%3ASpanish%3B&pageIndex=0&strategy=', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => '01. An Introduction to Anaplan\'s Supply Chain Planning Applications', 'url' => 'https://anaplan.seismic.com/Link/Content/DCBBX6mQXJ6288qVPBGbgdXDcCPj', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => '05. Customer Stories', 'url' => 'https://anaplan.seismic.com/Link/Content/DCbj2BVmfRh9RGMVgcJD6gFCRG9V', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'IBP – Positioning and Messaging', 'url' => 'https://anaplan.seismic.com/Link/Content/DC6cqqc33jq7TGQJ3bVmgT6c334G', 'duration_display' => '10 min', 'duration_minutes' => 10, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'IBP Data Sheet', 'url' => 'https://anaplan.seismic.com/Link/Content/DCBqmh7H88jVT84PWDXQb29hbpbB', 'duration_display' => '5 min', 'duration_minutes' => 5, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Integrated Business Planning (IBP) App 101 for Partners', 'url' => 'https://academy.anaplan.com/learn/courses/413/integrated-business-planning-ibp-app-101-for-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                2 => [
+                    ['title' => 'Business Value Framework (BVS) for Supply Chain', 'url' => 'https://anaplan.seismic.com/apps/search?appType=DocCenter&keyword=Business%2520Value%2520Framework%2520(BVS)%2520for%2520Supply%2520Chain&contentType=All%20Documents&folderId=&folderName=&fromAppType=&currentTeamSiteId=&sharedTeamSiteId=&profileItemId=&selectedProperties=ContentProfiles%3APartner%3BAuto-detected%20Language%3AEnglish%3BAuto-detected%20Language%3AGerman%3BAuto-detected%20Language%3ASpanish%3B&pageIndex=0&strategy=', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'SCM Transformation – First Meeting Deck', 'url' => 'https://anaplan.seismic.com/apps/search?appType=DocCenter&keyword=SCM%2520Transformation%2520%25E2%2580%2593%2520First%2520Meeting%2520Deck&contentType=All%20Documents&folderId=&folderName=&fromAppType=&currentTeamSiteId=&sharedTeamSiteId=&profileItemId=&selectedProperties=ContentProfiles%3APartner%3BAuto-detected%2520Language%3AEnglish%3BAuto-detected%2520Language%3AGerman%3BAuto-detected%2520Language%3ASpanish%3B&pageIndex=0&strategy=', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'Ideal Customer Profile - IBP', 'url' => 'https://anaplan.seismic.com/Link/Content/DCBQmfmHT6qhqGhBWXTQhpQFqCVG', 'duration_display' => '10 min', 'duration_minutes' => 10, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'IBP Pitch Deck', 'url' => 'https://anaplan.seismic.com/Link/Content/DCfDW2D38b3FX8TDq2HRpRH27bWV', 'duration_display' => '20 min', 'duration_minutes' => 20, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => '02. How to sell SCP Applications', 'url' => 'https://anaplan.seismic.com/Link/Content/DCR432fT46mpM8TFbfB22h4JPq2P', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+                3 => [
+                    ['title' => 'Integrated Business Planning (IBP) Configuration', 'url' => 'https://academy.anaplan.com/learn/course/393/integrated-business-planning-ibp-configuration', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Integrated Business Planning (IBP) Overview', 'url' => 'https://academy.anaplan.com/learn/course/392/integrated-business-planning-ibp-overview', 'duration_display' => '20 min', 'duration_minutes' => 20, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                4 => [
+                    ['title' => 'Anaplan Polaris Prerequisites', 'duration_display' => '3.5 hours', 'duration_minutes' => 210, 'source' => 'multiple', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                5 => [
+                    ['title' => 'Provision Partner Workspace & App copies in Anaplan Tenant', 'source' => 'Anaplan', 'prerequisites' => 'Global IBP Deep-Dive', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Technical Documentation (https://applications.anaplan.com)', 'url' => 'https://applications.anaplan.com/', 'source' => 'Anapedia', 'prerequisites' => 'Global IBP Deep-Dive', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                6 => [
+                    ['title' => 'Global IBP Deep-Dive Workshop (invitation-only)', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'App COE', 'prerequisites' => 'SC Apps GTM or Implementer Workshop', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                7 => [
+                    ['title' => 'Conceptual Demo Assessment (read here for further instructions)', 'source' => 'PSM', 'prerequisites' => 'PreSales Blueprint', 'gtm' => 'na', 'pre_sales' => 'optional', 'delivery' => 'na'],
+                    ['title' => 'Conceptual Demos copied into Partner Workspace', 'source' => 'Anaplan', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'na'],
+                ],
+                8 => [
+                    ['title' => 'First project is primed by PS, Partner co-prime,
+Second is primed by Partner, co-primed by PS,
+Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                9 => [
+                    ['title' => 'Partners have co-delivered with Anaplan', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: Merchandise Financial Planning ──────────────────
+
+    private function seedDraftMerchandiseFinancialPlanning(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'Merchandise Financial Planning', 'application', 'Supply Chain',
+            'Supply Chain application blueprint for merchandise financial planning in retail.',
+            [
+                1 => [
+                    ['title' => 'Anaplan Applications 101 for Partners', 'url' => 'https://academy.anaplan.com/learn/courses/377/anaplan-applications-101-for-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Merchandise Financial Planning (familiarize yourself with available materials)', 'url' => 'https://anaplan.seismic.com/apps/search?appType=All&keyword=Merchandise%2520Financial%2520Planning%2520MFP&contentType=All%20Documents&folderId=&folderName=&fromAppType=&currentTeamSiteId=&sharedTeamSiteId=&profileItemId=&selectedProperties=ContentProfiles%3APartner%3BAuto-detected%2520Language%3AEnglish%3BAuto-detected%2520Language%3AGerman%3BAuto-detected%2520Language%3ASpanish%3B&pageIndex=0&strategy=', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => '01. An Introduction to Anaplan\'s Supply Chain Planning Applications', 'url' => 'https://anaplan.seismic.com/Link/Content/DCBBX6mQXJ6288qVPBGbgdXDcCPj', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => '05. Customer Stories', 'url' => 'https://anaplan.seismic.com/Link/Content/DCbj2BVmfRh9RGMVgcJD6gFCRG9V', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'MFP Positioning and Messaging', 'url' => 'https://anaplan.seismic.com/Link/Content/DC34JQHj9JBj7GMMMRfFG872VDC3', 'duration_display' => '10 min', 'duration_minutes' => 10, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'MFP Data Sheet', 'url' => 'https://anaplan.seismic.com/Link/Content/DCcmhjf4qG7hVGhDjF9JX494mJ7V', 'duration_display' => '5 min', 'duration_minutes' => 5, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Merchandise Financial Planning (MFP) App 101 for Partners', 'url' => 'https://academy.anaplan.com/learn/courses/414/merchandise-financial-planning-mfp-app-101-for-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                2 => [
+                    ['title' => 'Business Value Framework (BVS) for Supply Chain', 'url' => 'https://anaplan.seismic.com/apps/search?appType=DocCenter&keyword=Business%2520Value%2520Framework%2520(BVS)%2520for%2520Supply%2520Chain&contentType=All%20Documents&folderId=&folderName=&fromAppType=&currentTeamSiteId=&sharedTeamSiteId=&profileItemId=&selectedProperties=ContentProfiles%3APartner%3BAuto-detected%20Language%3AEnglish%3BAuto-detected%20Language%3AGerman%3BAuto-detected%20Language%3ASpanish%3B&pageIndex=0&strategy=', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'SCM Transformation – First Meeting Deck', 'url' => 'https://anaplan.seismic.com/apps/search?appType=DocCenter&keyword=SCM%2520Transformation%2520%25E2%2580%2593%2520First%2520Meeting%2520Deck&contentType=All%20Documents&folderId=&folderName=&fromAppType=&currentTeamSiteId=&sharedTeamSiteId=&profileItemId=&selectedProperties=ContentProfiles%3APartner%3BAuto-detected%2520Language%3AEnglish%3BAuto-detected%2520Language%3AGerman%3BAuto-detected%2520Language%3ASpanish%3B&pageIndex=0&strategy=', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'Ideal Customer Profile - MFP', 'url' => 'https://anaplan.seismic.com/Link/Content/DCbVbHpmGjHq68fRDpjGXCd2WTDV', 'duration_display' => '10 min', 'duration_minutes' => 10, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'MFP Pitch Deck', 'url' => 'https://anaplan.seismic.com/Link/Content/DCm43Xm6Vm9hRG2JmBMPqG6TPPHd', 'duration_display' => '20 min', 'duration_minutes' => 20, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => '02. How to sell SCP Applications', 'url' => 'https://anaplan.seismic.com/Link/Content/DCR432fT46mpM8TFbfB22h4JPq2P', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+                3 => [
+                    ['title' => 'Merchandise Financial Planning Application Configuration', 'url' => 'https://academy.anaplan.com/learn/courses/395/merchandise-financial-planning-mfp-configuration/lessons', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Merchandise Financial Planning Application Overview', 'url' => 'https://academy.anaplan.com/learn/courses/394/merchandise-financial-planning-mfp-overview/lessons', 'duration_display' => '20 min', 'duration_minutes' => 20, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                4 => [
+                    ['title' => 'Anaplan Polaris Prerequisites', 'duration_display' => '3.5 hours', 'duration_minutes' => 210, 'source' => 'multiple', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                5 => [
+                    ['title' => 'Provision Partner Workspace & App copies in Anaplan Tenant', 'source' => 'Anaplan', 'prerequisites' => 'Global MFP Deep-Dive', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Technical Documentation (https://applications.anaplan.com)', 'url' => 'https://applications.anaplan.com/', 'source' => 'Anapedia', 'prerequisites' => 'Global MFP Deep-Dive', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                6 => [
+                    ['title' => 'Global MFP Deep-Dive Workshop (invitation-only)', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'prerequisites' => 'SC Apps GTM or Implementer Workshop', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                7 => [
+                    ['title' => 'Conceptual Demo Assessment (read here for further instructions)', 'source' => 'PSM', 'prerequisites' => 'PreSales Blueprint', 'gtm' => 'na', 'pre_sales' => 'optional', 'delivery' => 'na'],
+                    ['title' => 'Conceptual Demos copied into Partner Workspace', 'source' => 'Anaplan', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'na'],
+                ],
+                8 => [
+                    ['title' => 'First project is primed by PS, Partner co-prime,
+Second is primed by Partner, co-primed by PS,
+Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                9 => [
+                    ['title' => 'Partners have co-delivered with Anaplan', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: Integrated Financial Planning (IFP) ─────────────
+
+    private function seedDraftIFP(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'Integrated Financial Planning (IFP)', 'application', 'Finance',
+            'Finance application blueprint for integrated financial planning and budgeting.',
+            [
+                1 => [
+                    ['title' => 'Anaplan Applications 101 for Partners', 'url' => 'https://academy.anaplan.com/learn/courses/377/anaplan-applications-101-for-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'IFP App 101 for Partners​', 'url' => 'https://academy.anaplan.com/learn/courses/356/integrated-financial-planning-ifp-app-101-for-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Integrated Financial Planning Application for Partners', 'url' => 'https://anaplan.seismic.com/apps/doccenter/f4c8d4fe-f6c0-46d8-85cc-d94645d413ce/doc/%252Fdd434fd8b9-9551-65e4-1b84-7cc32af3d43e%252FdfNjhjNWQyNGUtMzdhOC00ZDYzLWE5NzQtYmJhZTgyYTQyNjg4%252CPT0%253D%252CRW5hYmxlbWVudA%253D%253D%252Flf6c5099ce-9642-4bf4-9a69-65231c02faf6/', 'duration_display' => '2 hours', 'duration_minutes' => 120, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                2 => [
+                    ['title' => 'Transform IFP and Consolidation with Anaplan', 'url' => 'https://academy.anaplan.com/learn/courses/524/transform-ifp-and-consolidation-with-anaplan/lessons', 'duration_display' => '40 Mins', 'duration_minutes' => 40, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'Sales Play Summary Finance Planning Transformation', 'url' => 'https://anaplan.seismic.com/apps/doccenter/43c4640c-56b4-4bec-ae55-5c04163ff648/doc/%25252Fdd75ddaa6f-ac28-bd54-ca4b-225fc9c6ed68%25252FdfNThiZDIxNWMtYjc3NS00ZTZiLTkwYzgtZWIxZjM4MTQ3YTUx%25252CPT0%25253D%25252CRmluYW5jZQ%25253D%25253D%25252FdfNjhjNWQyNGUtMzdhOC00ZDYzLWE5NzQtYmJhZTgyYTQyNjg4%25252CPT0%25253D%25252CUGxheWJvb2s%25253D%25252Flf1ea11615-9d8d-455a-b6ba-b6a4ae577a3a/?mode=view', 'duration_display' => '10 Mins', 'duration_minutes' => 10, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'Finance Planning Transformation- Drive enterprise value with connected finance', 'url' => 'https://anaplan.seismic.com/apps/doccenter/f4c8d4fe-f6c0-46d8-85cc-d94645d413ce/doc/%25252Fdd434fd8b9-9551-65e4-1b84-7cc32af3d43e%25252FdfNjhjNWQyNGUtMzdhOC00ZDYzLWE5NzQtYmJhZTgyYTQyNjg4%25252CPT0%25253D%25252CRGF0YXNoZWV0%25252Flf1f69a06c-9d4b-469b-9880-83132f1908f0/?mode=view&searchId=aaa072ee-4f4a-4abb-be5f-b3ac90a5e9dc', 'duration_display' => '20 Mins', 'duration_minutes' => 20, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+                3 => [
+                    ['title' => 'Implementing Applications on the Application Framework', 'url' => 'https://academy.anaplan.com/learn/courses/499/implementing-applications-on-the-application-framework/lessons', 'duration_display' => '20 mins', 'duration_minutes' => 20, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                4 => [
+                    ['title' => 'Anaplan Polaris Prerequisites', 'duration_display' => '3.5 hours', 'duration_minutes' => 210, 'source' => 'multiple', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                5 => [
+                    ['title' => 'Provision Partner Workspace & App copies in Anaplan Tenant', 'source' => 'Tenant', 'prerequisites' => 'Workshop Enablement', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Shared Folder with Additional App Documentation', 'source' => 'Sharepoint', 'prerequisites' => 'Workshop Enablement', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Technical Documentation (https://applications.anaplan.com)', 'url' => 'https://applications.anaplan.com/', 'source' => 'Anapedia', 'prerequisites' => 'Workshop Enablement', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                6 => [
+                    ['title' => 'Deep Dive Enablement by Region / Country', 'duration_display' => '90 mins', 'duration_minutes' => 90, 'source' => 'App COE', 'prerequisites' => 'Delivery Learning Plan', 'gtm' => 'optional', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'Regional in-person IFP Apps Implementer workshop', 'duration_display' => '2 days', 'duration_minutes' => 960, 'source' => 'PSM', 'prerequisites' => 'Delivery Learning Plan', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Hands-on Enablement with PS / CoE (on project)', 'source' => 'PS/App COE', 'prerequisites' => 'Project Won', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                7 => [
+                    ['title' => 'Conceptual Demo Assessment (to come)', 'source' => 'PSM', 'prerequisites' => 'PreSales Blueprint (to come)', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'Conceptual Demos copied into Partner Workspace', 'source' => 'Tenant', 'prerequisites' => 'Workshop Enablement', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: Financial Planning & Consolidation (FPC) ────────
+
+    private function seedDraftFPC(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'Financial Planning & Consolidation (FPC)', 'application', 'Finance',
+            'Finance application blueprint for financial planning and consolidation.',
+            [
+                1 => [
+                    ['title' => 'FPC Sales & Marketing Seismic', 'url' => 'https://anaplan.highspot.com/items/68c1c86e98d048886b5bcebf?lfrm=ssrp.1', 'duration_display' => '1 hours', 'duration_minutes' => 60, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'FCR Blueprint', 'url' => 'https://anaplan.sharepoint.com/:p:/r/sites/Team-Partner-Success-Global/Shared%20Documents/11%20Application%20Blueprints/Partner%20Enablement%20Blueprints%20for%20Anaplan%20Applications%20V1.2.pptx?d=w39c1c2a3e4204872a75723d98e57a549&csf=1&web=1&e=EzSKF7&nav=eyJzSWQiOjI2MSwiY0lkIjozOTAzMDk0ODQ0fQ', 'duration_display' => '30 hours', 'duration_minutes' => 1800, 'source' => 'Various', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'IFP Blueprint', 'url' => 'https://anaplan.sharepoint.com/:p:/r/sites/Team-Partner-Success-Global/Shared%20Documents/11%20Application%20Blueprints/Partner%20Enablement%20Blueprints%20for%20Anaplan%20Applications%20V1.2.pptx?d=w39c1c2a3e4204872a75723d98e57a549&csf=1&web=1&e=4XODgb&nav=eyJzSWQiOjIxNDc0ODM0NzYsImNJZCI6Mzc3NDEzODgwMH0', 'duration_display' => '10 hours', 'duration_minutes' => 600, 'source' => 'Various', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Anaplan Data Orchestrator (ADO) Training', 'url' => 'https://academy.anaplan.com/learn/learning-plans/25/anaplan-data-orchestrator-ado-certification', 'duration_display' => '6 hours', 'duration_minutes' => 360, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: Financial Close & Reporting (FCR) ───────────────
+
+    private function seedDraftFCR(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'Financial Close & Reporting (FCR)', 'application', 'Finance',
+            'Finance application blueprint for financial close and reporting processes.',
+            [
+                1 => [
+                    ['title' => 'FCR Positioning Statement​', 'url' => 'https://anaplan.highspot.com/items/67bdb71efacb1b0f31645e92#1', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'FCR Solution use Cases', 'url' => 'https://anaplan.highspot.com/items/67bdb89afacb1b39f0dc4358?lfrm=srp.0#1', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                2 => [
+                    ['title' => 'FCR Sales Play Summary​', 'url' => 'https://anaplan.seismic.com/Link/Content/DCHqbp788Dq3H89XXchcqGchBF6G', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'FCR Sales Play', 'url' => 'https://anaplan.highspot.com/items/67bdb58066bcb4f7f31d9735?lfrm=rhp.0', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'IFRS Accelerator GTM', 'url' => 'https://anaplan.seismic.com/Link/Content/DCpHfFD678GMFGHMJ2c7b8VXXP9V', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+                3 => [
+                    ['title' => 'Introduction to Anaplan Consolidations​', 'url' => 'https://academy.anaplan.com/learn/courses/19/introduction-to-anaplan-consolidation', 'duration_display' => '1 hours', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'AnaplanXL Fundamentals​', 'url' => 'https://academy.anaplan.com/learn/learning-plans/3/anaplan-xl-reporting-training', 'duration_display' => '3 hours', 'duration_minutes' => 180, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Anaplan Consolidations Fundamentals​', 'url' => 'https://academy.anaplan.com/learn/learning-plans/1/anaplan-consolidation-fundamentals-training', 'duration_display' => '12 hours', 'duration_minutes' => 720, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Anaplan Consolidations Implementer​', 'url' => 'https://academy.anaplan.com/learn/learning-plans/2/anaplan-consolidation-implementer-training', 'duration_display' => '12 hours', 'duration_minutes' => 720, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                4 => [
+                    ['title' => 'not applicable', 'source' => '-', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'na'],
+                ],
+                5 => [
+                    ['title' => 'Provision AnaplanXL, FCR', 'source' => 'App COE', 'prerequisites' => 'Delivery 1+3', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Technical Documentation', 'url' => 'https://applications.anaplan.com/financial-consolidation--reporting-7db4c09a-7c1b-444e-bece-7f5887e7f0c3', 'duration_display' => '5 min', 'duration_minutes' => 5, 'source' => 'App COE', 'prerequisites' => 'Provisioning', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'FCR Enablement Seismic Page​', 'url' => 'https://anaplan.highspot.com/items/67d0799e62561c5f0bb9a0ec?lfrm=shp.1', 'duration_display' => '4 hours', 'duration_minutes' => 240, 'source' => 'Seismic', 'prerequisites' => '2 learners completed 1+3', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                6 => [
+                    ['title' => 'Deep-Dive Enablement by region/country', 'duration_display' => '90 mins', 'duration_minutes' => 90, 'source' => 'App COE', 'prerequisites' => 'Delivery 1+3', 'gtm' => 'optional', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'Regional in-person Implementer workshop', 'duration_display' => '2.5 days', 'duration_minutes' => 1200, 'source' => 'App COE', 'prerequisites' => 'Delivery 1+3', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Hands-on Enablement with PS (on project)', 'source' => 'PS/App COE', 'prerequisites' => 'Project Won', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                7 => [
+                    ['title' => 'Conceptual Demo Assessment (to come)', 'source' => 'PSM', 'prerequisites' => 'PreSales Blueprint (to come)', 'gtm' => 'na', 'pre_sales' => 'optional', 'delivery' => 'na'],
+                    ['title' => 'IFRS Accelerator & EMEA Demo Script / IFRS & EMEA Demo Video / AMER Demo Videos (bottom of the page)', 'url' => 'https://anaplan.highspot.com/items/67d0799e62561c5f0bb9a0ec?lfrm=shp.1', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'App COE', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: AnaplanXL (AXL) ─────────────────────────────────
+
+    private function seedDraftAXL(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'AnaplanXL (AXL)', 'application', 'Finance',
+            'Finance application blueprint for AnaplanXL reporting add-in.',
+            [
+                1 => [
+                    ['title' => 'FCR Positioning Statement​', 'url' => 'https://anaplan.highspot.com/items/67bdb71efacb1b0f31645e92#1', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'FCR Solution use Cases', 'url' => 'https://anaplan.highspot.com/items/67bdb89afacb1b39f0dc4358?lfrm=srp.0#1', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                2 => [
+                    ['title' => 'FCR Sales Play Summary​', 'url' => 'https://anaplan.seismic.com/Link/Content/DCHqbp788Dq3H89XXchcqGchBF6G', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'FCR Sales Play', 'url' => 'https://anaplan.highspot.com/items/67bdb58066bcb4f7f31d9735?lfrm=rhp.0', 'duration_display' => '1 hours', 'duration_minutes' => 60, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+                3 => [
+                    ['title' => 'AnaplanXL Reporting Training', 'url' => 'https://academy.anaplan.com/learn/learning-plans/3/anaplan-xl-reporting-training', 'duration_display' => '14 hours', 'duration_minutes' => 840, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'AnaplanXL How-to Videos', 'url' => 'https://community.anaplan.com/discussion/160603/unlocking-the-power-of-anaplan-xl-reporting-a-guide-to-using-anaplan-xl', 'duration_display' => '2 hours', 'duration_minutes' => 120, 'source' => 'Community', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                4 => [
+                    ['title' => 'not applicable', 'source' => '-', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'na'],
+                ],
+                5 => [
+                    ['title' => 'Provision AnaplanXL', 'source' => 'App COE', 'prerequisites' => 'Delivery 1+3', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Join & Participate in the Community', 'url' => 'https://community.anaplan.com/categories/add-ins-and-extensions', 'source' => 'Community', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Technical Documentation​', 'url' => 'https://applications.anaplan.com/financial-consolidation--reporting-7db4c09a-7c1b-444e-bece-7f5887e7f0c3', 'duration_display' => '5 min', 'duration_minutes' => 5, 'source' => 'App COE', 'prerequisites' => 'Provisioning', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'FCR Enablement Seismic Page​', 'url' => 'https://anaplan.highspot.com/items/67d0799e62561c5f0bb9a0ec?lfrm=shp.1', 'duration_display' => '4 hours', 'duration_minutes' => 240, 'source' => 'Seismic', 'prerequisites' => '2 learners completed 1+3', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                6 => [
+                    ['title' => 'Hands-on Enablement with PS (on project)', 'source' => 'PS/App COE', 'prerequisites' => 'Project Won', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                7 => [
+                    ['title' => 'Conceptual Demo Assessment (to come)', 'source' => 'PSM', 'prerequisites' => 'PreSales Blueprint (to come)', 'gtm' => 'na', 'pre_sales' => 'optional', 'delivery' => 'na'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: Anaplan Disclosure Management (ADM) ─────────────
+
+    private function seedDraftADM(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'Anaplan Disclosure Management (ADM)', 'application', 'Finance',
+            'Finance application blueprint for disclosure management and narrative reporting.',
+            [
+                1 => [
+                    ['title' => 'FCR Positioning Statement​', 'url' => 'https://anaplan.highspot.com/items/67bdb71efacb1b0f31645e92#1', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'FCR Solution use Cases', 'url' => 'https://anaplan.highspot.com/items/67bdb89afacb1b39f0dc4358?lfrm=srp.0#1', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                2 => [
+                    ['title' => 'FCR Sales Play Summary​', 'url' => 'https://anaplan.seismic.com/Link/Content/DCHqbp788Dq3H89XXchcqGchBF6G', 'duration_display' => '15 min', 'duration_minutes' => 15, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'FCR Sales Play', 'url' => 'https://anaplan.highspot.com/items/67bdb58066bcb4f7f31d9735?lfrm=rhp.0', 'duration_display' => '1 hours', 'duration_minutes' => 60, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+                3 => [
+                    ['title' => 'AnaplanXL Fundamentals​', 'url' => 'https://academy.anaplan.com/learn/learning-plans/3/anaplan-xl-reporting-training', 'duration_display' => '3 hours', 'duration_minutes' => 180, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Anaplan Disclosure Management Fundamentals', 'url' => 'https://academy.anaplan.com/learn/courses/2/anaplan-disclosure-management-fundamentals/lessons', 'duration_display' => '6 hours', 'duration_minutes' => 360, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'AnaplanXL How-to Videos', 'url' => 'https://community.anaplan.com/discussion/160603/unlocking-the-power-of-anaplan-xl-reporting-a-guide-to-using-anaplan-xl', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Community', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                4 => [
+                    ['title' => 'not applicable', 'source' => '-', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'na'],
+                ],
+                5 => [
+                    ['title' => 'Provision AnaplanXL, DM', 'source' => 'App COE', 'prerequisites' => 'Delivery 1+3', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Technical Documentation (requires sign-up)​', 'url' => 'https://support.fluencetech.com/hc/en-us/categories/7289736321171-Fluence-Guides', 'duration_display' => '5 min', 'duration_minutes' => 5, 'source' => 'App COE', 'prerequisites' => 'Provisioning', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'FCR Enablement Seismic Page​', 'url' => 'https://anaplan.highspot.com/items/67d0799e62561c5f0bb9a0ec?lfrm=shp.1', 'duration_display' => '4 hours', 'duration_minutes' => 240, 'source' => 'Seismic', 'prerequisites' => '2 learners completed 1+3', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                6 => [
+                    ['title' => 'Hands-on Enablement with PS (on project)', 'source' => 'PS/App COE', 'prerequisites' => 'Project Won', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                7 => [
+                    ['title' => 'Conceptual Demo Assessment (to come)', 'source' => 'PSM', 'prerequisites' => 'PreSales Blueprint (to come)', 'gtm' => 'na', 'pre_sales' => 'optional', 'delivery' => 'na'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: Revenue Performance Management (RPM) ────────────
+
+    private function seedDraftRPM(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'Revenue Performance Management (RPM)', 'application', 'Sales',
+            'Sales application blueprint for territory, quota, capacity planning, and segmentation.',
+            [
+                1 => [
+                    ['title' => 'Anaplan Applications 101 for Partners', 'url' => 'https://academy.anaplan.com/learn/courses/377/anaplan-applications-101-for-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Segmentation and Scoring Application 101 for Partners', 'url' => 'https://academy.anaplan.com/learn/courses/400/segmentation-and-scoring-application-101-for-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Go-to-Market Capacity Planning Application 101 Partners', 'url' => 'https://academy.anaplan.com/learn/courses/382/go-to-market-gtm-capacity-planning-app-101-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Territory & Quota Application 101 for Partners', 'url' => 'https://academy.anaplan.com/learn/courses/441/territory-quota-application-101-for-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Anaplan for Salesforce 101 for Partners', 'url' => 'https://academy.anaplan.com/learn/courses/475/anaplan-salesforce-101-for-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                2 => [
+                    ['title' => 'Go-to-Market Planning Applications', 'url' => 'https://anaplan.seismic.com/Link/Content/DCW29mFhmBg6HGfH66qd49Mb3J8G', 'duration_display' => '30 mins', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'Segmentation and Scoring Pitch deck', 'url' => 'https://anaplan.seismic.com/Link/Content/DCQD7bX9hR7FbGfRdmR7jGbhWTCj', 'duration_display' => '20mins', 'duration_minutes' => 20, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'Go-To-Market Capacity Planning Pitch deck', 'url' => 'https://anaplan.seismic.com/Link/Content/DCq6MbgcD4cmdGWTMmXMXFHdM82V', 'duration_display' => '20mins', 'duration_minutes' => 20, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'Territory & Quota Pitch deck', 'url' => 'https://anaplan.seismic.com/Link/Content/DCpg3fXmQDH6282VVF2HGmVPJXQ3', 'duration_display' => '20mins', 'duration_minutes' => 20, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+                3 => [
+                    ['title' => 'RPM Configuration', 'url' => 'https://academy.anaplan.com/learn/learning-plans/51/territory-quota-planning-application/courses/380/rpm-configuration/lessons', 'duration_display' => '30 mins', 'duration_minutes' => 30, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Segmentation and Scoring Overview', 'url' => 'https://academy.anaplan.com/learn/courses/379/segmentation-and-scoring-overview', 'duration_display' => '20 min', 'duration_minutes' => 20, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Go-to-Market Capacity Planning Overview', 'url' => 'https://academy.anaplan.com/learn/courses/381/gtm-capacity-planning-overview', 'duration_display' => '20 min', 'duration_minutes' => 20, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Territory & Quota Overview', 'url' => 'https://academy.anaplan.com/learn/learning-plans/51/territory-quota-planning-application/courses/390/territory-quota-planning-overview/lessons', 'duration_display' => '20 min', 'duration_minutes' => 20, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Anaplan for Salesforce: Connector Overview', 'url' => 'https://academy.anaplan.com/learn/courses/458/anaplan-for-salesforce-connector-overview', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Anaplan for Salesforce: Connector Configuration', 'url' => 'https://academy.anaplan.com/learn/courses/457/anaplan-for-salesforce-connector-configuration', 'duration_display' => '45 min', 'duration_minutes' => 45, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                4 => [
+                    ['title' => 'Anaplan Polaris Prerequisites', 'duration_display' => '3.5 hours', 'duration_minutes' => 210, 'source' => 'multiple', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                5 => [
+                    ['title' => 'Provision Partner Workspace & App copies in Anaplan Tenant (on-demand)', 'source' => 'Tenant', 'prerequisites' => 'Delivery 1 + 3 + 4', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Technical Documentation (https://applications.anaplan.com)', 'url' => 'https://applications.anaplan.com/', 'source' => 'Anapedia', 'prerequisites' => 'Delivery 1 + 3 + 4', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                6 => [
+                    ['title' => 'Live Sales Enablement (coming soon)', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'App COE', 'prerequisites' => 'Delivery 1 + 3 + 4', 'gtm' => 'optional', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Quarterly Hands-on Enablement (FY26Q3)', 'duration_display' => '2 days', 'duration_minutes' => 960, 'source' => 'App COE', 'prerequisites' => 'Delivery 1 + 3 + 4', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                7 => [
+                    ['title' => 'Conceptual Demos copied into Partner Workspace (coming soon)', 'source' => 'Tenant', 'prerequisites' => '1 + 2', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'na'],
+                    ['title' => 'Conceptual Demos companion assets (coming soon)', 'source' => 'Seismic', 'prerequisites' => '1 + 2', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+            ]
+        );
+    }
+
+    // --- Draft: Operational Workforce Planning (OWP) ────────────
+
+    private function seedDraftOWP(int $adminId): void
+    {
+        $this->seedDraftWithIBPOutcomes($adminId, 'Operational Workforce Planning (OWP)', 'application', 'Workforce',
+            'Workforce application blueprint for operational workforce planning.',
+            [
+                1 => [
+                    ['title' => 'Anaplan Applications 101 for Partners', 'url' => 'https://academy.anaplan.com/learn/courses/377/anaplan-applications-101-for-partners', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Anaplan Operational Workforce Planning Overview', 'url' => 'https://anaplan.seismic.com/Link/Content/DC32X49TFch7j8CCgGB6cVf799p8', 'duration_display' => '30 min', 'duration_minutes' => 30, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Anaplan Operational Workforce Planning Application Datasheet', 'url' => 'https://anaplan.seismic.com/Link/Content/DCp4Q2X9BRTC984BGhFg4hqfVbm8', 'duration_display' => '10 mins', 'duration_minutes' => 10, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Operational Workforce Planning (OWP) App 101 for Partners', 'url' => 'https://academy.anaplan.com/learn/course/357/operational-workforce-planning-owp-app-101-for-partners', 'duration_display' => '1 hr 5 min', 'duration_minutes' => 65, 'source' => 'Academy', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                2 => [
+                    ['title' => 'Workforce Planning Transformation (WPT)', 'url' => 'https://anaplan.seismic.com/Link/Content/DC32X49TFch7j8CCgGB6cVf799p8', 'duration_display' => '1 hour', 'duration_minutes' => 60, 'source' => 'Seismic', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+                3 => [
+                    ['title' => 'OWP Application Configuration (coming mid-May)', 'duration_display' => '30 mins', 'duration_minutes' => 30, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'OWP Application Overview (coming end-March)', 'duration_display' => '30 mins', 'duration_minutes' => 30, 'source' => 'Academy', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                4 => [
+                    ['title' => 'Anaplan Polaris Prerequisites', 'duration_display' => '3.5 hours', 'duration_minutes' => 210, 'source' => 'multiple', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'required'],
+                ],
+                5 => [
+                    ['title' => 'Provision Partner Workspace & App copies in Anaplan Tenant', 'source' => 'Tenant', 'prerequisites' => 'Delivery 1 + 3 + 4 + 5', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                    ['title' => 'Technical Documentation (https://applications.anaplan.com)', 'url' => 'https://applications.anaplan.com/', 'source' => 'Anapedia', 'prerequisites' => 'Delivery 1 + 3 + 4 + 5', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                6 => [
+                    ['title' => 'Deep Dive Enablement by Region / Country', 'duration_display' => '90 mins', 'duration_minutes' => 90, 'source' => 'App COE', 'prerequisites' => 'Delivery 1 + 3 + 4', 'gtm' => 'required', 'pre_sales' => 'required', 'delivery' => 'required'],
+                    ['title' => 'Hands-on Enablement with PS / CoE (on project)', 'source' => 'PS/App COE', 'prerequisites' => 'Project Won', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'required'],
+                ],
+                7 => [
+                    ['title' => 'Conceptual Demo Assessment', 'source' => 'PSM', 'prerequisites' => 'PreSales Blueprint (to come)', 'gtm' => 'na', 'pre_sales' => 'optional', 'delivery' => 'na'],
+                    ['title' => 'Access to Conceptual demo Assets', 'source' => 'Tenant', 'prerequisites' => 'PreSales 1 + 2 + 4 + 5', 'gtm' => 'na', 'pre_sales' => 'required', 'delivery' => 'na'],
+                ],
+            ]
+        );
+    }
+
     // --- Delivery Excellence: Polaris ───────────────────────────
 
     private function seedDeliveryExcellencePolaris(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Delivery Excellence: Polaris', 'delivery', 'Platform', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Delivery Excellence: Polaris', 'delivery', 'Platform', 'V1.0',
             'Delivery excellence blueprint for Polaris migration and implementation best practices.', 'draft');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand GTM Positioning and Use Cases']);
@@ -774,14 +1362,19 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
             ['title' => 'Feedback Submission Process', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'na'],
         ]);
 
-        $this->command->info('  Created: Delivery Excellence: Polaris (5 outcomes, 28 items)');
+        foreach ([7, 8, 9] as $i) {
+            $outcome = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => $i, 'title' => self::IBP_OUTCOME_TITLES[$i]]);
+            $this->addItems($outcome, self::IBP_STANDARD_CLOSING_ITEMS[$i]);
+        }
+
+        $this->command->info('  Created: Delivery Excellence: Polaris (8 outcomes, 28 items)');
     }
 
     // --- Delivery Excellence: ADO ───────────────────────────────
 
     private function seedDeliveryExcellenceADO(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Delivery Excellence: ADO', 'delivery', 'Platform', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Delivery Excellence: ADO', 'delivery', 'Platform', 'V1.0',
             'Delivery excellence blueprint for Anaplan Data Orchestrator implementation.', 'draft');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand GTM Positioning and Use Cases']);
@@ -829,14 +1422,19 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
             ['title' => 'Connector Request List', 'url' => 'https://anaplan.highspot.com/items/67bce25aee4925efa318e06b?lfrm=srp.0', 'source' => 'Slack', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'na'],
         ]);
 
-        $this->command->info('  Created: Delivery Excellence: ADO (5 outcomes, 25 items)');
+        foreach ([7, 8, 9] as $i) {
+            $outcome = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => $i, 'title' => self::IBP_OUTCOME_TITLES[$i]]);
+            $this->addItems($outcome, self::IBP_STANDARD_CLOSING_ITEMS[$i]);
+        }
+
+        $this->command->info('  Created: Delivery Excellence: ADO (8 outcomes, 25 items)');
     }
 
     // --- Delivery Excellence: Forecaster ────────────────────────
 
     private function seedDeliveryExcellenceForecaster(int $adminId): void
     {
-        $bp = $this->createBlueprint($adminId, 'Delivery Excellence: Forecaster', 'delivery', 'Platform', 'V2.0',
+        $bp = $this->createBlueprint($adminId, 'Delivery Excellence: Forecaster', 'delivery', 'Platform', 'V1.0',
             'Delivery excellence blueprint for Forecaster product implementation.', 'draft');
 
         $o1 = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => 1, 'title' => 'Partners understand GTM Positioning and Use Cases']);
@@ -881,6 +1479,11 @@ Third is primed by Partner with PS on call', 'gtm' => 'na', 'pre_sales' => 'na',
             ['title' => 'V5 Pricing FAQ', 'url' => 'https://anaplan.highspot.com/items/65df9275d8b079fc49b71693?lfrm=srp.1#1', 'source' => 'Seismic', 'gtm' => 'na', 'pre_sales' => 'na', 'delivery' => 'na'],
         ]);
 
-        $this->command->info('  Created: Delivery Excellence: Forecaster (5 outcomes, 22 items)');
+        foreach ([7, 8, 9] as $i) {
+            $outcome = BlueprintOutcome::create(['blueprint_id' => $bp->id, 'sort_order' => $i, 'title' => self::IBP_OUTCOME_TITLES[$i]]);
+            $this->addItems($outcome, self::IBP_STANDARD_CLOSING_ITEMS[$i]);
+        }
+
+        $this->command->info('  Created: Delivery Excellence: Forecaster (8 outcomes, 22 items)');
     }
 }

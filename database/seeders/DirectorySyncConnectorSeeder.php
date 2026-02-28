@@ -33,7 +33,7 @@ class DirectorySyncConnectorSeeder extends Seeder
                 'name' => 'User Directory Import',
                 'description' => 'Import team members from a directory CSV — syncs names, emails, and manager hierarchy.',
                 'target_model' => 'User',
-                'required_feature' => 'directory_sync_admin',
+                'required_feature' => 'directory_sync.sync',
                 'is_current' => true,
                 'fields' => [
                     ['key' => 'external_id', 'source_field' => 'employee_id', 'target_field' => 'external_id', 'transform' => 'trim', 'default_value' => null, 'is_required' => true, 'description' => 'Unique employee identifier from the directory'],

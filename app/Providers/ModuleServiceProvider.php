@@ -25,9 +25,9 @@ class ModuleServiceProvider extends ServiceProvider
             $registry->register($slug, $definition);
         }
 
-        // Share enabled module navigation with the sidebar
+        // Share module registry and navigation sections with the sidebar
         View::composer('layouts.partials.generated-navigation', function ($view) use ($registry) {
-            $view->with('moduleNav', $registry->navigationItems());
+            $view->with('navSections', $registry->getAccessibleSections());
             $view->with('moduleRegistry', $registry);
         });
     }

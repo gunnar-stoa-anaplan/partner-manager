@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('directory_sync_admin')]
-class DirectorySyncAdmin
+#[Name('directory_sync')]
+class DirectorySync
 {
     /**
      * Resolve the feature's initial value.

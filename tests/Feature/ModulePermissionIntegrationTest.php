@@ -61,7 +61,7 @@ class ModulePermissionIntegrationTest extends TestCase
         $role = Role::factory()->create(['type' => 'internal']);
         RolePermission::create([
             'role_id' => $role->id,
-            'module_slug' => 'data_imports',
+            'module_slug' => 'integration_hub.hub',
             'access_level' => 'write',
         ]);
 

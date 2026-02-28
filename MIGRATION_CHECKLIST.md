@@ -1,4 +1,4 @@
-# Partner Manager 2 → 3 Migration Checklist
+# Partner Manager Migration Checklist
 
 ## Overview
 Migrating ONLY your backend logic and data to fresh SmartAdmin Laravel template.
@@ -13,28 +13,28 @@ Migrating ONLY your backend logic and data to fresh SmartAdmin Laravel template.
 ```bash
 # Copy database settings from old .env
 # From: partner-manager-2/.env
-# To: Partner-Manager-3/.env
+# To: partner-manager/.env
 ```
 
-Update Partner-Manager-3/.env:
+Update partner-manager/.env:
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=partner_manager_3  # NEW database name
+DB_DATABASE=partner_manager  # NEW database name
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
 ```
 
 ### Step 1.2: Create New Database
 ```bash
-# Create fresh database for Partner-Manager-3
-mysql -u root -p -e "CREATE DATABASE partner_manager_3;"
+# Create fresh database for partner-manager
+mysql -u root -p -e "CREATE DATABASE partner_manager;"
 ```
 
 ### Step 1.3: Copy ALL Migrations
 ```bash
-# Copy from partner-manager-2 to Partner-Manager-3
+# Copy from partner-manager-2 to partner-manager
 cp -r ../partner-manager-2/database/migrations/*.php database/migrations/
 ```
 
@@ -44,7 +44,7 @@ cp -r ../partner-manager-2/database/migrations/*.php database/migrations/
 
 ### Step 1.4: Run Migrations
 ```bash
-cd /Users/gunnar.stoa/Library/CloudStorage/OneDrive-Anaplan/Desktop/Partner-Manager-3
+cd /Users/gunnar.stoa/Library/CloudStorage/OneDrive-Anaplan/Desktop/partner-manager
 php artisan migrate
 ```
 
@@ -63,10 +63,10 @@ php artisan db:export --path=database/export_$(date +%Y%m%d).sql
 mysqldump -u root -p partner_manager > database/full_export_$(date +%Y%m%d).sql
 ```
 
-### Step 2.2: Import Data to Partner-Manager-3
+### Step 2.2: Import Data to partner-manager
 ```bash
 # Import into new database
-mysql -u root -p partner_manager_3 < ../partner-manager-2/database/full_export_*.sql
+mysql -u root -p partner_manager < ../partner-manager-2/database/full_export_*.sql
 ```
 
 **What you're preserving:**
@@ -81,7 +81,7 @@ mysql -u root -p partner_manager_3 < ../partner-manager-2/database/full_export_*
 
 ### Step 3.1: Copy All Models
 ```bash
-cd /Users/gunnar.stoa/Library/CloudStorage/OneDrive-Anaplan/Desktop/Partner-Manager-3
+cd /Users/gunnar.stoa/Library/CloudStorage/OneDrive-Anaplan/Desktop/partner-manager
 
 # Copy all models
 cp ../partner-manager-2/app/Models/*.php app/Models/
@@ -131,7 +131,7 @@ cp ../partner-manager-2/app/Http/Controllers/ProjectController.php app/Http/Cont
 ### Step 5.1: Merge Routes
 Open both files side-by-side:
 - OLD: `partner-manager-2/routes/web.php`
-- NEW: `Partner-Manager-3/routes/web.php`
+- NEW: `partner-manager/routes/web.php`
 
 **Copy these route sections:**
 ```php
@@ -193,7 +193,7 @@ App\Providers\ViewServiceProvider::class,
 
 ### Step 8.1: Install PHP Dependencies
 ```bash
-cd /Users/gunnar.stoa/Library/CloudStorage/OneDrive-Anaplan/Desktop/Partner-Manager-3
+cd /Users/gunnar.stoa/Library/CloudStorage/OneDrive-Anaplan/Desktop/partner-manager
 composer install
 ```
 
@@ -403,7 +403,7 @@ Route::get('/dashboard-subscription', [PartnerController::class, 'fullInsights']
 
 ```bash
 # Navigate to new project
-cd /Users/gunnar.stoa/Library/CloudStorage/OneDrive-Anaplan/Desktop/Partner-Manager-3
+cd /Users/gunnar.stoa/Library/CloudStorage/OneDrive-Anaplan/Desktop/partner-manager
 
 # Install dependencies
 composer install

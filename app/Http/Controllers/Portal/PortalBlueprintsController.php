@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\BlueprintEnrollment;
 use App\Models\PartnerBlueprintAssignment;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class PortalBlueprintsController extends Controller
 {
-    public function index(): \Illuminate\View\View
+    public function index(): View
     {
         $contact = Auth::guard('portal')->user();
         $partner = $contact->partner;
@@ -27,7 +28,22 @@ class PortalBlueprintsController extends Controller
         return view('portal.blueprints.index', compact('contact', 'partner', 'assignments', 'myEnrollments'));
     }
 
-    public function show(BlueprintEnrollment $enrollment): \Illuminate\View\View
+    public function showAssignment(PartnerBlueprintAssignment $assignment): View
+    {
+        $contact = Auth::guard('portal')->user();
+
+        abort_unless($assignment->partner_id === $contact->partner_id, 403);
+
+        $assignment->load([
+            'blueprint.outcomes.contentItems',
+            'enrollments.contact',
+            'enrollments.progress',
+        ]);
+
+        return view('portal.blueprints.assignment', compact('contact', 'assignment'));
+    }
+
+    public function show(BlueprintEnrollment $enrollment): View
     {
         $contact = Auth::guard('portal')->user();
 

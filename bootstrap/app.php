@@ -39,23 +39,30 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             // Load module route files (web)
-            foreach (['integration-hub', 'strategy', 'idea-room', 'zoom-chat'] as $mod) {
+            $moduleRoutes = [
+                'integration-hub' => 'integration_hub.hub',
+                'strategy' => 'strategy.strategy',
+                'idea-room' => 'idea_room.room',
+                'zoom-chat' => 'zoom_chat.chat',
+            ];
+
+            foreach ($moduleRoutes as $mod => $moduleIdentifier) {
                 $slug = str_replace('-', '_', $mod);
                 $file = base_path("routes/modules/{$mod}.php");
 
                 if (file_exists($file)) {
-                    Route::middleware(['web', 'auth', "module:{$slug}"])
+                    Route::middleware(['web', 'auth', "module:{$moduleIdentifier}"])
                         ->prefix($mod)
                         ->name("{$slug}.")
                         ->group($file);
                 }
             }
 
-            // Knowledge Base (uses knowledge_base gate)
+            // Knowledge Base (gated by ai_knowledge.knowledge_base)
             $knowledgeBaseWeb = base_path('routes/modules/knowledge-base.php');
 
             if (file_exists($knowledgeBaseWeb)) {
-                Route::middleware(['web', 'auth', 'module:knowledge_base'])
+                Route::middleware(['web', 'auth', 'module:ai_knowledge.knowledge_base'])
                     ->prefix('knowledge-base')
                     ->name('knowledge_base.')
                     ->group($knowledgeBaseWeb);
@@ -65,7 +72,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $ideaRoomApi = base_path('routes/modules/idea-room-api.php');
 
             if (file_exists($ideaRoomApi)) {
-                Route::middleware(['web', 'auth', 'module:idea_room'])
+                Route::middleware(['web', 'auth', 'module:idea_room.room'])
                     ->prefix('api/v1/idea-room')
                     ->name('idea_room.api.')
                     ->group($ideaRoomApi);
@@ -74,7 +81,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $knowledgeBaseApi = base_path('routes/modules/knowledge-base-api.php');
 
             if (file_exists($knowledgeBaseApi)) {
-                Route::middleware(['web', 'auth', 'module:knowledge_base'])
+                Route::middleware(['web', 'auth', 'module:ai_knowledge.knowledge_base'])
                     ->prefix('api/v1/knowledge-base')
                     ->name('knowledge_base.api.')
                     ->group($knowledgeBaseApi);

@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('qbr')]
-class Qbr
+#[Name('measurement')]
+class Measurement
 {
     /**
      * Resolve the feature's initial value.

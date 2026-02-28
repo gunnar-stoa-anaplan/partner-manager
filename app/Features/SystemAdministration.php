@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('feature_activation_coe')]
-class FeatureActivationCoe
+#[Name('system_administration')]
+class SystemAdministration
 {
     /**
      * Resolve the feature's initial value.

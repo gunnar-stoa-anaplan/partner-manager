@@ -127,7 +127,7 @@
 </div>
 @endif
 
-@if(app(\App\Services\ModuleRegistry::class)->isEnabled('ai_agents'))
+@if(app(\App\Services\ModuleRegistry::class)->isEnabled('ai_knowledge.agents'))
 {{-- AI Partner Insights --}}
 <div class="row mb-g" id="ai-insights-partner-panel" data-advisor-url="{{ route('partners.advisor', $partner) }}">
     <div class="col-12">

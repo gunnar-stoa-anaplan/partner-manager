@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\TaskAutoVerificationService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class MarketplaceApprovalTest extends TestCase
@@ -29,6 +30,9 @@ class MarketplaceApprovalTest extends TestCase
         parent::setUp();
 
         $this->seed(RoleSeeder::class);
+
+        Feature::for(null)->activate('deal_registration');
+        Feature::for(null)->activate('partner_management');
 
         $this->admin = User::factory()->admin()->create();
         $this->psm = User::factory()->psm()->create();

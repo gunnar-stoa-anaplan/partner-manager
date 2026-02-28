@@ -8,6 +8,7 @@ use App\Models\PartnerHealthSnapshot;
 use App\Models\PartnerScorecard;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Pennant\Feature;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -24,6 +25,8 @@ class PartnerAdvisorTest extends TestCase
         parent::setUp();
 
         $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        Feature::for(null)->activate('partner_management');
 
         $this->user = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $this->user->id]);

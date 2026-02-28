@@ -12,7 +12,7 @@ class EnsureAdminOrIntegration
     {
         $user = $request->user();
 
-        if ($user?->bypassesPermissions() || $user?->hasModulePermission('data_imports')) {
+        if ($user?->bypassesPermissions() || $user?->hasModulePermission('integration_hub.hub')) {
             return $next($request);
         }
 

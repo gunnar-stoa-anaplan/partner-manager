@@ -36,7 +36,7 @@
     <div class="card-header"><strong>Partner Blueprint Assignments</strong></div>
     <div class="card-body">
         @forelse($assignments as $assignment)
-        <div class="border-bottom py-3">
+        <a href="{{ route('portal.blueprints.assignment', $assignment) }}" class="text-decoration-none text-body d-block border-bottom py-3">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="mb-1">{{ $assignment->blueprint?->name ?? 'Blueprint' }}</h6>
@@ -44,13 +44,13 @@
                     <span class="badge bg-secondary">{{ \App\Models\PartnerBlueprintAssignment::STATUSES[$assignment->status] ?? $assignment->status }}</span>
                     <small class="text-muted ms-2">{{ $assignment->enrollments->count() }} enrolled</small>
                 </div>
-                <div>
+                <div class="text-end">
                     @php $aPct = $assignment->completionPercentage(); @endphp
-                    <div class="progress" style="width:120px;height:8px"><div class="progress-bar" style="width:{{ $aPct }}%"></div></div>
+                    <div class="progress" style="width:120px;height:8px"><div class="progress-bar bg-{{ $aPct >= 80 ? 'success' : ($aPct >= 40 ? 'warning' : 'danger') }}" style="width:{{ $aPct }}%"></div></div>
                     <small class="text-muted">{{ $aPct }}%</small>
                 </div>
             </div>
-        </div>
+        </a>
         @empty
         <p class="text-muted mb-0">No blueprint assignments.</p>
         @endforelse

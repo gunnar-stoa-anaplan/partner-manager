@@ -13,7 +13,6 @@ use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Pennant\Feature;
 use Laravel\Pulse\Facades\Pulse;
 
 class AppServiceProvider extends ServiceProvider
@@ -50,8 +49,7 @@ class AppServiceProvider extends ServiceProvider
                 return true;
             }
 
-            return $user->hasModulePermission('feature_activation_coe')
-                && Feature::for(null)->active('feature_activation_coe');
+            return $user->hasModulePermission('system_administration.admin');
         });
 
         Pulse::user(fn ($user) => [

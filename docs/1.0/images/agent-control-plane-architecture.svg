@@ -31,7 +31,7 @@
   <rect x="30" y="80" width="360" height="380" rx="10" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
   <rect x="30" y="80" width="360" height="34" rx="10" fill="#2563eb"/>
   <rect x="30" y="106" width="360" height="8" fill="#2563eb"/>
-  <text x="210" y="103" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Partner Manager 3 (Client App)</text>
+  <text x="210" y="103" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Partner Manager (Client App)</text>
 
   <!-- PM3 internal services -->
   <rect x="50" y="125" width="160" height="60" rx="6" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
@@ -253,5 +253,5 @@
   <text x="60" y="748" font-size="10" fill="#374151">Internal agent &#8596; PM3 communication: plain HTTP over Docker internal network (no auth) &#8226; Agent runs as non-root user (pmagent:pmagent)</text>
 
   <!-- Footer -->
-  <text x="550" y="790" text-anchor="middle" font-size="9" fill="#9ca3af">pm-agent (Go sidecar) &#8596; Partner Manager 3 (PHP) &#8596; Control Plane (Laravel) &#8212; heartbeat interval configurable (default 30s)</text>
+  <text x="550" y="790" text-anchor="middle" font-size="9" fill="#9ca3af">pm-agent (Go sidecar) &#8596; Partner Manager (PHP) &#8596; Control Plane (Laravel) &#8212; heartbeat interval configurable (default 30s)</text>
 </svg>

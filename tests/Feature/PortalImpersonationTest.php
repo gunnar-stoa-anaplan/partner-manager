@@ -8,6 +8,7 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class PortalImpersonationTest extends TestCase
@@ -24,6 +25,9 @@ class PortalImpersonationTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+
+        Feature::for(null)->activate('partner_management');
+        Feature::for(null)->activate('portal');
 
         $this->admin = User::factory()->admin()->create();
         $this->psm = User::factory()->psm()->create();

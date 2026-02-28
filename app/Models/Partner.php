@@ -86,6 +86,11 @@ class Partner extends Model
         return $this->hasMany(Contact::class);
     }
 
+    public function portalContacts()
+    {
+        return $this->hasMany(Contact::class)->where('portal_access', true);
+    }
+
     public function leads()
     {
         return $this->hasMany(Lead::class);

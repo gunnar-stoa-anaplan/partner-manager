@@ -134,7 +134,7 @@ class User extends Authenticatable
             return true;
         }
 
-        return $this->hasModulePermission('user_management');
+        return $this->hasModulePermission('partner_management.administration');
     }
 
     /**

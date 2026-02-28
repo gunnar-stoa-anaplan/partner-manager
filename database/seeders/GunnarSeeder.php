@@ -39,6 +39,9 @@ class GunnarSeeder extends Seeder
         ],
         'psm' => [
             ['email' => 'gunnar.stoa@gmail.com', 'name' => 'Gunnar Stoa'],
+            ['email' => 'rick.palmer@example.com', 'name' => 'Rick Palmer'],
+            ['email' => 'nicole.demary@example.com', 'name' => 'Nicole Demary'],
+            ['email' => 'ben.wilson@example.com', 'name' => 'Ben Wilson'],
             ['email' => 'sarah.chen@example.com', 'name' => 'Sarah Chen'],
             ['email' => 'marcus.johnson@example.com', 'name' => 'Marcus Johnson'],
             ['email' => 'emily.rodriguez@example.com', 'name' => 'Emily Rodriguez'],
@@ -57,14 +60,19 @@ class GunnarSeeder extends Seeder
     ];
 
     /**
-     * Partners explicitly assigned to Gunnar (created before PartnerSeeder).
+     * Explicit PSM-to-partner assignments (created before PartnerSeeder).
+     * Keyed by PSM email → list of partner data.
      *
-     * @var list<array{name: string, website: string, industry: string}>
+     * @var array<string, list<array{name: string, website: string, industry: string}>>
      */
-    private const GUNNAR_PARTNERS = [
-        ['name' => 'Accenture', 'website' => 'https://www.accenture.com', 'industry' => 'Consulting'],
-        ['name' => 'Deloitte', 'website' => 'https://www.deloitte.com', 'industry' => 'Consulting'],
-        ['name' => 'PwC', 'website' => 'https://www.pwc.com', 'industry' => 'Consulting'],
+    private const PSM_PARTNERS = [
+        'rick.palmer@example.com' => [
+            ['name' => 'Accenture', 'website' => 'https://www.accenture.com', 'industry' => 'Consulting'],
+        ],
+        'gunnar.stoa@gmail.com' => [
+            ['name' => 'Deloitte', 'website' => 'https://www.deloitte.com', 'industry' => 'Consulting'],
+            ['name' => 'PwC', 'website' => 'https://www.pwc.com', 'industry' => 'Consulting'],
+        ],
     ];
 
     public function run(): void
@@ -103,25 +111,29 @@ class GunnarSeeder extends Seeder
         }
         $this->command->info("  ✓ All PAMs report to {$ray->name}");
 
-        // Create Gunnar's explicit partners
-        $gunnar = $createdUsers['psm'][0];
+        // Create explicit PSM partner assignments
+        $psmsByEmail = collect($createdUsers['psm'])->keyBy('email');
 
-        foreach (self::GUNNAR_PARTNERS as $data) {
-            $partner = Partner::updateOrCreate(
-                ['name' => $data['name']],
-                [
-                    'user_id' => $gunnar->id,
-                    'salesforce_id' => '00Q'.Str::upper(Str::random(15)),
-                    'website' => $data['website'],
-                    'industry' => $data['industry'],
-                ]
-            );
+        foreach (self::PSM_PARTNERS as $psmEmail => $partners) {
+            $psm = $psmsByEmail[$psmEmail];
 
-            if (! $partner->psms()->where('user_id', $gunnar->id)->exists()) {
-                $partner->psms()->attach($gunnar->id, ['role' => 'psm']);
+            foreach ($partners as $data) {
+                $partner = Partner::updateOrCreate(
+                    ['name' => $data['name']],
+                    [
+                        'user_id' => $psm->id,
+                        'salesforce_id' => '00Q'.Str::upper(Str::random(15)),
+                        'website' => $data['website'],
+                        'industry' => $data['industry'],
+                    ]
+                );
+
+                if (! $partner->psms()->where('user_id', $psm->id)->exists()) {
+                    $partner->psms()->attach($psm->id, ['role' => 'psm']);
+                }
+
+                $this->command->info("  ✓ {$partner->name} → assigned to {$psm->name}");
             }
-
-            $this->command->info("  ✓ {$partner->name} → assigned to Gunnar");
         }
 
         // Seed deal registrations
@@ -130,17 +142,17 @@ class GunnarSeeder extends Seeder
             $this->command->info('  ✓ Seeded 30 deal registrations');
         }
 
-        // Activate all Pennant feature flags by discovering Feature classes
+        // Purge stale feature flags and activate all current Feature classes
+        Feature::purge();
+
         $featureClasses = collect(File::files(app_path('Features')))
             ->map(fn ($file) => 'App\\Features\\'.pathinfo($file->getFilename(), PATHINFO_FILENAME))
             ->filter(fn ($class) => class_exists($class));
 
-        $activated = 0;
         foreach ($featureClasses as $class) {
             Feature::for(null)->activate($class);
-            $activated++;
         }
-        $this->command->info("  ✓ Activated {$activated} Pennant feature flags");
+        $this->command->info("  ✓ Activated {$featureClasses->count()} Pennant feature flags");
 
         // Seed directory sync connector + sample connection
         $this->call(DirectorySyncConnectorSeeder::class);

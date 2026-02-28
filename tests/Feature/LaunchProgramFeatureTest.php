@@ -33,6 +33,7 @@ class LaunchProgramFeatureTest extends TestCase
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         Feature::for(null)->activate('launch_programs');
+        Feature::for(null)->activate('partner_management');
 
         $this->admin = User::factory()->admin()->create();
         $this->psm = User::factory()->psm()->create();

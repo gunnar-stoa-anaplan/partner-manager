@@ -1,10 +1,10 @@
-@extends('layouts.vertical', ['pageTitle' => 'Enablement Blueprints'])
+@extends('layouts.vertical', ['pageTitle' => 'Blueprint Assignments'])
 
 @section('css')
 @endsection
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Enablement Blueprints', 'pageSubTitle1' => 'Partner Enablement', 'pageSubText' => 'Browse and assign partner readiness blueprints'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Blueprint Assignments', 'pageSubTitle1' => 'Blueprints', 'pageSubText' => 'Browse and assign partner readiness blueprints'])
 @endsection
 
 @section('content')
