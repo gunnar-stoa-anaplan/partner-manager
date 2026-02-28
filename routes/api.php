@@ -30,18 +30,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tokens', [TokenController::class, 'store']);
     Route::delete('/tokens/{id}', [TokenController::class, 'destroy']);
 
-    // --- Imports (write) ---
-    Route::middleware('abilities:imports:write')->group(function () {
+    // --- Imports (write, gated by integration_hub)
+    Route::middleware(['abilities:imports:write', 'module:integration_hub.hub'])->group(function () {
         Route::post('/imports/opportunities', [ImportController::class, 'opportunities']);
         Route::post('/imports/projects', [ImportController::class, 'projects']);
         Route::post('/imports/contacts', [ImportController::class, 'contacts']);
     });
-    Route::middleware('abilities:imports:read')->group(function () {
+    Route::middleware(['abilities:imports:read', 'module:integration_hub.hub'])->group(function () {
         Route::get('/imports/{id}', [ImportController::class, 'show']);
     });
 
-    // --- Partners (read) ---
-    Route::middleware('abilities:partners:read')->group(function () {
+    // --- Partners (read, gated by partner_management) ---
+    Route::middleware(['abilities:partners:read', 'module:partner_management'])->group(function () {
         Route::get('/partners', [PartnerController::class, 'index']);
         Route::get('/partners/{id}', [PartnerController::class, 'show']);
         Route::get('/partners/{id}/pipeline', [PartnerController::class, 'pipeline']);
@@ -49,8 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/partners/{partner}/advisor', PartnerAdvisorController::class)->name('api.partners.advisor');
     });
 
-    // --- Enablement (read) ---
-    Route::middleware('abilities:enablement:read')->group(function () {
+    // --- Enablement (read, gated by enablement) ---
+    Route::middleware(['abilities:enablement:read', 'module:enablement'])->group(function () {
         Route::get('/enablement/calendar', [EnablementController::class, 'calendar']);
         Route::get('/enablement/events', [EnablementController::class, 'events']);
         Route::get('/enablement/events/{id}', [EnablementController::class, 'show']);

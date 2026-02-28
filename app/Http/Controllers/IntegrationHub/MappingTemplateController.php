@@ -120,7 +120,7 @@ class MappingTemplateController extends Controller
     private function licensedFeatures(): array
     {
         if (app()->environment('local', 'testing')) {
-            return ['core', 'analytics', 'qbr', 'enablement', 'competency', 'integration_hub', 'mcp_server'];
+            return ['core', 'analytics', 'measurement', 'enablement', 'competency', 'integration_hub'];
         }
 
         $statusPath = config('version.agent_status_path');

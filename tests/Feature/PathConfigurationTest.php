@@ -8,6 +8,7 @@ use App\Models\PartnerPathStage;
 use App\Models\TaskTemplate;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class PathConfigurationTest extends TestCase
@@ -23,6 +24,8 @@ class PathConfigurationTest extends TestCase
         parent::setUp();
 
         $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        Feature::for(null)->activate('competency');
 
         $this->admin = User::factory()->admin()->create();
         $this->psm = User::factory()->psm()->create();

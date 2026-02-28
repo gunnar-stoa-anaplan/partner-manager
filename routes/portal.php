@@ -43,6 +43,7 @@ Route::middleware('portal')->group(function () {
     // All roles: enablement, blueprints & workspaces
     Route::get('/enablement', [PortalEnablementController::class, 'index'])->name('enablement.index');
     Route::get('/blueprints', [PortalBlueprintsController::class, 'index'])->name('blueprints.index');
+    Route::get('/blueprints/assignments/{assignment}', [PortalBlueprintsController::class, 'showAssignment'])->name('blueprints.assignment');
     Route::get('/blueprints/{enrollment}', [PortalBlueprintsController::class, 'show'])->name('blueprints.show');
     Route::get('/workspaces', [PortalWorkspaceController::class, 'index'])->name('workspaces.index');
 

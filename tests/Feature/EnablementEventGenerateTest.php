@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Ai\Agents\EnablementDesigner;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class EnablementEventGenerateTest extends TestCase
@@ -20,6 +21,8 @@ class EnablementEventGenerateTest extends TestCase
         parent::setUp();
 
         $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        Feature::for(null)->activate('enablement');
 
         $this->admin = User::factory()->admin()->create();
         $this->psm = User::factory()->psm()->create();

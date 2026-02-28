@@ -6,30 +6,35 @@
     align-items: center;
     color: #ffffff;
     position: relative;
+    overflow: hidden;
 }
 
-#net {
-    background: transparent !important;
-    /* Make the background transparent */
-    position: relative;
-    /* Ensure proper positioning */
-    z-index: 1;
-    /* Ensure it stays on top if needed */
-    width: 100vw;
-    height: 100vh;
+/* Animated gradient mesh background */
+.hero-bg {
     position: absolute;
+    inset: 0;
     z-index: 0;
-
-    /*position: absolute; top: 30%; right: -20%; width: 80vw; height: 90vh; z-index: 0; rotate: 329deg;*/
+    opacity: 0.6;
+    background:
+        radial-gradient(ellipse 80% 50% at 20% 40%, var(--bs-primary, #fd3995) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 60% at 80% 20%, rgba(100, 50, 200, 0.5) 0%, transparent 70%),
+        radial-gradient(ellipse 70% 50% at 60% 80%, rgba(0, 120, 255, 0.4) 0%, transparent 70%);
+    animation: hero-drift 12s ease-in-out infinite alternate;
 }
 
-/* Optional: Ensure the canvas itself is transparent */
-#net canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: -1;
-    /* Send the canvas behind the content */
+@keyframes hero-drift {
+    0% {
+        transform: scale(1) translate(0, 0);
+        filter: hue-rotate(0deg);
+    }
+    50% {
+        transform: scale(1.15) translate(-3%, 2%);
+        filter: hue-rotate(15deg);
+    }
+    100% {
+        transform: scale(1.05) translate(2%, -2%);
+        filter: hue-rotate(-10deg);
+    }
 }
 
 .divider {

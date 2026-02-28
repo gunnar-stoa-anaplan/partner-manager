@@ -130,72 +130,22 @@ class RoleController extends Controller
     {
         $modules = config('modules', []);
 
-        // Virtual module keys not in config/modules.php
-        $virtualModules = [
-            'admin_dashboard' => 'Admin Dashboard',
-            'user_management' => 'User Management',
-            'configuration' => 'Configuration',
-            'data_imports' => 'Data Imports',
-            'health_alerts' => 'Health & Alerts',
-        ];
+        // Build groups from config — each feature becomes a group, sections become entries
+        $groups = [];
 
-        $groups = [
-            'System' => $virtualModules,
-            'Partner Management' => [],
-            'Enablement' => [],
-            'Deal Registration' => [],
-            'Launch Programs' => [],
-            'Project Health' => [],
-            'QBR' => [],
-            'Goals & Targets' => [],
-            'Benchmarks' => [],
-            'Action Plans' => [],
-            'Provisioning' => [],
-            'Partner Portal' => [],
-            'AI & Knowledge' => [],
-            'Workshop & Labs' => [],
-            'Integration' => [],
-            'Analytics & Strategy' => [],
-        ];
+        foreach ($modules as $feature => $meta) {
+            $groupLabel = $meta['name'] ?? $feature;
+            $entries = [];
 
-        $slugToGroup = [
-            'partner_management' => 'Partner Management',
-            'enablement' => 'Enablement',
-            'enablement_events' => 'Enablement',
-            'blueprints' => 'Enablement',
-            'deal_registration' => 'Deal Registration',
-            'launch_programs' => 'Launch Programs',
-            'project_health' => 'Project Health',
-            'qbr' => 'QBR',
-            'goals_targets' => 'Goals & Targets',
-            'benchmark' => 'Benchmarks',
-            'action_plans' => 'Action Plans',
-            'provisioning' => 'Provisioning',
-            'partner_portal' => 'Partner Portal',
-            'partner_portal_partner' => 'Partner Portal',
-            'ai_agents' => 'AI & Knowledge',
-            'knowledge_base' => 'AI & Knowledge',
-            'zoom_chat' => 'AI & Knowledge',
-            'workshop_delivery' => 'Workshop & Labs',
-            'workshop_labs' => 'Workshop & Labs',
-            'integration_hub' => 'Integration',
-            'mcp_server' => 'Integration',
-            'feature_activation_coe' => 'Analytics & Strategy',
-            'analytics' => 'Analytics & Strategy',
-            'competency' => 'Analytics & Strategy',
-            'strategy' => 'Analytics & Strategy',
-            'idea_room' => 'Analytics & Strategy',
-        ];
-
-        foreach ($modules as $slug => $meta) {
-            $group = $slugToGroup[$slug] ?? 'Other';
-            if (! isset($groups[$group])) {
-                $groups[$group] = [];
+            foreach ($meta['sections'] ?? [] as $sectionKey => $sectionDef) {
+                $entries["{$feature}.{$sectionKey}"] = $sectionDef['label'];
             }
-            $groups[$group][$slug] = $meta['name'] ?? $slug;
+
+            if (! empty($entries)) {
+                $groups[$groupLabel] = $entries;
+            }
         }
 
-        // Remove empty groups
-        return array_filter($groups);
+        return $groups;
     }
 }

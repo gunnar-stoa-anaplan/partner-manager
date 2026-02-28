@@ -107,230 +107,40 @@
         </div>
     </div>
 
-    @php $registry = app(\App\Services\ModuleRegistry::class); @endphp
+    @php
+        $registry = app(\App\Services\ModuleRegistry::class);
+        $partnerTabs = $registry->getPartnerDetailTabs();
+        $serverRenderedSlugs = collect($partnerTabs)->where('server_rendered', true)->pluck('slug')->all();
+    @endphp
 
     {{-- Tab Navigation --}}
     <ul class="nav nav-tabs border-bottom mb-g" id="partner-tabs" role="tablist">
+        @foreach($partnerTabs as $tab)
         <li class="nav-item">
-            <a class="nav-link active" href="#overview" data-tab="overview" role="tab">
-                <i class="fal fa-tachometer-alt me-1 d-none d-md-inline"></i> Overview
+            <a class="nav-link {{ $loop->first ? 'active' : '' }}" href="#{{ $tab['slug'] }}" data-tab="{{ $tab['slug'] }}" role="tab">
+                <i class="fal fa-{{ $tab['icon'] }} me-1 d-none d-md-inline"></i> {{ $tab['label'] }}
+                @if(isset($tab['badge_relation']) && $partner->relationLoaded($tab['badge_relation']))
+                    <span class="badge bg-primary bg-opacity-25 text-primary ms-1">{{ $partner->{$tab['badge_relation']}->count() }}</span>
+                @endif
             </a>
         </li>
-        @if($registry->isEnabled('deal_registration'))
-        <li class="nav-item">
-            <a class="nav-link" href="#pipeline" data-tab="pipeline" role="tab">
-                <i class="fal fa-chart-line me-1 d-none d-md-inline"></i> Pipeline
-                <span class="badge bg-primary bg-opacity-25 text-primary ms-1">{{ $partner->opportunities->count() }}</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#deal-registrations" data-tab="deal-registrations" role="tab">
-                <i class="fal fa-file-text me-1 d-none d-md-inline"></i> Deal Registrations
-                <span class="badge bg-info bg-opacity-25 text-info ms-1">{{ $partner->dealRegistrations->count() }}</span>
-            </a>
-        </li>
-        @endif
-        @if($registry->isEnabled('project_health'))
-        <li class="nav-item">
-            <a class="nav-link" href="#projects" data-tab="projects" role="tab">
-                <i class="fal fa-project-diagram me-1 d-none d-md-inline"></i> Projects
-                <span class="badge bg-info bg-opacity-25 text-info ms-1">{{ $partner->projects->count() }}</span>
-            </a>
-        </li>
-        @endif
-        @if($registry->isEnabled('enablement'))
-        <li class="nav-item">
-            <a class="nav-link" href="#enablement" data-tab="enablement" role="tab">
-                <i class="fal fa-award me-1 d-none d-md-inline"></i> Enablement
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#calendar" data-tab="calendar" role="tab">
-                <i class="fal fa-calendar me-1 d-none d-md-inline"></i> Calendar
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#influencers" data-tab="influencers" role="tab">
-                <i class="fal fa-users me-1 d-none d-md-inline"></i> Influencers
-            </a>
-        </li>
-        @endif
-        <li class="nav-item">
-            <a class="nav-link" href="#resources" data-tab="resources" role="tab">
-                <i class="fal fa-user-hard-hat me-1 d-none d-md-inline"></i> Resources
-            </a>
-        </li>
-        @if($registry->isEnabled('blueprints'))
-        <li class="nav-item">
-            <a class="nav-link" href="#blueprints" data-tab="blueprints" role="tab">
-                <i class="fal fa-layers me-1 d-none d-md-inline"></i> Blueprints
-                <span class="badge bg-primary bg-opacity-25 text-primary ms-1">{{ $partner->blueprintAssignments->count() }}</span>
-            </a>
-        </li>
-        @endif
-        @if($registry->isEnabled('enablement'))
-        <li class="nav-item">
-            <a class="nav-link" href="#app-enablement" data-tab="app-enablement" role="tab">
-                <i class="fal fa-th me-1 d-none d-md-inline"></i> Nicole's View
-            </a>
-        </li>
-        @endif
-        @if($registry->isEnabled('launch_programs'))
-        <li class="nav-item">
-            <a class="nav-link" href="#launch-programs" data-tab="launch-programs" role="tab">
-                <i class="fal fa-rocket me-1 d-none d-md-inline"></i> Launch Programs
-            </a>
-        </li>
-        @endif
-        @if($registry->isEnabled('provisioning'))
-        <li class="nav-item">
-            <a class="nav-link" href="#workspaces" data-tab="workspaces" role="tab">
-                <i class="fal fa-server me-1 d-none d-md-inline"></i> Workspaces
-                <span class="badge bg-info bg-opacity-25 text-info ms-1">{{ $partner->anaplanWorkspaces->count() }}</span>
-            </a>
-        </li>
-        @endif
-        @if($registry->isEnabled('partner_portal'))
-        <li class="nav-item">
-            <a class="nav-link" href="#portal-users" data-tab="portal-users" role="tab">
-                <i class="fal fa-user-shield me-1 d-none d-md-inline"></i> Portal Users
-                <span class="badge bg-info bg-opacity-25 text-info ms-1">{{ $partner->contacts->where('portal_access', true)->count() }}</span>
-            </a>
-        </li>
-        @endif
-        <li class="nav-item">
-            <a class="nav-link" href="#marketplace" data-tab="marketplace" role="tab">
-                <i class="fal fa-store me-1 d-none d-md-inline"></i> Marketplace
-            </a>
-        </li>
+        @endforeach
     </ul>
 
     {{-- Tab Content --}}
     <div id="partner-tab-content">
-        {{-- Overview (server-rendered) --}}
-        <div class="tab-pane" id="tab-overview" style="display: block;">
-            @include('partner.tabs.overview')
+        @foreach($partnerTabs as $tab)
+        <div class="tab-pane" id="tab-{{ $tab['slug'] }}" style="display: {{ $loop->first ? 'block' : 'none' }};">
+            @if(! empty($tab['server_rendered']))
+                @include($tab['partial'])
+            @else
+                <div class="spinner-loader">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Loading {{ strtolower($tab['label']) }} data...</p>
+                </div>
+            @endif
         </div>
-
-        @if($registry->isEnabled('deal_registration'))
-        {{-- Pipeline (AJAX) --}}
-        <div class="tab-pane" id="tab-pipeline" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading pipeline data...</p>
-            </div>
-        </div>
-
-        {{-- Deal Registrations (AJAX) --}}
-        <div class="tab-pane" id="tab-deal-registrations" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading deal registrations...</p>
-            </div>
-        </div>
-        @endif
-
-        @if($registry->isEnabled('project_health'))
-        {{-- Projects (AJAX) --}}
-        <div class="tab-pane" id="tab-projects" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading project data...</p>
-            </div>
-        </div>
-        @endif
-
-        @if($registry->isEnabled('enablement'))
-        {{-- Enablement (AJAX) --}}
-        <div class="tab-pane" id="tab-enablement" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading enablement data...</p>
-            </div>
-        </div>
-
-        {{-- Calendar (AJAX) --}}
-        <div class="tab-pane" id="tab-calendar" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading calendar data...</p>
-            </div>
-        </div>
-
-        {{-- Influencers (AJAX) --}}
-        <div class="tab-pane" id="tab-influencers" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading influencer data...</p>
-            </div>
-        </div>
-        @endif
-
-        {{-- Resources (AJAX) --}}
-        <div class="tab-pane" id="tab-resources" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading resource data...</p>
-            </div>
-        </div>
-
-        @if($registry->isEnabled('blueprints'))
-        {{-- Blueprints (AJAX) --}}
-        <div class="tab-pane" id="tab-blueprints" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading blueprint data...</p>
-            </div>
-        </div>
-        @endif
-
-        @if($registry->isEnabled('enablement'))
-        {{-- App Enablement (AJAX) --}}
-        <div class="tab-pane" id="tab-app-enablement" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading app enablement data...</p>
-            </div>
-        </div>
-        @endif
-
-        @if($registry->isEnabled('launch_programs'))
-        {{-- Launch Programs (AJAX) --}}
-        <div class="tab-pane" id="tab-launch-programs" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading launch programs...</p>
-            </div>
-        </div>
-        @endif
-
-        @if($registry->isEnabled('provisioning'))
-        {{-- Workspaces (AJAX) --}}
-        <div class="tab-pane" id="tab-workspaces" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading workspace data...</p>
-            </div>
-        </div>
-        @endif
-
-        @if($registry->isEnabled('partner_portal'))
-        {{-- Portal Users (AJAX) --}}
-        <div class="tab-pane" id="tab-portal-users" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading portal users...</p>
-            </div>
-        </div>
-        @endif
-
-        {{-- Marketplace (AJAX) --}}
-        <div class="tab-pane" id="tab-marketplace" style="display: none;">
-            <div class="spinner-loader">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading marketplace data...</p>
-            </div>
-        </div>
+        @endforeach
     </div>
 @endsection
 
@@ -340,11 +150,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     var PARTNER_ID = {{ $partner->id }};
     var TAB_BASE_URL = '{{ url("/partners") }}/' + PARTNER_ID + '/tab/';
-    var AJAX_TABS = ['pipeline', 'deal-registrations', 'projects', 'enablement', 'calendar', 'influencers', 'resources', 'blueprints', 'app-enablement', 'launch-programs', 'workspaces', 'portal-users', 'marketplace'];
-    var ALL_TABS = ['overview'].concat(AJAX_TABS);
+    var SERVER_RENDERED = @json($serverRenderedSlugs);
+    var ALL_TABS = @json(collect($partnerTabs)->pluck('slug')->values());
+    var AJAX_TABS = ALL_TABS.filter(function(t) { return SERVER_RENDERED.indexOf(t) === -1; });
 
-    // State
-    var tabLoaded = { overview: true };
+    // State — mark server-rendered tabs as already loaded
+    var tabLoaded = {};
+    SERVER_RENDERED.forEach(function(t) { tabLoaded[t] = true; });
+
     var tabLinks = document.querySelectorAll('#partner-tabs .nav-link');
     var tabPanes = document.querySelectorAll('#partner-tab-content .tab-pane');
 
@@ -451,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle initial hash (direct link like /partners/5#pipeline)
     var initialHash = window.location.hash.replace('#', '');
-    if (initialHash && ALL_TABS.indexOf(initialHash) !== -1 && initialHash !== 'overview') {
+    if (initialHash && ALL_TABS.indexOf(initialHash) !== -1 && SERVER_RENDERED.indexOf(initialHash) === -1) {
         loadTab(initialHash);
     }
 

@@ -14,15 +14,18 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BlueprintController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $status = $request->query('status');
+
         $blueprints = Blueprint::withCount(['outcomes', 'assignments'])
             ->with('outcomes.contentItems')
+            ->when($status, fn ($q) => $q->where('status', $status))
             ->orderBy('category')
             ->orderBy('name')
             ->get();
 
-        return view('admin.blueprints.index', compact('blueprints'));
+        return view('admin.blueprints.index', compact('blueprints', 'status'));
     }
 
     public function create()

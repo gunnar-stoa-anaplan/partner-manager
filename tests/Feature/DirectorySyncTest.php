@@ -35,7 +35,7 @@ class DirectorySyncTest extends TestCase
         $this->coe = User::factory()->coe()->create();
         $this->psm = User::factory()->psm()->create();
 
-        Feature::for(null)->activate('directory_sync_admin');
+        Feature::for(null)->activate('directory_sync');
 
         $this->connection = IntegrationConnection::create([
             'name' => 'Test Directory Sync',
@@ -91,7 +91,7 @@ class DirectorySyncTest extends TestCase
     public function test_admin_bypasses_feature_flag(): void
     {
         // Admins and CoE bypass all feature gating by design (ModuleRegistry::isEnabled)
-        Feature::for(null)->deactivate('directory_sync_admin');
+        Feature::for(null)->deactivate('directory_sync');
 
         $this->actingAs($this->admin)
             ->get(route('directory-sync.index'))

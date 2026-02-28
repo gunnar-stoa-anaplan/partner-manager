@@ -79,7 +79,7 @@ class PartnerController extends Controller
      */
     public function show(string $id)
     {
-        $partner = Partner::with(['projects', 'contacts', 'opportunities', 'leads', 'certifications', 'anaplanWorkspaces', 'blueprintAssignments'])
+        $partner = Partner::with(['projects', 'contacts', 'opportunities', 'leads', 'certifications', 'anaplanWorkspaces', 'blueprintAssignments', 'dealRegistrations', 'portalContacts'])
             ->findOrFail($id);
         $this->authorizePartnerAccess($partner);
 

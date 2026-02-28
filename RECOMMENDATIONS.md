@@ -1,4 +1,4 @@
-# Partner Manager 3 — Recommended Changes
+# Partner Manager — Recommended Changes
 
 Generated: 2026-02-07 | Updated: 2026-02-13
 

@@ -10,7 +10,7 @@
 @section('content')
 <p class="text-muted fst-italic mt-3 mb-4">Use this form to define a new enablement event for the catalog. Set the event type, product area, target audience, and capacity. Once created, you can schedule sessions for this event from the Calendar view and manage registrations from the event detail page.</p>
 
-    @if(app(\App\Services\ModuleRegistry::class)->isEnabled('enablement_events_user'))
+    @if(app(\App\Services\ModuleRegistry::class)->isEnabled('enablement.events'))
     {{-- AI Generate Panel --}}
     <div id="ai-generate-enablement-panel" data-generate-url="{{ route('enablement-events.generate') }}">
         <div class="row mb-3">

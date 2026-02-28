@@ -14,7 +14,14 @@
             <div class="card shadow-0 mb-g">
                 <div class="card-header d-flex align-items-center">
                     <div class="card-title flex-grow-1">Blueprints</div>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 align-items-center">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Filter by status">
+                            <a href="{{ route('blueprints.index') }}" class="btn btn-outline-secondary{{ !$status ? ' active' : '' }}">All</a>
+                            <a href="{{ route('blueprints.index', ['status' => 'published']) }}" class="btn btn-outline-success{{ $status === 'published' ? ' active' : '' }}">Published</a>
+                            <a href="{{ route('blueprints.index', ['status' => 'draft']) }}" class="btn btn-outline-secondary{{ $status === 'draft' ? ' active' : '' }}">Draft</a>
+                            <a href="{{ route('blueprints.index', ['status' => 'submitted']) }}" class="btn btn-outline-info{{ $status === 'submitted' ? ' active' : '' }}">Submitted</a>
+                            <a href="{{ route('blueprints.index', ['status' => 'archived']) }}" class="btn btn-outline-warning{{ $status === 'archived' ? ' active' : '' }}">Archived</a>
+                        </div>
                         <a href="{{ route('blueprints.create') }}" class="btn btn-primary btn-sm">
                             <i class="fal fa-plus me-1"></i> Create Blueprint
                         </a>

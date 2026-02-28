@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class ReportingHierarchyTest extends TestCase
@@ -27,6 +28,8 @@ class ReportingHierarchyTest extends TestCase
         parent::setUp();
 
         $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        Feature::for(null)->activate('partner_management');
 
         $this->admin = User::factory()->admin()->create();
         $this->superAdmin = User::factory()->superAdmin()->create();

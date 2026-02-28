@@ -1,7 +1,7 @@
 /*!
  * Enablement Calendar - FullCalendar for Enablement Sessions
  * Handles three modes: admin, psm, partner
- * Partner Manager 3
+ * Partner Manager
  */
 
 import bootstrap from 'bootstrap/dist/js/bootstrap.min';

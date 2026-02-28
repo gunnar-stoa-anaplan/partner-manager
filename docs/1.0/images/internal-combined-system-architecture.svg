@@ -113,7 +113,7 @@
 
   <!-- PM3 App -->
   <rect x="50" y="548" width="180" height="100" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
-  <text x="140" y="568" text-anchor="middle" font-size="10" font-weight="600" fill="#1e40af">Partner Manager 3</text>
+  <text x="140" y="568" text-anchor="middle" font-size="10" font-weight="600" fill="#1e40af">Partner Manager</text>
   <text x="64" y="586" font-size="8" fill="#6b7280">PHP 8.4 + PHP-FPM</text>
   <text x="64" y="600" font-size="8" fill="#6b7280">Signal Engine (8 proc.)</text>
   <text x="64" y="614" font-size="8" fill="#6b7280">Scheduler, Queue</text>
@@ -162,7 +162,7 @@
 
   <!-- PM3 App (hosted) -->
   <rect x="850" y="548" width="180" height="100" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
-  <text x="940" y="568" text-anchor="middle" font-size="10" font-weight="600" fill="#1e40af">Partner Manager 3</text>
+  <text x="940" y="568" text-anchor="middle" font-size="10" font-weight="600" fill="#1e40af">Partner Manager</text>
   <text x="864" y="586" font-size="8" fill="#6b7280">ECS Fargate task</text>
   <text x="864" y="600" font-size="8" fill="#6b7280">Nginx + PHP-FPM + Supervisor</text>
   <text x="864" y="614" font-size="8" fill="#6b7280">ALB &#8594; custom domain</text>

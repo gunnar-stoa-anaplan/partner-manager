@@ -47,45 +47,82 @@ class Role extends Model
     }
 
     /**
-     * Check if this role has permission for a given module slug.
+     * Check if this role has permission for a given identifier.
+     *
+     * Supports "feature.section" dot notation (exact match) and
+     * bare "feature" (matches any section for that feature).
      */
-    public function hasPermission(string $moduleSlug): bool
+    public function hasPermission(string $identifier): bool
     {
         if ($this->bypass_permissions) {
             return true;
         }
 
-        return $this->permissions->contains('module_slug', $moduleSlug);
+        if (str_contains($identifier, '.')) {
+            return $this->permissions->contains('module_slug', $identifier);
+        }
+
+        $prefix = $identifier.'.';
+
+        return $this->permissions->contains(
+            fn (RolePermission $p) => $p->module_slug === $identifier || str_starts_with($p->module_slug, $prefix),
+        );
     }
 
     /**
-     * Check if this role has write access for a given module slug.
+     * Check if this role has write access for a given identifier.
+     *
+     * Supports "feature.section" and bare "feature" formats.
      */
-    public function hasWritePermission(string $moduleSlug): bool
+    public function hasWritePermission(string $identifier): bool
     {
         if ($this->bypass_permissions) {
             return true;
         }
 
+        if (str_contains($identifier, '.')) {
+            return $this->permissions
+                ->where('module_slug', $identifier)
+                ->where('access_level', 'write')
+                ->isNotEmpty();
+        }
+
+        $prefix = $identifier.'.';
+
         return $this->permissions
-            ->where('module_slug', $moduleSlug)
+            ->filter(fn (RolePermission $p) => $p->module_slug === $identifier || str_starts_with($p->module_slug, $prefix))
             ->where('access_level', 'write')
             ->isNotEmpty();
     }
 
     /**
-     * Get the access level for a given module slug (null if no access).
+     * Get the access level for a given identifier (null if no access).
+     *
+     * For bare "feature" format, returns the highest level across all sections.
      */
-    public function accessLevel(string $moduleSlug): ?string
+    public function accessLevel(string $identifier): ?string
     {
         if ($this->bypass_permissions) {
             return 'write';
         }
 
-        return $this->permissions
-            ->where('module_slug', $moduleSlug)
-            ->first()
-            ?->access_level;
+        if (str_contains($identifier, '.')) {
+            return $this->permissions
+                ->where('module_slug', $identifier)
+                ->first()
+                ?->access_level;
+        }
+
+        $prefix = $identifier.'.';
+        $levels = $this->permissions
+            ->filter(fn (RolePermission $p) => $p->module_slug === $identifier || str_starts_with($p->module_slug, $prefix))
+            ->pluck('access_level');
+
+        if ($levels->contains('write')) {
+            return 'write';
+        }
+
+        return $levels->first();
     }
 
     public function scopeInternal($query)

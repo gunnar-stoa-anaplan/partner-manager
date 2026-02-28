@@ -51,10 +51,6 @@
                 </div>
             </div>
         </div>
-        <div id="net"></div>
+        <div class="hero-bg"></div>
     </section>
-@endsection
-
-@section('scripts')
-    @vite(['resources/scripts/pages/auth-animation.js'])
 @endsection

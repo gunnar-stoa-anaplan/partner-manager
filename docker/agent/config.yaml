@@ -9,7 +9,7 @@ tls:
 
 docker:
   host: "unix:///var/run/docker.sock"
-  app_container: "partner-manager-3-laravel.test-1"
+  app_container: "partner-manager-laravel.test-1"
   app_url: "http://laravel.test:80"
 
 status:

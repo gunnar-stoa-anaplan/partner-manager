@@ -4,8 +4,8 @@ namespace App\Features;
 
 use Laravel\Pennant\Attributes\Name;
 
-#[Name('benchmark')]
-class Benchmark
+#[Name('ai_knowledge')]
+class AiKnowledge
 {
     /**
      * Resolve the feature's initial value.

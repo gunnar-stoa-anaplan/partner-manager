@@ -375,7 +375,7 @@ class ActivationAggregateTest extends TestCase
 
     public function test_benchmark_view_loads_for_admin(): void
     {
-        $this->activateModuleForUser('feature_activation_coe', $this->admin);
+        $this->activateModuleForUser('system_administration', $this->admin);
 
         $response = $this->actingAs($this->admin)->get(route('admin.activation.benchmarks'));
 

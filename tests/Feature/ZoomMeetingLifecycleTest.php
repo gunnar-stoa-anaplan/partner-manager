@@ -12,6 +12,7 @@ use App\Models\WorkshopAttendance;
 use App\Models\ZoomMeeting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
+use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class ZoomMeetingLifecycleTest extends TestCase
@@ -23,6 +24,8 @@ class ZoomMeetingLifecycleTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Feature::for(null)->activate('enablement');
 
         $this->admin = User::factory()->admin()->create();
     }

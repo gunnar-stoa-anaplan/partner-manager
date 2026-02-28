@@ -9,6 +9,7 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class PortalRolesTest extends TestCase
@@ -23,6 +24,9 @@ class PortalRolesTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+
+        Feature::for(null)->activate('partner_management');
+        Feature::for(null)->activate('portal');
 
         $this->psm = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $this->psm->id]);

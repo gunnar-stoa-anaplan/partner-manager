@@ -1,8 +1,8 @@
-# Laravel Sail Quick Start - Partner Manager 3
+# Laravel Sail Quick Start - Partner Manager
 
 ## ✅ Sail is Configured!
 
-Your Partner-Manager-3 project is now ready to run in Docker containers.
+Your partner-manager project is now ready to run in Docker containers.
 
 ---
 
@@ -11,7 +11,7 @@ Your Partner-Manager-3 project is now ready to run in Docker containers.
 ### First Time Setup
 
 ```bash
-cd /Users/gunnar.stoa/Library/CloudStorage/OneDrive-Anaplan/Desktop/Partner-Manager-3
+cd /Users/gunnar.stoa/Library/CloudStorage/OneDrive-Anaplan/Desktop/partner-manager
 
 # Start Sail containers
 ./vendor/bin/sail up -d
@@ -55,7 +55,7 @@ Once Sail is running:
 - **Database:** localhost:33063 (from host machine)
   - Username: `sail`
   - Password: `password`
-  - Database: `partner_manager_3`
+  - Database: `partner_manager`
 
 ---
 
@@ -158,12 +158,12 @@ VITE_PORT=5174          # Vite dev server runs on port 5174
 
 ### Why Different Ports?
 
-This allows you to run **both** partner-manager-2 and Partner-Manager-3 simultaneously:
+This allows you to run **both** partner-manager-2 and partner-manager simultaneously:
 
 | Project | App URL | MySQL Port |
 |---------|---------|------------|
 | partner-manager-2 | http://localhost | 3306 |
-| Partner-Manager-3 | http://localhost:8083 | 33063 |
+| partner-manager | http://localhost:8083 | 33063 |
 
 ---
 
@@ -180,7 +180,7 @@ lsof -i :8083
 cd ../partner-manager-2
 ./vendor/bin/sail down
 
-# Or change ports in Partner-Manager-3/.env
+# Or change ports in partner-manager/.env
 ```
 
 ### Containers Not Starting

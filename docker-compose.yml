@@ -77,7 +77,7 @@ services:
         build:
             context: ../pm-agent
             dockerfile: Dockerfile
-        image: partner-manager-3-pm-agent
+        image: partner-manager-pm-agent
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
             - ./docker/agent/config.yaml:/etc/pm-agent/config.yaml:ro
