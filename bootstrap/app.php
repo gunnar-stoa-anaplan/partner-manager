@@ -43,7 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'integration-hub' => 'integration_hub.hub',
                 'strategy' => 'strategy.strategy',
                 'idea-room' => 'idea_room.room',
-                'zoom-chat' => 'zoom_chat.chat',
+                'zoom-chat' => 'enablement.zoom_chat',
             ];
 
             foreach ($moduleRoutes as $mod => $moduleIdentifier) {

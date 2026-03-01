@@ -31,6 +31,7 @@ class ActivationStep extends Model
         'criteria',
         'is_required',
         'phase',
+        'unlocks_sections',
     ];
 
     /**
@@ -45,6 +46,7 @@ class ActivationStep extends Model
             'tour_steps' => 'array',
             'is_required' => 'boolean',
             'phase' => TrainingPhase::class,
+            'unlocks_sections' => 'array',
         ];
     }
 

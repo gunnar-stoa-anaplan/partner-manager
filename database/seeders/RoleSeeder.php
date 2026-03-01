@@ -51,12 +51,12 @@ class RoleSeeder extends Seeder
         $this->syncPermissions($coe, [
             'ai_knowledge.agents' => 'write',
             'ai_knowledge.knowledge_base' => 'write',
-            'analytics.analysis' => 'write',
-            'blueprints.catalog' => 'write',
-            'blueprints.administration' => 'write',
+            'partner_management.analytics' => 'write',
+            'enablement.blueprints' => 'write',
+            'enablement.blueprint_admin' => 'write',
             'competency.paths' => 'write',
             'competency.administration' => 'write',
-            'directory_sync.sync' => 'write',
+            'integration_hub.directory_sync' => 'write',
             'enablement.calendar' => 'write',
             'enablement.field' => 'write',
             'enablement.events' => 'write',
@@ -68,8 +68,8 @@ class RoleSeeder extends Seeder
             'partner_management.administration' => 'write',
             'strategy.strategy' => 'write',
             'system_administration.admin' => 'write',
-            'workshops.labs' => 'write',
-            'workshops.administration' => 'write',
+            'enablement.workshops' => 'write',
+            'enablement.workshop_admin' => 'write',
         ]);
 
         // Manager
@@ -83,9 +83,9 @@ class RoleSeeder extends Seeder
             'description' => 'Team oversight, reporting hierarchy management, and portfolio-level analytics.',
         ]);
         $this->syncPermissions($manager, [
-            'action_plans.plans' => 'read',
-            'analytics.analysis' => 'read',
-            'blueprints.catalog' => 'read',
+            'launch_programs.action_plans' => 'read',
+            'partner_management.analytics' => 'read',
+            'enablement.blueprints' => 'read',
             'competency.paths' => 'read',
             'deal_registration.deals' => 'read',
             'enablement.calendar' => 'read',
@@ -97,7 +97,7 @@ class RoleSeeder extends Seeder
             'measurement.qbr' => 'read',
             'partner_management.administration' => 'write',
             'partner_management.management' => 'read',
-            'project_health.projects' => 'read',
+            'launch_programs.projects' => 'read',
             'strategy.strategy' => 'read',
         ]);
 
@@ -112,9 +112,9 @@ class RoleSeeder extends Seeder
             'description' => 'Day-to-day partner management, task execution, and field enablement.',
         ]);
         $this->syncPermissions($psm, [
-            'action_plans.plans' => 'write',
-            'analytics.analysis' => 'read',
-            'blueprints.catalog' => 'write',
+            'launch_programs.action_plans' => 'write',
+            'partner_management.analytics' => 'read',
+            'enablement.blueprints' => 'write',
             'competency.paths' => 'write',
             'deal_registration.deals' => 'read',
             'deal_registration.marketplace' => 'write',
@@ -127,11 +127,11 @@ class RoleSeeder extends Seeder
             'measurement.qbr' => 'write',
             'partner_management.management' => 'write',
             'portal.management' => 'write',
-            'project_health.projects' => 'write',
-            'provisioning.provisioning' => 'write',
+            'launch_programs.projects' => 'write',
+            'partner_management.provisioning' => 'write',
             'strategy.strategy' => 'read',
-            'workshops.labs' => 'write',
-            'workshops.administration' => 'write',
+            'enablement.workshops' => 'write',
+            'enablement.workshop_admin' => 'write',
         ]);
 
         // PAM
@@ -145,9 +145,9 @@ class RoleSeeder extends Seeder
             'description' => 'Partner account ownership, relationship management, and commercial oversight.',
         ]);
         $this->syncPermissions($pam, [
-            'action_plans.plans' => 'write',
-            'analytics.analysis' => 'read',
-            'blueprints.catalog' => 'read',
+            'launch_programs.action_plans' => 'write',
+            'partner_management.analytics' => 'read',
+            'enablement.blueprints' => 'read',
             'competency.paths' => 'read',
             'deal_registration.deals' => 'write',
             'deal_registration.business_development' => 'write',
@@ -161,7 +161,7 @@ class RoleSeeder extends Seeder
             'measurement.health' => 'read',
             'measurement.qbr' => 'write',
             'partner_management.management' => 'write',
-            'project_health.projects' => 'read',
+            'launch_programs.projects' => 'read',
             'strategy.strategy' => 'read',
         ]);
 
@@ -192,7 +192,7 @@ class RoleSeeder extends Seeder
                 'sort_order' => 0,
                 'description' => 'Full access to all portal features and team management.',
                 'permissions' => [
-                    'blueprints.catalog' => 'read',
+                    'enablement.blueprints' => 'read',
                     'calendar' => 'write',
                     'cases' => 'write',
                     'certifications' => 'write',
@@ -209,9 +209,9 @@ class RoleSeeder extends Seeder
                     'partner_management.management' => 'read',
                     'portal.partner' => 'write',
                     'path' => 'read',
-                    'project_health.projects' => 'write',
+                    'launch_programs.projects' => 'write',
                     'projects' => 'write',
-                    'provisioning.provisioning' => 'read',
+                    'partner_management.provisioning' => 'read',
                     'measurement.qbr' => 'write',
                     'scorecard' => 'write',
                 ],
@@ -223,7 +223,7 @@ class RoleSeeder extends Seeder
                 'sort_order' => 1,
                 'description' => 'Manages delivery projects, cases, and enablement content.',
                 'permissions' => [
-                    'blueprints.catalog' => 'read',
+                    'enablement.blueprints' => 'read',
                     'calendar' => 'read',
                     'cases' => 'read',
                     'enablement.calendar' => 'read',
@@ -231,7 +231,7 @@ class RoleSeeder extends Seeder
                     'labs' => 'read',
                     'path' => 'read',
                     'portal.partner' => 'read',
-                    'project_health.projects' => 'write',
+                    'launch_programs.projects' => 'write',
                     'projects' => 'write',
                     'workspaces' => 'read',
                 ],
@@ -243,7 +243,7 @@ class RoleSeeder extends Seeder
                 'sort_order' => 2,
                 'description' => 'Manages partner engagement, enablement programs, and goals.',
                 'permissions' => [
-                    'blueprints.catalog' => 'read',
+                    'enablement.blueprints' => 'read',
                     'calendar' => 'read',
                     'cases' => 'read',
                     'enablement.calendar' => 'read',
@@ -252,7 +252,7 @@ class RoleSeeder extends Seeder
                     'launch_programs.programs' => 'read',
                     'path' => 'read',
                     'portal.partner' => 'read',
-                    'project_health.projects' => 'write',
+                    'launch_programs.projects' => 'write',
                     'projects' => 'write',
                 ],
             ],
@@ -263,7 +263,7 @@ class RoleSeeder extends Seeder
                 'sort_order' => 3,
                 'description' => 'Oversees enablement content, certifications, and goal tracking.',
                 'permissions' => [
-                    'blueprints.catalog' => 'read',
+                    'enablement.blueprints' => 'read',
                     'calendar' => 'read',
                     'cases' => 'write',
                     'certifications' => 'read',
@@ -278,8 +278,8 @@ class RoleSeeder extends Seeder
                     'partner_management.management' => 'read',
                     'portal.partner' => 'read',
                     'path' => 'read',
-                    'project_health.projects' => 'write',
-                    'provisioning.provisioning' => 'read',
+                    'launch_programs.projects' => 'write',
+                    'partner_management.provisioning' => 'read',
                     'measurement.qbr' => 'write',
                     'scorecard' => 'read',
                 ],
@@ -291,7 +291,7 @@ class RoleSeeder extends Seeder
                 'sort_order' => 4,
                 'description' => 'View-only access to enablement content and deal registration.',
                 'permissions' => [
-                    'blueprints.catalog' => 'read',
+                    'enablement.blueprints' => 'read',
                     'calendar' => 'read',
                     'deal_registration.deals' => 'read',
                     'enablement.calendar' => 'read',
@@ -306,7 +306,7 @@ class RoleSeeder extends Seeder
                 'sort_order' => 5,
                 'description' => 'Deal registration, enablement content, and calendar.',
                 'permissions' => [
-                    'blueprints.catalog' => 'read',
+                    'enablement.blueprints' => 'read',
                     'calendar' => 'read',
                     'deal_registration.deals' => 'write',
                     'deal_registrations' => 'write',
@@ -337,7 +337,7 @@ class RoleSeeder extends Seeder
                 'sort_order' => 7,
                 'description' => 'Enablement content, cases, and calendar.',
                 'permissions' => [
-                    'blueprints.catalog' => 'read',
+                    'enablement.blueprints' => 'read',
                     'calendar' => 'read',
                     'cases' => 'read',
                     'enablement.calendar' => 'read',
@@ -359,7 +359,7 @@ class RoleSeeder extends Seeder
                     'enablement.calendar' => 'read',
                     'enablement.events' => 'read',
                     'portal.partner' => 'read',
-                    'project_health.projects' => 'write',
+                    'launch_programs.projects' => 'write',
                     'projects' => 'write',
                 ],
             ],

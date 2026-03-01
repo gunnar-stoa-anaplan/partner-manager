@@ -4,20 +4,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Feature Modules
+    | Product Modules — Seed Source
     |--------------------------------------------------------------------------
     |
-    | Each entry defines a feature that can be activated per-instance. Features
-    | contain sections (nav groups) that are independently assignable to roles.
-    | When a feature is inactive (Pennant flag off), ALL its sections, routes,
-    | nav items, and partner detail tabs are completely hidden.
+    | This file is the VERSION-CONTROLLED SEED SOURCE for the `modules` table.
+    | At runtime, module definitions are loaded from the database (not this file).
+    | ModuleSeeder reads this config to populate the database via updateOrCreate.
+    |
+    | To add or modify products:
+    |   1. Edit this file
+    |   2. Run: php artisan db:seed --class=ModuleSeeder
     |
     | Structure:
     |   - sections: nav groups with items; each section maps to a role permission
     |   - extends:  contributions to other features' nav or partner detail tabs
     |   - group:    UI grouping for the Feature Activation dashboard
     |
-    | Permission model: role_permissions use "feature.section" dot notation.
+    | Permission model: role_permissions use "product.section" dot notation.
     | e.g. "launch_programs.programs" => "write"
     |
     */
@@ -30,7 +33,7 @@ return [
 
     'partner_management' => [
         'name' => 'Partner Management',
-        'description' => 'Partner operations, detail views, calendars, and administrative management.',
+        'description' => 'Partner operations, detail views, calendars, analytics, provisioning, and administrative management.',
         'icon' => 'briefcase',
         'group' => 'core',
         'enabled' => env('MODULE_PARTNER_MANAGEMENT', true),
@@ -42,6 +45,23 @@ return [
                     ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'home'],
                     ['label' => 'My Partners', 'route' => 'partners.my', 'icon' => 'users'],
                     ['label' => 'Calendar', 'route' => 'calendar.portfolio', 'icon' => 'calendar'],
+                ],
+            ],
+            'analytics' => [
+                'label' => 'Analytics',
+                'icon' => 'trending-up',
+                'items' => [
+                    ['label' => 'Custom Filters', 'route' => 'custom-filters.index', 'icon' => 'filter'],
+                    ['label' => 'Wizard', 'route' => 'wizard.index', 'icon' => 'compass'],
+                    ['label' => 'Coach', 'route' => 'coach.index', 'icon' => 'message-circle'],
+                ],
+            ],
+            'provisioning' => [
+                'label' => 'Provisioning',
+                'icon' => 'server',
+                'items' => [
+                    ['label' => 'Dashboard', 'route' => 'admin.provisioning-summary', 'icon' => 'home'],
+                    ['label' => 'Workspaces', 'route' => 'admin.provisioning-workspaces.index', 'icon' => 'server'],
                 ],
             ],
             'administration' => [
@@ -58,34 +78,7 @@ return [
                 'tabs' => [
                     ['label' => 'Overview', 'slug' => 'overview', 'icon' => 'tachometer-alt', 'partial' => 'partner.tabs.overview', 'section' => 'management', 'sort' => 0, 'server_rendered' => true],
                     ['label' => 'Resources', 'slug' => 'resources', 'icon' => 'user-hard-hat', 'partial' => 'partner.tabs.resources', 'section' => 'management', 'sort' => 70],
-                ],
-            ],
-        ],
-    ],
-
-    'analytics' => [
-        'name' => 'Analytics',
-        'description' => 'Partner analysis tools: coach, wizard, and custom filters.',
-        'icon' => 'trending-up',
-        'group' => 'core',
-        'enabled' => env('MODULE_ANALYTICS', true),
-        'sections' => [
-            'analysis' => [
-                'label' => 'Analytics',
-                'icon' => 'trending-up',
-                'items' => [
-                    ['label' => 'Custom Filters', 'route' => 'custom-filters.index', 'icon' => 'filter'],
-                    ['label' => 'Wizard', 'route' => 'wizard.index', 'icon' => 'compass'],
-                    ['label' => 'Coach', 'route' => 'coach.index', 'icon' => 'message-circle'],
-                ],
-            ],
-        ],
-        'extends' => [
-            'partner_management.management' => [
-                'items' => [
-                    ['label' => 'Custom Filters', 'route' => 'custom-filters.index', 'icon' => 'filter'],
-                    ['label' => 'Wizard', 'route' => 'wizard.index', 'icon' => 'compass'],
-                    ['label' => 'Coach', 'route' => 'coach.index', 'icon' => 'message-circle'],
+                    ['label' => 'Workspaces', 'slug' => 'workspaces', 'icon' => 'server', 'partial' => 'partner.tabs.workspaces', 'section' => 'provisioning', 'sort' => 80, 'badge_relation' => 'anaplanWorkspaces'],
                 ],
             ],
         ],
@@ -135,7 +128,7 @@ return [
 
     'enablement' => [
         'name' => 'Enablement',
-        'description' => 'Enablement events, calendar, field enablement, influence maps, and administration.',
+        'description' => 'Enablement events, calendar, field enablement, blueprints, workshops, zoom chat, and administration.',
         'icon' => 'layers',
         'group' => 'enablement',
         'enabled' => env('MODULE_ENABLEMENT', true),
@@ -167,6 +160,44 @@ return [
                     ['label' => 'Calendar', 'route' => 'enablement-calendar', 'icon' => 'calendar'],
                 ],
             ],
+            'blueprints' => [
+                'label' => 'Blueprints',
+                'icon' => 'layers',
+                'items' => [
+                    ['label' => 'Dashboard', 'route' => 'admin.blueprint-dashboard', 'icon' => 'home'],
+                    ['label' => 'Blueprints', 'route' => 'blueprints.index', 'icon' => 'layers'],
+                    ['label' => 'Blueprint Assignments', 'route' => 'blueprints.catalog', 'icon' => 'clipboard'],
+                ],
+            ],
+            'blueprint_admin' => [
+                'label' => 'Blueprint Administration',
+                'icon' => 'settings',
+                'items' => [
+                    ['label' => 'Create Blueprint', 'route' => 'blueprints.create', 'icon' => 'plus'],
+                ],
+            ],
+            'workshops' => [
+                'label' => 'Workshops',
+                'icon' => 'check-square',
+                'items' => [
+                    ['label' => 'Labs', 'route' => 'labs.index', 'icon' => 'check-square'],
+                ],
+            ],
+            'workshop_admin' => [
+                'label' => 'Workshop Administration',
+                'icon' => 'settings',
+                'items' => [
+                    ['label' => 'Lab Designer', 'route' => 'labs.create', 'icon' => 'edit'],
+                ],
+            ],
+            'zoom_chat' => [
+                'label' => 'Zoom Chat',
+                'icon' => 'video',
+                'items' => [
+                    ['label' => 'Responders', 'route' => 'zoom_chat.responders.index', 'icon' => 'message-circle'],
+                    ['label' => 'Messages', 'route' => 'zoom_chat.messages.index', 'icon' => 'mail'],
+                ],
+            ],
             'administration' => [
                 'label' => 'Enablement Administration',
                 'icon' => 'settings',
@@ -181,64 +212,8 @@ return [
                     ['label' => 'Enablement', 'slug' => 'enablement', 'icon' => 'award', 'partial' => 'partner.tabs.enablement', 'section' => 'calendar', 'sort' => 40],
                     ['label' => 'Calendar', 'slug' => 'calendar', 'icon' => 'calendar', 'partial' => 'partner.tabs.calendar', 'section' => 'calendar', 'sort' => 45],
                     ['label' => 'Influencers', 'slug' => 'influencers', 'icon' => 'users', 'partial' => 'partner.tabs.influencers', 'section' => 'field', 'sort' => 50],
+                    ['label' => 'Blueprints', 'slug' => 'blueprints', 'icon' => 'layers', 'partial' => 'partner.tabs.blueprints', 'section' => 'blueprints', 'sort' => 60, 'badge_relation' => 'blueprintAssignments'],
                     ['label' => "Nicole's View", 'slug' => 'app-enablement', 'icon' => 'th', 'partial' => 'partner.tabs.app-enablement', 'section' => 'calendar', 'sort' => 65],
-                ],
-            ],
-        ],
-    ],
-
-    'blueprints' => [
-        'name' => 'Blueprints',
-        'description' => 'Blueprint catalog, assignments, enrollments, progress tracking, and administration.',
-        'icon' => 'layers',
-        'group' => 'enablement',
-        'enabled' => env('MODULE_BLUEPRINTS', true),
-        'sections' => [
-            'catalog' => [
-                'label' => 'Blueprints',
-                'icon' => 'layers',
-                'items' => [
-                    ['label' => 'Dashboard', 'route' => 'admin.blueprint-dashboard', 'icon' => 'home'],
-                    ['label' => 'Blueprints', 'route' => 'blueprints.index', 'icon' => 'layers'],
-                    ['label' => 'Blueprint Assignments', 'route' => 'blueprints.catalog', 'icon' => 'clipboard'],
-                ],
-            ],
-            'administration' => [
-                'label' => 'Blueprint Administration',
-                'icon' => 'settings',
-                'items' => [
-                    ['label' => 'Create Blueprint', 'route' => 'blueprints.create', 'icon' => 'plus'],
-                ],
-            ],
-        ],
-        'extends' => [
-            'partner_detail' => [
-                'tabs' => [
-                    ['label' => 'Blueprints', 'slug' => 'blueprints', 'icon' => 'layers', 'partial' => 'partner.tabs.blueprints', 'section' => 'catalog', 'sort' => 60, 'badge_relation' => 'blueprintAssignments'],
-                ],
-            ],
-        ],
-    ],
-
-    'workshops' => [
-        'name' => 'Workshops',
-        'description' => 'Workshop labs, checkpoints, facilitator dashboard, and workshop delivery.',
-        'icon' => 'check-square',
-        'group' => 'enablement',
-        'enabled' => env('MODULE_WORKSHOPS', true),
-        'sections' => [
-            'labs' => [
-                'label' => 'Workshops',
-                'icon' => 'check-square',
-                'items' => [
-                    ['label' => 'Labs', 'route' => 'labs.index', 'icon' => 'check-square'],
-                ],
-            ],
-            'administration' => [
-                'label' => 'Workshop Administration',
-                'icon' => 'settings',
-                'items' => [
-                    ['label' => 'Lab Designer', 'route' => 'labs.create', 'icon' => 'edit'],
                 ],
             ],
         ],
@@ -252,7 +227,7 @@ return [
 
     'launch_programs' => [
         'name' => 'Launch Programs',
-        'description' => 'Launch programs, milestones, partner nominations, and participant tracking.',
+        'description' => 'Launch programs, milestones, action plans, task board, project health, and partner nominations.',
         'icon' => 'zap',
         'group' => 'engagement',
         'enabled' => env('MODULE_LAUNCH_PROGRAMS', true),
@@ -263,6 +238,22 @@ return [
                 'items' => [
                     ['label' => 'Dashboard', 'route' => 'admin.launch-programs.dashboard', 'icon' => 'home'],
                     ['label' => 'Programs', 'route' => 'admin.launch-programs.index', 'icon' => 'list'],
+                ],
+            ],
+            'action_plans' => [
+                'label' => 'Action Plans',
+                'icon' => 'list',
+                'items' => [
+                    ['label' => 'Action Plans', 'route' => 'plan.action-plans.index', 'icon' => 'list'],
+                    ['label' => 'Task Board', 'route' => 'plan.tasks.index', 'icon' => 'trello'],
+                ],
+            ],
+            'projects' => [
+                'label' => 'Project Health',
+                'icon' => 'clipboard',
+                'items' => [
+                    ['label' => 'Projects', 'route' => 'projects.index', 'icon' => 'folder'],
+                    ['label' => 'Risks', 'route' => 'projects.risks', 'icon' => 'alert-triangle'],
                 ],
             ],
             'administration' => [
@@ -282,6 +273,7 @@ return [
             'partner_detail' => [
                 'tabs' => [
                     ['label' => 'Launch Programs', 'slug' => 'launch-programs', 'icon' => 'rocket', 'partial' => 'partner.tabs.launch-programs', 'section' => 'programs', 'sort' => 75],
+                    ['label' => 'Projects', 'slug' => 'projects', 'icon' => 'project-diagram', 'partial' => 'partner.tabs.projects', 'section' => 'projects', 'sort' => 20, 'badge_relation' => 'projects'],
                 ],
             ],
         ],
@@ -359,49 +351,6 @@ return [
                 'icon' => 'settings',
                 'items' => [
                     ['label' => 'Goal Templates', 'route' => 'admin.goal-templates.index', 'icon' => 'copy'],
-                ],
-            ],
-        ],
-    ],
-
-    'action_plans' => [
-        'name' => 'Action Plans',
-        'description' => 'Action plan management, task board, and task tracking.',
-        'icon' => 'list',
-        'group' => 'engagement',
-        'enabled' => env('MODULE_ACTION_PLANS', true),
-        'sections' => [
-            'plans' => [
-                'label' => 'Action Plans',
-                'icon' => 'list',
-                'items' => [
-                    ['label' => 'Action Plans', 'route' => 'plan.action-plans.index', 'icon' => 'list'],
-                    ['label' => 'Task Board', 'route' => 'plan.tasks.index', 'icon' => 'trello'],
-                ],
-            ],
-        ],
-    ],
-
-    'project_health' => [
-        'name' => 'Project Health',
-        'description' => 'Project tracking, risk categories, delivery metrics, and health dashboards.',
-        'icon' => 'clipboard',
-        'group' => 'engagement',
-        'enabled' => env('MODULE_PROJECT_HEALTH', true),
-        'sections' => [
-            'projects' => [
-                'label' => 'Project Health',
-                'icon' => 'clipboard',
-                'items' => [
-                    ['label' => 'Projects', 'route' => 'projects.index', 'icon' => 'folder'],
-                    ['label' => 'Risks', 'route' => 'projects.risks', 'icon' => 'alert-triangle'],
-                ],
-            ],
-        ],
-        'extends' => [
-            'partner_detail' => [
-                'tabs' => [
-                    ['label' => 'Projects', 'slug' => 'projects', 'icon' => 'project-diagram', 'partial' => 'partner.tabs.projects', 'section' => 'projects', 'sort' => 20, 'badge_relation' => 'projects'],
                 ],
             ],
         ],
@@ -525,24 +474,6 @@ return [
         ],
     ],
 
-    'zoom_chat' => [
-        'name' => 'Zoom Chat Responder',
-        'description' => 'AI-powered chat responders for Zoom meetings and webcasts.',
-        'icon' => 'video',
-        'group' => 'intelligence',
-        'enabled' => env('MODULE_ZOOM_CHAT', true),
-        'sections' => [
-            'chat' => [
-                'label' => 'Zoom Chat',
-                'icon' => 'video',
-                'items' => [
-                    ['label' => 'Responders', 'route' => 'zoom_chat.responders.index', 'icon' => 'message-circle'],
-                    ['label' => 'Messages', 'route' => 'zoom_chat.messages.index', 'icon' => 'mail'],
-                ],
-            ],
-        ],
-    ],
-
     /*
     |--------------------------------------------------------------------------
     | Infrastructure
@@ -551,7 +482,7 @@ return [
 
     'integration_hub' => [
         'name' => 'Integration Hub',
-        'description' => 'Data connectors, field mapping, import/export jobs, MCP server, and API tokens.',
+        'description' => 'Data connectors, field mapping, import/export jobs, MCP server, API tokens, and directory sync.',
         'icon' => 'refresh-cw',
         'group' => 'infrastructure',
         'enabled' => env('MODULE_INTEGRATION_HUB', true),
@@ -570,6 +501,13 @@ return [
                     ['label' => 'Data Imports', 'route' => 'imports.index', 'icon' => 'upload-cloud'],
                 ],
             ],
+            'directory_sync' => [
+                'label' => 'Directory Sync',
+                'icon' => 'upload-cloud',
+                'items' => [
+                    ['label' => 'Directory Sync', 'route' => 'directory-sync.index', 'icon' => 'upload-cloud'],
+                ],
+            ],
             'mcp' => [
                 'label' => 'MCP Server',
                 'icon' => 'cpu',
@@ -582,23 +520,6 @@ return [
                 'icon' => 'key',
                 'items' => [
                     ['label' => 'Token Management', 'route' => 'admin.api-tokens', 'icon' => 'key'],
-                ],
-            ],
-        ],
-    ],
-
-    'directory_sync' => [
-        'name' => 'Directory Sync',
-        'description' => 'CSV directory import for automated user provisioning and manager hierarchy sync.',
-        'icon' => 'upload-cloud',
-        'group' => 'infrastructure',
-        'enabled' => env('MODULE_DIRECTORY_SYNC', true),
-        'sections' => [
-            'sync' => [
-                'label' => 'Directory Sync',
-                'icon' => 'upload-cloud',
-                'items' => [
-                    ['label' => 'Directory Sync', 'route' => 'directory-sync.index', 'icon' => 'upload-cloud'],
                 ],
             ],
         ],
@@ -628,31 +549,6 @@ return [
             'partner_detail' => [
                 'tabs' => [
                     ['label' => 'Portal Users', 'slug' => 'portal-users', 'icon' => 'user-shield', 'partial' => 'partner.tabs.portal-users', 'section' => 'management', 'sort' => 85, 'badge_relation' => 'portalContacts'],
-                ],
-            ],
-        ],
-    ],
-
-    'provisioning' => [
-        'name' => 'Provisioning',
-        'description' => 'Workspace provisioning, version configuration, and partner assignment.',
-        'icon' => 'server',
-        'group' => 'infrastructure',
-        'enabled' => env('MODULE_PROVISIONING', true),
-        'sections' => [
-            'provisioning' => [
-                'label' => 'Provisioning',
-                'icon' => 'server',
-                'items' => [
-                    ['label' => 'Dashboard', 'route' => 'admin.provisioning-summary', 'icon' => 'home'],
-                    ['label' => 'Workspaces', 'route' => 'admin.provisioning-workspaces.index', 'icon' => 'server'],
-                ],
-            ],
-        ],
-        'extends' => [
-            'partner_detail' => [
-                'tabs' => [
-                    ['label' => 'Workspaces', 'slug' => 'workspaces', 'icon' => 'server', 'partial' => 'partner.tabs.workspaces', 'section' => 'provisioning', 'sort' => 80, 'badge_relation' => 'anaplanWorkspaces'],
                 ],
             ],
         ],

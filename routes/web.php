@@ -3,6 +3,7 @@
 use App\Http\Controllers\ActionPlanController;
 use App\Http\Controllers\Admin\ActivationBenchmarkController;
 use App\Http\Controllers\Admin\FeatureActivationController;
+use App\Http\Controllers\Admin\ProductBundleController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AiAgentsController;
 use App\Http\Controllers\AlertController;
@@ -121,6 +122,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/steps/{step}/tour-data', [\App\Http\Controllers\TrainingController::class, 'tourData'])->name('step.tour-data');
     });
 
+    /*
+    |--------------------------------------------------------------------------
+    | Feature Preview (locked features landing page)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/features/{module:slug}/preview', \App\Http\Controllers\FeaturePreviewController::class)->name('features.preview');
+
     Route::get('/dashboard', function () {
         return view('index');
     })->name('dashboard')->middleware('module:partner_management.management');
@@ -174,7 +182,7 @@ Route::middleware(['auth'])->group(function () {
     | Project Delivery (gated by project_health feature flag)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('module:project_health.projects')->group(function () {
+    Route::middleware('module:launch_programs.projects')->group(function () {
         Route::get('/projects/risks', [ProjectController::class, 'risks'])->name('projects.risks');
         Route::resource('projects', ProjectController::class);
     });
@@ -214,7 +222,7 @@ Route::middleware(['auth'])->group(function () {
     | Analysis & Insights
     |--------------------------------------------------------------------------
     */
-    Route::middleware('module:analytics.analysis')->group(function () {
+    Route::middleware('module:partner_management.analytics')->group(function () {
         Route::get('/custom-filters', [PartnerController::class, 'analysis'])->name('custom-filters.index');
         Route::get('/wizard', [PartnerController::class, 'guidedAnalysis'])->name('wizard.index');
         Route::get('/coach', [PartnerController::class, 'partnerCoach'])->name('coach.index');
@@ -262,7 +270,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Blueprint Progress API (gated by blueprints.catalog)
-        Route::post('/blueprint-progress/toggle', [BlueprintAssignmentController::class, 'toggleProgress'])->name('blueprint-progress.toggle')->middleware('module:blueprints.catalog');
+        Route::post('/blueprint-progress/toggle', [BlueprintAssignmentController::class, 'toggleProgress'])->name('blueprint-progress.toggle')->middleware('module:enablement.blueprints');
     });
 
     /*
@@ -354,7 +362,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Lab Facilitator Dashboard (gated by workshops.labs)
-    Route::middleware('module:workshops.labs')->group(function () {
+    Route::middleware('module:enablement.workshops')->group(function () {
         Route::get('/enablement-sessions/{session}/lab-dashboard', [LabFacilitatorController::class, 'dashboard'])->name('sessions.lab-dashboard');
         Route::post('/enablement-sessions/{session}/validate-all', [LabFacilitatorController::class, 'validateAll'])->name('sessions.validate-all');
         Route::post('/lab-participants/{participant}/checkpoints/{checkpoint}/validate', [LabFacilitatorController::class, 'validateParticipant'])->name('lab-participants.validate');
@@ -365,7 +373,7 @@ Route::middleware(['auth'])->group(function () {
     | Blueprint Assignments & Enrollments (gated by blueprints module)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('module:blueprints.catalog')->group(function () {
+    Route::middleware('module:enablement.blueprints')->group(function () {
         Route::get('/blueprints-catalog', [BlueprintAssignmentController::class, 'catalog'])->name('blueprints.catalog');
         Route::get('/blueprints-catalog/{blueprint}', [BlueprintAssignmentController::class, 'blueprintDetail'])->name('blueprints.detail');
         Route::post('/blueprints-catalog/{blueprint}/assign', [BlueprintAssignmentController::class, 'assign'])->name('blueprints.assign');
@@ -381,7 +389,7 @@ Route::middleware(['auth'])->group(function () {
     | Blueprint Owner Access (non-admin users who own a blueprint)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('module:blueprints.catalog')->group(function () {
+    Route::middleware('module:enablement.blueprints')->group(function () {
         Route::get('/my-blueprints/{blueprint}/edit', [BlueprintController::class, 'ownerEdit'])->name('blueprints.owner.edit');
         Route::put('/my-blueprints/{blueprint}', [BlueprintController::class, 'ownerUpdate'])->name('blueprints.owner.update');
         Route::post('/my-blueprints/{blueprint}/submit', [BlueprintController::class, 'submit'])->name('blueprints.owner.submit');
@@ -476,7 +484,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Workshop Labs (gated by workshops.administration)
-        Route::middleware('module:workshops.administration')->group(function () {
+        Route::middleware('module:enablement.workshop_admin')->group(function () {
             Route::post('/labs/generate', [LabController::class, 'generate'])->name('labs.generate');
             Route::resource('labs', LabController::class);
             Route::post('/labs/{lab}/publish', [LabController::class, 'publish'])->name('labs.publish');
@@ -499,7 +507,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Provisioning Admin (gated by provisioning.provisioning)
-        Route::middleware('module:provisioning.provisioning')->group(function () {
+        Route::middleware('module:partner_management.provisioning')->group(function () {
             Route::get('/provisioning-workspaces', [AnaplanProvisioningController::class, 'index'])->name('admin.provisioning-workspaces.index');
             Route::put('/provisioning-workspaces/{workspace}/assign', [AnaplanProvisioningController::class, 'assignPartner'])->name('admin.provisioning-workspaces.assign');
             Route::post('/provisioning-workspaces/sync', [AnaplanProvisioningController::class, 'sync'])->name('admin.provisioning-workspaces.sync');
@@ -534,7 +542,7 @@ Route::middleware(['auth'])->group(function () {
     | Blueprint Admin (admin + CoE, gated by blueprints module)
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['admin:coe', 'module:blueprints.administration'])->group(function () {
+    Route::middleware(['admin:coe', 'module:enablement.blueprint_admin'])->group(function () {
         // Blueprint CRUD
         Route::resource('blueprints', BlueprintController::class);
         Route::post('/blueprints/{blueprint}/duplicate', [BlueprintController::class, 'duplicate'])->name('blueprints.duplicate');
@@ -555,7 +563,7 @@ Route::middleware(['auth'])->group(function () {
     | Enablement Events — Admin (event/session CRUD, gated by enablement.administration)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('module:enablement.administration')->group(function () {
+    Route::middleware(['admin:coe', 'module:enablement.administration'])->group(function () {
         Route::post('/enablement-events/generate', [EnablementEventController::class, 'generate'])->name('enablement-events.generate');
         Route::resource('enablement-events', EnablementEventController::class);
         Route::get('/enablement-events/{id}/sessions/create', [EnablementEventController::class, 'createSession'])->name('enablement-events.sessions.create');
@@ -584,7 +592,7 @@ Route::middleware(['auth'])->group(function () {
     | Directory Sync (gated by directory_sync_admin module permission)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('module:directory_sync.sync')->group(function () {
+    Route::middleware('module:integration_hub.directory_sync')->group(function () {
         Route::get('/directory-sync', [DirectorySyncController::class, 'index'])->name('directory-sync.index');
         Route::post('/directory-sync/upload', [DirectorySyncController::class, 'upload'])->name('directory-sync.upload');
     });
@@ -597,6 +605,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['can:manage-activation'])->group(function () {
         Route::get('/activation/flags', [FeatureActivationController::class, 'flags'])->name('admin.activation.flags');
         Route::post('/activation/toggle', [FeatureActivationController::class, 'toggle'])->name('admin.activation.toggle');
+        Route::put('/activation/training-mode', [FeatureActivationController::class, 'updateTrainingMode'])->name('admin.activation.training-mode');
         Route::get('/activation/progression', [FeatureActivationController::class, 'progression'])->name('admin.activation.progression');
         Route::get('/activation/log', [FeatureActivationController::class, 'log'])->name('admin.activation.log');
 
@@ -614,8 +623,20 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/activation/paths/{path}/assignments', [FeatureActivationController::class, 'assignUsers'])->name('admin.activation.paths.assign-users');
         Route::post('/activation/paths/{path}/assignments/role', [FeatureActivationController::class, 'assignRole'])->name('admin.activation.paths.assign-role');
         Route::delete('/activation/paths/{path}/assignments/{user}', [FeatureActivationController::class, 'unassignUser'])->name('admin.activation.paths.unassign-user');
+        Route::post('/activation/paths/{path}/assignments/{user}/bypass', [FeatureActivationController::class, 'bypassTraining'])->name('admin.activation.paths.bypass-training');
+        Route::delete('/activation/paths/{path}/assignments/{user}/bypass', [FeatureActivationController::class, 'revokeBypass'])->name('admin.activation.paths.revoke-bypass');
         Route::get('/activation/users/{user}/progress', [FeatureActivationController::class, 'userProgress'])->name('admin.activation.user-progress');
         Route::get('/activation/benchmarks', ActivationBenchmarkController::class)->name('admin.activation.benchmarks');
+
+        // Product Bundles
+        Route::get('/activation/products', [ProductBundleController::class, 'index'])->name('admin.products.index');
+        Route::get('/activation/products/{module}', [ProductBundleController::class, 'show'])->name('admin.products.show');
+        Route::put('/activation/products/{module}/sections/{sectionKey}', [ProductBundleController::class, 'updateSection'])->name('admin.products.sections.update');
+        Route::post('/activation/products/{module}/sections', [ProductBundleController::class, 'addSection'])->name('admin.products.sections.store');
+        Route::delete('/activation/products/{module}/sections/{sectionKey}', [ProductBundleController::class, 'removeSection'])->name('admin.products.sections.destroy');
+        Route::post('/activation/products/{module}/sections/{sectionKey}/items', [ProductBundleController::class, 'addItem'])->name('admin.products.items.store');
+        Route::put('/activation/products/{module}/sections/{sectionKey}/items/{itemIndex}', [ProductBundleController::class, 'updateItem'])->name('admin.products.items.update');
+        Route::delete('/activation/products/{module}/sections/{sectionKey}/items/{itemIndex}', [ProductBundleController::class, 'removeItem'])->name('admin.products.items.destroy');
     });
 
     /*
@@ -641,7 +662,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Task Board (gated by action_plans.plans)
-        Route::middleware('module:action_plans.plans')->group(function () {
+        Route::middleware('module:launch_programs.action_plans')->group(function () {
             Route::get('/tasks', [TaskBoardController::class, 'index'])->name('tasks.index');
             Route::post('/tasks', [TaskBoardController::class, 'store'])->name('tasks.store');
             Route::put('/tasks/{task}/status', [TaskBoardController::class, 'updateStatus'])->name('tasks.update-status');
@@ -658,7 +679,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Action Plans (gated by action_plans.plans)
-        Route::middleware('module:action_plans.plans')->group(function () {
+        Route::middleware('module:launch_programs.action_plans')->group(function () {
             Route::get('/action-plans', [ActionPlanController::class, 'index'])->name('action-plans.index');
             Route::post('/action-plans', [ActionPlanController::class, 'store'])->name('action-plans.store');
             Route::put('/action-plans/{plan}', [ActionPlanController::class, 'update'])->name('action-plans.update');

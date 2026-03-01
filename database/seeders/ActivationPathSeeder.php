@@ -93,21 +93,21 @@ class ActivationPathSeeder extends Seeder
                 }
             }
 
-            // If path is marked as already unlocked, activate in Pennant
-            // and mark the primary user as completed
-            if ($def['unlocked'] ?? false) {
-                Feature::for(null)->activate($def['feature_slug']);
+            // Activate all features in Pennant — bypass_permissions users see
+            // everything regardless, but non-bypass users need flags active.
+            Feature::for(null)->activate($def['feature_slug']);
 
+            // If path is marked as already unlocked, mark the primary user as completed
+            if ($def['unlocked'] ?? false) {
                 if ($primaryUser && $assignees->contains('id', $primaryUser->id)) {
                     $path->users()->updateExistingPivot($primaryUser->id, [
                         'completed_at' => now(),
                     ]);
                 }
 
-                $this->command->info("  {$def['name']} — {$path->steps()->count()} steps, {$assignees->count()} users assigned ✓ ACTIVATED");
+                $this->command->info("  {$def['name']} — {$path->steps()->count()} steps, {$assignees->count()} users assigned ✓ UNLOCKED");
             } else {
-                Feature::for(null)->deactivate($def['feature_slug']);
-                $this->command->info("  {$def['name']} — {$path->steps()->count()} steps, {$assignees->count()} users assigned");
+                $this->command->info("  {$def['name']} — {$path->steps()->count()} steps, {$assignees->count()} users assigned ✓ ACTIVATED");
             }
         }
 
@@ -154,19 +154,6 @@ class ActivationPathSeeder extends Seeder
                 ],
             ],
 
-            // ── Analytics ── not started
-            [
-                'feature_slug' => 'analytics',
-                'name' => 'Analytics',
-                'description' => 'Steps to unlock portfolio analytics, revenue analysis, and custom filters.',
-                'steps' => [
-                    ['name' => 'Complete analytics overview training', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the Analytics overview training.', 'phase' => 'tell'],
-                    ['name' => 'Import revenue data', 'type' => 'data_populated', 'target' => 1, 'description' => 'Import or populate revenue data for at least one partner.', 'phase' => 'show'],
-                    ['name' => 'Create first custom filter', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Save a custom filter for portfolio analysis.', 'phase' => 'show'],
-                    ['name' => 'Generate portfolio report', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Run a portfolio analytics report.', 'phase' => 'do'],
-                ],
-            ],
-
             // ── Competency ── not started
             [
                 'feature_slug' => 'competency',
@@ -191,32 +178,6 @@ class ActivationPathSeeder extends Seeder
                     ['name' => 'Create an enablement event', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Create at least one enablement event in the catalog.', 'phase' => 'show'],
                     ['name' => 'Schedule 5 enablement events', 'type' => 'usage_threshold', 'target' => 5, 'description' => 'Create at least 5 enablement events on the calendar.', 'phase' => 'do'],
                     ['name' => '10 partner contacts registered', 'type' => 'metric_threshold', 'target' => 10, 'description' => 'At least 10 partner contacts registered for events.', 'phase' => 'do'],
-                ],
-            ],
-
-            // ── Blueprints ── not started
-            [
-                'feature_slug' => 'blueprints',
-                'name' => 'Blueprints',
-                'description' => 'Steps to unlock blueprint catalog, assignments, enrollments, and progress tracking.',
-                'steps' => [
-                    ['name' => 'Complete blueprints training', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the Blueprints training module.', 'phase' => 'tell'],
-                    ['name' => 'Create first blueprint', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Publish at least one enablement blueprint.', 'phase' => 'show'],
-                    ['name' => 'Assign blueprint to 3 partners', 'type' => 'usage_threshold', 'target' => 3, 'description' => 'Assign a blueprint to at least 3 partners.', 'phase' => 'show'],
-                    ['name' => 'Track first blueprint completion', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Have at least one partner complete a blueprint milestone.', 'phase' => 'do'],
-                ],
-            ],
-
-            // ── Workshops (absorbs workshop_labs) ── not started
-            [
-                'feature_slug' => 'workshops',
-                'name' => 'Workshops',
-                'description' => 'Steps to unlock workshop labs, checkpoints, facilitator dashboard, and delivery.',
-                'steps' => [
-                    ['name' => 'Complete workshop training', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the Workshops training module.', 'phase' => 'tell'],
-                    ['name' => 'Create a workshop lab', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Create at least one workshop lab with a golden model.', 'phase' => 'show'],
-                    ['name' => 'Publish lab with checkpoints', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Publish a lab with at least one checkpoint defined.', 'phase' => 'show'],
-                    ['name' => 'Complete a lab checkpoint', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Complete at least one checkpoint in a workshop lab.', 'phase' => 'do'],
                 ],
             ],
 
@@ -256,32 +217,6 @@ class ActivationPathSeeder extends Seeder
                     ['name' => 'Create first goal template', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Create at least one goal template for partner assignments.', 'phase' => 'show'],
                     ['name' => 'Assign goals to 5 partners', 'type' => 'usage_threshold', 'target' => 5, 'description' => 'Assign goals to at least 5 different partners.', 'phase' => 'show'],
                     ['name' => 'Record first actual value', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Record at least one actual value against an assigned goal.', 'phase' => 'do'],
-                ],
-            ],
-
-            // ── Action Plans ── not started
-            [
-                'feature_slug' => 'action_plans',
-                'name' => 'Action Plans',
-                'description' => 'Steps to unlock action plan templates, categories, assignment rules, and task board.',
-                'steps' => [
-                    ['name' => 'Complete action plans training', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the Action Plans training module.', 'phase' => 'tell'],
-                    ['name' => 'Create action plan template', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Create at least one action plan template.', 'phase' => 'show'],
-                    ['name' => 'Add items to 3 action plans', 'type' => 'usage_threshold', 'target' => 3, 'description' => 'Add action items to at least 3 different plans.', 'phase' => 'show'],
-                    ['name' => 'Complete 5 action items', 'type' => 'usage_threshold', 'target' => 5, 'description' => 'Mark at least 5 action items as complete across all plans.', 'phase' => 'do'],
-                ],
-            ],
-
-            // ── Project Health ── not started
-            [
-                'feature_slug' => 'project_health',
-                'name' => 'Project Health',
-                'description' => 'Steps to unlock project tracking, risk categories, delivery metrics, and health dashboards.',
-                'steps' => [
-                    ['name' => 'Complete project health training', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the Project Health training module.', 'phase' => 'tell'],
-                    ['name' => 'Import project data', 'type' => 'data_populated', 'target' => 1, 'description' => 'Import or create initial project records.', 'phase' => 'show'],
-                    ['name' => 'Track 10 active projects', 'type' => 'metric_threshold', 'target' => 10, 'description' => 'Have at least 10 projects in active tracking.', 'phase' => 'show'],
-                    ['name' => 'Log first risk entry', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Log at least one risk against a project.', 'phase' => 'do'],
                 ],
             ],
 
@@ -336,18 +271,6 @@ class ActivationPathSeeder extends Seeder
                 ],
             ],
 
-            // ── Zoom Chat ── not started
-            [
-                'feature_slug' => 'zoom_chat',
-                'name' => 'Zoom Chat',
-                'description' => 'Steps to unlock Zoom Chat integration and webhook configuration.',
-                'steps' => [
-                    ['name' => 'Complete Zoom Chat training', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the Zoom Chat integration training.', 'phase' => 'tell'],
-                    ['name' => 'Configure Zoom credentials', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Set up Zoom API credentials and webhook URL.', 'phase' => 'show'],
-                    ['name' => 'Receive first webhook event', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Verify a webhook event is received from Zoom.', 'phase' => 'do'],
-                ],
-            ],
-
             // ── Integration Hub (absorbs mcp_server) ── not started
             [
                 'feature_slug' => 'integration_hub',
@@ -361,18 +284,6 @@ class ActivationPathSeeder extends Seeder
                 ],
             ],
 
-            // ── Directory Sync ── not started
-            [
-                'feature_slug' => 'directory_sync',
-                'name' => 'Directory Sync',
-                'description' => 'Steps to unlock CSV user sync and directory management.',
-                'steps' => [
-                    ['name' => 'Complete directory sync training', 'type' => 'training_completed', 'target' => 1, 'description' => 'Finish the Directory Sync training module.', 'phase' => 'tell'],
-                    ['name' => 'Upload first CSV', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Upload a CSV file for user synchronization.', 'phase' => 'show'],
-                    ['name' => 'Review sync results', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Review and confirm sync results after upload.', 'phase' => 'do'],
-                ],
-            ],
-
             // ── Portal (absorbs partner_portal + partner_portal_partner) ── not started
             [
                 'feature_slug' => 'portal',
@@ -383,19 +294,6 @@ class ActivationPathSeeder extends Seeder
                     ['name' => 'Configure portal branding', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Set up portal branding, logo, and theme colors.', 'phase' => 'show'],
                     ['name' => 'Onboard 3 portal contacts', 'type' => 'usage_threshold', 'target' => 3, 'description' => 'Create at least 3 portal contacts with access.', 'phase' => 'show'],
                     ['name' => 'Verify portal login flow', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Confirm at least one partner contact can log into the portal.', 'phase' => 'do'],
-                ],
-            ],
-
-            // ── Provisioning ── not started
-            [
-                'feature_slug' => 'provisioning',
-                'name' => 'Provisioning',
-                'description' => 'Steps to unlock workspace provisioning, version configuration, and partner assignment.',
-                'steps' => [
-                    ['name' => 'Configure Anaplan credentials', 'type' => 'data_populated', 'target' => 1, 'description' => 'Connect to Anaplan for workspace sync.', 'phase' => 'tell'],
-                    ['name' => 'Sync workspaces', 'type' => 'feature_usage', 'target' => 1, 'description' => 'Run initial workspace sync from Anaplan.', 'phase' => 'show'],
-                    ['name' => 'Assign workspaces to 5 partners', 'type' => 'usage_threshold', 'target' => 5, 'description' => 'Assign workspaces to at least 5 different partners.', 'phase' => 'show'],
-                    ['name' => '30 days of usage data', 'type' => 'time_elapsed', 'target' => 30, 'description' => 'Allow 30 days for model activity data to accumulate.', 'phase' => 'do'],
                 ],
             ],
 

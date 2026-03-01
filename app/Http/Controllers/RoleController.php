@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SaveRoleRequest;
 use App\Models\Role;
 use App\Models\RolePermission;
+use App\Services\ModuleRegistry;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -128,7 +129,7 @@ class RoleController extends Controller
      */
     private function getModuleGroups(): array
     {
-        $modules = config('modules', []);
+        $modules = app(ModuleRegistry::class)->allModules();
 
         // Build groups from config — each feature becomes a group, sections become entries
         $groups = [];

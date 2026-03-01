@@ -34,8 +34,8 @@ class BlueprintFeatureTest extends TestCase
         $this->admin = User::factory()->admin()->create();
         $this->psm = User::factory()->psm()->create();
         $this->partner = Partner::factory()->create(['user_id' => $this->psm->id]);
-        $this->activateModuleForUser('blueprints', $this->admin);
-        $this->activateModuleForUser('blueprints', $this->psm);
+        $this->activateModuleForUser('enablement', $this->admin);
+        $this->activateModuleForUser('enablement', $this->psm);
     }
 
     // ─── Admin CRUD ─────────────────────────────────────────────
@@ -575,7 +575,7 @@ class BlueprintFeatureTest extends TestCase
     public function test_owner_can_edit_their_blueprint(): void
     {
         $owner = User::factory()->psm()->create();
-        $this->activateModuleForUser('blueprints', $owner);
+        $this->activateModuleForUser('enablement', $owner);
         $blueprint = Blueprint::factory()->withOwner($owner)->create([
             'created_by' => $this->admin->id,
         ]);
@@ -590,7 +590,7 @@ class BlueprintFeatureTest extends TestCase
     public function test_owner_can_update_their_blueprint(): void
     {
         $owner = User::factory()->psm()->create();
-        $this->activateModuleForUser('blueprints', $owner);
+        $this->activateModuleForUser('enablement', $owner);
         $blueprint = Blueprint::factory()->withOwner($owner)->create([
             'created_by' => $this->admin->id,
         ]);
@@ -624,7 +624,7 @@ class BlueprintFeatureTest extends TestCase
     public function test_owner_can_submit_for_publishing(): void
     {
         $owner = User::factory()->psm()->create();
-        $this->activateModuleForUser('blueprints', $owner);
+        $this->activateModuleForUser('enablement', $owner);
         $blueprint = Blueprint::factory()->withOwner($owner)->create([
             'created_by' => $this->admin->id,
         ]);
@@ -654,7 +654,7 @@ class BlueprintFeatureTest extends TestCase
     public function test_owner_cannot_set_published_status(): void
     {
         $owner = User::factory()->psm()->create();
-        $this->activateModuleForUser('blueprints', $owner);
+        $this->activateModuleForUser('enablement', $owner);
         $blueprint = Blueprint::factory()->withOwner($owner)->create([
             'created_by' => $this->admin->id,
         ]);

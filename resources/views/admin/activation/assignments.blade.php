@@ -107,7 +107,7 @@
                             <th>Email</th>
                             <th>Role</th>
                             <th>Assigned At</th>
-                            <th>Completed At</th>
+                            <th>Status</th>
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
@@ -122,20 +122,42 @@
                                 <td>{{ $user->pivot->assigned_at ? \Carbon\Carbon::parse($user->pivot->assigned_at)->format('M d, Y') : '—' }}</td>
                                 <td>
                                     @if($user->pivot->completed_at)
-                                        <span class="badge bg-success">{{ \Carbon\Carbon::parse($user->pivot->completed_at)->format('M d, Y') }}</span>
+                                        <span class="badge bg-success">Completed {{ \Carbon\Carbon::parse($user->pivot->completed_at)->format('M d, Y') }}</span>
+                                    @elseif($user->pivot->training_bypassed_at)
+                                        <span class="badge bg-info">Early Access</span>
                                     @else
                                         <span class="text-muted">In Progress</span>
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <form method="POST" action="{{ route('admin.activation.paths.unassign-user', [$path, $user]) }}" class="d-inline"
-                                          onsubmit="return confirm('Remove {{ $user->name }} from this path?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i data-feather="user-minus" class="icon-inline"></i> Remove
-                                        </button>
-                                    </form>
+                                    <div class="d-flex gap-1 justify-content-end">
+                                        @if(! $user->pivot->completed_at)
+                                            @if($user->pivot->training_bypassed_at)
+                                            <form method="POST" action="{{ route('admin.activation.paths.revoke-bypass', [$path, $user]) }}" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Revoke early access">
+                                                    <i class="fal fa-lock"></i>
+                                                </button>
+                                            </form>
+                                            @else
+                                            <form method="POST" action="{{ route('admin.activation.paths.bypass-training', [$path, $user]) }}" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-info" title="Grant early access">
+                                                    <i class="fal fa-unlock"></i>
+                                                </button>
+                                            </form>
+                                            @endif
+                                        @endif
+                                        <form method="POST" action="{{ route('admin.activation.paths.unassign-user', [$path, $user]) }}" class="d-inline"
+                                              onsubmit="return confirm('Remove {{ $user->name }} from this path?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove from path">
+                                                <i data-feather="user-minus" class="icon-inline"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
