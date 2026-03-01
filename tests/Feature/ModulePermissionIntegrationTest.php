@@ -95,14 +95,14 @@ class ModulePermissionIntegrationTest extends TestCase
     {
         $registry = app(ModuleRegistry::class);
 
-        // Register the module and enable via config and Pennant
-        config(['modules.test_module.enabled' => true]);
+        // Register the module and enable via registry and Pennant
         $registry->register('test_module', [
             'name' => 'Test Module',
             'description' => 'Test',
             'icon' => 'test',
-            'nav_section' => 'test',
-            'nav_items' => [],
+            'group' => 'core',
+            'enabled' => true,
+            'sections' => [],
         ]);
         Feature::for(null)->activate('test_module');
 
@@ -132,7 +132,7 @@ class ModulePermissionIntegrationTest extends TestCase
         ]);
 
         // Enable the module
-        config(['modules.enablement.enabled' => true]);
+        app(ModuleRegistry::class)->setModuleEnabled('enablement', true);
         Feature::for(null)->activate('enablement');
 
         $user = User::factory()->create(['role_id' => $role->id]);

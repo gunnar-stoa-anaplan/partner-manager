@@ -96,6 +96,9 @@ class PerUserActivationTest extends TestCase
     {
         Feature::for(null)->activate('enablement');
 
+        $registry = app(ModuleRegistry::class);
+        $registry->setTrainingMode('enablement', 'required');
+
         $path = ActivationPath::factory()->create([
             'feature_slug' => 'enablement',
             'is_active' => true,
@@ -113,9 +116,7 @@ class PerUserActivationTest extends TestCase
             'assigned_at' => now(),
         ]);
 
-        $registry = app(ModuleRegistry::class);
-
-        // Non-admin with incomplete path is blocked
+        // Non-admin with incomplete path is blocked when training is required
         $this->assertFalse($registry->isEnabled('enablement', $this->psm));
 
         // Admin always passes
@@ -134,6 +135,7 @@ class PerUserActivationTest extends TestCase
     public function test_non_admin_blocked_with_incomplete_tell(): void
     {
         Feature::for(null)->activate('enablement');
+        app(ModuleRegistry::class)->setTrainingMode('enablement', 'required');
 
         $path = ActivationPath::factory()->create([
             'feature_slug' => 'enablement',
@@ -148,10 +150,10 @@ class PerUserActivationTest extends TestCase
 
         $path->users()->attach($this->psm->id, ['assigned_by' => $this->admin->id]);
 
-        // Non-admin assigned but Tell phase not completed — blocked
+        // Non-admin assigned but Tell phase not completed — redirected to training
         $response = $this->actingAs($this->psm)->get(route('influencers.index'));
 
-        $response->assertForbidden();
+        $response->assertRedirect();
     }
 
     public function test_route_allowed_with_completed_path(): void
@@ -189,6 +191,7 @@ class PerUserActivationTest extends TestCase
     public function test_module_accessible_once_tell_phase_completed(): void
     {
         Feature::for(null)->activate('enablement');
+        app(ModuleRegistry::class)->setTrainingMode('enablement', 'required');
 
         $path = ActivationPath::factory()->create([
             'feature_slug' => 'enablement',
@@ -212,9 +215,9 @@ class PerUserActivationTest extends TestCase
 
         $path->users()->attach($this->psm->id, ['assigned_by' => $this->admin->id]);
 
-        // Before Tell — blocked
+        // Before Tell — locked, redirected to training
         $response = $this->actingAs($this->psm)->get(route('influencers.index'));
-        $response->assertForbidden();
+        $response->assertRedirect();
 
         // Complete the Tell step
         StepProgress::factory()->create([
@@ -238,6 +241,9 @@ class PerUserActivationTest extends TestCase
     {
         Feature::for(null)->activate('enablement');
 
+        $registry = app(ModuleRegistry::class);
+        $registry->setTrainingMode('enablement', 'required');
+
         $path = ActivationPath::factory()->create([
             'feature_slug' => 'enablement',
             'is_active' => true,
@@ -256,8 +262,6 @@ class PerUserActivationTest extends TestCase
         $path->users()->attach($this->psm->id, [
             'assigned_by' => $this->admin->id,
         ]);
-
-        $registry = app(ModuleRegistry::class);
 
         $this->assertTrue($registry->isEnabled('enablement', $this->admin));
         $this->assertFalse($registry->isEnabled('enablement', $this->psm));
@@ -372,7 +376,7 @@ class PerUserActivationTest extends TestCase
 
     public function test_config_disabled_blocks_non_admin_even_with_pennant_and_path(): void
     {
-        config(['modules.enablement.enabled' => false]);
+        app(ModuleRegistry::class)->setModuleEnabled('enablement', false);
         Feature::for(null)->activate('enablement');
 
         $this->activateModuleForUser('enablement', $this->psm);
@@ -384,7 +388,7 @@ class PerUserActivationTest extends TestCase
 
     public function test_admin_bypasses_config_disabled(): void
     {
-        config(['modules.enablement.enabled' => false]);
+        app(ModuleRegistry::class)->setModuleEnabled('enablement', false);
 
         $registry = app(ModuleRegistry::class);
 

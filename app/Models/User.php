@@ -199,7 +199,7 @@ class User extends Authenticatable
     public function activationPaths(): BelongsToMany
     {
         return $this->belongsToMany(ActivationPath::class)
-            ->withPivot('assigned_by', 'assigned_at', 'completed_at')
+            ->withPivot('assigned_by', 'assigned_at', 'completed_at', 'training_bypassed_at')
             ->withTimestamps();
     }
 

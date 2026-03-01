@@ -100,7 +100,7 @@ class MappingTemplateSeeder extends Seeder
                 'description' => 'Import sales opportunities for pipeline analytics and revenue tracking.',
                 'target_model' => 'Opportunity',
                 'version' => '1.0',
-                'required_feature' => 'analytics',
+                'required_feature' => 'partner_management',
                 'is_current' => true,
                 'fields' => [
                     ['key' => 'salesforce_id', 'source_field' => 'sfdc_opportunity_id', 'target_field' => 'salesforce_id', 'transform' => 'trim', 'default_value' => null, 'is_required' => false, 'description' => 'Salesforce opportunity ID'],
@@ -120,7 +120,7 @@ class MappingTemplateSeeder extends Seeder
                 'description' => 'Import deal registration records for pipeline co-sell tracking.',
                 'target_model' => 'DealRegistration',
                 'version' => '1.0',
-                'required_feature' => 'analytics',
+                'required_feature' => 'partner_management',
                 'is_current' => true,
                 'fields' => [
                     ['key' => 'deal_name', 'source_field' => 'deal_name', 'target_field' => 'deal_name', 'transform' => 'trim', 'default_value' => null, 'is_required' => true, 'description' => 'Deal registration name'],

@@ -13,6 +13,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            // === Module Definitions (must run before RoleSeeder which references module slugs) ===
+            ModuleSeeder::class,
+
             // === Roles & Permissions ===
             RoleSeeder::class,
 

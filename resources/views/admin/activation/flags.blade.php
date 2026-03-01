@@ -94,7 +94,7 @@
                         </div>
 
                         @if($feature['env_enabled'])
-                        <form method="POST" action="{{ route('admin.activation.toggle') }}">
+                        <form method="POST" action="{{ route('admin.activation.toggle') }}" class="mb-2">
                             @csrf
                             <input type="hidden" name="slug" value="{{ $feature['slug'] }}">
                             <input type="hidden" name="active" value="{{ $feature['pennant_active'] ? '0' : '1' }}">
@@ -102,6 +102,25 @@
                                 {{ $feature['pennant_active'] ? 'Deactivate' : 'Activate' }}
                             </button>
                         </form>
+                        @if($feature['effective'])
+                        <form method="POST" action="{{ route('admin.activation.training-mode') }}">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="slug" value="{{ $feature['slug'] }}">
+                            <div class="d-flex gap-1 align-items-center">
+                                <select name="training_mode" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    @foreach($trainingModes as $mode)
+                                    <option value="{{ $mode->value }}" {{ $feature['training_mode'] === $mode->value ? 'selected' : '' }}>
+                                        {{ ucfirst($mode->value) }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                <span class="text-muted small flex-shrink-0" title="Training requirement">
+                                    <i class="fal fa-graduation-cap"></i>
+                                </span>
+                            </div>
+                        </form>
+                        @endif
                         @else
                         <div class="text-center small text-muted py-1">
                             Disabled via environment variable

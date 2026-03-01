@@ -3,6 +3,7 @@
 namespace Tests\Feature\KnowledgeBase;
 
 use App\Models\User;
+use App\Services\ModuleRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,7 +20,7 @@ class ModuleGatingTest extends TestCase
 
     public function test_knowledge_base_returns_403_when_module_disabled(): void
     {
-        config(['modules.knowledge_base.enabled' => false]);
+        app(ModuleRegistry::class)->setModuleEnabled('ai_knowledge', false);
 
         $user = User::factory()->psm()->create();
 

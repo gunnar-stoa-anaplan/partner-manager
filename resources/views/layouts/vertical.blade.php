@@ -46,6 +46,8 @@
 
     @include('layouts.partials/app-settings')
 
+    @include('layouts.partials/app-unlock-toast')
+
 </div>
 
 @include('layouts.partials/app-scripts')

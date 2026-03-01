@@ -33,6 +33,11 @@ class ActivationService
             $user->id => ['completed_at' => now()],
         ]);
 
+        // Flash unlock celebration for the next page load
+        if (session()->isStarted()) {
+            session()->flash('feature_unlocked', $path->feature_slug);
+        }
+
         return true;
     }
 

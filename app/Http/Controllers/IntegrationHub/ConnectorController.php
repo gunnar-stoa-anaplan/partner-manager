@@ -93,7 +93,7 @@ class ConnectorController extends Controller
     private function licensedFeatures(): array
     {
         if (app()->environment('local', 'testing')) {
-            return ['core', 'analytics', 'measurement', 'enablement', 'competency', 'integration_hub'];
+            return ['core', 'partner_management', 'measurement', 'enablement', 'competency', 'integration_hub'];
         }
 
         $statusPath = config('version.agent_status_path');

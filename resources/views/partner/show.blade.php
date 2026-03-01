@@ -25,6 +25,14 @@
         font-size: 0.65rem;
         vertical-align: middle;
     }
+    #partner-tabs .nav-link.tab-locked {
+        opacity: 0.5;
+        cursor: default;
+        pointer-events: none;
+    }
+    #partner-tabs .nav-link.tab-locked .fa-lock {
+        font-size: 0.7rem;
+    }
     .tab-pane { min-height: 200px; }
     .tab-pane .spinner-loader {
         display: flex;
@@ -116,10 +124,15 @@
     {{-- Tab Navigation --}}
     <ul class="nav nav-tabs border-bottom mb-g" id="partner-tabs" role="tablist">
         @foreach($partnerTabs as $tab)
+        @php $tabLocked = ($tab['state'] ?? 'unlocked') === 'locked'; @endphp
         <li class="nav-item">
-            <a class="nav-link {{ $loop->first ? 'active' : '' }}" href="#{{ $tab['slug'] }}" data-tab="{{ $tab['slug'] }}" role="tab">
-                <i class="fal fa-{{ $tab['icon'] }} me-1 d-none d-md-inline"></i> {{ $tab['label'] }}
-                @if(isset($tab['badge_relation']) && $partner->relationLoaded($tab['badge_relation']))
+            <a class="nav-link {{ $loop->first ? 'active' : '' }} {{ $tabLocked ? 'tab-locked' : '' }}"
+               href="{{ $tabLocked ? '#' : '#' . $tab['slug'] }}"
+               data-tab="{{ $tab['slug'] }}"
+               @if($tabLocked) title="Complete training to unlock" @endif
+               role="tab">
+                <i class="fal fa-{{ $tabLocked ? 'lock' : $tab['icon'] }} me-1 d-none d-md-inline"></i> {{ $tab['label'] }}
+                @if(! $tabLocked && isset($tab['badge_relation']) && $partner->relationLoaded($tab['badge_relation']))
                     <span class="badge bg-primary bg-opacity-25 text-primary ms-1">{{ $partner->{$tab['badge_relation']}->count() }}</span>
                 @endif
             </a>
@@ -130,8 +143,17 @@
     {{-- Tab Content --}}
     <div id="partner-tab-content">
         @foreach($partnerTabs as $tab)
+        @php $tabLocked = ($tab['state'] ?? 'unlocked') === 'locked'; @endphp
         <div class="tab-pane" id="tab-{{ $tab['slug'] }}" style="display: {{ $loop->first ? 'block' : 'none' }};">
-            @if(! empty($tab['server_rendered']))
+            @if($tabLocked)
+                <div class="text-center py-5 text-muted">
+                    <i class="fal fa-lock fa-2x mb-2 d-block"></i>
+                    <p>Complete training to unlock <strong>{{ $tab['label'] }}</strong>.</p>
+                    <a href="{{ route('training.index', ['feature' => $tab['feature']]) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fal fa-book-open me-1"></i> Start Training
+                    </a>
+                </div>
+            @elseif(! empty($tab['server_rendered']))
                 @include($tab['partial'])
             @else
                 <div class="spinner-loader">
@@ -151,8 +173,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var PARTNER_ID = {{ $partner->id }};
     var TAB_BASE_URL = '{{ url("/partners") }}/' + PARTNER_ID + '/tab/';
     var SERVER_RENDERED = @json($serverRenderedSlugs);
+    var LOCKED_TABS = @json(collect($partnerTabs)->where('state', 'locked')->pluck('slug')->values());
     var ALL_TABS = @json(collect($partnerTabs)->pluck('slug')->values());
-    var AJAX_TABS = ALL_TABS.filter(function(t) { return SERVER_RENDERED.indexOf(t) === -1; });
+    var AJAX_TABS = ALL_TABS.filter(function(t) { return SERVER_RENDERED.indexOf(t) === -1 && LOCKED_TABS.indexOf(t) === -1; });
 
     // State — mark server-rendered tabs as already loaded
     var tabLoaded = {};
@@ -252,10 +275,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Expose for retry links
     window.partnerTabs = { reload: reloadTab };
 
+    // Mark locked tabs as already loaded (they have static content)
+    LOCKED_TABS.forEach(function(t) { tabLoaded[t] = true; });
+
     // Tab click handlers
     tabLinks.forEach(function(link) {
         link.addEventListener('click', function(e) {
             e.preventDefault();
+            if (this.classList.contains('tab-locked')) return;
             var tabName = this.dataset.tab;
             loadTab(tabName);
             history.replaceState(null, '', '#' + tabName);

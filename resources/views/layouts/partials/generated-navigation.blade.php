@@ -41,26 +41,53 @@
             continue;
         }
 
+        $sectionState = $section['state'] ?? 'unlocked';
+        $isLocked = $sectionState === 'locked';
+        $isNudge = $sectionState === 'nudge';
+        $progress = $section['training_progress'] ?? null;
+
         // Filter to items whose named routes exist
         $validItems = array_filter($section['items'], fn($item) => Route::has($item['route']));
     @endphp
-    @if(! empty($validItems))
-    <li class="nav-item">
+    @if(! empty($validItems) || $isLocked)
+    <li class="nav-item {{ $isLocked ? 'nav-locked' : '' }} {{ $isNudge ? 'nav-nudge' : '' }}">
+        @if($isLocked)
+        <a href="{{ route('features.preview', $section['feature']) }}" title="{{ $section['label'] }} — Complete training to unlock" data-filter-tags="{{ strtolower($section['label']) }}">
+        @else
         <a href="#" title="{{ $section['label'] }}" data-filter-tags="{{ strtolower($section['label']) }}">
+        @endif
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#{{ $section['icon'] }}"></use>
             </svg>
             <span class="nav-link-text">{{ $section['label'] }}</span>
+            @if($isLocked)
+            <span class="nav-lock-indicator ms-auto d-flex align-items-center gap-1">
+                @if($progress && $progress['total'] > 0)
+                <span class="badge bg-warning text-dark rounded-pill nav-progress-badge">{{ $progress['completed'] }}/{{ $progress['total'] }}</span>
+                @endif
+                <svg class="sa-icon sa-icon-xs"><use href="/icons/sprite.svg#lock"></use></svg>
+            </span>
+            @elseif($isNudge && $progress && $progress['total'] > 0 && $progress['completed'] < $progress['total'])
+            <span class="badge bg-info bg-opacity-25 text-info rounded-pill ms-auto nav-nudge-badge" title="Training available">{{ $progress['completed'] }}/{{ $progress['total'] }}</span>
+            @endif
         </a>
+        @if(! empty($validItems))
         <ul>
             @foreach($validItems as $item)
             <li>
+                @if($isLocked)
+                <a href="{{ route('features.preview', $section['feature']) }}" class="nav-locked-item" data-filter-tags="{{ strtolower($item['label']) }}">
+                    <span class="nav-link-text">{{ $item['label'] }}</span>
+                </a>
+                @else
                 <a href="{{ route($item['route'], $item['params'] ?? []) }}" title="{{ $item['label'] }}" data-filter-tags="{{ strtolower($item['label']) }}">
                     <span class="nav-link-text">{{ $item['label'] }}</span>
                 </a>
+                @endif
             </li>
             @endforeach
         </ul>
+        @endif
     </li>
     @endif
     @endforeach
@@ -82,6 +109,7 @@
             <li><a href="{{ route('admin.activation.paths') }}" data-filter-tags="activation paths"><span class="nav-link-text">Activation Paths</span></a></li>
             <li><a href="{{ route('admin.activation.log') }}" data-filter-tags="audit log"><span class="nav-link-text">Audit Log</span></a></li>
             <li><a href="{{ route('admin.activation.benchmarks') }}" data-filter-tags="benchmarks"><span class="nav-link-text">Benchmarks</span></a></li>
+            <li><a href="{{ route('admin.products.index') }}" data-filter-tags="product bundles"><span class="nav-link-text">Product Bundles</span></a></li>
         </ul>
     </li>
     @endif

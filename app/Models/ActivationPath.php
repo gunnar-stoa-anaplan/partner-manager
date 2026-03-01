@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -16,6 +17,7 @@ class ActivationPath extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'module_id',
         'feature_slug',
         'name',
         'description',
@@ -32,6 +34,11 @@ class ActivationPath extends Model
         ];
     }
 
+    public function module(): BelongsTo
+    {
+        return $this->belongsTo(Module::class);
+    }
+
     public function steps(): HasMany
     {
         return $this->hasMany(ActivationStep::class)->orderBy('order');
@@ -40,7 +47,7 @@ class ActivationPath extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-            ->withPivot('assigned_by', 'assigned_at', 'completed_at')
+            ->withPivot('assigned_by', 'assigned_at', 'completed_at', 'training_bypassed_at')
             ->withTimestamps();
     }
 

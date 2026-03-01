@@ -11,7 +11,7 @@ use Laravel\Pennant\Feature;
 class ModuleRegistry
 {
     /**
-     * @var array<string, array{name: string, description: string, icon: string, group: string, enabled: bool, sections: array, extends?: array}>
+     * @var array<string, array{name: string, description: string, icon: string, group: string, enabled: bool, training_mode: string, sections: array, extends?: array}>
      */
     private array $modules = [];
 
@@ -26,6 +26,27 @@ class ModuleRegistry
      * @var array<int, array<string, bool>>
      */
     private array $userCompletedSlugs = [];
+
+    /**
+     * Per-request cache of bypassed feature slugs keyed by user ID.
+     *
+     * @var array<int, array<string, bool>>
+     */
+    private array $userBypassedSlugs = [];
+
+    /**
+     * Per-request cache of training progress keyed by user ID.
+     *
+     * @var array<int, array<string, array{completed: int, total: int, assigned: bool}>>
+     */
+    private array $userTrainingProgress = [];
+
+    /**
+     * Per-request cache of section unlocks from graduated training steps.
+     *
+     * @var array<int, array<string, array<string, bool>>>
+     */
+    private array $userSectionUnlocks = [];
 
     /**
      * Per-request cache of feature slugs that have an active path.
@@ -60,15 +81,124 @@ class ModuleRegistry
         return [$identifier, null];
     }
 
+    // ── Feature State ────────────────────────────────────────────────
+
+    /**
+     * Determine the lifecycle state of a feature for a user.
+     *
+     * Returns: hidden, locked, nudge, unlocked
+     *
+     * - hidden:   feature inactive or user's role has no permission
+     * - locked:   training_mode=required and user hasn't completed training
+     * - nudge:    training_mode=recommended, full access with training prompt
+     * - unlocked: full access (training complete, bypassed, or not required)
+     */
+    public function getFeatureState(string $feature, ?User $user = null): string
+    {
+        $authUser = $user ?? Auth::user();
+        $internalUser = $authUser instanceof User ? $authUser : null;
+
+        // Bypass roles always see everything unlocked
+        if ($internalUser?->bypassesPermissions()) {
+            return 'unlocked';
+        }
+
+        // Feature must be active at instance level
+        if (! $this->isFeatureActive($feature)) {
+            return 'hidden';
+        }
+
+        // Portal contacts pass through
+        if ($internalUser === null) {
+            return $authUser !== null ? 'unlocked' : 'hidden';
+        }
+
+        // Role permission check
+        if ($internalUser->role_id !== null && ! $internalUser->hasModulePermission($feature)) {
+            return 'hidden';
+        }
+
+        // Check training mode
+        $trainingMode = $this->modules[$feature]['training_mode'] ?? 'none';
+
+        if ($trainingMode === 'none') {
+            return 'unlocked';
+        }
+
+        if ($trainingMode === 'recommended') {
+            return 'nudge';
+        }
+
+        // training_mode = required
+        if (! $this->hasActivePath($feature)) {
+            return 'unlocked'; // No training path configured yet
+        }
+
+        if ($this->userHasBypassed($internalUser, $feature)) {
+            return 'unlocked';
+        }
+
+        if ($this->userHasCompleted($internalUser, $feature)) {
+            return 'unlocked';
+        }
+
+        return 'locked';
+    }
+
+    /**
+     * Determine the lifecycle state of a specific section within a feature.
+     * Supports graduated unlock via unlocks_sections on training steps.
+     */
+    public function getSectionState(string $feature, string $sectionKey, ?User $user = null): string
+    {
+        $authUser = $user ?? Auth::user();
+        $internalUser = $authUser instanceof User ? $authUser : null;
+
+        // Bypass roles skip all checks
+        if ($internalUser?->bypassesPermissions()) {
+            return 'unlocked';
+        }
+
+        // Feature must be active
+        if (! $this->isFeatureActive($feature)) {
+            return 'hidden';
+        }
+
+        // Portal contacts pass through
+        if ($internalUser === null) {
+            return $authUser !== null ? 'unlocked' : 'hidden';
+        }
+
+        // Section-level role permission check
+        $permissionKey = "{$feature}.{$sectionKey}";
+        if ($internalUser->role_id !== null && ! $internalUser->hasModulePermission($permissionKey)) {
+            return 'hidden';
+        }
+
+        $featureState = $this->getFeatureState($feature, $user);
+
+        // If the feature is already unlocked/nudge/hidden, sections inherit that state
+        if ($featureState !== 'locked') {
+            return $featureState;
+        }
+
+        // Feature is locked — check graduated unlock
+        if ($this->hasSectionUnlock($internalUser, $feature, $sectionKey)) {
+            return 'unlocked';
+        }
+
+        return 'locked';
+    }
+
     // ── Feature-Level Checks ────────────────────────────────────────
 
     /**
-     * Check if a feature is active at the instance level (config + Pennant).
+     * Check if a feature is active at the instance level (registered + Pennant).
      * No user-specific checks — purely deployment/tenant level.
      */
     public function isFeatureActive(string $feature): bool
     {
-        if (! config("modules.{$feature}.enabled", false)) {
+        if (! ($this->modules[$feature]['enabled'] ?? false)) {
             return false;
         }
 
@@ -76,50 +206,42 @@ class ModuleRegistry
     }
 
     /**
-     * Check if a module identifier is enabled for a user.
+     * Toggle a module's enabled flag in the registry. Useful for tests.
+     */
+    public function setModuleEnabled(string $slug, bool $enabled): void
+    {
+        if (isset($this->modules[$slug])) {
+            $this->modules[$slug]['enabled'] = $enabled;
+        }
+    }
+
+    /**
+     * Set a module's training mode in the registry. Useful for tests.
+     */
+    public function setTrainingMode(string $slug, string $mode): void
+    {
+        if (isset($this->modules[$slug])) {
+            $this->modules[$slug]['training_mode'] = $mode;
+        }
+    }
+
+    /**
+     * Check if a module identifier is enabled for a user (full functional access).
      * Accepts "feature" or "feature.section" format.
      *
-     * Checks: bypass → config → Pennant → role permission → activation path.
+     * Returns true when state is unlocked or nudge (recommended = full access).
      */
     public function isEnabled(string $identifier, ?User $user = null): bool
     {
         [$feature, $section] = $this->parseIdentifier($identifier);
 
-        $authUser = $user ?? Auth::user();
-
-        // Only apply internal-user checks to User models (not portal Contacts)
-        $internalUser = $authUser instanceof User ? $authUser : null;
-
-        // System roles (bypass_permissions) skip all feature gating
-        if ($internalUser?->bypassesPermissions()) {
-            return true;
+        if ($section !== null) {
+            $state = $this->getSectionState($feature, $section, $user);
+        } else {
+            $state = $this->getFeatureState($feature, $user);
         }
 
-        // 1. Instance-level: config + Pennant
-        if (! $this->isFeatureActive($feature)) {
-            return false;
-        }
-
-        // 2. Portal contacts pass through — access is controlled by PortalCan/PortalRole middleware
-        if ($internalUser === null) {
-            return $authUser !== null;
-        }
-
-        // 3. Role permission check (enforced when user has a role_id)
-        if ($internalUser->role_id !== null) {
-            $permissionKey = $section ? "{$feature}.{$section}" : $feature;
-
-            if (! $internalUser->hasModulePermission($permissionKey)) {
-                return false;
-            }
-        }
-
-        // 4. Per-user activation check
-        if (! $this->hasActivePath($feature)) {
-            return true;
-        }
-
-        return $this->userHasCompleted($internalUser, $feature);
+        return in_array($state, ['unlocked', 'nudge'], true);
     }
 
     /**
@@ -161,31 +283,40 @@ class ModuleRegistry
     // ── Section & Extension Queries ─────────────────────────────────
 
     /**
-     * Get all sections the current user can access, structured for nav rendering.
-     * Includes extended items contributed by other features.
+     * Get all sections for the nav, annotated with lifecycle state.
+     * Includes locked sections (unlike getAccessibleSections which hides them).
      *
-     * @return array<int, array{feature: string, section: string, label: string, icon: string, items: array, group: string}>
+     * @return array<int, array{feature: string, section: string, label: string, icon: string, items: array, group: string, state: string, training_progress: array|null}>
      */
-    public function getAccessibleSections(?User $user = null): array
+    public function getNavigationSections(?User $user = null): array
     {
         $sections = [];
+        $authUser = $user ?? Auth::user();
+        $bypass = $authUser instanceof User && $authUser->bypassesPermissions();
 
         foreach ($this->modules as $feature => $definition) {
-            if (! $this->isFeatureActive($feature)) {
+            if (! $bypass && ! $this->isFeatureActive($feature)) {
                 continue;
             }
 
             foreach ($definition['sections'] ?? [] as $sectionKey => $sectionDef) {
-                $identifier = "{$feature}.{$sectionKey}";
+                $state = $bypass ? 'unlocked' : $this->getSectionState($feature, $sectionKey, $user);
 
-                if (! $this->isAccessible($identifier, $user)) {
+                if ($state === 'hidden') {
                     continue;
                 }
 
                 $items = $sectionDef['items'] ?? [];
 
-                // Merge in items contributed by other features via extends
-                $items = array_merge($items, $this->getExtendedItems($feature, $sectionKey, $user));
+                // Only merge extended items for unlocked/nudge sections
+                if ($state !== 'locked') {
+                    $items = array_merge($items, $this->getExtendedItems($feature, $sectionKey, $user));
+                }
+
+                $trainingProgress = null;
+                if ($state === 'locked' || $state === 'nudge') {
+                    $trainingProgress = $this->getTrainingProgress($feature, $user);
+                }
 
                 $sections[] = [
                     'feature' => $feature,
@@ -194,11 +325,27 @@ class ModuleRegistry
                     'icon' => $sectionDef['icon'],
                     'items' => $items,
                     'group' => $definition['group'] ?? 'other',
+                    'state' => $state,
+                    'training_progress' => $trainingProgress,
                 ];
             }
         }
 
         return $sections;
+    }
+
+    /**
+     * Get all sections the current user can access (backward-compatible).
+     * Filters out locked sections — only returns unlocked/nudge.
+     *
+     * @return array<int, array{feature: string, section: string, label: string, icon: string, items: array, group: string}>
+     */
+    public function getAccessibleSections(?User $user = null): array
+    {
+        return array_values(array_filter(
+            $this->getNavigationSections($user),
+            fn (array $section) => in_array($section['state'], ['unlocked', 'nudge'], true),
+        ));
     }
 
     /**
@@ -210,13 +357,15 @@ class ModuleRegistry
     {
         $items = [];
         $target = "{$targetFeature}.{$targetSection}";
+        $authUser = $user ?? Auth::user();
+        $bypass = $authUser instanceof User && $authUser->bypassesPermissions();
 
         foreach ($this->modules as $sourceFeature => $definition) {
             if ($sourceFeature === $targetFeature) {
                 continue;
             }
 
-            if (! $this->isFeatureActive($sourceFeature)) {
+            if (! $bypass && ! $this->isFeatureActive($sourceFeature)) {
                 continue;
             }
 
@@ -226,8 +375,8 @@ class ModuleRegistry
                 continue;
             }
 
-            // Contributing feature must be accessible to the user (any section)
-            if (! $this->isAccessible($sourceFeature, $user)) {
+            // Contributing feature must be enabled (unlocked/nudge) for the user
+            if (! $this->isEnabled($sourceFeature, $user)) {
                 continue;
             }
 
@@ -241,17 +390,19 @@ class ModuleRegistry
     }
 
     /**
-     * Get partner detail tabs from all active features' extends.partner_detail config.
+     * Get partner detail tabs from all active features, annotated with state.
      * Sorted by the 'sort' key for consistent ordering.
      *
-     * @return array<int, array{label: string, slug: string, icon: string, partial: string, feature: string, section: string, sort: int}>
+     * @return array<int, array{label: string, slug: string, icon: string, partial: string, feature: string, section: string, sort: int, state: string}>
      */
     public function getPartnerDetailTabs(?User $user = null): array
     {
         $tabs = [];
+        $authUser = $user ?? Auth::user();
+        $bypass = $authUser instanceof User && $authUser->bypassesPermissions();
 
         foreach ($this->modules as $feature => $definition) {
-            if (! $this->isFeatureActive($feature)) {
+            if (! $bypass && ! $this->isFeatureActive($feature)) {
                 continue;
             }
 
@@ -259,13 +410,16 @@ class ModuleRegistry
 
             foreach ($extendsTabs as $tab) {
                 $section = $tab['section'] ?? null;
-                $identifier = $section ? "{$feature}.{$section}" : $feature;
+                $state = $bypass ? 'unlocked' : ($section
+                    ? $this->getSectionState($feature, $section, $user)
+                    : $this->getFeatureState($feature, $user));
 
-                if (! $this->isAccessible($identifier, $user)) {
+                if ($state === 'hidden') {
                     continue;
                 }
 
                 $tab['feature'] = $feature;
+                $tab['state'] = $state;
                 $tabs[] = $tab;
             }
         }
@@ -273,6 +427,27 @@ class ModuleRegistry
         usort($tabs, fn (array $a, array $b) => ($a['sort'] ?? 50) <=> ($b['sort'] ?? 50));
 
         return $tabs;
+    }
+
+    // ── Training Progress ───────────────────────────────────────────
+
+    /**
+     * Get training progress for a feature for a user.
+     *
+     * @return array{completed: int, total: int, assigned: bool}
+     */
+    public function getTrainingProgress(string $feature, ?User $user = null): array
+    {
+        $authUser = $user ?? Auth::user();
+
+        if (! $authUser instanceof User) {
+            return ['completed' => 0, 'total' => 0, 'assigned' => false];
+        }
+
+        $this->loadUserTrainingProgress($authUser);
+
+        return $this->userTrainingProgress[$authUser->id][$feature]
+            ?? ['completed' => 0, 'total' => 0, 'assigned' => false];
     }
 
     // ── Module Listings ─────────────────────────────────────────────
@@ -365,15 +540,124 @@ class ModuleRegistry
      */
     private function userHasCompleted(User $user, string $slug): bool
     {
-        if (! isset($this->userCompletedSlugs[$user->id])) {
-            $this->userCompletedSlugs[$user->id] = $user->activationPaths()
-                ->wherePivotNotNull('completed_at')
-                ->pluck('feature_slug')
-                ->mapWithKeys(fn (string $s) => [$s => true])
-                ->all();
-        }
+        $this->loadUserActivationData($user);
 
         return $this->userCompletedSlugs[$user->id][$slug] ?? false;
+    }
+
+    /**
+     * Check if a user has been granted early access (training bypass).
+     * Cached per-request per-user.
+     */
+    private function userHasBypassed(User $user, string $slug): bool
+    {
+        $this->loadUserActivationData($user);
+
+        return $this->userBypassedSlugs[$user->id][$slug] ?? false;
+    }
+
+    /**
+     * Load both completed and bypassed slugs for a user in a single query.
+     */
+    private function loadUserActivationData(User $user): void
+    {
+        if (isset($this->userCompletedSlugs[$user->id])) {
+            return;
+        }
+
+        $paths = $user->activationPaths()->get();
+
+        $this->userCompletedSlugs[$user->id] = $paths
+            ->filter(fn ($path) => $path->pivot->completed_at !== null)
+            ->pluck('feature_slug')
+            ->mapWithKeys(fn (string $s) => [$s => true])
+            ->all();
+
+        $this->userBypassedSlugs[$user->id] = $paths
+            ->filter(fn ($path) => $path->pivot->training_bypassed_at !== null)
+            ->pluck('feature_slug')
+            ->mapWithKeys(fn (string $s) => [$s => true])
+            ->all();
+    }
+
+    /**
+     * Load training progress (step counts) for all assigned paths for a user.
+     */
+    private function loadUserTrainingProgress(User $user): void
+    {
+        if (isset($this->userTrainingProgress[$user->id])) {
+            return;
+        }
+
+        $this->userTrainingProgress[$user->id] = [];
+
+        $paths = $user->activationPaths()
+            ->with('steps.allProgress')
+            ->get();
+
+        foreach ($paths as $path) {
+            $totalRequired = $path->steps->where('is_required', true)->count();
+            $completedRequired = $path->steps
+                ->where('is_required', true)
+                ->filter(fn ($s) => $s->progressFor($user)->first()?->completed)
+                ->count();
+
+            $this->userTrainingProgress[$user->id][$path->feature_slug] = [
+                'completed' => $completedRequired,
+                'total' => $totalRequired,
+                'assigned' => true,
+            ];
+        }
+    }
+
+    /**
+     * Check if a specific section has been unlocked via graduated training steps.
+     */
+    private function hasSectionUnlock(User $user, string $feature, string $sectionKey): bool
+    {
+        $this->loadUserSectionUnlocks($user, $feature);
+
+        return $this->userSectionUnlocks[$user->id][$feature][$sectionKey] ?? false;
+    }
+
+    /**
+     * Load section-level unlock data from steps with unlocks_sections defined.
+     */
+    private function loadUserSectionUnlocks(User $user, string $feature): void
+    {
+        if (isset($this->userSectionUnlocks[$user->id][$feature])) {
+            return;
+        }
+
+        $this->userSectionUnlocks[$user->id][$feature] = [];
+
+        $path = $user->activationPaths()
+            ->where('feature_slug', $feature)
+            ->first();
+
+        if ($path === null) {
+            return;
+        }
+
+        $steps = $path->steps()
+            ->whereNotNull('unlocks_sections')
+            ->with(['allProgress' => fn ($q) => $q->where('user_id', $user->id)])
+            ->get();
+
+        // If no steps define unlocks_sections, graduated unlock is not configured
+        if ($steps->isEmpty()) {
+            return;
+        }
+
+        foreach ($steps as $step) {
+            $progress = $step->allProgress->first();
+
+            if ($progress?->completed) {
+                foreach ($step->unlocks_sections ?? [] as $sectionKey) {
+                    $this->userSectionUnlocks[$user->id][$feature][$sectionKey] = true;
+                }
+            }
+        }
     }
 
     /**

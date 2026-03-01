@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\StepType;
+use App\Enums\TrainingMode;
 use App\Enums\TrainingPhase;
 use App\Http\Controllers\Controller;
 use App\Models\ActivationPath;
 use App\Models\ActivationStep;
+use App\Models\Module;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\ActivationService;
@@ -32,13 +34,16 @@ class FeatureActivationController extends Controller
                 'name' => $definition['name'],
                 'description' => $definition['description'],
                 'icon' => $definition['icon'],
-                'env_enabled' => config("modules.{$slug}.enabled", false),
+                'env_enabled' => $definition['enabled'] ?? false,
                 'pennant_active' => Feature::for(null)->active($slug),
                 'effective' => $registry->isEnabled($slug),
+                'training_mode' => $definition['training_mode'] ?? 'none',
             ];
         }
 
-        return view('admin.activation.flags', compact('features'));
+        $trainingModes = TrainingMode::cases();
+
+        return view('admin.activation.flags', compact('features', 'trainingModes'));
     }
 
     /**
@@ -58,6 +63,47 @@ class FeatureActivationController extends Controller
         }
 
         return back()->with('success', 'Feature flag updated.');
+    }
+
+    /**
+     * Update the training mode for a module.
+     */
+    public function updateTrainingMode(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'slug' => 'required|string',
+            'training_mode' => 'required|string|in:'.implode(',', array_column(TrainingMode::cases(), 'value')),
+        ]);
+
+        Module::where('slug', $validated['slug'])->update([
+            'training_mode' => $validated['training_mode'],
+        ]);
+
+        return back()->with('success', 'Training mode updated.');
+    }
+
+    /**
+     * Grant early access (bypass training) for a user on an activation path.
+     */
+    public function bypassTraining(ActivationPath $path, User $user): RedirectResponse
+    {
+        $path->users()->updateExistingPivot($user->id, [
+            'training_bypassed_at' => now(),
+        ]);
+
+        return back()->with('success', "{$user->name} granted early access.");
+    }
+
+    /**
+     * Revoke early access (remove training bypass) for a user.
+     */
+    public function revokeBypass(ActivationPath $path, User $user): RedirectResponse
+    {
+        $path->users()->updateExistingPivot($user->id, [
+            'training_bypassed_at' => null,
+        ]);
+
+        return back()->with('success', "{$user->name} early access revoked.");
     }
 
     /**

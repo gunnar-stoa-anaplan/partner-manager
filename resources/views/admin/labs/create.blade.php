@@ -10,7 +10,7 @@
 @section('content')
 <p class="text-muted fst-italic mt-3 mb-4">Create a new workshop lab by selecting an enablement session and a golden Anaplan model. Once created, you can add checkpoints and enroll participants from the detail page.</p>
 
-    @if(app(\App\Services\ModuleRegistry::class)->isEnabled('workshops.labs'))
+    @if(app(\App\Services\ModuleRegistry::class)->isEnabled('enablement.workshops'))
     {{-- AI Generate Panel --}}
     <div id="ai-generate-lab-panel" data-generate-url="{{ route('labs.generate') }}">
         <div class="row mb-3">
