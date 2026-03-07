@@ -287,7 +287,7 @@ class ProjectSeeder extends Seeder
 
             // Create a matching opportunity so product_area is available
             $opp = Opportunity::create([
-                'salesforce_id' => 'OPP-PROJ-'.str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT),
+                'salesforce_id' => 'OPP-PROJ-'.\Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(10)),
                 'opportunity_name' => $projectName,
                 'account_name' => $accountName,
                 'partner_id' => $partner->id,

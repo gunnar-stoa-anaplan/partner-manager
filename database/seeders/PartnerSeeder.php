@@ -5,82 +5,121 @@ namespace Database\Seeders;
 use App\Models\Partner;
 use App\Models\Role;
 use App\Models\User;
-use Database\Factories\ContactFactory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class PartnerSeeder extends Seeder
 {
-    protected static array $geoRegionMap = [
-        'Americas' => ['North America', 'Latin America', 'Canada'],
-        'EMEA' => ['Northern Europe', 'Southern Europe', 'Middle East & Africa', 'UK & Ireland'],
-        'APAC' => ['ANZ', 'Japan', 'Southeast Asia', 'India'],
+    /**
+     * PSM name normalization map: Excel name → GunnarSeeder name.
+     * Handles minor spelling differences between data sources.
+     */
+    private const PSM_NAME_MAP = [
+        'Gunnar Stoa' => 'Gunnar Stoa',
+        'Rick Palmer' => 'Rick Palmer',
+        'Nicole Demarey' => 'Nicole Demarey',
+        'Ben Wilson' => 'Ben Wilson',
     ];
 
     public function run(): void
     {
-        $existingNames = Partner::pluck('name')->toArray();
+        $this->command->info('Seeding partners from psm_mappings.xlsx...');
 
-        // Get PSM users to assign as primary owners
+        $mappings = $this->loadPsmMappings();
+        $this->command->info("  Found {$mappings->count()} partner mappings in Excel.");
+
+        // Look up PSM users by name
         $psmRole = Role::where('slug', 'psm')->first();
-        $psms = User::where('role_id', $psmRole->id)->get();
+        $psmUsers = User::where('role_id', $psmRole->id)->get()->keyBy('name');
 
-        // Use known partner names, skipping any already seeded (e.g. by GunnarSeeder)
-        $knownNames = array_keys(ContactFactory::KNOWN_PARTNERS);
-        $namesToCreate = collect($knownNames)
-            ->reject(fn (string $name) => in_array($name, $existingNames))
-            ->values();
+        $created = 0;
+        $updated = 0;
 
-        // Round-robin assign remaining partners to PSMs (skip index 0 = Gunnar, who already has 3)
-        $psmIndex = 1;
-        foreach ($namesToCreate as $name) {
-            $geography = array_rand(self::$geoRegionMap);
-            $region = self::$geoRegionMap[$geography][array_rand(self::$geoRegionMap[$geography])];
-            $owner = $psms[$psmIndex % $psms->count()];
+        foreach ($mappings as $row) {
+            $partnerName = trim($row['Partner']);
+            $psmName = trim($row['PSM'] ?? '');
+            $geo = trim($row['Geo'] ?? '');
+            $region = trim($row['Region'] ?? '');
 
-            Partner::factory()->create([
-                'name' => $name,
-                'user_id' => $owner->id,
-                'salesforce_id' => '00Q'.Str::upper(Str::random(15)),
-                'geography' => $geography,
-                'region' => $region,
-            ]);
+            if (empty($partnerName)) {
+                continue;
+            }
 
-            $psmIndex++;
+            // Resolve PSM user
+            $resolvedPsmName = self::PSM_NAME_MAP[$psmName] ?? $psmName;
+            $psmUser = $psmUsers->get($resolvedPsmName);
+
+            $partnerData = [
+                'user_id' => $psmUser?->id,
+                'geography' => $geo ?: null,
+                'region' => $region ?: null,
+                'psm' => $psmUser?->name,
+            ];
+
+            $partner = Partner::where('name', $partnerName)->first();
+
+            if ($partner) {
+                $partner->update($partnerData);
+                $updated++;
+            } else {
+                $partner = Partner::create(array_merge($partnerData, [
+                    'name' => $partnerName,
+                    'salesforce_id' => '00Q'.Str::upper(Str::random(15)),
+                ]));
+                $created++;
+            }
+
+            // Ensure PSM pivot entry exists
+            if ($psmUser && ! $partner->psms()->where('user_id', $psmUser->id)->exists()) {
+                $partner->psms()->attach($psmUser->id, ['role' => 'psm']);
+            }
         }
 
-        // Backfill any existing partners missing geography/region
-        Partner::whereNull('geography')->orWhereNull('region')->each(function ($partner) {
-            $geos = array_keys(self::$geoRegionMap);
-            $geography = $geos[array_rand($geos)];
-            $regions = self::$geoRegionMap[$geography];
-            $region = $regions[array_rand($regions)];
+        $this->command->info("  Created {$created} partners, updated {$updated}.");
 
-            $partner->update([
-                'geography' => $geography,
-                'region' => $region,
-            ]);
-        });
-
-        // Assign PSMs and PAMs via user_partner pivot
-        $this->assignPsmPivotEntries($psms);
+        // Assign PAMs round-robin
         $this->assignPamPivotEntries();
+
+        $unassigned = Partner::whereNull('user_id')->count();
+        if ($unassigned > 0) {
+            $this->command->warn("  {$unassigned} partners have PSM = 'Unassigned' in Excel (no user_id set).");
+        }
+
+        $this->command->info('Done seeding partners from Excel.');
     }
 
     /**
-     * Create user_partner pivot entries for PSM assignments.
+     * Load PSM mappings from the most recent snapshot Excel file.
+     *
+     * @return \Illuminate\Support\Collection<int, array{Partner: string, Geo: string, Region: string, PSM: string}>
      */
-    private function assignPsmPivotEntries($psms): void
+    private function loadPsmMappings(): \Illuminate\Support\Collection
     {
-        $partners = Partner::orderBy('name')->get();
+        // Use the most recent snapshot (all 3 are identical for PSM mappings)
+        $path = database_path('seeders/data/3-5-2026/psm_mappings.xlsx');
 
-        foreach ($partners as $partner) {
-            // The owner (user_id) should also have a PSM pivot entry
-            $owner = $psms->firstWhere('id', $partner->user_id);
-            if ($owner && ! $partner->psms()->where('user_id', $owner->id)->exists()) {
-                $partner->psms()->attach($owner->id, ['role' => 'psm']);
-            }
+        if (! file_exists($path)) {
+            $this->command->error("PSM mappings file not found: {$path}");
+
+            return collect();
         }
+
+        $spreadsheet = IOFactory::load($path);
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray(null, true, true, true);
+
+        // First row is headers
+        $headers = array_shift($rows);
+
+        return collect($rows)->map(function ($row) use ($headers) {
+            $mapped = [];
+            foreach ($headers as $col => $header) {
+                $mapped[trim($header)] = $row[$col];
+            }
+
+            return $mapped;
+        })->filter(fn ($row) => ! empty(trim($row['Partner'] ?? '')));
     }
 
     /**
@@ -107,5 +146,7 @@ class PartnerSeeder extends Seeder
 
             $pamIndex++;
         }
+
+        $this->command->info("  Assigned {$pams->count()} PAMs across {$partners->count()} partners (round-robin).");
     }
 }

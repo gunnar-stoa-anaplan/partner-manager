@@ -3,12 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\DealRegistration;
-use App\Models\Partner;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 use Laravel\Pennant\Feature;
 
 class GunnarSeeder extends Seeder
@@ -40,12 +38,8 @@ class GunnarSeeder extends Seeder
         'psm' => [
             ['email' => 'gunnar.stoa@gmail.com', 'name' => 'Gunnar Stoa'],
             ['email' => 'rick.palmer@example.com', 'name' => 'Rick Palmer'],
-            ['email' => 'nicole.demary@example.com', 'name' => 'Nicole Demary'],
+            ['email' => 'nicole.demarey@example.com', 'name' => 'Nicole Demarey'],
             ['email' => 'ben.wilson@example.com', 'name' => 'Ben Wilson'],
-            ['email' => 'sarah.chen@example.com', 'name' => 'Sarah Chen'],
-            ['email' => 'marcus.johnson@example.com', 'name' => 'Marcus Johnson'],
-            ['email' => 'emily.rodriguez@example.com', 'name' => 'Emily Rodriguez'],
-            ['email' => 'david.kim@example.com', 'name' => 'David Kim'],
         ],
         'pam' => [
             ['email' => 'rachel.morrison@example.com', 'name' => 'Rachel Morrison'],
@@ -56,22 +50,6 @@ class GunnarSeeder extends Seeder
             ['email' => 'chris.anderson@example.com', 'name' => 'Chris Anderson'],
             ['email' => 'nina.patel@example.com', 'name' => 'Nina Patel'],
             ['email' => 'robert.hayes@example.com', 'name' => 'Robert Hayes'],
-        ],
-    ];
-
-    /**
-     * Explicit PSM-to-partner assignments (created before PartnerSeeder).
-     * Keyed by PSM email → list of partner data.
-     *
-     * @var array<string, list<array{name: string, website: string, industry: string}>>
-     */
-    private const PSM_PARTNERS = [
-        'rick.palmer@example.com' => [
-            ['name' => 'Accenture', 'website' => 'https://www.accenture.com', 'industry' => 'Consulting'],
-        ],
-        'gunnar.stoa@gmail.com' => [
-            ['name' => 'Deloitte', 'website' => 'https://www.deloitte.com', 'industry' => 'Consulting'],
-            ['name' => 'PwC', 'website' => 'https://www.pwc.com', 'industry' => 'Consulting'],
         ],
     ];
 
@@ -111,32 +89,7 @@ class GunnarSeeder extends Seeder
         }
         $this->command->info("  ✓ All PAMs report to {$ray->name}");
 
-        // Create explicit PSM partner assignments
-        $psmsByEmail = collect($createdUsers['psm'])->keyBy('email');
-
-        foreach (self::PSM_PARTNERS as $psmEmail => $partners) {
-            $psm = $psmsByEmail[$psmEmail];
-
-            foreach ($partners as $data) {
-                $partner = Partner::updateOrCreate(
-                    ['name' => $data['name']],
-                    [
-                        'user_id' => $psm->id,
-                        'salesforce_id' => '00Q'.Str::upper(Str::random(15)),
-                        'website' => $data['website'],
-                        'industry' => $data['industry'],
-                    ]
-                );
-
-                if (! $partner->psms()->where('user_id', $psm->id)->exists()) {
-                    $partner->psms()->attach($psm->id, ['role' => 'psm']);
-                }
-
-                $this->command->info("  ✓ {$partner->name} → assigned to {$psm->name}");
-            }
-        }
-
-        // Seed deal registrations
+        // Seed deal registrations (partners are now created by PartnerSeeder from Excel data)
         if (DealRegistration::count() === 0) {
             DealRegistration::factory(30)->create();
             $this->command->info('  ✓ Seeded 30 deal registrations');
