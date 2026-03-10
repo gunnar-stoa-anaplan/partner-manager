@@ -80,12 +80,14 @@
     visibility: hidden;
     display: block;
     z-index: 1000;
+    pointer-events: none;
 }
 .show + .dropdown-menu-animated {
     transform: scale(1)!important;
     transform-origin: -21px;
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
 }
 
 @media (min-width: 576px) {
