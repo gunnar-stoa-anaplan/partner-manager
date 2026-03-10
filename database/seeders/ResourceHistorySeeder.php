@@ -16,6 +16,24 @@ class ResourceHistorySeeder extends Seeder
 {
     private const PROGRAMS = ['IFP', 'OWP', 'FCR', 'SPM', 'I&D', 'IBP', 'MFP'];
 
+    /**
+     * Priority aliases for multi-entity partners where the simplified Excel name
+     * should route to a specific DB entity (typically the HQ) rather than the
+     * first alphabetical fuzzy match.
+     */
+    private const PARTNER_ALIASES = [
+        'Accenture' => 'Accenture - US',
+        'Deloitte LLP' => 'Deloitte Consulting LLP - US (HQ)',
+        'KPMG' => 'KPMG US (HQ)',
+        'Genpact' => 'Genpact Intl',
+        'Genpact International Inc. (Partner)' => 'Genpact Intl',
+        'Fadmoor LLC-Partner' => 'Fadmoor LLC',
+        'EyeOn Switzerland Sarl' => 'EyeOn',
+        'Keyrus France' => 'Keyrus EMEA',
+        'Keyrus Global' => 'Keyrus EPM Americas',
+        'BearingPoint Holding B.V.' => 'Bearingpoint GmbH',
+    ];
+
     public function run(): void
     {
         $this->command->info('Seeding resource history from Excel snapshots...');
@@ -37,7 +55,15 @@ class ResourceHistorySeeder extends Seeder
         $this->command->info("  Found {$folders->count()} snapshot folder(s): ".$folders->pluck('name')->implode(', '));
 
         $admin = User::whereRelation('role', 'slug', 'admin')->first() ?? User::first();
-        $partnerMap = Partner::pluck('id', 'name');
+        $dbPartnerNames = Partner::pluck('id', 'name');
+
+        // Seed the fuzzy cache with priority aliases for multi-entity partners
+        $fuzzyCache = [];
+        foreach (self::PARTNER_ALIASES as $alias => $dbName) {
+            if (isset($dbPartnerNames[$dbName])) {
+                $fuzzyCache[$alias] = $dbPartnerNames[$dbName];
+            }
+        }
 
         $totalResources = 0;
         $totalSnapshots = 0;
@@ -56,7 +82,7 @@ class ResourceHistorySeeder extends Seeder
 
             // Stream rows to avoid loading entire 57K+ row file into memory
             [$rowCount, $resourceRecords, $snapshotAggregates, $matchedCount, $skippedCount] =
-                $this->processExcelStreaming($resourcesPath, $partnerMap, $snapshotDate);
+                $this->processExcelStreaming($resourcesPath, $dbPartnerNames, $fuzzyCache, $snapshotDate);
 
             $this->command->info("    Processed {$rowCount} rows from Excel.");
 
@@ -133,9 +159,10 @@ class ResourceHistorySeeder extends Seeder
      * Process an Excel file row-by-row using PhpSpreadsheet's row iterator
      * to avoid loading the entire file into memory at once.
      *
+     * @param  array<string, int|null>  $fuzzyCache  Cached fuzzy lookups (passed by reference)
      * @return array{0: int, 1: array, 2: array, 3: int, 4: int}
      */
-    private function processExcelStreaming(string $path, \Illuminate\Support\Collection $partnerMap, \Carbon\Carbon $snapshotDate): array
+    private function processExcelStreaming(string $path, \Illuminate\Support\Collection $dbPartnerNames, array &$fuzzyCache, \Carbon\Carbon $snapshotDate): array
     {
         $reader = IOFactory::createReaderForFile($path);
         $reader->setReadDataOnly(true);
@@ -181,7 +208,17 @@ class ResourceHistorySeeder extends Seeder
                 continue;
             }
 
-            $partnerId = $partnerMap->get($partnerName);
+            // Resolve partner ID: exact match first, then fuzzy with cache
+            $partnerId = $dbPartnerNames->get($partnerName);
+
+            if ($partnerId === null) {
+                if (array_key_exists($partnerName, $fuzzyCache)) {
+                    $partnerId = $fuzzyCache[$partnerName];
+                } else {
+                    $partnerId = $this->findBestPartnerMatch($partnerName, $dbPartnerNames);
+                    $fuzzyCache[$partnerName] = $partnerId;
+                }
+            }
 
             if (! $partnerId) {
                 $skippedCount++;
@@ -245,6 +282,93 @@ class ResourceHistorySeeder extends Seeder
         unset($spreadsheet);
 
         return [$rowCount, $resourceRecords, $snapshotAggregates, $matchedCount, $skippedCount];
+    }
+
+    /**
+     * Normalize a partner name for fuzzy comparison.
+     * Ported from risk-analyzer.html's normalizePartnerName().
+     */
+    private function normalizePartnerName(string $name): string
+    {
+        $name = mb_strtolower(trim($name));
+        $name = preg_replace('/\s+/', ' ', $name);
+        $name = preg_replace('/[,\.\(\)]/', '', $name); // Remove commas, periods, parentheses
+        $name = preg_replace('/\s+-\s+.*/', '', $name); // Remove everything after " - " (regions)
+        $name = preg_replace('/\b(ltd|llc|inc|gmbh|pty|pvt|sa|bv|ag|co|srl|llp|pte|plc|partner|former partner)\b/', '', $name);
+
+        return trim(preg_replace('/\s+/', ' ', $name));
+    }
+
+    /**
+     * Find the best matching DB partner for a given Excel partner name.
+     * Uses a multi-stage fuzzy matching algorithm ported from risk-analyzer.html.
+     */
+    private function findBestPartnerMatch(string $targetName, \Illuminate\Support\Collection $dbPartnerNames): ?int
+    {
+        $normalizedTarget = $this->normalizePartnerName($targetName);
+        $dbNames = $dbPartnerNames->keys()->all();
+
+        // 1. Case-insensitive exact match
+        foreach ($dbNames as $dbName) {
+            if (mb_strtolower($dbName) === mb_strtolower($targetName)) {
+                return $dbPartnerNames[$dbName];
+            }
+        }
+
+        // 2. Normalized exact match
+        foreach ($dbNames as $dbName) {
+            if ($this->normalizePartnerName($dbName) === $normalizedTarget) {
+                return $dbPartnerNames[$dbName];
+            }
+        }
+
+        // 3. Contains match (either direction, require minimum 4 chars)
+        $minLength = 4;
+        if (mb_strlen($normalizedTarget) >= $minLength) {
+            foreach ($dbNames as $dbName) {
+                $normalized = $this->normalizePartnerName($dbName);
+                if (mb_strlen($normalized) < $minLength) {
+                    continue;
+                }
+                if (str_contains($normalized, $normalizedTarget) || str_contains($normalizedTarget, $normalized)) {
+                    return $dbPartnerNames[$dbName];
+                }
+            }
+        }
+
+        // 4. First significant word match (6+ chars to avoid false matches like "ey" → "keyrus")
+        $targetFirstWord = explode(' ', $normalizedTarget)[0] ?? '';
+        if (mb_strlen($targetFirstWord) > 5) {
+            foreach ($dbNames as $dbName) {
+                $normalized = $this->normalizePartnerName($dbName);
+                $dbFirstWord = explode(' ', $normalized)[0] ?? '';
+                if (mb_strlen($dbFirstWord) > 5 && $dbFirstWord === $targetFirstWord) {
+                    return $dbPartnerNames[$dbName];
+                }
+            }
+        }
+
+        // 5. Token matching (at least 2 significant words match)
+        $targetTokens = array_filter(explode(' ', $normalizedTarget), fn ($t) => mb_strlen($t) > 3);
+        if (count($targetTokens) > 0) {
+            foreach ($dbNames as $dbName) {
+                $dbTokens = array_filter(explode(' ', $this->normalizePartnerName($dbName)), fn ($t) => mb_strlen($t) > 3);
+                $matches = array_filter($targetTokens, function ($tt) use ($dbTokens) {
+                    foreach ($dbTokens as $dt) {
+                        if (str_contains($dt, $tt) || str_contains($tt, $dt)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                });
+                if (count($matches) >= min(2, count($targetTokens))) {
+                    return $dbPartnerNames[$dbName];
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

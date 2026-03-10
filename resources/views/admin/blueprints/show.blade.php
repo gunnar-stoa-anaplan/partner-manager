@@ -1,6 +1,13 @@
 @extends('layouts.vertical', ['pageTitle' => $blueprint->name])
 
 @section('css')
+<style>
+    #blueprint-assignments-table[data-role-filter="gtm"] tbody tr:not(:has([data-role="gtm"])),
+    #blueprint-assignments-table[data-role-filter="pre_sales"] tbody tr:not(:has([data-role="pre_sales"])),
+    #blueprint-assignments-table[data-role-filter="delivery"] tbody tr:not(:has([data-role="delivery"])) {
+        display: none !important;
+    }
+</style>
 @endsection
 
 @section('page-title')
@@ -87,7 +94,7 @@
         <div class="col-lg-12">
             <div class="accordion" id="outcomesAccordion">
                 @foreach($blueprint->outcomes as $outcome)
-                    <div class="accordion-item shadow-0 mb-g border rounded">
+                    <div class="accordion-item shadow-0 mb-g border rounded outcome-card">
                         <h2 class="accordion-header" id="outcomeHead{{ $outcome->id }}">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#outcomeBody{{ $outcome->id }}" aria-expanded="false" aria-controls="outcomeBody{{ $outcome->id }}">
                                 <span class="badge bg-primary me-2">{{ $outcome->sort_order }}</span>
@@ -106,20 +113,20 @@
                                                     <th>Time</th>
                                                     <th>Source</th>
                                                     <th>Prerequisites</th>
-                                                    <th class="text-center" style="width:70px">
+                                                    <th class="text-center role-col role-col-gtm" style="width:70px">
                                                         <span class="d-inline-block" style="color: #fd7e14;" title="GTM (Sales)">GTM</span>
                                                     </th>
-                                                    <th class="text-center" style="width:70px">
+                                                    <th class="text-center role-col role-col-pre_sales" style="width:70px">
                                                         <span class="d-inline-block" style="color: #886ab5;" title="Pre-Sales">Pre-S</span>
                                                     </th>
-                                                    <th class="text-center" style="width:70px">
+                                                    <th class="text-center role-col role-col-delivery" style="width:70px">
                                                         <span class="d-inline-block" style="color: #00BCD4;" title="Delivery">Del</span>
                                                     </th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach($outcome->contentItems as $item)
-                                                    <tr>
+                                                    <tr class="content-row" data-gtm="{{ $item->gtm_applicable }}" data-pre-sales="{{ $item->pre_sales_applicable }}" data-delivery="{{ $item->delivery_applicable }}">
                                                         <td>
                                                             @if($item->url)
                                                                 <a href="{{ $item->url }}" target="_blank" class="text-primary">
@@ -133,21 +140,21 @@
                                                         <td class="text-nowrap">{{ $item->duration_display ?? '-' }}</td>
                                                         <td>{{ $item->source ?? '-' }}</td>
                                                         <td><small class="text-muted">{{ $item->prerequisites ?? '-' }}</small></td>
-                                                        <td class="text-center">
+                                                        <td class="text-center role-col role-col-gtm">
                                                             @if($item->gtm_applicable === 'required')
                                                                 <i class="fas fa-check-circle text-success"></i>
                                                             @elseif($item->gtm_applicable === 'optional')
                                                                 <i class="fas fa-check-circle text-muted" title="Optional"></i>
                                                             @endif
                                                         </td>
-                                                        <td class="text-center">
+                                                        <td class="text-center role-col role-col-pre_sales">
                                                             @if($item->pre_sales_applicable === 'required')
                                                                 <i class="fas fa-check-circle text-success"></i>
                                                             @elseif($item->pre_sales_applicable === 'optional')
                                                                 <i class="fas fa-check-circle text-muted" title="Optional"></i>
                                                             @endif
                                                         </td>
-                                                        <td class="text-center">
+                                                        <td class="text-center role-col role-col-delivery">
                                                             @if($item->delivery_applicable === 'required')
                                                                 <i class="fas fa-check-circle text-success"></i>
                                                             @elseif($item->delivery_applicable === 'optional')
@@ -175,8 +182,14 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="card shadow-0 mb-g">
-                    <div class="card-header">
-                        <div class="card-title">Partner Assignments ({{ $blueprint->assignments->count() }})</div>
+                    <div class="card-header d-flex align-items-center">
+                        <div class="card-title flex-grow-1">Partner Assignments ({{ $blueprint->assignments->count() }})</div>
+                        <div class="btn-group" id="roleFilter">
+                            <button type="button" class="btn btn-sm btn-outline-primary active" data-filter="all">All Roles</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-filter="gtm" style="border-color:#fd7e14;color:#fd7e14">GTM (Sales)</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-filter="pre_sales" style="border-color:#886ab5;color:#886ab5">Pre-Sales</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-filter="delivery" style="border-color:#00BCD4;color:#00BCD4">Delivery</button>
+                        </div>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -192,10 +205,10 @@
                                 </thead>
                                 <tbody>
                                     @foreach($blueprint->assignments as $assignment)
-                                        <tr>
+                                        <tr class="assignment-row" data-role="{{ $assignment->role }}">
                                             <td>{{ $assignment->partner->name }}</td>
                                             <td>
-                                                <span class="badge" style="background-color: {{ \App\Models\PartnerBlueprintAssignment::ROLE_COLORS[$assignment->role] ?? '#868e96' }}">
+                                                <span class="badge" data-role="{{ $assignment->role }}" style="background-color: {{ \App\Models\PartnerBlueprintAssignment::ROLE_COLORS[$assignment->role] ?? '#868e96' }}">
                                                     {{ \App\Models\PartnerBlueprintAssignment::ROLES[$assignment->role] ?? $assignment->role }}
                                                 </span>
                                             </td>
@@ -226,6 +239,38 @@
             if (window.SmartTables && el && el.querySelector('tbody tr td:not([colspan])')) {
                 new window.SmartTables('blueprint-assignments-table', { perPage: 10, sortable: true, searchable: true });
             }
+
+            // Role filter for assignments — uses CSS :has() selector on badge data-role
+            // which survives SmartTables row recreation (innerHTML is preserved)
+            var filterBtns = document.querySelectorAll('#roleFilter button');
+            var table = document.querySelector('#blueprint-assignments-table');
+
+            filterBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var filter = this.dataset.filter;
+
+                    // Update active button styling
+                    filterBtns.forEach(function(b) {
+                        b.classList.remove('active');
+                        b.style.backgroundColor = '';
+                        b.style.color = b.dataset.filter === 'all' ? '' : b.style.borderColor;
+                    });
+                    this.classList.add('active');
+                    if (filter !== 'all') {
+                        this.style.backgroundColor = this.style.borderColor;
+                        this.style.color = '#fff';
+                    }
+
+                    // Set filter attribute on table — CSS rules handle hiding
+                    if (table) {
+                        if (filter === 'all') {
+                            table.removeAttribute('data-role-filter');
+                        } else {
+                            table.setAttribute('data-role-filter', filter);
+                        }
+                    }
+                });
+            });
         });
     </script>
 @endsection

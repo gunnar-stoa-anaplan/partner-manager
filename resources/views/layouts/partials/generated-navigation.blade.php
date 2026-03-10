@@ -84,6 +84,53 @@
                     <span class="nav-link-text">{{ $item['label'] }}</span>
                 </a>
                 @endif
+                {{-- State of Business: inject My Partners & Custom Filters sub-nav --}}
+                @if(($item['route'] ?? '') === 'state-of-business' && !$isLocked)
+                <ul>
+                    @php
+                        $user = auth()->user();
+                        $sobPartners = $user && $user->isAdmin()
+                            ? \App\Models\Partner::orderBy('name')->get(['id', 'name'])
+                            : ($user ? \App\Models\Partner::where('user_id', $user->id)->orderBy('name')->get(['id', 'name']) : collect());
+                        $sobFilters = $user
+                            ? \App\Models\SavedFilter::where('user_id', $user->id)->where('context', 'state-of-business')->orderBy('name')->get()
+                            : collect();
+                    @endphp
+                    <li>
+                        <a href="#" title="My Partners" data-filter-tags="my partners">
+                            <span class="nav-link-text">My Partners</span>
+                        </a>
+                        <ul>
+                            @foreach($sobPartners as $p)
+                            <li>
+                                <a href="{{ route('state-of-business', ['partner' => $p->id]) }}" data-filter-tags="{{ strtolower($p->name) }}">
+                                    <span class="nav-link-text">{{ $p->name }}</span>
+                                </a>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" title="Custom Filters" data-filter-tags="custom filters">
+                            <span class="nav-link-text">Custom Filters</span>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#newFilterModal" data-filter-tags="new filter">
+                                    <span class="nav-link-text">New Filter</span>
+                                </a>
+                            </li>
+                            @foreach($sobFilters as $sf)
+                            <li>
+                                <a href="#" class="apply-saved-filter" data-criteria="{{ json_encode($sf->criteria) }}" data-filter-tags="{{ strtolower($sf->name) }}">
+                                    <span class="nav-link-text">{{ $sf->name }}</span>
+                                </a>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </li>
+                </ul>
+                @endif
             </li>
             @endforeach
         </ul>

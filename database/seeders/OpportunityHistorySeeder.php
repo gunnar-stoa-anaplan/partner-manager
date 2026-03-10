@@ -397,7 +397,7 @@ class OpportunityHistorySeeder extends Seeder
     }
 
     /**
-     * Parse an amount value from Excel (could be float or string).
+     * Parse an amount value from Excel (stored in $K, convert to dollars).
      */
     private function parseAmount(mixed $value): ?float
     {
@@ -405,7 +405,7 @@ class OpportunityHistorySeeder extends Seeder
             return null;
         }
 
-        return (float) $value;
+        return (float) $value * 1000;
     }
 
     /**

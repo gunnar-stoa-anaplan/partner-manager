@@ -194,6 +194,18 @@ class User extends Authenticatable
             && in_array($field, config('team.directory.synced_fields', []));
     }
 
+    // ── Priorities & Progress relationships ─────────────────────
+
+    public function psmObjectives(): HasMany
+    {
+        return $this->hasMany(PsmObjective::class);
+    }
+
+    public function weeklyFocuses(): HasMany
+    {
+        return $this->hasMany(WeeklyFocus::class);
+    }
+
     // ── Activation Path relationships ────────────────────────────
 
     public function activationPaths(): BelongsToMany

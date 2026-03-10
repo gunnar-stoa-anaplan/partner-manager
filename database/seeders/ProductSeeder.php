@@ -47,10 +47,13 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($products as $product) {
-            Product::create(array_merge($product, [
-                'slug' => Str::slug($product['name']),
-                'status' => 'published',
-            ]));
+            Product::updateOrCreate(
+                ['name' => $product['name']],
+                array_merge($product, [
+                    'slug' => Str::slug($product['name']),
+                    'status' => 'published',
+                ])
+            );
         }
 
         $this->command->info('Created '.count($products).' products.');

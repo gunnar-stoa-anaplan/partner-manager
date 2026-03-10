@@ -97,7 +97,7 @@ class PartnerSeeder extends Seeder
     private function loadPsmMappings(): \Illuminate\Support\Collection
     {
         // Use the most recent snapshot (all 3 are identical for PSM mappings)
-        $path = database_path('seeders/data/3-5-2026/psm_mappings.xlsx');
+        $path = database_path('seeders/data/3-9-2026/psm_mappings.xlsx');
 
         if (! file_exists($path)) {
             $this->command->error("PSM mappings file not found: {$path}");

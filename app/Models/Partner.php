@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Partner extends Model
@@ -239,6 +240,16 @@ class Partner extends Model
     public function marketplaceEntries()
     {
         return $this->hasMany(PartnerMarketplaceEntry::class);
+    }
+
+    public function psmObjectives(): HasMany
+    {
+        return $this->hasMany(PsmObjective::class);
+    }
+
+    public function weeklyFocusItems(): HasMany
+    {
+        return $this->hasMany(WeeklyFocusItem::class);
     }
 
     public function marketplaceReviewer()

@@ -11,10 +11,10 @@
         $isImpersonating = session('impersonating_user');
     @endphp
 
-    <div class="dropdown d-inline-flex align-items-center">
-        <button type="button"
+    <div class="dropdown d-inline-flex align-items-center" id="dev-switcher">
+        <button type="button" id="dev-switcher-toggle"
                 class="btn btn-sm fw-bold border d-flex align-items-center gap-1 px-2 py-1"
-                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-expanded="false"
                 style="font-size: 11px; background: {{ $isImpersonating ? '#fff3cd' : '#e8f5e9' }}; border-color: {{ $isImpersonating ? '#ffc107' : '#81c784' }};">
             <svg class="sa-icon" style="width: 14px; height: 14px;">
                 <use href="/icons/sprite.svg#users"></use>
@@ -22,7 +22,7 @@
             <span class="text-uppercase">{{ $currentRole }}</span>
         </button>
 
-        <div class="dropdown-menu dropdown-menu-end shadow" style="min-width: 240px;">
+        <div class="dropdown-menu dropdown-menu-end shadow" id="dev-switcher-menu" style="min-width: 240px; max-height: 80vh; overflow-y: auto;">
             <div class="px-3 py-1">
                 <small class="text-muted fw-bold text-uppercase" style="font-size: 10px;">Dev Role Switcher</small>
             </div>
@@ -70,5 +70,18 @@
             @endforeach
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var toggle = document.getElementById('dev-switcher-toggle');
+        if (!toggle || typeof bootstrap === 'undefined') return;
+        new bootstrap.Dropdown(toggle, {
+            popperConfig: function(defaultConfig) {
+                defaultConfig.strategy = 'fixed';
+                return defaultConfig;
+            }
+        });
+    });
+    </script>
 @endif
 @endauth
