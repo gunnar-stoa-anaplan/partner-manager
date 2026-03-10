@@ -124,6 +124,7 @@ class PartnerController extends Controller
             'deal-registrations' => $this->dealRegistrationsTabData($partner),
             'blueprints' => $this->blueprintsTabData($partner),
             'marketplace' => $this->marketplaceTabData($partner),
+            'psm-priorities' => $this->psmPrioritiesTabData($partner),
             default => abort(404),
         };
 
@@ -1874,5 +1875,26 @@ class PartnerController extends Controller
 
         return redirect(route('partners.show', $partnerId).'#launch-programs')
             ->with('success', 'Participant removed.');
+    }
+
+    /**
+     * PSM Priorities tab data for partner detail.
+     */
+    private function psmPrioritiesTabData(Partner $partner): array
+    {
+        $activeObjectives = $partner->psmObjectives()
+            ->where('status', 'active')
+            ->with('user')
+            ->orderBy('target_date')
+            ->get();
+
+        $recentCompleted = $partner->psmObjectives()
+            ->where('status', 'completed')
+            ->where('completed_at', '>=', now()->subDays(30))
+            ->with('user')
+            ->latest('completed_at')
+            ->get();
+
+        return compact('activeObjectives', 'recentCompleted');
     }
 }

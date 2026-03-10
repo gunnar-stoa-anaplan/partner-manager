@@ -7,186 +7,124 @@ use App\Models\Import;
 use App\Models\Opportunity;
 use App\Models\OpportunitySnapshot;
 use App\Models\Partner;
-use App\Models\Product;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class OpportunityHistorySeeder extends Seeder
 {
-    private array $stageProgression = [
-        'Prospecting',
-        'Qualification',
-        'Needs Analysis',
-        'Value Proposition',
-        'Proposal/Price Quote',
-        'Negotiation/Review',
-        'Closed Won',
-    ];
+    /**
+     * Minimum number of columns expected in a valid opportunities file.
+     * The malformed 2-2-2026 file has only 2 columns (pivot table export).
+     */
+    private const MIN_COLUMNS = 10;
 
-    private array $accounts = [
-        'Coca-Cola', 'Nike', 'Tesla', 'Pfizer', 'Goldman Sachs', 'Target', 'Walmart',
-        'Johnson & Johnson', 'Procter & Gamble', 'Unilever', 'AstraZeneca', 'Boeing',
-        'Caterpillar', 'FedEx', 'UPS', 'Disney', 'Netflix', 'Spotify', 'Adobe', 'Salesforce',
-        'SAP', 'Oracle', 'IBM', 'Dell', 'HP', 'Cisco', 'Intel', 'AMD', 'Qualcomm', 'Siemens',
-        'BMW', 'Volkswagen', 'Toyota', 'Honda', 'Nestle', 'PepsiCo', 'Mondelez', 'Mars',
-        'Shell', 'BP', 'TotalEnergies', 'Chevron', 'ExxonMobil', 'Rio Tinto', 'BHP',
-        'Barclays', 'HSBC', 'Citi', 'JPMorgan', 'Morgan Stanley', 'BlackRock', 'Vanguard',
-    ];
-
-    private array $oppTypes = [
-        'Implementation', 'Expansion', 'Migration', 'Strategic Planning',
-        'Digital Transformation', 'Platform Upgrade', 'Consulting Engagement',
-        'Managed Services', 'Training & Enablement', 'Integration',
-    ];
-
-    private array $productAreaWeights = [
-        'Finance' => 30,
-        'Supply Chain' => 25,
-        'Sales' => 20,
-        'Workforce' => 15,
-        'Platform' => 10,
+    /**
+     * Map Excel Sales Stage → probability percentage.
+     */
+    private const STAGE_PROBABILITY = [
+        '1. Qualification and Discovery' => 20,
+        '2. Solution Development' => 40,
+        '3. Solution Validation' => 60,
+        '4. Negotiate and Close' => 80,
+        '5. Closed Won' => 100,
     ];
 
     /**
-     * Partner-specific profiles controlling opportunity volume and value.
-     * [min_opps, max_opps, min_amount_influenced, max_amount_influenced, avg_close_weeks, sourced_chance_pct]
-     *
-     * sourced_chance_pct: percentage of opportunities that are sourced (vs influenced).
-     * sourced_chance_pct controls the ratio of sourced vs influenced opportunities.
-     * Sourced NNACV ends up roughly 3-40% of influenced since fewer opps are sourced.
+     * LOB → product_area mapping for the Opportunity model.
      */
-    private function getPartnerProfile(string $partnerName): array
-    {
-        return match (true) {
-            str_contains($partnerName, 'Accenture') => [28, 38, 80000, 450000, 14, 25],
-            str_contains($partnerName, 'Deloitte') => [22, 30, 60000, 380000, 16, 22],
-            str_contains($partnerName, 'PwC') => [20, 26, 50000, 320000, 15, 25],
-            default => [12, 18, 15000, 180000, 12, 20],
-        };
-    }
+    private const LOB_TO_PRODUCT_AREA = [
+        'Finance' => 'Finance',
+        'Supply Chain' => 'Supply Chain',
+        'Sales and Marketing' => 'Sales',
+        'HR' => 'Workforce',
+        'HR & Workforce' => 'Workforce',
+        'Other' => 'Platform',
+    ];
 
     public function run(): void
     {
-        $this->command->info('Seeding opportunity history (52 weeks)...');
+        $this->command->info('Seeding opportunity history from Excel snapshots...');
 
-        // Clear only opportunity-related data (non-destructive to partners/users/contacts/etc.)
         Schema::withoutForeignKeyConstraints(function () {
             OpportunitySnapshot::truncate();
             Opportunity::truncate();
             Import::where('type', 'opportunities')->delete();
         });
 
-        $partners = Partner::orderBy('id')->get();
-        $admin = User::whereRelation('role', 'slug', 'admin')->first() ?? User::first();
+        $folders = $this->discoverSnapshotFolders();
 
-        // Group products by product_line for assigning product_id to opportunities
-        $productsByLine = Product::all()->groupBy('product_line');
-
-        if ($partners->isEmpty()) {
-            $this->command->warn('No partners found. Run PartnerSeeder first.');
+        if ($folders->isEmpty()) {
+            $this->command->warn('No snapshot folders found in database/seeders/data/.');
 
             return;
         }
 
-        $weeksToSimulate = 52;
-        $startDate = now()->subWeeks($weeksToSimulate);
+        $admin = User::whereRelation('role', 'slug', 'admin')->first() ?? User::first();
+        $partnerMap = Partner::pluck('id', 'name');
 
-        // Pre-generate opportunities for each partner
-        $partnerOpportunities = [];
+        // Track opportunities by SFDC ID across snapshots for deduplication
+        $knownOpportunities = []; // sfdc_id => db_id
 
-        foreach ($partners as $partner) {
-            [$minOpps, $maxOpps, $minAmt, $maxAmt, $avgCloseWeeks, $sourcedChance] = $this->getPartnerProfile($partner->name);
-            $oppCount = rand($minOpps, $maxOpps);
+        $totalOpportunities = 0;
+        $totalSnapshots = 0;
 
-            // Determine sourced count upfront (guarantees at least 1 sourced per partner)
-            $sourcedCount = max(1, (int) round($oppCount * $sourcedChance / 100));
-            $sourcedRemaining = $sourcedCount;
+        foreach ($folders as $folder) {
+            $oppsPath = $folder['path'].'/opportunities.xlsx';
 
-            $partnerOpps = [];
-            for ($i = 0; $i < $oppCount; $i++) {
-                $account = $this->accounts[array_rand($this->accounts)];
-                $type = $this->oppTypes[array_rand($this->oppTypes)];
+            if (! file_exists($oppsPath)) {
+                $this->command->warn("  Skipping {$folder['name']} — no opportunities.xlsx found.");
 
-                // Guarantee the first Closed Won opp is sourced so goal attainment shows both types
-                if ($i === 0) {
-                    $isSourced = true;
-                    $sourcedRemaining--;
-                } else {
-                    $influencedRemaining = $oppCount - $i - $sourcedRemaining;
-                    $isSourced = $sourcedRemaining > 0 && ($influencedRemaining <= 0 || rand(1, $sourcedRemaining + $influencedRemaining) <= $sourcedRemaining);
-                    if ($isSourced) {
-                        $sourcedRemaining--;
-                    }
-                }
-                $revenueType = $isSourced ? 'sourced' : 'influenced';
-
-                // Guarantee at least 2 Closed Won targets per partner, then use weighted funnel
-                $closedWonIdx = count($this->stageProgression) - 1;
-                $targetStageIdx = $i < 2 ? $closedWonIdx : $this->randomTargetStage();
-
-                // Stagger intro weeks: opps targeting later stages start earlier
-                // (they need more time to reach their target); early-stage opps start late.
-                $weeksNeeded = $targetStageIdx * rand(4, 8);
-                $latestIntro = max(0, $weeksToSimulate - $weeksNeeded - 2);
-                $introWeek = rand(max(0, $latestIntro - 10), min($latestIntro, $weeksToSimulate - 1));
-
-                $startStageIdx = 0;
-
-                // Guaranteed Closed Won opps get close dates in current FY so goal attainment works
-                $closeDate = $i < 2
-                    ? now()->subDays(rand(1, 10))
-                    : $startDate->copy()->addWeeks($introWeek + $avgCloseWeeks + rand(-3, 5));
-
-                $productArea = $this->randomProductArea();
-                $productId = $productsByLine->has($productArea)
-                    ? $productsByLine[$productArea]->random()->id
-                    : null;
-
-                $partnerOpps[] = [
-                    'partner_id' => $partner->id,
-                    'account_name' => $account,
-                    'opportunity_name' => "{$account} - {$type}",
-                    'amount' => round(rand($minAmt * 100, $maxAmt * 100) / 100, 2),
-                    'type' => $type,
-                    'revenue_type' => $revenueType,
-                    'product_area' => $productArea,
-                    'product_id' => $productId,
-                    'intro_week' => $introWeek,
-                    'current_stage_index' => $startStageIdx,
-                    'target_stage_index' => $targetStageIdx,
-                    'weeks_in_stage' => 0,
-                    'weeks_to_advance' => rand(4, 8),
-                    'close_date' => $closeDate,
-                    'lead_source' => $isSourced
-                        ? 'Partner Referral'
-                        : fake()->randomElement(['Web', 'Event', 'Cold Call', 'LinkedIn']),
-                    'owner' => fake()->name(),
-                    'db_id' => null,
-                    'closed' => false,
-                ];
+                continue;
             }
 
-            $partnerOpportunities[$partner->id] = $partnerOpps;
-        }
+            $snapshotDate = $folder['date'];
 
-        $totalSnapshots = 0;
-        $totalOpportunities = 0;
+            $rows = $this->loadExcel($oppsPath);
 
-        for ($week = 0; $week < $weeksToSimulate; $week++) {
-            $weekDate = $startDate->copy()->addWeeks($week);
+            // Skip malformed files (e.g., pivot table exports with < 10 columns)
+            if ($rows->isEmpty() || count(array_keys($rows->first())) < self::MIN_COLUMNS) {
+                $this->command->warn("  Skipping {$folder['name']} — malformed opportunities file (".count(array_keys($rows->first() ?? [])).' columns).');
 
-            // Create weekly import record — all timestamps match the file name date
+                continue;
+            }
+
+            $this->command->info("  Processing {$folder['name']} ({$rows->count()} raw rows)...");
+
+            // Filter: must have a partner, exclude Anaplan PS
+            $filteredRows = $rows->filter(function ($row) {
+                $finalImpl = trim($row['Final Implementation Partner'] ?? '');
+                $partnerHQ = trim($row['Partner Plan HQ'] ?? '');
+
+                // Resolve partner: Final Implementation Partner takes priority
+                $partner = $finalImpl ?: $partnerHQ;
+
+                if (empty($partner)) {
+                    return false;
+                }
+
+                // Exclude Anaplan PS
+                if (str_contains(strtolower($finalImpl), 'anaplan ps')) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            $this->command->info("    After filtering: {$filteredRows->count()} partner-related opportunities.");
+
             $import = Import::create([
                 'type' => 'opportunities',
-                'file_name' => 'weekly_pipeline_'.$weekDate->format('Y_m_d').'.xlsx',
-                'file_path' => 'imports/weekly_pipeline_'.$weekDate->format('Y_m_d').'.xlsx',
+                'file_name' => "opportunities_{$folder['name']}.xlsx",
+                'file_path' => "seeders/data/{$folder['name']}/opportunities.xlsx",
                 'status' => 'completed',
                 'user_id' => $admin->id,
-                'started_at' => $weekDate,
-                'completed_at' => $weekDate->copy()->addMinutes(rand(2, 8)),
-                'total_rows' => 0,
+                'started_at' => $snapshotDate,
+                'completed_at' => $snapshotDate->copy()->addMinutes(5),
+                'total_rows' => $rows->count(),
                 'successful_rows' => 0,
                 'failed_rows' => 0,
                 'partners_created' => 0,
@@ -194,205 +132,295 @@ class OpportunityHistorySeeder extends Seeder
                 'opportunities_created' => 0,
                 'opportunities_updated' => 0,
                 'resources_created' => 0,
-                'created_at' => $weekDate,
-                'updated_at' => $weekDate,
+                'created_at' => $snapshotDate,
+                'updated_at' => $snapshotDate,
             ]);
 
-            $weekSnapshots = [];
-            $weekNewOpps = 0;
+            $newOpps = 0;
+            $updatedOpps = 0;
+            $snapshotRecords = [];
+            $skippedPartners = 0;
 
-            foreach ($partnerOpportunities as $partnerId => &$opps) {
-                foreach ($opps as &$opp) {
-                    // Skip if not yet introduced
-                    if ($week < $opp['intro_week']) {
-                        continue;
-                    }
+            foreach ($filteredRows as $row) {
+                $finalImpl = trim($row['Final Implementation Partner'] ?? '');
+                $partnerHQ = trim($row['Partner Plan HQ'] ?? '');
+                $resolvedPartner = $finalImpl ?: $partnerHQ;
 
-                    // Skip if already closed
-                    if ($opp['closed']) {
-                        continue;
-                    }
+                // Match partner to DB — try both Final Implementation Partner and Partner Plan HQ
+                $partnerId = $partnerMap->get($resolvedPartner)
+                    ?? $partnerMap->get($finalImpl)
+                    ?? $partnerMap->get($partnerHQ);
 
-                    // Create the DB opportunity if first appearance
-                    if ($opp['db_id'] === null) {
-                        $fiscal = FiscalYearHelper::calculateFiscalPeriod($opp['close_date']);
-                        $fiscalQuarter = $fiscal['fiscal_quarter'];
-                        $fiscalYear = $fiscal['fiscal_year'];
+                if (! $partnerId) {
+                    $skippedPartners++;
 
-                        $dbOpp = Opportunity::create([
-                            'salesforce_id' => 'OPP-'.str_pad(++$totalOpportunities, 6, '0', STR_PAD_LEFT),
-                            'opportunity_name' => $opp['opportunity_name'],
-                            'account_name' => $opp['account_name'],
-                            'partner_id' => $opp['partner_id'],
-                            'stage' => $this->stageProgression[$opp['current_stage_index']],
-                            'amount' => $opp['amount'],
-                            'close_date' => $opp['close_date'],
-                            'fiscal_quarter' => $fiscalQuarter,
-                            'fiscal_year' => $fiscalYear,
-                            'type' => $opp['type'],
-                            'lead_source' => $opp['lead_source'],
-                            'revenue_type' => $opp['revenue_type'],
-                            'product_area' => $opp['product_area'],
-                            'product_id' => $opp['product_id'],
-                            'probability' => $this->getProbabilityForStage($this->stageProgression[$opp['current_stage_index']]),
-                            'owner' => $opp['owner'],
-                            'import_id' => $import->id,
-                            'created_at' => $weekDate,
-                            'updated_at' => $weekDate,
-                        ]);
-                        $opp['db_id'] = $dbOpp->id;
-                        $weekNewOpps++;
-                    }
-
-                    // Evolve stage — capped at target stage for funnel distribution
-                    $opp['weeks_in_stage']++;
-                    if ($opp['weeks_in_stage'] >= $opp['weeks_to_advance']
-                        && $opp['current_stage_index'] < $opp['target_stage_index']
-                        && $opp['current_stage_index'] < count($this->stageProgression) - 1) {
-
-                        $opp['current_stage_index']++;
-                        $opp['weeks_in_stage'] = 0;
-                        $opp['weeks_to_advance'] = rand(4, 8);
-
-                        $newStage = $this->stageProgression[$opp['current_stage_index']];
-
-                        // Small chance of amount adjustment as deal progresses
-                        if (rand(1, 4) === 1) {
-                            $opp['amount'] = round($opp['amount'] * (rand(85, 120) / 100), 2);
-                        }
-
-                        // Mark as closed if reached Closed Won
-                        if ($newStage === 'Closed Won') {
-                            $opp['closed'] = true;
-                        }
-
-                        Opportunity::where('id', $opp['db_id'])->update([
-                            'stage' => $newStage,
-                            'probability' => $this->getProbabilityForStage($newStage),
-                            'amount' => $opp['amount'],
-                            'import_id' => $import->id,
-                            'updated_at' => $weekDate,
-                        ]);
-                    }
-
-                    // Create snapshot
-                    $currentStage = $this->stageProgression[$opp['current_stage_index']];
-                    $weekSnapshots[] = [
-                        'opportunity_id' => $opp['db_id'],
-                        'import_id' => $import->id,
-                        'snapshot_date' => $weekDate->toDateString(),
-                        'opportunity_name' => $opp['opportunity_name'],
-                        'account_name' => $opp['account_name'],
-                        'partner_id' => $opp['partner_id'],
-                        'stage' => $currentStage,
-                        'amount' => $opp['amount'],
-                        'close_date' => $opp['close_date']->toDateString(),
-                        'fiscal_quarter' => null,
-                        'fiscal_year' => null,
-                        'type' => $opp['type'],
-                        'lead_source' => $opp['lead_source'],
-                        'revenue_type' => $opp['revenue_type'],
-                        'product_area' => $opp['product_area'],
-                        'probability' => $this->getProbabilityForStage($currentStage),
-                        'owner' => $opp['owner'],
-                        'created_at' => $weekDate,
-                        'updated_at' => $weekDate,
-                    ];
+                    continue;
                 }
+
+                // Extract SFDC ID from Link column
+                $link = $row['Link'] ?? '';
+                $sfdcId = $this->extractSfdcId($link);
+
+                $closeDate = $this->parseDate($row['Close Date'] ?? null);
+                $stage = trim($row['Sales Stage'] ?? '');
+                $amount = $this->parseAmount($row['NNACV - SFDC'] ?? null);
+                $lob = trim($row['LOB'] ?? '');
+                $productArea = self::LOB_TO_PRODUCT_AREA[$lob] ?? null;
+                $probability = self::STAGE_PROBABILITY[$stage] ?? 50;
+                $recordType = trim($row['Record Type (SFDC)'] ?? '');
+                $partnerSalesRole = trim($row['Primary Partner Sales Role'] ?? '');
+
+                // Determine revenue_type from Partner Sales Role
+                $revenueType = strtolower($partnerSalesRole) === 'originated' ? 'sourced' : 'influenced';
+
+                // Fiscal period
+                $fiscal = FiscalYearHelper::calculateFiscalPeriod($closeDate);
+
+                // Build excel_data JSON for fields not in the main schema
+                $excelData = array_filter([
+                    'parent_account' => trim($row['Parent Account'] ?? ''),
+                    'geo' => trim($row['Geo'] ?? ''),
+                    'region' => trim($row['Region'] ?? ''),
+                    'partner_plan_hq' => $partnerHQ,
+                    'final_implementation_partner' => $finalImpl,
+                    'record_type' => $recordType,
+                    'implementation_approach' => trim($row['Implementation Approach'] ?? ''),
+                    'implementation_approach_details' => trim($row['Implementation Approach Details'] ?? ''),
+                    'delivery_readiness_meeting_date' => $this->parseDate($row['Delivery Readiness Meeting Date'] ?? null)?->toDateString(),
+                    'delivery_readiness_notes' => trim($row['Delivery Readiness Notes'] ?? ''),
+                    'account_tier' => trim($row['Account Tier'] ?? ''),
+                    'cs_health_score' => trim($row['CS Health Score'] ?? ''),
+                    'delivery_assurance' => $this->parseBool($row['Delivery Assurance?'] ?? null),
+                    'positioned_delivery_assurance' => $this->parseBool($row['Positioned Delivery Assurance?'] ?? null),
+                    'app' => $this->parseBool($row['App?'] ?? null),
+                    'app_detail' => trim($row['App Detail'] ?? ''),
+                    'polaris' => $this->parseBool($row['Polaris'] ?? null),
+                    'syrup' => $this->parseBool($row['Syrup'] ?? null),
+                    'product_family' => trim($row['Product Family'] ?? ''),
+                    'product_name' => trim($row['Product Name'] ?? ''),
+                    'use_case_details' => trim($row['Use Case Details'] ?? ''),
+                    'nnacv_md_adj' => $this->parseAmount($row['NNACV - MD Adj (SF)'] ?? null),
+                    'stage_1_date' => $this->parseDate($row['Stage 1 Date'] ?? null)?->toDateString(),
+                    'stage_2_date' => $this->parseDate($row['Stage 2 Date'] ?? null)?->toDateString(),
+                    'stage_3_date' => $this->parseDate($row['Stage 3 Date'] ?? null)?->toDateString(),
+                    'primary_partner_sales_role' => $partnerSalesRole,
+                ], fn ($v) => $v !== '' && $v !== null);
+
+                // Create or update the opportunity
+                if (isset($knownOpportunities[$sfdcId])) {
+                    $dbId = $knownOpportunities[$sfdcId];
+                    Opportunity::where('id', $dbId)->update([
+                        'stage' => $stage ?: null,
+                        'amount' => $amount,
+                        'close_date' => $closeDate,
+                        'fiscal_quarter' => $fiscal['fiscal_quarter'],
+                        'fiscal_year' => $fiscal['fiscal_year'],
+                        'probability' => $probability,
+                        'excel_data' => $excelData,
+                        'import_id' => $import->id,
+                        'updated_at' => $snapshotDate,
+                    ]);
+                    $updatedOpps++;
+                } else {
+                    $dbOpp = Opportunity::create([
+                        'salesforce_id' => $sfdcId,
+                        'opportunity_name' => trim($row['Opportunity Name'] ?? ''),
+                        'account_name' => trim($row['Parent Account'] ?? ''),
+                        'partner_id' => $partnerId,
+                        'stage' => $stage ?: null,
+                        'amount' => $amount,
+                        'close_date' => $closeDate,
+                        'fiscal_quarter' => $fiscal['fiscal_quarter'],
+                        'fiscal_year' => $fiscal['fiscal_year'],
+                        'type' => $recordType ?: null,
+                        'lead_source' => $revenueType === 'sourced' ? 'Partner Referral' : null,
+                        'revenue_type' => $revenueType,
+                        'product_area' => $productArea,
+                        'probability' => $probability,
+                        'owner' => trim($row['Opportunity Owner'] ?? ''),
+                        'excel_data' => $excelData,
+                        'import_id' => $import->id,
+                        'first_seen_at' => $snapshotDate,
+                        'created_at' => $snapshotDate,
+                        'updated_at' => $snapshotDate,
+                    ]);
+                    $knownOpportunities[$sfdcId] = $dbOpp->id;
+                    $newOpps++;
+                    $totalOpportunities++;
+                }
+
+                $dbId = $knownOpportunities[$sfdcId];
+
+                // Create snapshot record
+                $snapshotRecords[] = [
+                    'opportunity_id' => $dbId,
+                    'import_id' => $import->id,
+                    'snapshot_date' => $snapshotDate->toDateString(),
+                    'opportunity_name' => trim($row['Opportunity Name'] ?? ''),
+                    'account_name' => trim($row['Parent Account'] ?? ''),
+                    'partner_id' => $partnerId,
+                    'stage' => $stage ?: null,
+                    'amount' => $amount,
+                    'close_date' => $closeDate?->toDateString(),
+                    'fiscal_quarter' => $fiscal['fiscal_quarter'],
+                    'fiscal_year' => $fiscal['fiscal_year'],
+                    'type' => $recordType ?: null,
+                    'lead_source' => $revenueType === 'sourced' ? 'Partner Referral' : null,
+                    'revenue_type' => $revenueType,
+                    'product_area' => $productArea,
+                    'probability' => $probability,
+                    'owner' => trim($row['Opportunity Owner'] ?? ''),
+                    'created_at' => $snapshotDate,
+                    'updated_at' => $snapshotDate,
+                ];
             }
-            unset($opps, $opp);
 
             // Batch insert snapshots
-            if (! empty($weekSnapshots)) {
-                foreach (array_chunk($weekSnapshots, 500) as $chunk) {
+            if (! empty($snapshotRecords)) {
+                foreach (array_chunk($snapshotRecords, 500) as $chunk) {
                     DB::table('opportunity_snapshots')->insert($chunk);
                 }
-                $totalSnapshots += count($weekSnapshots);
+                $totalSnapshots += count($snapshotRecords);
             }
 
-            // Update import stats
             $import->update([
-                'total_rows' => count($weekSnapshots),
-                'successful_rows' => count($weekSnapshots),
-                'opportunities_created' => $weekNewOpps,
-                'opportunities_updated' => count($weekSnapshots) - $weekNewOpps,
+                'successful_rows' => $newOpps + $updatedOpps,
+                'failed_rows' => $skippedPartners,
+                'opportunities_created' => $newOpps,
+                'opportunities_updated' => $updatedOpps,
             ]);
+
+            $this->command->info("    Created {$newOpps} new, updated {$updatedOpps}, skipped {$skippedPartners} unmatched partners.");
+            $this->command->info('    Created '.count($snapshotRecords).' snapshot records.');
         }
 
-        $this->command->info('');
-        $this->command->info("Seeded {$totalOpportunities} opportunities across ".$partners->count().' partners.');
-        $this->command->info("Created {$totalSnapshots} snapshots over {$weeksToSimulate} weekly imports.");
-
-        // Show per-partner breakdown with sourced/influenced split
-        foreach ($partners->take(5) as $partner) {
-            $sourced = Opportunity::where('partner_id', $partner->id)->where('revenue_type', 'sourced');
-            $influenced = Opportunity::where('partner_id', $partner->id)->where('revenue_type', 'influenced');
-            $sCount = $sourced->count();
-            $iCount = $influenced->count();
-            $sAcv = (clone $sourced)->sum('amount');
-            $iAcv = (clone $influenced)->sum('amount');
-            $ratio = $iAcv > 0 ? round($sAcv / $iAcv * 100, 1) : 0;
-            $this->command->info("  {$partner->name}: {$sCount} sourced (\${$this->fmtK($sAcv)}) + {$iCount} influenced (\${$this->fmtK($iAcv)}) = {$ratio}% ratio");
-        }
-        $this->command->info('  ... and '.max(0, $partners->count() - 5).' more partners');
-    }
-
-    private function fmtK(float $val): string
-    {
-        return $val >= 1000000
-            ? number_format($val / 1000000, 1).'M'
-            : number_format($val / 1000, 0).'k';
+        $this->command->info("Done. Total: {$totalOpportunities} unique opportunities, {$totalSnapshots} snapshots.");
     }
 
     /**
-     * Return a target stage index with funnel-shaped weights:
-     * many opps stay early, fewer reach later stages.
+     * Discover all date-based snapshot folders in database/seeders/data/.
      *
-     * Index 0 = Prospecting, 1 = Qualification, ... 6 = Closed Won
+     * @return \Illuminate\Support\Collection<int, array{name: string, path: string, date: Carbon}>
      */
-    private function randomTargetStage(): int
+    private function discoverSnapshotFolders(): \Illuminate\Support\Collection
     {
-        // Weights: Prospecting 30%, Qualification 20%, Needs Analysis 15%,
-        // Value Proposition 12%, Proposal 10%, Negotiation 5%, Closed Won 8%
-        $weights = [30, 20, 15, 12, 10, 5, 8];
-        $rand = rand(1, array_sum($weights));
-        $cumulative = 0;
-        foreach ($weights as $idx => $w) {
-            $cumulative += $w;
-            if ($rand <= $cumulative) {
-                return $idx;
-            }
+        $dataDir = database_path('seeders/data');
+
+        if (! is_dir($dataDir)) {
+            return collect();
         }
 
-        return 0;
+        return collect(scandir($dataDir))
+            ->filter(fn ($name) => preg_match('/^\d{1,2}-\d{1,2}-\d{4}$/', $name))
+            ->map(function ($name) use ($dataDir) {
+                [$month, $day, $year] = explode('-', $name);
+
+                return [
+                    'name' => $name,
+                    'path' => "{$dataDir}/{$name}",
+                    'date' => Carbon::create((int) $year, (int) $month, (int) $day),
+                ];
+            })
+            ->sortBy('date')
+            ->values();
     }
 
-    private function randomProductArea(): string
+    /**
+     * Load an Excel file and return rows as a collection of associative arrays.
+     *
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    private function loadExcel(string $path): \Illuminate\Support\Collection
     {
-        $rand = rand(1, 100);
-        $cumulative = 0;
-        foreach ($this->productAreaWeights as $area => $weight) {
-            $cumulative += $weight;
-            if ($rand <= $cumulative) {
-                return $area;
-            }
+        $spreadsheet = IOFactory::load($path);
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray(null, true, true, true);
+
+        $headers = array_shift($rows);
+
+        if (empty($headers)) {
+            return collect();
         }
 
-        return 'Finance';
+        return collect($rows)->map(function ($row) use ($headers) {
+            $mapped = [];
+            foreach ($headers as $col => $header) {
+                $mapped[trim((string) $header)] = $row[$col];
+            }
+
+            return $mapped;
+        });
     }
 
-    private function getProbabilityForStage(string $stage): int
+    /**
+     * Extract Salesforce ID from a link URL or use the value directly.
+     */
+    private function extractSfdcId(?string $link): string
     {
-        return match ($stage) {
-            'Prospecting' => 10,
-            'Qualification' => 20,
-            'Needs Analysis' => 30,
-            'Value Proposition' => 40,
-            'Proposal/Price Quote' => 60,
-            'Negotiation/Review' => 80,
-            'Closed Won' => 100,
-            'Closed Lost' => 0,
-            default => 50,
-        };
+        if (empty($link)) {
+            return 'OPP-'.strtoupper(substr(md5((string) mt_rand()), 0, 12));
+        }
+
+        // Extract ID from URLs like https://anaplan.my.salesforce.com/006PO000008diJ7YAI
+        if (str_contains($link, '/')) {
+            $parts = explode('/', rtrim($link, '/'));
+
+            return end($parts);
+        }
+
+        return $link;
+    }
+
+    /**
+     * Parse an Excel date value (could be numeric serial, datetime string, or Carbon).
+     */
+    private function parseDate(mixed $value): ?Carbon
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        if ($value instanceof \DateTimeInterface) {
+            return Carbon::instance($value);
+        }
+
+        if (is_numeric($value)) {
+            // Excel serial date number
+            return Carbon::createFromTimestamp(($value - 25569) * 86400);
+        }
+
+        try {
+            return Carbon::parse($value);
+        } catch (\Exception) {
+            return null;
+        }
+    }
+
+    /**
+     * Parse an amount value from Excel (stored in $K, convert to dollars).
+     */
+    private function parseAmount(mixed $value): ?float
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return (float) $value * 1000;
+    }
+
+    /**
+     * Parse a boolean value from Excel (could be TRUE/FALSE string or actual bool).
+     */
+    private function parseBool(mixed $value): ?bool
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        return strtoupper(trim((string) $value)) === 'TRUE';
     }
 }

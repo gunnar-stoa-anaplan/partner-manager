@@ -15,7 +15,27 @@ function initEnablementCalendar() {
     var config = window.enablementCalendarConfig;
     if (!config) return;
 
-    var calendarEl = document.getElementById('enablement-calendar');
+    // Support embedded mode with custom element IDs (e.g. SoB page)
+    var ids = {
+        calendar: config.calendarEl || 'enablement-calendar',
+        draggable: config.draggableEl || 'draggable-sessions',
+        typeFilterClass: config.typeFilterClass || 'type-filter',
+        toggleAll: config.toggleAllId || 'toggleAllTypes',
+        modal: config.modalId || 'contactAssignModal',
+        assignSessionId: config.assignSessionIdEl || 'assignSessionId',
+        assignSessionTitle: config.assignSessionTitleEl || 'assignSessionTitle',
+        assignTypeBadge: config.assignTypeBadgeEl || 'assignTypeBadge',
+        assignSessionDate: config.assignSessionDateEl || 'assignSessionDate',
+        assignSessionLocation: config.assignSessionLocationEl || 'assignSessionLocation',
+        assignSessionInstructor: config.assignSessionInstructorEl || 'assignSessionInstructor',
+        assignedContactsList: config.assignedContactsListEl || 'assignedContactsList',
+        assignContactCbClass: config.assignContactCbClass || 'assign-contact-cb',
+        assignContactsBtn: config.assignContactsBtnEl || 'assignContactsBtn',
+        removePartnerBtn: config.removePartnerBtnEl || 'removePartnerBtn',
+        contactRowPrefix: config.contactRowPrefix || 'contact-row-',
+    };
+
+    var calendarEl = document.getElementById(ids.calendar);
     if (!calendarEl) return;
 
     // Prevent double-init
@@ -42,10 +62,10 @@ function initEnablementCalendar() {
     // ─── Type Filter ────────────────────────────────────────────
     var activeTypes = Object.keys(config.eventTypes || {});
 
-    var toggleAllBtn = document.getElementById('toggleAllTypes');
+    var toggleAllBtn = document.getElementById(ids.toggleAll);
     if (toggleAllBtn) {
         toggleAllBtn.addEventListener('click', function () {
-            var checkboxes = document.querySelectorAll('.type-filter');
+            var checkboxes = document.querySelectorAll('.' + ids.typeFilterClass);
             var allChecked = Array.from(checkboxes).every(function (cb) { return cb.checked; });
             checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
             updateActiveTypes();
@@ -53,7 +73,7 @@ function initEnablementCalendar() {
         });
     }
 
-    document.querySelectorAll('.type-filter').forEach(function (cb) {
+    document.querySelectorAll('.' + ids.typeFilterClass).forEach(function (cb) {
         cb.addEventListener('change', function () {
             updateActiveTypes();
             calendar.refetchEvents();
@@ -62,15 +82,15 @@ function initEnablementCalendar() {
 
     function updateActiveTypes() {
         activeTypes = [];
-        document.querySelectorAll('.type-filter:checked').forEach(function (cb) {
+        document.querySelectorAll('.' + ids.typeFilterClass + ':checked').forEach(function (cb) {
             activeTypes.push(cb.value);
         });
         filterSidebarEvents();
     }
 
     function filterSidebarEvents() {
-        // Filter both admin sidebar (#draggable-events) and partner sidebar (#draggable-sessions)
-        ['draggable-events', 'draggable-sessions'].forEach(function (id) {
+        // Filter both admin sidebar (#draggable-events) and partner sidebar
+        ['draggable-events', ids.draggable].forEach(function (id) {
             var container = document.getElementById(id);
             if (!container) return;
             container.querySelectorAll('.fc-event').forEach(function (el) {
@@ -400,7 +420,7 @@ function initEnablementCalendar() {
     function loadAvailableSessions() {
         if (mode !== 'partner') return;
 
-        var container = document.getElementById('draggable-sessions');
+        var container = document.getElementById(ids.draggable);
         if (!container) return;
 
         var now = new Date();
@@ -451,7 +471,7 @@ function initEnablementCalendar() {
     }
 
     function initPartnerDraggable() {
-        var container = document.getElementById('draggable-sessions');
+        var container = document.getElementById(ids.draggable);
         if (!container) return;
 
         if (partnerDraggable) {
@@ -798,7 +818,7 @@ function initEnablementCalendar() {
     var contactAssignModal = null;
 
     if (mode === 'partner') {
-        var assignModalEl = document.getElementById('contactAssignModal');
+        var assignModalEl = document.getElementById(ids.modal);
         if (assignModalEl) contactAssignModal = new bootstrap.Modal(assignModalEl);
     }
 
@@ -808,21 +828,21 @@ function initEnablementCalendar() {
         var props = fcEvent.extendedProps;
         var sessionId = props.session_id || fcEvent.id;
 
-        document.getElementById('assignSessionId').value = sessionId;
-        document.getElementById('assignSessionTitle').textContent = fcEvent.title;
+        document.getElementById(ids.assignSessionId).value = sessionId;
+        document.getElementById(ids.assignSessionTitle).textContent = fcEvent.title;
 
-        var typeBadge = document.getElementById('assignTypeBadge');
+        var typeBadge = document.getElementById(ids.assignTypeBadge);
         typeBadge.textContent = props.type_label || '';
         typeBadge.style.backgroundColor = config.typeColors[props.type] || '#868e96';
 
         var startDate = fcEvent.start;
         var dateStr = startDate ? startDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) : '';
-        document.getElementById('assignSessionDate').textContent = dateStr;
-        document.getElementById('assignSessionLocation').textContent = props.location || 'TBD';
-        document.getElementById('assignSessionInstructor').textContent = props.instructor || '\u2014';
+        document.getElementById(ids.assignSessionDate).textContent = dateStr;
+        document.getElementById(ids.assignSessionLocation).textContent = props.location || 'TBD';
+        document.getElementById(ids.assignSessionInstructor).textContent = props.instructor || '\u2014';
 
         // Load assigned contacts from extendedProps
-        var assignedList = document.getElementById('assignedContactsList');
+        var assignedList = document.getElementById(ids.assignedContactsList);
         var partnerRegs = props.partner_registrations || [];
         var assignedContactIds = [];
 
@@ -862,9 +882,9 @@ function initEnablementCalendar() {
         }
 
         // Show/hide contact checkboxes based on what's already assigned
-        document.querySelectorAll('.assign-contact-cb').forEach(function (cb) {
+        document.querySelectorAll('.' + ids.assignContactCbClass).forEach(function (cb) {
             var contactId = parseInt(cb.value);
-            var row = document.getElementById('contact-row-' + cb.value);
+            var row = document.getElementById(ids.contactRowPrefix + cb.value);
             if (assignedContactIds.indexOf(contactId) !== -1) {
                 if (row) row.style.display = 'none';
                 cb.checked = false;
@@ -880,25 +900,25 @@ function initEnablementCalendar() {
 
     // Enable/disable assign button based on checkbox selection
     if (mode === 'partner') {
-        document.querySelectorAll('.assign-contact-cb').forEach(function (cb) {
+        document.querySelectorAll('.' + ids.assignContactCbClass).forEach(function (cb) {
             cb.addEventListener('change', updateAssignBtn);
         });
     }
 
     function updateAssignBtn() {
-        var btn = document.getElementById('assignContactsBtn');
+        var btn = document.getElementById(ids.assignContactsBtn);
         if (!btn) return;
-        var anyChecked = document.querySelector('.assign-contact-cb:checked');
+        var anyChecked = document.querySelector('.' + ids.assignContactCbClass + ':checked');
         btn.disabled = !anyChecked;
     }
 
     // Assign contacts button handler
-    var assignBtn = document.getElementById('assignContactsBtn');
+    var assignBtn = document.getElementById(ids.assignContactsBtn);
     if (assignBtn && mode === 'partner') {
         assignBtn.addEventListener('click', function () {
-            var sessionId = document.getElementById('assignSessionId').value;
+            var sessionId = document.getElementById(ids.assignSessionId).value;
             var contactIds = [];
-            document.querySelectorAll('.assign-contact-cb:checked').forEach(function (cb) {
+            document.querySelectorAll('.' + ids.assignContactCbClass + ':checked').forEach(function (cb) {
                 contactIds.push(parseInt(cb.value));
             });
 
@@ -940,12 +960,12 @@ function initEnablementCalendar() {
     }
 
     // Remove partner from session button handler
-    var removePartnerBtn = document.getElementById('removePartnerBtn');
-    if (removePartnerBtn && mode === 'partner') {
-        removePartnerBtn.addEventListener('click', function () {
+    var removeBtn = document.getElementById(ids.removePartnerBtn);
+    if (removeBtn && mode === 'partner') {
+        removeBtn.addEventListener('click', function () {
             if (!confirm('Remove ' + config.partnerName + ' from this session? This will also remove all contact assignments.')) return;
 
-            var sessionId = document.getElementById('assignSessionId').value;
+            var sessionId = document.getElementById(ids.assignSessionId).value;
 
             fetch(config.apiBaseUrl + '/enablement/sessions/' + sessionId + '/unregister-partner', {
                 method: 'DELETE',

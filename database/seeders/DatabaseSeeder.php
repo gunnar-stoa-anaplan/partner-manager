@@ -74,6 +74,9 @@ class DatabaseSeeder extends Seeder
             QbrSessionSeeder::class,           // QBR sessions + 9 sections each
             SignalSeeder::class,               // signals + engine runs across all partners
 
+            // === Priorities & Progress ===
+            PrioritiesSeeder::class,           // PSM objectives, weekly focuses, action items
+
             // === Idea Room ===
             GalleryThemeSeeder::class,         // gallery wall templates + frame slots
             IdeaRoomSeeder::class,             // ideas, buckets, tags, edges, rooms

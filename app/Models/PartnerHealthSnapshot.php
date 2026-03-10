@@ -28,6 +28,7 @@ class PartnerHealthSnapshot extends Model
 
     const RISK_LEVELS = [
         'healthy' => 'Healthy',
+        'monitor' => 'Monitor',
         'watch' => 'Watch',
         'at_risk' => 'At Risk',
         'critical' => 'Critical',
@@ -35,6 +36,7 @@ class PartnerHealthSnapshot extends Model
 
     const RISK_COLORS = [
         'healthy' => 'success',
+        'monitor' => 'info',
         'watch' => 'info',
         'at_risk' => 'warning',
         'critical' => 'danger',

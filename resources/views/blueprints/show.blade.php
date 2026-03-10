@@ -71,9 +71,9 @@
         </div>
     </div>
 
-    {{-- Role Legend --}}
+    {{-- Role Legend & Filter --}}
     <div class="row mb-3">
-        <div class="col-12">
+        <div class="col-12 d-flex justify-content-between align-items-center">
             <div class="d-flex gap-3 small">
                 <span><i class="fas fa-check-circle text-success me-1"></i> Required</span>
                 <span><i class="fas fa-check-circle text-muted me-1"></i> Optional</span>
@@ -82,12 +82,18 @@
                 <span style="color: #886ab5;"><i class="fas fa-circle me-1 small"></i> Pre-Sales</span>
                 <span style="color: #00BCD4;"><i class="fas fa-circle me-1 small"></i> Delivery</span>
             </div>
+            <div class="btn-group" id="roleFilter">
+                <button type="button" class="btn btn-sm btn-outline-primary active" data-filter="all">All Roles</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-filter="gtm" style="border-color:#fd7e14;color:#fd7e14">GTM (Sales)</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-filter="pre_sales" style="border-color:#886ab5;color:#886ab5">Pre-Sales</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-filter="delivery" style="border-color:#00BCD4;color:#00BCD4">Delivery</button>
+            </div>
         </div>
     </div>
 
     {{-- Outcomes --}}
     @foreach($blueprint->outcomes as $outcome)
-        <div class="row">
+        <div class="row outcome-card">
             <div class="col-lg-12">
                 <div class="card shadow-0 mb-g">
                     <div class="card-header">
@@ -106,14 +112,14 @@
                                             <th>Time</th>
                                             <th>Source</th>
                                             <th>Prerequisites</th>
-                                            <th class="text-center" style="width:60px; color:#fd7e14">GTM</th>
-                                            <th class="text-center" style="width:60px; color:#886ab5">Pre-S</th>
-                                            <th class="text-center" style="width:60px; color:#00BCD4">Del</th>
+                                            <th class="text-center role-col role-col-gtm" style="width:60px; color:#fd7e14">GTM</th>
+                                            <th class="text-center role-col role-col-pre_sales" style="width:60px; color:#886ab5">Pre-S</th>
+                                            <th class="text-center role-col role-col-delivery" style="width:60px; color:#00BCD4">Del</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($outcome->contentItems as $item)
-                                            <tr>
+                                            <tr class="content-row" data-gtm="{{ $item->gtm_applicable }}" data-pre-sales="{{ $item->pre_sales_applicable }}" data-delivery="{{ $item->delivery_applicable }}">
                                                 <td>
                                                     @if($item->url)
                                                         <a href="{{ $item->url }}" target="_blank">{{ $item->title }} <i class="fal fa-external-link ms-1 small"></i></a>
@@ -124,21 +130,21 @@
                                                 <td class="text-nowrap">{{ $item->duration_display ?? '-' }}</td>
                                                 <td>{{ $item->source ?? '-' }}</td>
                                                 <td><small class="text-muted">{{ $item->prerequisites ?? '-' }}</small></td>
-                                                <td class="text-center">
+                                                <td class="text-center role-col role-col-gtm">
                                                     @if($item->gtm_applicable === 'required')
                                                         <i class="fas fa-check-circle text-success"></i>
                                                     @elseif($item->gtm_applicable === 'optional')
                                                         <i class="fas fa-check-circle text-muted"></i>
                                                     @endif
                                                 </td>
-                                                <td class="text-center">
+                                                <td class="text-center role-col role-col-pre_sales">
                                                     @if($item->pre_sales_applicable === 'required')
                                                         <i class="fas fa-check-circle text-success"></i>
                                                     @elseif($item->pre_sales_applicable === 'optional')
                                                         <i class="fas fa-check-circle text-muted"></i>
                                                     @endif
                                                 </td>
-                                                <td class="text-center">
+                                                <td class="text-center role-col role-col-delivery">
                                                     @if($item->delivery_applicable === 'required')
                                                         <i class="fas fa-check-circle text-success"></i>
                                                     @elseif($item->delivery_applicable === 'optional')
@@ -179,7 +185,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach($myAssignments as $assignment)
-                                        <tr>
+                                        <tr class="assignment-row" data-role="{{ $assignment->role }}">
                                             <td>{{ $assignment->partner->name }}</td>
                                             <td>
                                                 <span class="badge" style="background-color: {{ \App\Models\PartnerBlueprintAssignment::ROLE_COLORS[$assignment->role] ?? '#868e96' }}">
@@ -256,4 +262,70 @@
 @endsection
 
 @section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var filterBtns = document.querySelectorAll('#roleFilter button');
+    var contentRows = document.querySelectorAll('.content-row');
+    var assignmentRows = document.querySelectorAll('.assignment-row');
+    var outcomeCards = document.querySelectorAll('.outcome-card');
+    var roleCols = document.querySelectorAll('.role-col');
+    var roles = ['gtm', 'pre_sales', 'delivery'];
+    var attrMap = { gtm: 'data-gtm', pre_sales: 'data-pre-sales', delivery: 'data-delivery' };
+
+    filterBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var filter = this.dataset.filter;
+
+            // Update active button styling
+            filterBtns.forEach(function(b) {
+                b.classList.remove('active');
+                b.style.backgroundColor = '';
+                b.style.color = b.dataset.filter === 'all' ? '' : b.style.borderColor;
+            });
+            this.classList.add('active');
+            if (filter !== 'all') {
+                this.style.backgroundColor = this.style.borderColor;
+                this.style.color = '#fff';
+            }
+
+            // Show/hide role columns — when a role is selected, hide the other two columns
+            roles.forEach(function(role) {
+                var cols = document.querySelectorAll('.role-col-' + role);
+                cols.forEach(function(col) {
+                    col.classList.toggle('d-none', filter !== 'all' && filter !== role);
+                });
+            });
+
+            // Filter content item rows — hide rows where selected role is 'na'
+            contentRows.forEach(function(row) {
+                if (filter === 'all') {
+                    row.classList.remove('d-none');
+                } else {
+                    row.classList.toggle('d-none', row.getAttribute(attrMap[filter]) === 'na');
+                }
+            });
+
+            // Hide outcome cards where all content rows are hidden (no applicable items)
+            outcomeCards.forEach(function(card) {
+                var rows = card.querySelectorAll('.content-row');
+                if (filter === 'all' || rows.length === 0) {
+                    card.classList.remove('d-none');
+                } else {
+                    var anyVisible = Array.from(rows).some(function(r) { return !r.classList.contains('d-none'); });
+                    card.classList.toggle('d-none', !anyVisible);
+                }
+            });
+
+            // Filter assignment rows
+            assignmentRows.forEach(function(row) {
+                if (filter === 'all') {
+                    row.classList.remove('d-none');
+                } else {
+                    row.classList.toggle('d-none', row.getAttribute('data-role') !== filter);
+                }
+            });
+        });
+    });
+});
+</script>
 @endsection

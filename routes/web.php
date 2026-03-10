@@ -47,16 +47,19 @@ use App\Http\Controllers\PathConfigurationController;
 use App\Http\Controllers\PathReviewController;
 use App\Http\Controllers\PortalImpersonationController;
 use App\Http\Controllers\PortalUserController;
+use App\Http\Controllers\PrioritiesController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\QbrController;
 use App\Http\Controllers\ReportingHierarchyController;
+use App\Http\Controllers\RiskAnalyzerController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoutingController;
 use App\Http\Controllers\SalesforceCredentialController;
 use App\Http\Controllers\ScorecardController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SolutionLifecycleController;
+use App\Http\Controllers\StateOfBusinessController;
 use App\Http\Controllers\Strategy\CoeProgramDashboardController;
 use App\Http\Controllers\SystemStatusController;
 use App\Http\Controllers\TaskBoardController;
@@ -108,6 +111,11 @@ Route::middleware(['auth'])->group(function () {
     })->name('welcome');
 
     Route::get('/program-dashboard', CoeProgramDashboardController::class)->name('program-dashboard');
+    Route::get('/state-of-business', [StateOfBusinessController::class, 'index'])->name('state-of-business');
+    Route::post('/state-of-business/filters', [StateOfBusinessController::class, 'storeFilter'])->name('state-of-business.filters.store');
+    Route::delete('/state-of-business/filters/{savedFilter}', [StateOfBusinessController::class, 'destroyFilter'])->name('state-of-business.filters.destroy');
+    Route::post('/state-of-business/goals', [StateOfBusinessController::class, 'upsertGoal'])->name('state-of-business.goals.upsert');
+    Route::delete('/state-of-business/goals/{enablementGoal}', [StateOfBusinessController::class, 'destroyGoal'])->name('state-of-business.goals.destroy');
 
     /*
     |--------------------------------------------------------------------------
@@ -230,6 +238,31 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Priorities & Progress
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('module:partner_management.priorities')->prefix('priorities')->name('priorities.')->group(function () {
+        Route::get('/', [PrioritiesController::class, 'index'])->name('index');
+        Route::get('/weekly', [PrioritiesController::class, 'weeklyFocus'])->name('weekly');
+        Route::get('/timeline', [PrioritiesController::class, 'timeline'])->name('timeline');
+        Route::get('/team', [PrioritiesController::class, 'team'])->name('team');
+        Route::get('/team/{user}', [PrioritiesController::class, 'teamMember'])->name('team.member');
+
+        Route::post('/objectives', [PrioritiesController::class, 'storeObjective'])->name('objectives.store');
+        Route::patch('/objectives/{objective}', [PrioritiesController::class, 'updateObjective'])->name('objectives.update');
+
+        Route::post('/weekly/items', [PrioritiesController::class, 'storeActionItem'])->name('items.store');
+        Route::patch('/weekly/items/{item}', [PrioritiesController::class, 'updateActionItem'])->name('items.update');
+        Route::delete('/weekly/items/{item}', [PrioritiesController::class, 'destroyActionItem'])->name('items.destroy');
+
+        Route::post('/weekly/carry-over', [PrioritiesController::class, 'carryOver'])->name('carry-over');
+        Route::post('/weekly/summary', [PrioritiesController::class, 'updateSummary'])->name('summary.update');
+        Route::post('/weekly/{focus}/review', [PrioritiesController::class, 'review'])->name('review');
+        Route::post('/team/{user}/suggest', [PrioritiesController::class, 'suggestObjective'])->name('suggest');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
     | API Routes for Filters
     |--------------------------------------------------------------------------
     */
@@ -288,7 +321,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/partners/{partner}/advisor', [PartnerController::class, 'advisor'])->name('partners.advisor');
         Route::get('/partners/{id}/tab/{tab}', [PartnerController::class, 'partnerTab'])
             ->name('partners.tab')
-            ->where('tab', 'overview|pipeline|deal-registrations|enablement|projects|calendar|influencers|resources|blueprints|app-enablement|launch-programs|workspaces|portal-users|marketplace');
+            ->where('tab', 'overview|pipeline|deal-registrations|enablement|projects|calendar|influencers|resources|blueprints|app-enablement|launch-programs|workspaces|portal-users|marketplace|psm-priorities');
     });
 
     // Marketplace Profile Review (gated by deal_registration.marketplace)
@@ -542,7 +575,7 @@ Route::middleware(['auth'])->group(function () {
     | Blueprint Admin (admin + CoE, gated by blueprints module)
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['admin:coe', 'module:enablement.blueprint_admin'])->group(function () {
+    Route::middleware(['admin:coe', 'module:enablement.blueprints'])->group(function () {
         // Blueprint CRUD
         Route::resource('blueprints', BlueprintController::class);
         Route::post('/blueprints/{blueprint}/duplicate', [BlueprintController::class, 'duplicate'])->name('blueprints.duplicate');
@@ -740,6 +773,11 @@ Route::middleware(['auth'])->group(function () {
         Route::middleware('module:measurement.benchmarks')->group(function () {
             Route::get('/benchmarks', [BenchmarkController::class, 'index'])->name('benchmarks.index');
             Route::get('/benchmarks/{partner}', [BenchmarkController::class, 'partner'])->name('benchmarks.partner');
+        });
+
+        // Risk Analyzer (gated by measurement.risk_analyzer)
+        Route::middleware('module:measurement.risk_analyzer')->prefix('risk-analyzer')->name('risk-analyzer.')->group(function () {
+            Route::get('/', [RiskAnalyzerController::class, 'index'])->name('index');
         });
     });
 

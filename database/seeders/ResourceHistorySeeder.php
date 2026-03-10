@@ -10,274 +10,392 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ResourceHistorySeeder extends Seeder
 {
-    private array $programs = ['IFP', 'I&D', 'SPM', 'OWP'];
-
-    private array $roles = ['Delivery', 'Pre-Sales', 'Sales'];
+    private const PROGRAMS = ['IFP', 'OWP', 'FCR', 'SPM', 'I&D', 'IBP', 'MFP'];
 
     /**
-     * Partner-specific profiles: [min_people, max_people, cert_speed_factor, max_certs_per_person]
-     *
-     * cert_speed_factor > 1 means faster completion (fewer weeks).
-     * max_certs_per_person controls breadth of program coverage.
+     * Priority aliases for multi-entity partners where the simplified Excel name
+     * should route to a specific DB entity (typically the HQ) rather than the
+     * first alphabetical fuzzy match.
      */
-    private function getPartnerProfile(string $name): array
-    {
-        return match (true) {
-            str_contains($name, 'Accenture') => [22, 30, 1.3, 3],
-            str_contains($name, 'Deloitte') => [18, 24, 1.2, 3],
-            str_contains($name, 'PwC') => [14, 20, 1.1, 3],
-            str_contains($name, 'KPMG') => [12, 18, 1.1, 2],
-            str_contains($name, 'EY') => [12, 18, 1.0, 2],
-            default => [5, 12, 1.0, 2],
-        };
-    }
+    private const PARTNER_ALIASES = [
+        'Accenture' => 'Accenture - US',
+        'Deloitte LLP' => 'Deloitte Consulting LLP - US (HQ)',
+        'KPMG' => 'KPMG US (HQ)',
+        'Genpact' => 'Genpact Intl',
+        'Genpact International Inc. (Partner)' => 'Genpact Intl',
+        'Fadmoor LLC-Partner' => 'Fadmoor LLC',
+        'EyeOn Switzerland Sarl' => 'EyeOn',
+        'Keyrus France' => 'Keyrus EMEA',
+        'Keyrus Global' => 'Keyrus EPM Americas',
+        'BearingPoint Holding B.V.' => 'Bearingpoint GmbH',
+    ];
 
     public function run(): void
     {
-        $this->command->info('Seeding resource history (52 weeks)...');
+        $this->command->info('Seeding resource history from Excel snapshots...');
 
-        // Clear only resource-related data (non-destructive to partners/users/contacts/etc.)
         Schema::withoutForeignKeyConstraints(function () {
             ResourceSnapshot::truncate();
             Resource::truncate();
             Import::where('type', 'resources')->delete();
         });
 
-        $partners = Partner::orderBy('id')->get();
-        $admin = User::whereRelation('role', 'slug', 'admin')->first() ?? User::first();
+        $folders = $this->discoverSnapshotFolders();
 
-        if ($partners->isEmpty()) {
-            $this->command->warn('No partners found. Run PartnerSeeder first.');
+        if ($folders->isEmpty()) {
+            $this->command->warn('No snapshot folders found in database/seeders/data/.');
 
             return;
         }
 
-        $weeksToSimulate = 52;
-        $startDate = now()->subWeeks($weeksToSimulate);
+        $this->command->info("  Found {$folders->count()} snapshot folder(s): ".$folders->pluck('name')->implode(', '));
 
-        // Pre-generate people and their certification journeys per partner
-        $partnerPeople = [];
+        $admin = User::whereRelation('role', 'slug', 'admin')->first() ?? User::first();
+        $dbPartnerNames = Partner::pluck('id', 'name');
 
-        foreach ($partners as $partner) {
-            [$minPeople, $maxPeople, $speedFactor, $maxCerts] = $this->getPartnerProfile($partner->name);
-            $peopleCount = rand($minPeople, $maxPeople);
-
-            $people = [];
-            for ($i = 0; $i < $peopleCount; $i++) {
-                $role = $this->weightedRole();
-                $certCount = rand(1, $maxCerts);
-                $selectedPrograms = (array) array_rand(array_flip($this->programs), min($certCount, count($this->programs)));
-
-                $certs = [];
-                foreach ($selectedPrograms as $prog) {
-                    // Stagger intro weeks: early hires start in first half, later hires throughout
-                    $introWeek = $i < $peopleCount / 2
-                        ? rand(0, (int) ($weeksToSimulate * 0.4))
-                        : rand(0, $weeksToSimulate - 8);
-
-                    // Weeks to complete varies by program difficulty and partner speed
-                    $baseDuration = $this->programDifficulty($prog);
-                    $weeksToComplete = max(4, (int) (rand($baseDuration - 3, $baseDuration + 5) / $speedFactor));
-
-                    $certs[$prog] = [
-                        'intro_week' => $introWeek,
-                        'complete_week' => $introWeek + $weeksToComplete,
-                    ];
-                }
-
-                $people[] = [
-                    'name' => fake()->unique()->name(),
-                    'role' => $role,
-                    'certifications' => $certs,
-                ];
+        // Seed the fuzzy cache with priority aliases for multi-entity partners
+        $fuzzyCache = [];
+        foreach (self::PARTNER_ALIASES as $alias => $dbName) {
+            if (isset($dbPartnerNames[$dbName])) {
+                $fuzzyCache[$alias] = $dbPartnerNames[$dbName];
             }
-
-            $partnerPeople[$partner->id] = $people;
         }
 
-        // Reset faker unique tracker
-        fake()->unique(true);
-
+        $totalResources = 0;
         $totalSnapshots = 0;
 
-        for ($week = 0; $week < $weeksToSimulate; $week++) {
-            $weekDate = $startDate->copy()->addWeeks($week);
+        foreach ($folders as $folder) {
+            $resourcesPath = $folder['path'].'/resources.xlsx';
 
-            // Create weekly import record — all timestamps match the file name date
+            if (! file_exists($resourcesPath)) {
+                $this->command->warn("  Skipping {$folder['name']} — no resources.xlsx found.");
+
+                continue;
+            }
+
+            $snapshotDate = $folder['date'];
+            $this->command->info("  Processing {$folder['name']} (snapshot date: {$snapshotDate->toDateString()})...");
+
+            // Stream rows to avoid loading entire 57K+ row file into memory
+            [$rowCount, $resourceRecords, $snapshotAggregates, $matchedCount, $skippedCount] =
+                $this->processExcelStreaming($resourcesPath, $dbPartnerNames, $fuzzyCache, $snapshotDate);
+
+            $this->command->info("    Processed {$rowCount} rows from Excel.");
+
             $import = Import::create([
                 'type' => 'resources',
-                'file_name' => 'weekly_resources_'.$weekDate->format('Y_m_d').'.xlsx',
-                'file_path' => 'imports/weekly_resources_'.$weekDate->format('Y_m_d').'.xlsx',
+                'file_name' => "resources_{$folder['name']}.xlsx",
+                'file_path' => "seeders/data/{$folder['name']}/resources.xlsx",
                 'status' => 'completed',
                 'user_id' => $admin->id,
-                'started_at' => $weekDate,
-                'completed_at' => $weekDate->copy()->addMinutes(rand(2, 8)),
-                'total_rows' => 0,
-                'successful_rows' => 0,
-                'failed_rows' => 0,
+                'started_at' => $snapshotDate,
+                'completed_at' => $snapshotDate->copy()->addMinutes(5),
+                'total_rows' => $rowCount,
+                'successful_rows' => $matchedCount,
+                'failed_rows' => $skippedCount,
                 'partners_created' => 0,
                 'partners_updated' => 0,
                 'opportunities_created' => 0,
                 'opportunities_updated' => 0,
-                'resources_created' => 0,
-                'created_at' => $weekDate,
-                'updated_at' => $weekDate,
+                'resources_created' => count($resourceRecords),
+                'created_at' => $snapshotDate,
+                'updated_at' => $snapshotDate,
             ]);
 
-            // Compute snapshots per partner/program/role for this week
-            $snapshots = [];
-            $weekResourceCount = 0;
-
-            foreach ($partnerPeople as $partnerId => $people) {
-                // Aggregate by program+role
-                $aggregates = [];
-
-                foreach ($people as $person) {
-                    foreach ($person['certifications'] as $program => $timing) {
-                        if ($week < $timing['intro_week']) {
-                            continue; // not yet started
-                        }
-
-                        $key = "{$program}|{$person['role']}";
-                        if (! isset($aggregates[$key])) {
-                            $aggregates[$key] = [
-                                'program' => $program,
-                                'role' => $person['role'],
-                                'started' => 0,
-                                'completed' => 0,
-                                'names' => [],
-                            ];
-                        }
-
-                        if ($week >= $timing['complete_week']) {
-                            $aggregates[$key]['completed']++;
-                        } else {
-                            $aggregates[$key]['started']++;
-                        }
-                        $aggregates[$key]['names'][] = $person['name'];
-                        $weekResourceCount++;
-                    }
+            // Batch insert resource records
+            if (! empty($resourceRecords)) {
+                // Set import_id on all records
+                foreach ($resourceRecords as &$rec) {
+                    $rec['import_id'] = $import->id;
                 }
+                unset($rec);
 
-                foreach ($aggregates as $agg) {
-                    $snapshots[] = [
-                        'partner_id' => $partnerId,
-                        'import_id' => $import->id,
-                        'snapshot_date' => $weekDate->toDateString(),
-                        'program' => $agg['program'],
-                        'role' => $agg['role'],
-                        'started_count' => $agg['started'],
-                        'completed_count' => $agg['completed'],
-                        'total_count' => $agg['started'] + $agg['completed'],
-                        'unique_people_count' => count(array_unique($agg['names'])),
-                        'created_at' => $weekDate,
-                        'updated_at' => $weekDate,
-                    ];
+                foreach (array_chunk($resourceRecords, 500) as $chunk) {
+                    DB::table('resources')->insert($chunk);
                 }
+                $totalResources += count($resourceRecords);
             }
 
-            // Batch insert snapshots
-            if (! empty($snapshots)) {
-                foreach (array_chunk($snapshots, 500) as $chunk) {
+            // Build and insert snapshot records
+            $snapshotRecords = [];
+            foreach ($snapshotAggregates as $agg) {
+                $snapshotRecords[] = [
+                    'partner_id' => $agg['partner_id'],
+                    'import_id' => $import->id,
+                    'snapshot_date' => $snapshotDate->toDateString(),
+                    'program' => $agg['program'],
+                    'role' => $agg['role'],
+                    'started_count' => $agg['started'],
+                    'completed_count' => $agg['completed'],
+                    'total_count' => $agg['started'] + $agg['completed'],
+                    'unique_people_count' => count(array_unique($agg['people'])),
+                    'created_at' => $snapshotDate,
+                    'updated_at' => $snapshotDate,
+                ];
+            }
+
+            if (! empty($snapshotRecords)) {
+                foreach (array_chunk($snapshotRecords, 500) as $chunk) {
                     DB::table('resource_snapshots')->insert($chunk);
                 }
-                $totalSnapshots += count($snapshots);
+                $totalSnapshots += count($snapshotRecords);
             }
 
-            $import->update([
-                'total_rows' => $weekResourceCount,
-                'successful_rows' => $weekResourceCount,
-                'resources_created' => $weekResourceCount,
-            ]);
+            $this->command->info("    Matched {$matchedCount} rows, skipped {$skippedCount} unmatched.");
+            $this->command->info('    Created '.count($resourceRecords).' resource records, '.count($snapshotRecords).' snapshots.');
+
+            // Free memory between files
+            gc_collect_cycles();
         }
 
-        // Create current-state Resource records (latest state of each person's certifications)
+        $this->command->info("Done. Total: {$totalResources} resources, {$totalSnapshots} snapshots across {$folders->count()} imports.");
+    }
+
+    /**
+     * Process an Excel file row-by-row using PhpSpreadsheet's row iterator
+     * to avoid loading the entire file into memory at once.
+     *
+     * @param  array<string, int|null>  $fuzzyCache  Cached fuzzy lookups (passed by reference)
+     * @return array{0: int, 1: array, 2: array, 3: int, 4: int}
+     */
+    private function processExcelStreaming(string $path, \Illuminate\Support\Collection $dbPartnerNames, array &$fuzzyCache, \Carbon\Carbon $snapshotDate): array
+    {
+        $reader = IOFactory::createReaderForFile($path);
+        $reader->setReadDataOnly(true);
+        $spreadsheet = $reader->load($path);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $headers = [];
         $resourceRecords = [];
-        $latestImport = Import::where('type', 'resources')->latest('started_at')->first();
+        $snapshotAggregates = [];
+        $matchedCount = 0;
+        $skippedCount = 0;
+        $rowCount = 0;
 
-        foreach ($partnerPeople as $partnerId => $people) {
-            foreach ($people as $person) {
-                foreach ($person['certifications'] as $program => $timing) {
-                    if ($weeksToSimulate < $timing['intro_week']) {
-                        continue; // never started within simulation window
-                    }
+        foreach ($sheet->getRowIterator() as $rowObj) {
+            $cellIterator = $rowObj->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
 
-                    $isCompleted = $weeksToSimulate >= $timing['complete_week'];
-                    $dateCertified = $isCompleted
-                        ? $startDate->copy()->addWeeks($timing['complete_week'])->toDateString()
-                        : null;
+            $rowData = [];
+            foreach ($cellIterator as $cell) {
+                $rowData[] = $cell->getValue();
+            }
 
-                    $resourceRecords[] = [
+            // First row is headers
+            if (empty($headers)) {
+                $headers = array_map(fn ($h) => trim((string) ($h ?? '')), $rowData);
+
+                continue;
+            }
+
+            $rowCount++;
+
+            // Map row to associative array
+            $row = [];
+            foreach ($headers as $i => $header) {
+                $row[$header] = $rowData[$i] ?? null;
+            }
+
+            $personName = trim($row['Unnamed: 0'] ?? $row[''] ?? 'Unknown');
+            $partnerName = trim($row['Partner'] ?? '');
+            $role = trim($row['Role'] ?? '');
+
+            if (empty($partnerName) || empty($personName)) {
+                continue;
+            }
+
+            // Resolve partner ID: exact match first, then fuzzy with cache
+            $partnerId = $dbPartnerNames->get($partnerName);
+
+            if ($partnerId === null) {
+                if (array_key_exists($partnerName, $fuzzyCache)) {
+                    $partnerId = $fuzzyCache[$partnerName];
+                } else {
+                    $partnerId = $this->findBestPartnerMatch($partnerName, $dbPartnerNames);
+                    $fuzzyCache[$partnerName] = $partnerId;
+                }
+            }
+
+            if (! $partnerId) {
+                $skippedCount++;
+
+                continue;
+            }
+
+            $matchedCount++;
+
+            if ($role === 'Pre Sales') {
+                $role = 'Pre-Sales';
+            }
+
+            foreach (self::PROGRAMS as $program) {
+                $startedCol = "{$program} Started";
+                $completeCol = "{$program} Complete";
+                $startedVal = (int) ($row[$startedCol] ?? 0);
+                $completeVal = (int) ($row[$completeCol] ?? 0);
+
+                if ($startedVal <= 0 && $completeVal <= 0) {
+                    continue;
+                }
+
+                $status = $completeVal > 0 ? 'Completed' : 'Started';
+
+                $resourceRecords[] = [
+                    'partner_id' => $partnerId,
+                    'name' => $personName,
+                    'role' => $role ?: null,
+                    'program' => $program,
+                    'status' => $status,
+                    'date_certified' => $status === 'Completed' ? $snapshotDate->toDateString() : null,
+                    'import_id' => null, // set after Import is created
+                    'created_at' => $snapshotDate,
+                    'updated_at' => $snapshotDate,
+                ];
+
+                $aggKey = "{$partnerId}|{$program}|{$role}";
+                if (! isset($snapshotAggregates[$aggKey])) {
+                    $snapshotAggregates[$aggKey] = [
                         'partner_id' => $partnerId,
-                        'name' => $person['name'],
-                        'role' => $person['role'],
                         'program' => $program,
-                        'status' => $isCompleted ? 'Completed' : 'Started',
-                        'date_certified' => $dateCertified,
-                        'import_id' => $latestImport->id,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'role' => $role ?: null,
+                        'started' => 0,
+                        'completed' => 0,
+                        'people' => [],
                     ];
+                }
+
+                if ($status === 'Completed') {
+                    $snapshotAggregates[$aggKey]['completed']++;
+                } else {
+                    $snapshotAggregates[$aggKey]['started']++;
+                }
+                $snapshotAggregates[$aggKey]['people'][] = $personName;
+            }
+        }
+
+        // Release spreadsheet memory
+        $spreadsheet->disconnectWorksheets();
+        unset($spreadsheet);
+
+        return [$rowCount, $resourceRecords, $snapshotAggregates, $matchedCount, $skippedCount];
+    }
+
+    /**
+     * Normalize a partner name for fuzzy comparison.
+     * Ported from risk-analyzer.html's normalizePartnerName().
+     */
+    private function normalizePartnerName(string $name): string
+    {
+        $name = mb_strtolower(trim($name));
+        $name = preg_replace('/\s+/', ' ', $name);
+        $name = preg_replace('/[,\.\(\)]/', '', $name); // Remove commas, periods, parentheses
+        $name = preg_replace('/\s+-\s+.*/', '', $name); // Remove everything after " - " (regions)
+        $name = preg_replace('/\b(ltd|llc|inc|gmbh|pty|pvt|sa|bv|ag|co|srl|llp|pte|plc|partner|former partner)\b/', '', $name);
+
+        return trim(preg_replace('/\s+/', ' ', $name));
+    }
+
+    /**
+     * Find the best matching DB partner for a given Excel partner name.
+     * Uses a multi-stage fuzzy matching algorithm ported from risk-analyzer.html.
+     */
+    private function findBestPartnerMatch(string $targetName, \Illuminate\Support\Collection $dbPartnerNames): ?int
+    {
+        $normalizedTarget = $this->normalizePartnerName($targetName);
+        $dbNames = $dbPartnerNames->keys()->all();
+
+        // 1. Case-insensitive exact match
+        foreach ($dbNames as $dbName) {
+            if (mb_strtolower($dbName) === mb_strtolower($targetName)) {
+                return $dbPartnerNames[$dbName];
+            }
+        }
+
+        // 2. Normalized exact match
+        foreach ($dbNames as $dbName) {
+            if ($this->normalizePartnerName($dbName) === $normalizedTarget) {
+                return $dbPartnerNames[$dbName];
+            }
+        }
+
+        // 3. Contains match (either direction, require minimum 4 chars)
+        $minLength = 4;
+        if (mb_strlen($normalizedTarget) >= $minLength) {
+            foreach ($dbNames as $dbName) {
+                $normalized = $this->normalizePartnerName($dbName);
+                if (mb_strlen($normalized) < $minLength) {
+                    continue;
+                }
+                if (str_contains($normalized, $normalizedTarget) || str_contains($normalizedTarget, $normalized)) {
+                    return $dbPartnerNames[$dbName];
                 }
             }
         }
 
-        // Batch insert current resource records
-        if (! empty($resourceRecords)) {
-            foreach (array_chunk($resourceRecords, 500) as $chunk) {
-                DB::table('resources')->insert($chunk);
+        // 4. First significant word match (6+ chars to avoid false matches like "ey" → "keyrus")
+        $targetFirstWord = explode(' ', $normalizedTarget)[0] ?? '';
+        if (mb_strlen($targetFirstWord) > 5) {
+            foreach ($dbNames as $dbName) {
+                $normalized = $this->normalizePartnerName($dbName);
+                $dbFirstWord = explode(' ', $normalized)[0] ?? '';
+                if (mb_strlen($dbFirstWord) > 5 && $dbFirstWord === $targetFirstWord) {
+                    return $dbPartnerNames[$dbName];
+                }
             }
         }
 
-        $totalPeople = collect($partnerPeople)->sum(fn ($people) => count($people));
-        $completedCount = collect($resourceRecords)->where('status', 'Completed')->count();
-        $startedCount = collect($resourceRecords)->where('status', 'Started')->count();
+        // 5. Token matching (at least 2 significant words match)
+        $targetTokens = array_filter(explode(' ', $normalizedTarget), fn ($t) => mb_strlen($t) > 3);
+        if (count($targetTokens) > 0) {
+            foreach ($dbNames as $dbName) {
+                $dbTokens = array_filter(explode(' ', $this->normalizePartnerName($dbName)), fn ($t) => mb_strlen($t) > 3);
+                $matches = array_filter($targetTokens, function ($tt) use ($dbTokens) {
+                    foreach ($dbTokens as $dt) {
+                        if (str_contains($dt, $tt) || str_contains($tt, $dt)) {
+                            return true;
+                        }
+                    }
 
-        $this->command->info("Seeded {$totalPeople} people with ".count($resourceRecords).' certifications across '.$partners->count().' partners.');
-        $this->command->info("  Current state: {$completedCount} completed, {$startedCount} in progress");
-        $this->command->info("  Created {$totalSnapshots} snapshot rows over {$weeksToSimulate} weekly imports.");
-
-        // Show top partners
-        foreach ($partners->take(5) as $partner) {
-            $pResources = collect($resourceRecords)->where('partner_id', $partner->id);
-            $pCompleted = $pResources->where('status', 'Completed')->count();
-            $pTotal = $pResources->count();
-            $pPeople = count($partnerPeople[$partner->id] ?? []);
-            $this->command->info("  {$partner->name}: {$pPeople} people, {$pCompleted}/{$pTotal} certifications completed");
+                    return false;
+                });
+                if (count($matches) >= min(2, count($targetTokens))) {
+                    return $dbPartnerNames[$dbName];
+                }
+            }
         }
-        $this->command->info('  ... and '.max(0, $partners->count() - 5).' more partners');
+
+        return null;
     }
 
     /**
-     * Weighted role distribution: more Delivery than Sales/Pre-Sales.
+     * Discover all date-based snapshot folders in database/seeders/data/.
+     *
+     * @return \Illuminate\Support\Collection<int, array{name: string, path: string, date: \Carbon\Carbon}>
      */
-    private function weightedRole(): string
+    private function discoverSnapshotFolders(): \Illuminate\Support\Collection
     {
-        $rand = rand(1, 100);
-        if ($rand <= 50) {
-            return 'Delivery';
-        }
-        if ($rand <= 80) {
-            return 'Pre-Sales';
+        $dataDir = database_path('seeders/data');
+
+        if (! is_dir($dataDir)) {
+            return collect();
         }
 
-        return 'Sales';
-    }
+        return collect(scandir($dataDir))
+            ->filter(fn ($name) => preg_match('/^\d{1,2}-\d{1,2}-\d{4}$/', $name))
+            ->map(function ($name) use ($dataDir) {
+                [$month, $day, $year] = explode('-', $name);
 
-    /**
-     * Base weeks to complete by program difficulty.
-     */
-    private function programDifficulty(string $program): int
-    {
-        return match ($program) {
-            'IFP' => 14,   // Connected Planning — moderate
-            'I&D' => 12,   // Import & Data — easier
-            'SPM' => 16,   // Supply Planning — harder
-            'OWP' => 10,   // Operational Workforce — easier
-            default => 12,
-        };
+                return [
+                    'name' => $name,
+                    'path' => "{$dataDir}/{$name}",
+                    'date' => \Carbon\Carbon::create((int) $year, (int) $month, (int) $day),
+                ];
+            })
+            ->sortBy('date')
+            ->values();
     }
 }

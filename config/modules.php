@@ -42,6 +42,7 @@ return [
                 'label' => 'Partner Management',
                 'icon' => 'briefcase',
                 'items' => [
+                    ['label' => 'State of Business', 'route' => 'state-of-business', 'icon' => 'activity'],
                     ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'home'],
                     ['label' => 'My Partners', 'route' => 'partners.my', 'icon' => 'users'],
                     ['label' => 'Calendar', 'route' => 'calendar.portfolio', 'icon' => 'calendar'],
@@ -64,6 +65,16 @@ return [
                     ['label' => 'Workspaces', 'route' => 'admin.provisioning-workspaces.index', 'icon' => 'server'],
                 ],
             ],
+            'priorities' => [
+                'label' => 'Priorities & Progress',
+                'icon' => 'target',
+                'items' => [
+                    ['label' => 'Portfolio Priorities', 'route' => 'priorities.index', 'icon' => 'trending-up'],
+                    ['label' => 'Weekly Focus', 'route' => 'priorities.weekly', 'icon' => 'check-square'],
+                    ['label' => 'Progress Timeline', 'route' => 'priorities.timeline', 'icon' => 'bar-chart'],
+                    ['label' => 'Team Overview', 'route' => 'priorities.team', 'icon' => 'users'],
+                ],
+            ],
             'administration' => [
                 'label' => 'Partner Administration',
                 'icon' => 'settings',
@@ -77,6 +88,7 @@ return [
             'partner_detail' => [
                 'tabs' => [
                     ['label' => 'Overview', 'slug' => 'overview', 'icon' => 'tachometer-alt', 'partial' => 'partner.tabs.overview', 'section' => 'management', 'sort' => 0, 'server_rendered' => true],
+                    ['label' => 'PSM Priorities', 'slug' => 'psm-priorities', 'icon' => 'target', 'partial' => 'partner.tabs.psm-priorities', 'section' => 'priorities', 'sort' => 65],
                     ['label' => 'Resources', 'slug' => 'resources', 'icon' => 'user-hard-hat', 'partial' => 'partner.tabs.resources', 'section' => 'management', 'sort' => 70],
                     ['label' => 'Workspaces', 'slug' => 'workspaces', 'icon' => 'server', 'partial' => 'partner.tabs.workspaces', 'section' => 'provisioning', 'sort' => 80, 'badge_relation' => 'anaplanWorkspaces'],
                 ],
@@ -167,13 +179,6 @@ return [
                     ['label' => 'Dashboard', 'route' => 'admin.blueprint-dashboard', 'icon' => 'home'],
                     ['label' => 'Blueprints', 'route' => 'blueprints.index', 'icon' => 'layers'],
                     ['label' => 'Blueprint Assignments', 'route' => 'blueprints.catalog', 'icon' => 'clipboard'],
-                ],
-            ],
-            'blueprint_admin' => [
-                'label' => 'Blueprint Administration',
-                'icon' => 'settings',
-                'items' => [
-                    ['label' => 'Create Blueprint', 'route' => 'blueprints.create', 'icon' => 'plus'],
                 ],
             ],
             'workshops' => [
@@ -396,6 +401,13 @@ return [
                 'icon' => 'clipboard',
                 'items' => [
                     ['label' => 'QBR Sessions', 'route' => 'act.qbr.index', 'icon' => 'clipboard'],
+                ],
+            ],
+            'risk_analyzer' => [
+                'label' => 'Risk Analyzer',
+                'icon' => 'alert-triangle',
+                'items' => [
+                    ['label' => 'Risk Analyzer', 'route' => 'measure.risk-analyzer.index', 'icon' => 'alert-triangle'],
                 ],
             ],
         ],

@@ -32,6 +32,7 @@ class ContactProductSeeder extends Seeder
                 $productCount = fake()->numberBetween(2, 5);
                 $selectedProducts = $products->random(min($productCount, $products->count()));
 
+                $syncData = [];
                 foreach ($selectedProducts as $product) {
                     $status = fake()->randomElement(
                         array_merge(
@@ -41,14 +42,15 @@ class ContactProductSeeder extends Seeder
                         )
                     );
 
-                    $contact->products()->attach($product->id, [
+                    $syncData[$product->id] = [
                         'status' => $status,
                         'trained_at' => $status === 'trained'
                             ? fake()->dateTimeBetween('-18 months', 'now')
                             : null,
-                    ]);
+                    ];
                     $totalAssignments++;
                 }
+                $contact->products()->syncWithoutDetaching($syncData);
             }
         }
 

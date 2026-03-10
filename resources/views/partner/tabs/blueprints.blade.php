@@ -65,123 +65,177 @@
     </div>
 </div>
 
-{{-- Quick Link to Full Blueprint Progress Page --}}
-<div class="d-flex justify-content-end mb-3">
+{{-- Role Filter + Quick Link --}}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="btn-group" id="blueprintRoleFilter">
+        <button type="button" class="btn btn-sm btn-outline-primary active" data-filter="all">All Roles</button>
+        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="gtm" style="border-color:#fd7e14;color:#fd7e14">GTM (Sales)</button>
+        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="pre_sales" style="border-color:#886ab5;color:#886ab5">Pre-Sales</button>
+        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="delivery" style="border-color:#00BCD4;color:#00BCD4">Delivery</button>
+    </div>
     <a href="{{ route('partners.blueprints', $partner->id) }}" class="btn btn-outline-warning btn-sm">
         <i class="fal fa-external-link me-1"></i> Open Full Blueprint Progress
     </a>
 </div>
 
-{{-- Blueprint Assignments --}}
-@forelse($assignments as $assignment)
-    @php
-        $pct = $assignment->completionPercentage();
-        $progressColor = $pct >= 100 ? 'success' : ($pct >= 50 ? 'info' : ($pct > 0 ? 'warning' : 'secondary'));
-        $applicableCount = $assignment->applicableContentItemCount();
-    @endphp
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card shadow-0 mb-g">
-                <div class="card-header d-flex align-items-center">
-                    <div class="card-title flex-grow-1 d-flex align-items-center gap-2">
-                        <span>{{ $assignment->blueprint->name }}</span>
-                        @php $catColors = ['application' => 'info', 'product' => 'warning', 'delivery' => 'primary']; @endphp
-                        <span class="badge bg-{{ $catColors[$assignment->blueprint->category] ?? 'secondary' }} opacity-75 fw-400">
-                            {{ \App\Models\Blueprint::CATEGORIES[$assignment->blueprint->category] ?? $assignment->blueprint->category }}
-                        </span>
-                        @if($assignment->blueprint->product_area)
-                            <span class="badge bg-light text-dark border fw-400">{{ $assignment->blueprint->product_area }}</span>
-                        @endif
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <a href="{{ route('blueprint-assignments.show', $assignment) }}" class="btn btn-sm btn-outline-primary">
-                            <i class="fal fa-chart-bar me-1"></i> Details
-                        </a>
-                        <a href="{{ route('blueprints.detail', $assignment->blueprint) }}" class="btn btn-sm btn-outline-secondary">
-                            <i class="fal fa-eye me-1"></i> Blueprint
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body">
-                    {{-- Assignment Meta Row --}}
-                    <div class="row mb-3">
-                        <div class="col-md-2">
-                            <small class="text-muted d-block">Role</small>
+{{-- Blueprint Assignments — Accordion --}}
+@if($assignments->count())
+    <div class="accordion" id="blueprintAccordion">
+        @foreach($assignments as $assignment)
+            @php
+                $pct = $assignment->completionPercentage();
+                $progressColor = $pct >= 100 ? 'success' : ($pct >= 50 ? 'info' : ($pct > 0 ? 'warning' : 'secondary'));
+                $applicableCount = $assignment->applicableContentItemCount();
+                $catColors = ['application' => 'info', 'product' => 'warning', 'delivery' => 'primary'];
+            @endphp
+            <div class="accordion-item shadow-0 mb-g border rounded blueprint-accordion-item" data-role="{{ $assignment->role }}">
+                <h2 class="accordion-header" id="bpHead{{ $assignment->id }}">
+                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#bpBody{{ $assignment->id }}" aria-expanded="false" aria-controls="bpBody{{ $assignment->id }}">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1 flex-wrap me-2">
+                            <span class="fw-500">{{ $assignment->blueprint->name }}</span>
+                            <span class="badge bg-{{ $catColors[$assignment->blueprint->category] ?? 'secondary' }} opacity-75 fw-400">
+                                {{ \App\Models\Blueprint::CATEGORIES[$assignment->blueprint->category] ?? $assignment->blueprint->category }}
+                            </span>
                             <span class="badge" style="background-color: {{ \App\Models\PartnerBlueprintAssignment::ROLE_COLORS[$assignment->role] ?? '#868e96' }}">
                                 {{ \App\Models\PartnerBlueprintAssignment::ROLES[$assignment->role] ?? $assignment->role }}
                             </span>
-                        </div>
-                        <div class="col-md-2">
-                            <small class="text-muted d-block">Status</small>
                             <span class="badge bg-{{ $assignment->status === 'active' ? 'success' : ($assignment->status === 'paused' ? 'warning' : 'info') }}">
                                 {{ ucfirst($assignment->status) }}
                             </span>
-                        </div>
-                        <div class="col-md-2">
-                            <small class="text-muted d-block">Content Items</small>
-                            <strong>{{ $applicableCount }}</strong>
-                        </div>
-                        <div class="col-md-2">
-                            <small class="text-muted d-block">Enrolled</small>
-                            <strong>{{ $assignment->enrollments->count() }}</strong> contacts
-                        </div>
-                        <div class="col-md-2">
-                            <small class="text-muted d-block">Assigned By</small>
-                            <span>{{ $assignment->assignedBy->name }}</span>
-                        </div>
-                        <div class="col-md-2">
-                            <small class="text-muted d-block">Since</small>
-                            <span>{{ $assignment->created_at->format('M j, Y') }}</span>
-                        </div>
-                    </div>
-
-                    {{-- Overall Progress Bar --}}
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <small class="text-muted text-nowrap fw-500">Overall:</small>
-                        <div class="progress flex-grow-1" style="height: 10px;">
-                            <div class="progress-bar bg-{{ $progressColor }}" style="width: {{ $pct }}%"></div>
-                        </div>
-                        <small class="text-muted text-nowrap fw-500">{{ $pct }}%</small>
-                    </div>
-
-                    {{-- Enrolled Contacts --}}
-                    @if($assignment->enrollments->count())
-                        <div class="border-top pt-3">
-                            <small class="text-muted fw-500 d-block mb-2">Enrolled Contacts</small>
-                            @foreach($assignment->enrollments as $enrollment)
-                                @php
-                                    $ePct = $enrollment->completionPercentage();
-                                    $eCompleted = $enrollment->completedItemsCount();
-                                    $eTotal = $enrollment->totalApplicableItems();
-                                    $eColor = $ePct >= 100 ? 'success' : ($ePct >= 50 ? 'info' : ($ePct > 0 ? 'warning' : 'secondary'));
-                                @endphp
-                                <div class="d-flex align-items-center gap-3 mb-2">
-                                    <div style="min-width: 160px;">
-                                        <a href="{{ route('blueprint-enrollments.show', $enrollment) }}" class="text-dark">
-                                            {{ $enrollment->contact->first_name }} {{ $enrollment->contact->last_name }}
-                                        </a>
-                                    </div>
-                                    <span class="badge" style="background-color: {{ \App\Models\BlueprintEnrollment::STATUS_COLORS[$enrollment->status] ?? '#868e96' }}; min-width: 80px;">
-                                        {{ \App\Models\BlueprintEnrollment::STATUSES[$enrollment->status] ?? $enrollment->status }}
-                                    </span>
-                                    <div class="progress flex-grow-1" style="height: 6px;">
-                                        <div class="progress-bar bg-{{ $eColor }}" style="width: {{ $ePct }}%"></div>
-                                    </div>
-                                    <small class="text-muted text-nowrap">{{ $eCompleted }}/{{ $eTotal }} ({{ $ePct }}%)</small>
+                            <div class="d-flex align-items-center gap-1" style="min-width: 140px;">
+                                <div class="progress flex-grow-1" style="height: 6px;">
+                                    <div class="progress-bar bg-{{ $progressColor }}" style="width: {{ $pct }}%"></div>
                                 </div>
-                            @endforeach
+                                <small class="text-muted text-nowrap">{{ $pct }}%</small>
+                            </div>
+                            <small class="text-muted text-nowrap"><i class="fal fa-users me-1"></i>{{ $assignment->enrollments->count() }}</small>
                         </div>
-                    @else
-                        <div class="text-center py-3 text-muted border-top">
-                            <i class="fal fa-user-plus me-1"></i> No contacts enrolled yet.
-                            <a href="{{ route('blueprint-assignments.show', $assignment) }}">Enroll contacts</a>
+                    </button>
+                </h2>
+                <div id="bpBody{{ $assignment->id }}" class="accordion-collapse collapse" aria-labelledby="bpHead{{ $assignment->id }}" data-bs-parent="#blueprintAccordion">
+                    <div class="accordion-body">
+                        {{-- Action Buttons --}}
+                        <div class="d-flex justify-content-end gap-2 mb-3">
+                            <a href="{{ route('blueprint-assignments.show', $assignment) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fal fa-chart-bar me-1"></i> Details
+                            </a>
+                            <a href="{{ route('blueprints.detail', $assignment->blueprint) }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fal fa-eye me-1"></i> Blueprint
+                            </a>
                         </div>
-                    @endif
+
+                        {{-- Assignment Meta Row --}}
+                        <div class="row mb-3">
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Role</small>
+                                <span class="badge" style="background-color: {{ \App\Models\PartnerBlueprintAssignment::ROLE_COLORS[$assignment->role] ?? '#868e96' }}">
+                                    {{ \App\Models\PartnerBlueprintAssignment::ROLES[$assignment->role] ?? $assignment->role }}
+                                </span>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Status</small>
+                                <span class="badge bg-{{ $assignment->status === 'active' ? 'success' : ($assignment->status === 'paused' ? 'warning' : 'info') }}">
+                                    {{ ucfirst($assignment->status) }}
+                                </span>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Content Items</small>
+                                <strong>{{ $applicableCount }}</strong>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Enrolled</small>
+                                <strong>{{ $assignment->enrollments->count() }}</strong> contacts
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Assigned By</small>
+                                <span>{{ $assignment->assignedBy->name }}</span>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Since</small>
+                                <span>{{ $assignment->created_at->format('M j, Y') }}</span>
+                            </div>
+                        </div>
+
+                        {{-- Overall Progress Bar --}}
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <small class="text-muted text-nowrap fw-500">Overall:</small>
+                            <div class="progress flex-grow-1" style="height: 10px;">
+                                <div class="progress-bar bg-{{ $progressColor }}" style="width: {{ $pct }}%"></div>
+                            </div>
+                            <small class="text-muted text-nowrap fw-500">{{ $pct }}%</small>
+                        </div>
+
+                        {{-- Enrolled Contacts --}}
+                        @if($assignment->enrollments->count())
+                            <div class="border-top pt-3">
+                                <small class="text-muted fw-500 d-block mb-2">Enrolled Contacts</small>
+                                @foreach($assignment->enrollments as $enrollment)
+                                    @php
+                                        $ePct = $enrollment->completionPercentage();
+                                        $eCompleted = $enrollment->completedItemsCount();
+                                        $eTotal = $enrollment->totalApplicableItems();
+                                        $eColor = $ePct >= 100 ? 'success' : ($ePct >= 50 ? 'info' : ($ePct > 0 ? 'warning' : 'secondary'));
+                                    @endphp
+                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                        <div style="min-width: 160px;">
+                                            <a href="{{ route('blueprint-enrollments.show', $enrollment) }}" class="text-dark">
+                                                {{ $enrollment->contact->first_name }} {{ $enrollment->contact->last_name }}
+                                            </a>
+                                        </div>
+                                        <span class="badge" style="background-color: {{ \App\Models\BlueprintEnrollment::STATUS_COLORS[$enrollment->status] ?? '#868e96' }}; min-width: 80px;">
+                                            {{ \App\Models\BlueprintEnrollment::STATUSES[$enrollment->status] ?? $enrollment->status }}
+                                        </span>
+                                        <div class="progress flex-grow-1" style="height: 6px;">
+                                            <div class="progress-bar bg-{{ $eColor }}" style="width: {{ $ePct }}%"></div>
+                                        </div>
+                                        <small class="text-muted text-nowrap">{{ $eCompleted }}/{{ $eTotal }} ({{ $ePct }}%)</small>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-3 text-muted border-top">
+                                <i class="fal fa-user-plus me-1"></i> No contacts enrolled yet.
+                                <a href="{{ route('blueprint-assignments.show', $assignment) }}">Enroll contacts</a>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
-        </div>
+        @endforeach
     </div>
-@empty
+
+    <script>
+        (function() {
+            var filterBtns = document.querySelectorAll('#blueprintRoleFilter button');
+            var items = document.querySelectorAll('.blueprint-accordion-item');
+
+            filterBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var filter = this.dataset.filter;
+
+                    filterBtns.forEach(function(b) {
+                        b.classList.remove('active');
+                        b.style.backgroundColor = '';
+                        b.style.color = b.dataset.filter === 'all' ? '' : b.style.borderColor;
+                    });
+                    this.classList.add('active');
+                    if (filter !== 'all') {
+                        this.style.backgroundColor = this.style.borderColor;
+                        this.style.color = '#fff';
+                    }
+
+                    items.forEach(function(item) {
+                        if (filter === 'all' || item.dataset.role === filter) {
+                            item.classList.remove('d-none');
+                        } else {
+                            item.classList.add('d-none');
+                        }
+                    });
+                });
+            });
+        })();
+    </script>
+@else
     <div class="row">
         <div class="col-12">
             <div class="card shadow-0">
@@ -196,4 +250,4 @@
             </div>
         </div>
     </div>
-@endforelse
+@endif

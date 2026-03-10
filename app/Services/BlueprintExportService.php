@@ -76,60 +76,55 @@ class BlueprintExportService
         }
 
         $headerRow = $rowMatches[0][0];
-        $outcomeRowTemplate = $rowMatches[0][1];  // Row with outcome text in cell 0
-        $continuationRowTemplate = $rowMatches[0][2] ?? $rowMatches[0][1]; // Row with vMerge
+        $outcomeRowTemplate = $rowMatches[0][1];
 
-        // Build new rows
+        // Strip rowSpan attributes — the template uses merged rows for outcomes,
+        // but we put all content as multiline text in a single row per outcome
+        $outcomeRowTemplate = preg_replace('/\s*rowSpan="\d+"/', '', $outcomeRowTemplate);
+
+        // Build one row per outcome — content items as multiline text within the row
         $newRows = [$headerRow];
 
         foreach ($blueprint->outcomes as $outcome) {
             $items = $outcome->contentItems;
 
-            if ($items->isEmpty()) {
-                // Outcome with no content items — single row with just the outcome title
-                $newRows[] = $this->buildOutcomeRow(
-                    $outcomeRowTemplate,
-                    $outcome->title,
-                    '',
-                    '',
-                    '',
-                    '',
-                    false,
-                    false,
-                    false,
-                );
+            // Collect content lines and aggregate role applicability
+            $contentLines = [];
+            $timeLines = [];
+            $sourceLines = [];
+            $prereqLines = [];
+            $hasDelivery = false;
+            $hasPreSales = false;
+            $hasGtm = false;
 
-                continue;
+            foreach ($items as $item) {
+                $contentLines[] = $item->title;
+                $timeLines[] = $item->duration_display ?? '';
+                $sourceLines[] = $item->source ?? '';
+                $prereqLines[] = $item->prerequisites ?? '';
+                $hasDelivery = $hasDelivery || $item->delivery_applicable !== 'na';
+                $hasPreSales = $hasPreSales || $item->pre_sales_applicable !== 'na';
+                $hasGtm = $hasGtm || $item->gtm_applicable !== 'na';
             }
 
-            foreach ($items as $index => $item) {
-                if ($index === 0) {
-                    // First item uses the outcome row (shows outcome title)
-                    $newRows[] = $this->buildOutcomeRow(
-                        $outcomeRowTemplate,
-                        $outcome->title,
-                        $item->title,
-                        $item->duration_display ?? '',
-                        $item->source ?? '',
-                        $item->prerequisites ?? '',
-                        $item->delivery_applicable !== 'na',
-                        $item->pre_sales_applicable !== 'na',
-                        $item->gtm_applicable !== 'na',
-                    );
-                } else {
-                    // Subsequent items use the continuation row (vMerge)
-                    $newRows[] = $this->buildContinuationRow(
-                        $continuationRowTemplate,
-                        $item->title,
-                        $item->duration_display ?? '',
-                        $item->source ?? '',
-                        $item->prerequisites ?? '',
-                        $item->delivery_applicable !== 'na',
-                        $item->pre_sales_applicable !== 'na',
-                        $item->gtm_applicable !== 'na',
-                    );
-                }
-            }
+            $row = $outcomeRowTemplate;
+
+            // Cell 0: Outcome title (numbered)
+            $row = $this->replaceCellText($row, 0, $outcome->sort_order.'. '.$outcome->title);
+            // Cell 2: Content items as multiline
+            $row = $this->setCellMultiline($row, 2, $contentLines);
+            // Cell 3: Time per content item
+            $row = $this->setCellMultiline($row, 3, $timeLines);
+            // Cell 4: Source per content item
+            $row = $this->setCellMultiline($row, 4, $sourceLines);
+            // Cell 5: Prerequisites per content item
+            $row = $this->setCellMultiline($row, 5, $prereqLines);
+            // Cells 6, 7, 8: Aggregated role applicability
+            $row = $this->replaceCellText($row, 6, $hasDelivery ? "\u{2713}" : '');
+            $row = $this->replaceCellText($row, 7, $hasPreSales ? "\u{2713}" : '');
+            $row = $this->replaceCellText($row, 8, $hasGtm ? "\u{2713}" : '');
+
+            $newRows[] = $row;
         }
 
         // Replace old rows with new rows
@@ -140,63 +135,72 @@ class BlueprintExportService
         return $xml;
     }
 
-    private function buildOutcomeRow(
-        string $template,
-        string $outcomeTitle,
-        string $contentTitle,
-        string $time,
-        string $source,
-        string $prerequisites,
-        bool $delivery,
-        bool $preSales,
-        bool $gtm,
-    ): string {
-        $row = $template;
+    /**
+     * Set multiline text in a specific cell by creating multiple <a:p> paragraphs.
+     */
+    private function setCellMultiline(string $rowXml, int $cellIndex, array $lines): string
+    {
+        if (empty($lines)) {
+            return $this->replaceCellText($rowXml, $cellIndex, '');
+        }
 
-        // Cell 0: Outcome title — replace the existing outcome text
-        $row = $this->replaceCellText($row, 0, $outcomeTitle);
-        // Cell 2: Content title
-        $row = $this->replaceCellText($row, 2, $contentTitle);
-        // Cell 3: Time
-        $row = $this->replaceCellText($row, 3, $time);
-        // Cell 4: Source
-        $row = $this->replaceCellText($row, 4, $source);
-        // Cell 5: Prerequisites
-        $row = $this->replaceCellText($row, 5, $prerequisites);
-        // Cells 6, 7, 8: Delivery, Pre-Sales, GTM checkmarks
-        $row = $this->replaceCellText($row, 6, $delivery ? "\u{2713}" : '');
-        $row = $this->replaceCellText($row, 7, $preSales ? "\u{2713}" : '');
-        $row = $this->replaceCellText($row, 8, $gtm ? "\u{2713}" : '');
+        if (count($lines) === 1) {
+            return $this->replaceCellText($rowXml, $cellIndex, $lines[0]);
+        }
 
-        return $row;
-    }
+        // Locate the target cell
+        $offset = 0;
+        $cellCount = 0;
 
-    private function buildContinuationRow(
-        string $template,
-        string $contentTitle,
-        string $time,
-        string $source,
-        string $prerequisites,
-        bool $delivery,
-        bool $preSales,
-        bool $gtm,
-    ): string {
-        $row = $template;
+        while (($pos = strpos($rowXml, '<a:tc', $offset)) !== false) {
+            $endPos = strpos($rowXml, '</a:tc>', $pos);
+            if ($endPos === false) {
+                break;
+            }
+            $endPos += strlen('</a:tc>');
 
-        // Cell 2: Content title
-        $row = $this->replaceCellText($row, 2, $contentTitle);
-        // Cell 3: Time
-        $row = $this->replaceCellText($row, 3, $time);
-        // Cell 4: Source
-        $row = $this->replaceCellText($row, 4, $source);
-        // Cell 5: Prerequisites
-        $row = $this->replaceCellText($row, 5, $prerequisites);
-        // Cells 6, 7, 8: Delivery, Pre-Sales, GTM
-        $row = $this->replaceCellText($row, 6, $delivery ? "\u{2713}" : '');
-        $row = $this->replaceCellText($row, 7, $preSales ? "\u{2713}" : '');
-        $row = $this->replaceCellText($row, 8, $gtm ? "\u{2713}" : '');
+            if ($cellCount === $cellIndex) {
+                $cellXml = substr($rowXml, $pos, $endPos - $pos);
 
-        return $row;
+                // Extract the first <a:p> as a template for paragraph formatting
+                if (preg_match('/(<a:p>.*?<\/a:p>)/s', $cellXml, $pMatch)) {
+                    $pTemplate = $pMatch[1];
+
+                    // Build new paragraphs from the template
+                    $newParagraphs = [];
+                    foreach ($lines as $line) {
+                        $p = preg_replace_callback('/<a:t>(.*?)<\/a:t>/s', function () use ($line, &$replaced) {
+                            if (! $replaced) {
+                                $replaced = true;
+
+                                return '<a:t>'.htmlspecialchars($line, ENT_XML1).'</a:t>';
+                            }
+
+                            return '<a:t></a:t>';
+                        }, $pTemplate);
+                        $replaced = false;
+                        $newParagraphs[] = $p;
+                    }
+
+                    // Replace all existing <a:p> elements with the new ones
+                    $newCellXml = preg_replace(
+                        '/(<a:p>.*?<\/a:p>\s*)+/s',
+                        implode('', $newParagraphs),
+                        $cellXml,
+                        1
+                    );
+
+                    return substr($rowXml, 0, $pos).$newCellXml.substr($rowXml, $endPos);
+                }
+
+                break;
+            }
+
+            $cellCount++;
+            $offset = $endPos;
+        }
+
+        return $rowXml;
     }
 
     /**
