@@ -33,20 +33,24 @@ class OpportunityHistorySeeder extends Seeder
         '5. Closed Won' => 100,
     ];
 
-    /**
-     * LOB → product_area mapping for the Opportunity model.
-     */
-    private const LOB_TO_PRODUCT_AREA = [
-        'Finance' => 'Finance',
-        'Supply Chain' => 'Supply Chain',
-        'Sales and Marketing' => 'Sales',
-        'HR' => 'Workforce',
-        'HR & Workforce' => 'Workforce',
-        'Other' => 'Platform',
-    ];
+    /** @var array<string, string> */
+    private array $lobToProductArea;
+
+    /** @var list<string> */
+    private array $validLobs;
+
+    /** @var array<string, string> */
+    private array $pfToLob;
+
+    /** @var array<string, string> */
+    private array $pnToLob;
+
+    /** @var list<string> */
+    private array $pfIgnore;
 
     public function run(): void
     {
+        $this->loadLobMappings();
         $this->command->info('Seeding opportunity history from Excel snapshots...');
 
         Schema::withoutForeignKeyConstraints(function () {
@@ -165,7 +169,10 @@ class OpportunityHistorySeeder extends Seeder
                 $stage = trim($row['Sales Stage'] ?? '');
                 $amount = $this->parseAmount($row['NNACV - SFDC'] ?? null);
                 $lob = trim($row['LOB'] ?? '');
-                $productArea = self::LOB_TO_PRODUCT_AREA[$lob] ?? null;
+                $productFamily = trim($row['Product Family'] ?? '');
+                $productName = trim($row['Product Name'] ?? '');
+                $resolvedLob = $this->resolveLob($lob, $productFamily, $productName);
+                $productArea = $this->lobToProductArea[$resolvedLob] ?? null;
                 $probability = self::STAGE_PROBABILITY[$stage] ?? 50;
                 $recordType = trim($row['Record Type (SFDC)'] ?? '');
                 $partnerSalesRole = trim($row['Primary Partner Sales Role'] ?? '');
@@ -406,6 +413,66 @@ class OpportunityHistorySeeder extends Seeder
         }
 
         return (float) $value * 1000;
+    }
+
+    /**
+     * Load LOB mappings from the shared JSON config file.
+     * This file is shared with partner-risk-analyzer for consistency.
+     */
+    private function loadLobMappings(): void
+    {
+        $path = database_path('seeders/data/lob-mappings.json');
+        $config = json_decode(file_get_contents($path), true);
+
+        $this->validLobs = $config['valid_lobs'];
+        $this->lobToProductArea = $config['lob_to_product_area'];
+        $this->pfToLob = $config['pf_to_lob'];
+        $this->pnToLob = $config['pn_to_lob'];
+        $this->pfIgnore = $config['pf_ignore'];
+    }
+
+    /**
+     * Resolve LOB using 3-step inference (matches partner-risk-analyzer logic).
+     *
+     * Step 1: Accept known valid LOB values as-is.
+     * Step 2: If LOB is missing/Other, infer from Product Family.
+     * Step 3: If PF didn't help, infer from Product Name.
+     */
+    private function resolveLob(string $lob, string $productFamily, string $productName): string
+    {
+        // Step 1: Known valid LOB — accept as-is
+        if ($lob !== '' && in_array($lob, $this->validLobs, true)) {
+            return $lob;
+        }
+
+        // Step 2: Infer from Product Family (skip Platform/AI/Support parts)
+        if ($productFamily !== '') {
+            $parts = array_map('trim', explode(';', $productFamily));
+            $ignore = array_merge($this->pfIgnore, ['']);
+            $nonPlatform = array_filter($parts, fn (string $p) => ! in_array($p, $ignore, true));
+
+            foreach ($nonPlatform as $part) {
+                $upper = strtoupper($part);
+                foreach ($this->pfToLob as $keyword => $mappedLob) {
+                    if (str_contains($upper, strtoupper($keyword))) {
+                        return $mappedLob;
+                    }
+                }
+            }
+        }
+
+        // Step 3: Infer from Product Name
+        if ($productName !== '') {
+            $upper = strtoupper($productName);
+            foreach ($this->pnToLob as $keyword => $mappedLob) {
+                if (str_contains($upper, strtoupper($keyword))) {
+                    return $mappedLob;
+                }
+            }
+        }
+
+        // Fallback: return original LOB (or 'Other' if blank)
+        return $lob ?: 'Other';
     }
 
     /**

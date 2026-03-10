@@ -1027,9 +1027,9 @@
             <div class="panel-hdr">
                 <h2><i class="fal fa-bullseye-arrow me-2"></i> Priorities <span class="fw-light"><i>& Actions</i></span></h2>
                 <div class="panel-toolbar">
-                    <a href="{{ route('priorities.weekly') }}" class="btn btn-xs btn-outline-primary me-2">
-                        <i class="fal fa-external-link me-1"></i> View All in Priorities
-                    </a>
+                    <button type="button" class="btn btn-xs btn-outline-primary me-2" id="priorities-new-objective-btn">
+                        <i class="fal fa-plus me-1"></i> New Objective
+                    </button>
                     <button class="btn btn-panel waves-effect waves-themed" data-action="panel-collapse" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Toggle">
                         <svg class="sa-icon"><use class="panel-collapsed-icon" href="/img/sprite.svg#minus-circle"></use><use class="panel-expand-icon" href="/img/sprite.svg#plus-circle"></use></svg>
                     </button>
@@ -1049,8 +1049,9 @@
                         <div class="{{ ($sobActionItems ?? collect())->count() > 0 ? 'col-xl-7' : 'col-12' }} mb-3 mb-xl-0">
                             <h6 class="fw-700 text-uppercase fs-xs text-muted mb-3">
                                 <i class="fal fa-bullseye-arrow me-1"></i> My Objectives
-                                <span class="badge bg-primary bg-opacity-15 text-primary ms-1">{{ ($sobObjectives ?? collect())->count() }}</span>
+                                <span class="badge bg-primary text-white ms-1">{{ ($sobObjectives ?? collect())->count() }}</span>
                             </h6>
+                            <div id="objectives-sortable-list">
                             @forelse($sobObjectives ?? collect() as $obj)
                                 @php
                                     $progress = $obj->progressPercentage();
@@ -1068,13 +1069,19 @@
                                     $statusColor = PsmObjective::STATUS_COLORS[$obj->status] ?? 'secondary';
                                     $isActive = $obj->status === 'active';
                                 @endphp
-                                <div class="card border shadow-0 mb-2 {{ !$isActive ? 'opacity-75' : '' }}">
+                                <div class="card border shadow-0 mb-2 {{ !$isActive ? 'opacity-75' : '' }} objective-sortable-item" data-objective-id="{{ $obj->id }}">
                                     <div class="card-body py-2 px-3">
                                         <div class="d-flex align-items-start justify-content-between">
+                                            <div class="d-flex align-items-center me-2 objective-drag-handle" style="cursor: grab; opacity: 0.4;" title="Drag to reorder">
+                                                <i class="fal fa-grip-vertical"></i>
+                                            </div>
                                             <div class="flex-grow-1 me-3">
                                                 <div class="d-flex align-items-center gap-2 mb-1">
-                                                    <span class="badge bg-{{ $statusColor }} bg-opacity-15 text-{{ $statusColor }}">{{ ucfirst($obj->status) }}</span>
-                                                    <span class="badge bg-{{ $categoryColor }} bg-opacity-15 text-{{ $categoryColor }}">{{ ucfirst($obj->category) }}</span>
+                                                    @if($obj->priority > 0)
+                                                        <span class="badge bg-dark text-white" style="min-width: 22px;">P{{ $obj->priority }}</span>
+                                                    @endif
+                                                    <span class="badge bg-{{ $statusColor }} text-white">{{ ucfirst($obj->status) }}</span>
+                                                    <span class="badge bg-{{ $categoryColor }} text-white">{{ ucfirst($obj->category) }}</span>
                                                     <span class="fw-500">{{ $obj->title }}</span>
                                                     @if($obj->partner)
                                                         <span class="text-muted small">· {{ $obj->partner->name }}</span>
@@ -1088,13 +1095,13 @@
                                                         <div class="progress-bar bg-{{ $progressColor }}" style="width: {{ $progress }}%"></div>
                                                     </div>
                                                     <span class="small fw-500 text-{{ $progressColor }}">{{ $progress }}%</span>
-                                                    <span class="small text-muted">{{ $obj->current_value }}/{{ $obj->target_value }} {{ PsmObjective::METRIC_TYPES[$obj->metric_type] ?? '' }}</span>
+                                                    <span class="small text-muted">{{ (int) $obj->current_value }}/{{ (int) $obj->target_value }} {{ PsmObjective::METRIC_TYPES[$obj->metric_type] ?? '' }}</span>
                                                     @if($isActive)
                                                         {{-- Inline progress update --}}
                                                         <form method="POST" action="{{ route('priorities.objectives.update', $obj) }}" class="d-inline-flex align-items-center gap-1 ms-2">
                                                             @csrf
                                                             @method('PATCH')
-                                                            <input type="number" name="current_value" class="form-control form-control-sm" style="width: 70px; height: 24px; font-size: 11px;" value="{{ $obj->current_value }}" min="0" step="0.01">
+                                                            <input type="number" name="current_value" class="form-control form-control-sm" style="width: 70px; height: 24px; font-size: 11px;" value="{{ (int) $obj->current_value }}" min="0" step="1">
                                                             <button type="submit" class="btn btn-xs btn-outline-primary" style="height: 24px; padding: 0 6px;" title="Update progress"><i class="fal fa-save" style="font-size: 10px;"></i></button>
                                                         </form>
                                                     @endif
@@ -1106,14 +1113,34 @@
                                                 @if($isOverdue)
                                                     <span class="badge bg-danger bg-opacity-15 text-danger">Overdue</span>
                                                 @endif
-                                                @if($isActive)
-                                                    <form method="POST" action="{{ route('priorities.objectives.update', $obj) }}" class="d-inline mt-1">
+                                                <div class="d-flex gap-1 mt-1 justify-content-end">
+                                                    @if($isActive)
+                                                        <form method="POST" action="{{ route('priorities.objectives.update', $obj) }}" class="d-inline">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <input type="hidden" name="status" value="completed">
+                                                            <button type="submit" class="btn btn-xs btn-outline-success" title="Mark completed"><i class="fal fa-check me-1"></i>Done</button>
+                                                        </form>
+                                                    @endif
+                                                    <button type="button" class="btn btn-xs btn-outline-primary edit-objective-btn" title="Edit"
+                                                        data-obj-id="{{ $obj->id }}"
+                                                        data-obj-title="{{ $obj->title }}"
+                                                        data-obj-description="{{ $obj->description }}"
+                                                        data-obj-category="{{ $obj->category }}"
+                                                        data-obj-metric-type="{{ $obj->metric_type }}"
+                                                        data-obj-target-value="{{ $obj->target_value }}"
+                                                        data-obj-target-date="{{ $obj->target_date->format('Y-m-d') }}"
+                                                        data-obj-partner-id="{{ $obj->partner_id }}"
+                                                        data-obj-status="{{ $obj->status }}"
+                                                        data-obj-priority="{{ $obj->priority }}">
+                                                        <i class="fal fa-pencil"></i>
+                                                    </button>
+                                                    <form method="POST" action="{{ route('priorities.objectives.destroy', $obj) }}" class="d-inline delete-objective-form">
                                                         @csrf
-                                                        @method('PATCH')
-                                                        <input type="hidden" name="status" value="completed">
-                                                        <button type="submit" class="btn btn-xs btn-outline-success" title="Mark completed"><i class="fal fa-check me-1"></i>Done</button>
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-xs btn-outline-danger" title="Delete"><i class="fal fa-trash"></i></button>
                                                     </form>
-                                                @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1121,6 +1148,7 @@
                             @empty
                                 <p class="text-muted small">No objectives yet.</p>
                             @endforelse
+                            </div>
                         </div>
 
                         {{-- Action Items --}}
@@ -1197,8 +1225,8 @@
                                             <div class="d-flex align-items-start justify-content-between">
                                                 <div class="flex-grow-1 me-3">
                                                     <div class="d-flex align-items-center gap-2 mb-1">
-                                                        <span class="badge bg-{{ $statusColor }} bg-opacity-15 text-{{ $statusColor }}">{{ ucfirst($obj->status) }}</span>
-                                                        <span class="badge bg-{{ $categoryColor }} bg-opacity-15 text-{{ $categoryColor }}">{{ ucfirst($obj->category) }}</span>
+                                                        <span class="badge bg-{{ $statusColor }} text-white">{{ ucfirst($obj->status) }}</span>
+                                                        <span class="badge bg-{{ $categoryColor }} text-white">{{ ucfirst($obj->category) }}</span>
                                                         <span class="fw-500">{{ $obj->title }}</span>
                                                         @if($obj->partner)
                                                             <span class="text-muted small">· {{ $obj->partner->name }}</span>
@@ -1209,7 +1237,7 @@
                                                             <div class="progress-bar bg-{{ $progressColor }}" style="width: {{ $progress }}%"></div>
                                                         </div>
                                                         <span class="small fw-500 text-{{ $progressColor }}">{{ $progress }}%</span>
-                                                        <span class="small text-muted">{{ $obj->current_value }}/{{ $obj->target_value }} {{ PsmObjective::METRIC_TYPES[$obj->metric_type] ?? '' }}</span>
+                                                        <span class="small text-muted">{{ (int) $obj->current_value }}/{{ (int) $obj->target_value }} {{ PsmObjective::METRIC_TYPES[$obj->metric_type] ?? '' }}</span>
                                                     </div>
                                                 </div>
                                                 <div class="text-end flex-shrink-0">
@@ -1364,6 +1392,63 @@
 
     {{-- Enablement Goals --}}
     @if(!empty($enablementGoals ?? []))
+    @php
+        $isMultiPartner = count($enablementGoals) > 1;
+
+        // Build chart data per group
+        $goalChartData = [];
+        foreach ($enablementGoalGroups ?? [] as $gk => $gc) {
+            if ($isMultiPartner) {
+                // Aggregate across all partners — single bar pair
+                $totalTarget = 0;
+                $totalActual = 0;
+                foreach ($enablementGoals as $pid => $pg) {
+                    $groupLines = $pg[$gk] ?? [];
+                    $totalTarget += array_sum(array_column($groupLines, 'target'));
+                    $totalActual += array_sum(array_column($groupLines, 'actual'));
+                }
+                $goalChartData[$gk] = [
+                    'label' => $gc['label'],
+                    'partners' => [$gc['label']],
+                    'targets' => [$totalTarget],
+                    'actuals' => [$totalActual],
+                ];
+            } else {
+                // Single partner — one bar pair
+                $pid = array_key_first($enablementGoals);
+                $groupLines = $enablementGoals[$pid][$gk] ?? [];
+                $goalChartData[$gk] = [
+                    'label' => $gc['label'],
+                    'partners' => [($goalPartners[$pid] ?? null)?->name ?? 'Partner'],
+                    'targets' => [array_sum(array_column($groupLines, 'target'))],
+                    'actuals' => [array_sum(array_column($groupLines, 'actual'))],
+                ];
+            }
+        }
+
+        // For multi-partner: aggregate lines across all partners
+        if ($isMultiPartner) {
+            $aggregatedGroups = [];
+            foreach ($enablementGoalGroups ?? [] as $gk => $gc) {
+                $mergedLines = [];
+                foreach ($enablementGoals as $pid => $pg) {
+                    foreach ($pg[$gk] ?? [] as $lineKey => $line) {
+                        if (!isset($mergedLines[$lineKey])) {
+                            $mergedLines[$lineKey] = ['label' => $line['label'], 'target' => 0, 'actual' => 0];
+                        }
+                        $mergedLines[$lineKey]['target'] += $line['target'];
+                        $mergedLines[$lineKey]['actual'] += $line['actual'];
+                    }
+                }
+                // Compute variance
+                foreach ($mergedLines as &$ml) {
+                    $ml['variance'] = $ml['target'] > 0 ? $ml['actual'] - $ml['target'] : 0;
+                }
+                unset($ml);
+                $aggregatedGroups[$gk] = $mergedLines;
+            }
+        }
+    @endphp
     <div class="col-12 mb-g">
         <div id="panel-enablement-goals" class="panel panel-icon panel-collapsed">
             <div class="panel-hdr">
@@ -1376,120 +1461,193 @@
             </div>
             <div class="panel-container show">
                 <div class="panel-content">
-                    @foreach($enablementGoals as $partnerId => $partnerGroups)
-                    @php $partnerName = ($goalPartners[$partnerId] ?? null)?->name ?? 'Partner #' . $partnerId; @endphp
-
-                    @if(count($enablementGoals) > 1)
-                    <h5 class="fw-700 mb-3 {{ !$loop->first ? 'mt-4 pt-3 border-top' : '' }}">
-                        <a href="{{ route('state-of-business', ['partner' => $partnerId]) }}" class="text-decoration-none">{{ $partnerName }}</a>
-                    </h5>
-                    @endif
-
-                    <div class="row">
+                    {{-- Goal charts row --}}
+                    <div class="row mb-4">
                         @foreach($enablementGoalGroups ?? [] as $groupKey => $groupConfig)
-                        @php $lines = $partnerGroups[$groupKey] ?? []; @endphp
-                        <div class="col-xl-6 col-lg-6 mb-4">
-                            <h6 class="fw-700 text-uppercase fs-xs text-muted mb-2">
+                        <div class="col-xl-6 col-lg-6 mb-3">
+                            <h6 class="fw-700 text-uppercase fs-xs text-muted mb-1">
                                 <i class="fal fa-layer-group me-1"></i> {{ $groupConfig['label'] }}
                             </h6>
-                            <div class="table-responsive">
-                                <table class="table table-sm table-hover table-bordered mb-0">
-                                    <thead class="bg-fusion-50">
-                                        <tr>
-                                            <th>Product</th>
-                                            <th class="text-center" style="width: 80px;">Target</th>
-                                            <th class="text-center" style="width: 70px;">Actual</th>
-                                            <th class="text-center" style="width: 80px;">Trend</th>
-                                            <th class="text-center" style="width: 80px;">Variance</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @php $groupTotals = ['target' => 0, 'actual' => 0]; @endphp
-                                        @foreach($lines as $lineKey => $line)
-                                        @php
-                                            $groupTotals['target'] += $line['target'];
-                                            $groupTotals['actual'] += $line['actual'];
-                                            $trendData = $enablementTrends[$partnerId]['series'][$lineKey] ?? [];
-                                        @endphp
-                                        <tr data-partner-id="{{ $partnerId }}" data-category="{{ $lineKey }}">
-                                            <td class="fw-500">{{ $line['label'] }}</td>
-                                            <td class="text-center">
-                                                <span class="editable-goal-field" data-field="target" data-goal-id="{{ $line['goal_id'] ?? '' }}" data-partner-id="{{ $partnerId }}" data-category="{{ $lineKey }}">
-                                                    <span class="goal-display" role="button" title="Click to edit">{{ $line['target'] }}</span>
-                                                    <input type="number" class="form-control form-control-sm text-center d-none goal-input" style="width: 70px; margin: 0 auto;" value="{{ $line['target'] }}" min="0">
-                                                </span>
-                                            </td>
-                                            <td class="text-center fw-500">{{ $line['actual'] }}</td>
-                                            <td class="text-center">
-                                                @if(count($trendData) > 1 && array_sum($trendData) > 0)
-                                                    <span class="peity-line d-none" data-peity='{"fill": false, "stroke": "var(--primary-500)", "height": 22, "width": 60, "strokeWidth": 1.5}'>{{ implode(',', $trendData) }}</span>
-                                                @else
-                                                    <span class="text-muted">—</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-center">
-                                                @if($line['target'] > 0)
-                                                    <span class="badge bg-{{ $line['variance'] >= 0 ? 'success' : 'danger' }}-200 text-{{ $line['variance'] >= 0 ? 'success' : 'danger' }}-700">
-                                                        {{ $line['variance'] >= 0 ? '+' : '' }}{{ $line['variance'] }}
-                                                    </span>
-                                                @else
-                                                    <span class="text-muted">—</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                    @if(count($lines) > 1)
-                                    <tfoot class="fw-700 bg-fusion-25">
-                                        @php
-                                            $totalVar = $groupTotals['target'] > 0 ? $groupTotals['actual'] - $groupTotals['target'] : 0;
-                                            // Sum line trends element-wise for group total sparkline
-                                            $groupTrend = [];
-                                            foreach ($lines as $lk => $l) {
-                                                foreach (($enablementTrends[$partnerId]['series'][$lk] ?? []) as $i => $v) {
-                                                    $groupTrend[$i] = ($groupTrend[$i] ?? 0) + $v;
-                                                }
-                                            }
-                                        @endphp
-                                        <tr>
-                                            <td>Total</td>
-                                            <td class="text-center">{{ $groupTotals['target'] }}</td>
-                                            <td class="text-center">{{ $groupTotals['actual'] }}</td>
-                                            <td class="text-center">
-                                                @if(count($groupTrend) > 1 && array_sum($groupTrend) > 0)
-                                                    <span class="peity-line d-none" data-peity='{"fill": false, "stroke": "var(--primary-700)", "height": 22, "width": 60, "strokeWidth": 2}'>{{ implode(',', $groupTrend) }}</span>
-                                                @else
-                                                    <span class="text-muted">—</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-center">
-                                                @if($groupTotals['target'] > 0)
-                                                    <span class="badge bg-{{ $totalVar >= 0 ? 'success' : 'danger' }}-200 text-{{ $totalVar >= 0 ? 'success' : 'danger' }}-700">
-                                                        {{ $totalVar >= 0 ? '+' : '' }}{{ $totalVar }}
-                                                    </span>
-                                                @else
-                                                    <span class="text-muted">—</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    </tfoot>
-                                    @endif
-                                </table>
-                            </div>
+                            <div id="goal-chart-{{ $groupKey }}" style="min-height: 200px;"></div>
                         </div>
                         @endforeach
                     </div>
-                    @endforeach
+
+                    @if($isMultiPartner)
+                        {{-- Aggregated tables for multi-partner --}}
+                        <div class="row">
+                            @foreach($enablementGoalGroups ?? [] as $groupKey => $groupConfig)
+                            @php $lines = $aggregatedGroups[$groupKey] ?? []; @endphp
+                            <div class="col-xl-6 col-lg-6 mb-4">
+                                <h6 class="fw-700 text-uppercase fs-xs text-muted mb-2">
+                                    <i class="fal fa-layer-group me-1"></i> {{ $groupConfig['label'] }}
+                                </h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover table-bordered mb-0">
+                                        <thead class="bg-fusion-50">
+                                            <tr>
+                                                <th></th>
+                                                <th class="text-center" style="width: 80px;">Target</th>
+                                                <th class="text-center" style="width: 70px;">Actual</th>
+                                                <th class="text-center" style="width: 80px;">Variance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @php $groupTotals = ['target' => 0, 'actual' => 0]; @endphp
+                                            @foreach($lines as $lineKey => $line)
+                                            @php
+                                                $groupTotals['target'] += $line['target'];
+                                                $groupTotals['actual'] += $line['actual'];
+                                            @endphp
+                                            <tr>
+                                                <td class="fw-500">{{ $line['label'] }}</td>
+                                                <td class="text-center">{{ $line['target'] }}</td>
+                                                <td class="text-center fw-500">{{ $line['actual'] }}</td>
+                                                <td class="text-center">
+                                                    @if($line['target'] > 0)
+                                                        <span class="badge bg-{{ $line['variance'] >= 0 ? 'success' : 'danger' }}-200 text-{{ $line['variance'] >= 0 ? 'success' : 'danger' }}-700">
+                                                            {{ $line['variance'] >= 0 ? '+' : '' }}{{ $line['variance'] }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                        @if(count($lines) > 1)
+                                        <tfoot class="fw-700 bg-fusion-25">
+                                            @php $totalVar = $groupTotals['target'] > 0 ? $groupTotals['actual'] - $groupTotals['target'] : 0; @endphp
+                                            <tr>
+                                                <td>Total</td>
+                                                <td class="text-center">{{ $groupTotals['target'] }}</td>
+                                                <td class="text-center">{{ $groupTotals['actual'] }}</td>
+                                                <td class="text-center">
+                                                    @if($groupTotals['target'] > 0)
+                                                        <span class="badge bg-{{ $totalVar >= 0 ? 'success' : 'danger' }}-200 text-{{ $totalVar >= 0 ? 'success' : 'danger' }}-700">
+                                                            {{ $totalVar >= 0 ? '+' : '' }}{{ $totalVar }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                        @endif
+                                    </table>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    @else
+                        {{-- Single partner: detailed tables with trends and editable targets --}}
+                        @foreach($enablementGoals as $partnerId => $partnerGroups)
+                        <div class="row">
+                            @foreach($enablementGoalGroups ?? [] as $groupKey => $groupConfig)
+                            @php $lines = $partnerGroups[$groupKey] ?? []; @endphp
+                            <div class="col-xl-6 col-lg-6 mb-4">
+                                <h6 class="fw-700 text-uppercase fs-xs text-muted mb-2">
+                                    <i class="fal fa-layer-group me-1"></i> {{ $groupConfig['label'] }}
+                                </h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover table-bordered mb-0">
+                                        <thead class="bg-fusion-50">
+                                            <tr>
+                                                <th></th>
+                                                <th class="text-center" style="width: 80px;">Target</th>
+                                                <th class="text-center" style="width: 70px;">Actual</th>
+                                                <th class="text-center" style="width: 80px;">Trend</th>
+                                                <th class="text-center" style="width: 80px;">Variance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @php $groupTotals = ['target' => 0, 'actual' => 0]; @endphp
+                                            @foreach($lines as $lineKey => $line)
+                                            @php
+                                                $groupTotals['target'] += $line['target'];
+                                                $groupTotals['actual'] += $line['actual'];
+                                                $trendData = $enablementTrends[$partnerId]['series'][$lineKey] ?? [];
+                                            @endphp
+                                            <tr data-partner-id="{{ $partnerId }}" data-category="{{ $lineKey }}">
+                                                <td class="fw-500">{{ $line['label'] }}</td>
+                                                <td class="text-center">
+                                                    <span class="editable-goal-field" data-field="target" data-goal-id="{{ $line['goal_id'] ?? '' }}" data-partner-id="{{ $partnerId }}" data-category="{{ $lineKey }}">
+                                                        <span class="goal-display" role="button" title="Click to edit">{{ $line['target'] }}</span>
+                                                        <input type="number" class="form-control form-control-sm text-center d-none goal-input" style="width: 70px; margin: 0 auto;" value="{{ $line['target'] }}" min="0">
+                                                    </span>
+                                                </td>
+                                                <td class="text-center fw-500">{{ $line['actual'] }}</td>
+                                                <td class="text-center">
+                                                    @if(count($trendData) > 1 && array_sum($trendData) > 0)
+                                                        <span class="peity-line d-none" data-peity='{"fill": false, "stroke": "var(--primary-500)", "height": 22, "width": 60, "strokeWidth": 1.5}'>{{ implode(',', $trendData) }}</span>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    @if($line['target'] > 0)
+                                                        <span class="badge bg-{{ $line['variance'] >= 0 ? 'success' : 'danger' }}-200 text-{{ $line['variance'] >= 0 ? 'success' : 'danger' }}-700">
+                                                            {{ $line['variance'] >= 0 ? '+' : '' }}{{ $line['variance'] }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                        @if(count($lines) > 1)
+                                        <tfoot class="fw-700 bg-fusion-25">
+                                            @php
+                                                $totalVar = $groupTotals['target'] > 0 ? $groupTotals['actual'] - $groupTotals['target'] : 0;
+                                                $groupTrend = [];
+                                                foreach ($lines as $lk => $l) {
+                                                    foreach (($enablementTrends[$partnerId]['series'][$lk] ?? []) as $i => $v) {
+                                                        $groupTrend[$i] = ($groupTrend[$i] ?? 0) + $v;
+                                                    }
+                                                }
+                                            @endphp
+                                            <tr>
+                                                <td>Total</td>
+                                                <td class="text-center">{{ $groupTotals['target'] }}</td>
+                                                <td class="text-center">{{ $groupTotals['actual'] }}</td>
+                                                <td class="text-center">
+                                                    @if(count($groupTrend) > 1 && array_sum($groupTrend) > 0)
+                                                        <span class="peity-line d-none" data-peity='{"fill": false, "stroke": "var(--primary-700)", "height": 22, "width": 60, "strokeWidth": 2}'>{{ implode(',', $groupTrend) }}</span>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    @if($groupTotals['target'] > 0)
+                                                        <span class="badge bg-{{ $totalVar >= 0 ? 'success' : 'danger' }}-200 text-{{ $totalVar >= 0 ? 'success' : 'danger' }}-700">
+                                                            {{ $totalVar >= 0 ? '+' : '' }}{{ $totalVar }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                        @endif
+                                    </table>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        @endforeach
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Enablement Trends Panel --}}
+    {{-- Enablement Waterfall Chart --}}
+    @if(!empty($enablementWaterfall['values'] ?? []))
     <div class="col-12 mb-g">
         <div id="panel-enablement-trends" class="panel panel-icon panel-collapsed">
             <div class="panel-hdr">
-                <h2><i class="fal fa-chart-line me-2"></i> Enablement <span class="fw-light"><i>Trends</i></span></h2>
+                <h2><i class="fal fa-chart-bar me-2"></i> Enablement <span class="fw-light"><i>Trends</i></span></h2>
                 <div class="panel-toolbar">
                     <button class="btn btn-panel" data-action="panel-collapse" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Toggle">
                         <svg class="sa-icon"><use class="panel-collapsed-icon" href="/img/sprite.svg#minus-circle"></use><use class="panel-expand-icon" href="/img/sprite.svg#plus-circle"></use></svg>
@@ -1498,20 +1656,12 @@
             </div>
             <div class="panel-container show">
                 <div class="panel-content">
-                    <div class="row">
-                        @foreach($enablementGoalGroups as $gKey => $gConfig)
-                        <div class="col-xl-6 col-lg-6 mb-4">
-                            <h6 class="fw-700 text-uppercase fs-xs text-muted mb-2">
-                                <i class="fal fa-layer-group me-1"></i> {{ $gConfig['label'] }}
-                            </h6>
-                            <div id="enablement-trend-{{ $gKey }}" style="min-height: 250px;"></div>
-                        </div>
-                        @endforeach
-                    </div>
+                    <div id="enablement-waterfall-chart" style="min-height: 320px;"></div>
                 </div>
             </div>
         </div>
     </div>
+    @endif
     @endif
 
 {{-- Filter Modal (kept for nav integration) --}}
@@ -1697,6 +1847,92 @@
     </div>
 </div>
 
+{{-- Edit Objective Modal --}}
+<div class="modal fade" id="editObjectiveModal" tabindex="-1" aria-labelledby="editObjectiveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editObjectiveModalLabel">
+                    <i class="fal fa-pencil me-1 text-primary"></i> Edit Objective
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" id="edit-objective-form">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="_redirect" value="{{ request()->fullUrl() }}">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-500">Partner <span class="text-danger">*</span></label>
+                            <select name="partner_id" class="form-select" id="edit-obj-partner" required>
+                                <option value="">Select partner…</option>
+                                @foreach($myPartners as $p)
+                                    <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-500">Target Date <span class="text-danger">*</span></label>
+                            <input type="date" name="target_date" class="form-control" id="edit-obj-target-date" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-500">Objective Title <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control" id="edit-obj-title" required maxlength="255">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-500">Description</label>
+                            <textarea name="description" class="form-control" id="edit-obj-description" rows="2" maxlength="1000"></textarea>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-500">Priority</label>
+                            <input type="number" name="priority" class="form-control" id="edit-obj-priority" min="0" step="1" placeholder="0">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-500">Status</label>
+                            <select name="status" class="form-select" id="edit-obj-status">
+                                <option value="active">Active</option>
+                                <option value="completed">Completed</option>
+                                <option value="missed">Missed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-500">Category</label>
+                            <select name="category" class="form-select" id="edit-obj-category">
+                                <option value="delivery">Delivery</option>
+                                <option value="pipeline">Pipeline</option>
+                                <option value="enablement">Enablement</option>
+                                <option value="certification">Certification</option>
+                                <option value="general">General</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-500">Metric Type</label>
+                            <select name="metric_type" class="form-select" id="edit-obj-metric-type">
+                                <option value="resources_registered">Resources Registered</option>
+                                <option value="certifications">Certifications</option>
+                                <option value="pipeline_value">Pipeline Value</option>
+                                <option value="opportunity_count">Opportunity Count</option>
+                                <option value="projects_delivered">Projects Delivered</option>
+                                <option value="manual">Manual</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-500">Target Value <span class="text-danger">*</span></label>
+                            <input type="number" name="target_value" class="form-control" id="edit-obj-target-value" required min="0.01" step="0.01">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fal fa-save me-1"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {{-- Close main content row --}}
 </div>
 
@@ -1862,94 +2098,132 @@ function initSobCharts() {
         }
     }
 
-    // Enablement Trends — ApexCharts per group
-    var enablementTrends = @json($enablementTrends ?? []);
-    var enablementGroups = @json($enablementGoalGroups ?? []);
-    var enablementGoalsData = @json($enablementGoals ?? []);
-    var groupColors = ['#0d6efd', '#198754', '#6f42c1', '#d63384', '#fd7e14', '#20c997', '#0dcaf0'];
-
-    Object.keys(enablementGroups).forEach(function(groupKey) {
-        var el = document.getElementById('enablement-trend-' + groupKey);
+    // Enablement Goal Charts — Target vs Actual per group
+    var goalChartData = @json($goalChartData ?? []);
+    Object.keys(goalChartData).forEach(function(groupKey) {
+        var el = document.getElementById('goal-chart-' + groupKey);
         if (!el || !window.ApexCharts) return;
 
-        var group = enablementGroups[groupKey];
-        var series = [];
-        var annotations = [];
-        var xCategories = [];
-
-        // Use first partner's dates for x-axis
-        var partnerIds = Object.keys(enablementTrends);
-        if (!partnerIds.length) return;
-        var firstPartner = enablementTrends[partnerIds[0]];
-        xCategories = (firstPartner.dates || []).map(function(d) {
-            return new Date(d + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'});
-        });
-        if (xCategories.length < 2) {
-            el.innerHTML = '<div class="text-center text-muted py-5 fs-sm">Need 2+ snapshots for trend data</div>';
-            return;
-        }
-
-        if (group.aggregate) {
-            // Aggregate group: one series per partner (or single series in single-partner view)
-            partnerIds.forEach(function(pid) {
-                var data = enablementTrends[pid];
-                var seriesData = data.series[groupKey] || [];
-                if (seriesData.length) {
-                    series.push({ name: partnerIds.length > 1 ? 'Partner ' + pid : group.label, data: seriesData });
-                }
-                // Target reference line
-                var goalData = (enablementGoalsData[pid] || {})[groupKey] || {};
-                var target = (goalData[groupKey] || {}).target || 0;
-                if (target > 0) {
-                    annotations.push({ y: target, borderColor: '#FF4560', strokeDashArray: 4,
-                        label: { text: 'Target: ' + target, style: { background: '#FF4560', color: '#fff', fontSize: '11px', padding: { left: 6, right: 6, top: 2, bottom: 2 } } } });
-                }
-            });
-        } else {
-            // Line-level: one series per product line (single-partner) or summed across partners
-            var lines = group.lines || {};
-            var ci = 0;
-            Object.keys(lines).forEach(function(lineKey) {
-                // Sum across partners for multi-partner view
-                var combined = [];
-                partnerIds.forEach(function(pid) {
-                    var lineData = (enablementTrends[pid].series || {})[lineKey] || [];
-                    lineData.forEach(function(v, i) { combined[i] = (combined[i] || 0) + v; });
-                });
-                if (combined.some(function(v) { return v > 0; })) {
-                    series.push({ name: lines[lineKey].label, data: combined });
-                }
-                // Target reference lines for single-partner
-                if (partnerIds.length === 1) {
-                    var goalData = (enablementGoalsData[partnerIds[0]] || {})[groupKey] || {};
-                    var target = (goalData[lineKey] || {}).target || 0;
-                    if (target > 0) {
-                        annotations.push({ y: target, borderColor: groupColors[ci % groupColors.length], strokeDashArray: 4, opacity: 0.5,
-                            label: { text: lines[lineKey].label + ': ' + target, style: { background: groupColors[ci % groupColors.length], color: '#fff', fontSize: '10px', padding: { left: 4, right: 4, top: 1, bottom: 1 } } } });
-                    }
-                }
-                ci++;
-            });
-        }
-
-        if (!series.length) {
-            el.innerHTML = '<div class="text-center text-muted py-5 fs-sm">No data yet</div>';
+        var gd = goalChartData[groupKey];
+        var hasAnyTarget = gd.targets.some(function(v) { return v > 0; });
+        var hasAnyActual = gd.actuals.some(function(v) { return v > 0; });
+        if (!hasAnyTarget && !hasAnyActual) {
+            el.innerHTML = '<div class="text-center text-muted py-4 fs-sm">No targets set</div>';
             return;
         }
 
         new window.ApexCharts(el, {
-            series: series,
-            chart: { type: 'line', height: 240, toolbar: { show: false }, fontFamily: 'inherit', zoom: { enabled: false } },
-            stroke: { width: 2, curve: 'smooth' },
-            markers: { size: 3, strokeWidth: 2, hover: { sizeOffset: 2 } },
-            xaxis: { categories: xCategories, labels: { style: { fontSize: '11px' } } },
-            yaxis: { min: 0, forceNiceScale: true, labels: { style: { fontSize: '11px' } } },
-            annotations: { yaxis: annotations },
-            legend: { position: 'top', fontSize: '12px', labels: { colors: window.colorMap ? window.colorMap.bootstrapVars.bodyColor.hex : '#333' } },
-            grid: { borderColor: window.colorMap ? window.colorMap.bootstrapVars.bodyColor.rgba(0.08) : 'rgba(0,0,0,0.08)', strokeDashArray: 3 },
+            series: [
+                { name: 'Target', data: gd.targets },
+                { name: 'Actual', data: gd.actuals }
+            ],
+            chart: { type: 'bar', height: 200, toolbar: { show: false }, fontFamily: 'inherit' },
+            plotOptions: { bar: { columnWidth: gd.partners.length > 1 ? '60%' : '35%', borderRadius: 2 } },
+            colors: ['#6c757d', '#e8803a'],
+            dataLabels: {
+                enabled: true,
+                style: { fontSize: '11px', fontWeight: 600, colors: ['#333'] },
+                offsetY: -12,
+                formatter: function(val) { return val > 0 ? val : ''; }
+            },
+            xaxis: {
+                categories: gd.partners,
+                labels: { show: gd.partners.length > 1, style: { fontSize: '11px', fontWeight: 500 }, trim: true, maxHeight: 60 },
+                axisBorder: { show: true, color: '#ccc' }
+            },
+            yaxis: { labels: { style: { fontSize: '11px' } }, forceNiceScale: true },
+            grid: { borderColor: '#e8e8e8', strokeDashArray: 0, yaxis: { lines: { show: true } }, xaxis: { lines: { show: false } } },
+            legend: { position: 'top', fontSize: '12px', markers: { width: 10, height: 10, radius: 2 } },
             tooltip: { shared: true, intersect: false }
         }).render();
     });
+
+    // Enablement Waterfall Chart
+    var waterfallData = @json($enablementWaterfall ?? []);
+    var waterfallEl = document.getElementById('enablement-waterfall-chart');
+    if (waterfallEl && window.ApexCharts && waterfallData.values && waterfallData.values.length) {
+        var labels = waterfallData.labels;
+        var values = waterfallData.values;
+        var colors = waterfallData.colors;
+        var lastIdx = values.length - 1;
+
+        // Build cumulative base (invisible) and visible series for waterfall effect
+        var baseSeries = [];
+        var visibleSeries = [];
+        var cumulative = 0;
+        for (var i = 0; i < values.length; i++) {
+            if (i === lastIdx) {
+                // Total bar starts from zero
+                baseSeries.push(0);
+                visibleSeries.push(values[i]);
+            } else {
+                baseSeries.push(cumulative);
+                visibleSeries.push(values[i]);
+                cumulative += values[i];
+            }
+        }
+
+        new window.ApexCharts(waterfallEl, {
+            series: [
+                { name: 'Base', data: baseSeries },
+                { name: 'Value', data: visibleSeries }
+            ],
+            chart: {
+                type: 'bar',
+                height: 320,
+                stacked: true,
+                toolbar: { show: false },
+                fontFamily: 'inherit'
+            },
+            plotOptions: {
+                bar: {
+                    columnWidth: '50%',
+                    borderRadius: 2
+                }
+            },
+            colors: ['transparent', function(opts) { return colors[opts.dataPointIndex] || '#1b2a4a'; }],
+            dataLabels: {
+                enabled: true,
+                enabledOnSeries: [1],
+                formatter: function(val) { return val; },
+                offsetY: -8,
+                style: { fontSize: '13px', fontWeight: 700, colors: ['#333'] }
+            },
+            xaxis: {
+                categories: labels,
+                labels: {
+                    style: { fontSize: '11px', fontWeight: 600 },
+                    trim: false
+                },
+                axisBorder: { show: true, color: '#ccc' }
+            },
+            yaxis: {
+                labels: { style: { fontSize: '11px' } },
+                forceNiceScale: true
+            },
+            grid: {
+                borderColor: '#e8e8e8',
+                strokeDashArray: 0,
+                yaxis: { lines: { show: true } },
+                xaxis: { lines: { show: false } }
+            },
+            legend: { show: false },
+            tooltip: {
+                enabled: true,
+                shared: false,
+                intersect: true,
+                custom: function(opts) {
+                    if (opts.seriesIndex === 0) return '';
+                    var label = labels[opts.dataPointIndex].replace(/\n/g, ' ');
+                    var val = visibleSeries[opts.dataPointIndex];
+                    return '<div class="px-3 py-2"><strong>' + label + '</strong>: ' + val + '</div>';
+                }
+            },
+            states: {
+                hover: { filter: { type: 'darken', value: 0.9 } }
+            }
+        }).render();
+    }
 
     var saveBtn = document.getElementById('save-filter-btn');
     if (saveBtn) {
@@ -2116,6 +2390,130 @@ document.querySelectorAll('.js-take-action').forEach(function(btn) {
         modal.show();
     });
 });
+
+// New Objective button in Priorities panel header
+document.getElementById('priorities-new-objective-btn')?.addEventListener('click', function() {
+    var selectedPartnerId = '{{ $selectedPartnerId ?? '' }}';
+    if (selectedPartnerId) {
+        document.getElementById('action-partner').value = selectedPartnerId;
+        document.getElementById('action-item-partner').value = selectedPartnerId;
+    }
+    var targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + 30);
+    document.getElementById('action-target-date').value = targetDate.toISOString().split('T')[0];
+    document.getElementById('action-title').value = '';
+    document.getElementById('action-description').value = '';
+    document.getElementById('action-category').value = 'general';
+    document.getElementById('action-metric-type').value = 'manual';
+    document.getElementById('action-target-value').value = '';
+    document.getElementById('action-source-signal').value = '';
+    document.getElementById('action-context-alert').classList.add('d-none');
+    document.getElementById('action-item-description').value = '';
+    var modal = new bootstrap.Modal(document.getElementById('takeActionModal'));
+    modal.show();
+});
+
+// Edit Objective
+document.querySelectorAll('.edit-objective-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var form = document.getElementById('edit-objective-form');
+        form.action = '{{ url("priorities/objectives") }}/' + this.dataset.objId;
+        document.getElementById('edit-obj-title').value = this.dataset.objTitle;
+        document.getElementById('edit-obj-description').value = this.dataset.objDescription || '';
+        document.getElementById('edit-obj-category').value = this.dataset.objCategory;
+        document.getElementById('edit-obj-metric-type').value = this.dataset.objMetricType;
+        document.getElementById('edit-obj-target-value').value = this.dataset.objTargetValue;
+        document.getElementById('edit-obj-target-date').value = this.dataset.objTargetDate;
+        document.getElementById('edit-obj-partner').value = this.dataset.objPartnerId;
+        document.getElementById('edit-obj-status').value = this.dataset.objStatus;
+        document.getElementById('edit-obj-priority').value = this.dataset.objPriority || 0;
+        var modal = new bootstrap.Modal(document.getElementById('editObjectiveModal'));
+        modal.show();
+    });
+});
+
+// Delete Objective — confirm before submitting
+document.querySelectorAll('.delete-objective-form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        if (!confirm('Are you sure you want to delete this objective?')) {
+            e.preventDefault();
+        }
+    });
+});
+
+// Objective drag-and-drop reordering
+(function() {
+    var list = document.getElementById('objectives-sortable-list');
+    if (!list) return;
+
+    var items = list.querySelectorAll('.objective-sortable-item');
+    var dragItem = null;
+
+    items.forEach(function(item) {
+        item.setAttribute('draggable', 'true');
+
+        item.addEventListener('dragstart', function(e) {
+            dragItem = this;
+            this.style.opacity = '0.4';
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', function() {
+            this.style.opacity = '1';
+            list.querySelectorAll('.objective-sortable-item').forEach(function(el) {
+                el.classList.remove('border-primary');
+            });
+            dragItem = null;
+        });
+
+        item.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('border-primary');
+        });
+
+        item.addEventListener('dragleave', function() {
+            this.classList.remove('border-primary');
+        });
+
+        item.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('border-primary');
+            if (dragItem === this) return;
+
+            // Reorder DOM
+            var allItems = Array.from(list.querySelectorAll('.objective-sortable-item'));
+            var fromIdx = allItems.indexOf(dragItem);
+            var toIdx = allItems.indexOf(this);
+            if (fromIdx < toIdx) {
+                this.parentNode.insertBefore(dragItem, this.nextSibling);
+            } else {
+                this.parentNode.insertBefore(dragItem, this);
+            }
+
+            // Update priority badges
+            var reordered = Array.from(list.querySelectorAll('.objective-sortable-item'));
+            var ids = [];
+            reordered.forEach(function(el, i) {
+                ids.push(parseInt(el.dataset.objectiveId));
+                var badge = el.querySelector('.badge.bg-dark');
+                if (badge) {
+                    badge.textContent = 'P' + (i + 1);
+                }
+            });
+
+            // Save via AJAX
+            fetch('{{ route("priorities.objectives.reorder") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ ids: ids })
+            });
+        });
+    });
+})();
 
 // Enablement Goals — inline editing
 (function() {

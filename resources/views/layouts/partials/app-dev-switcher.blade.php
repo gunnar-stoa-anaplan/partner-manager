@@ -81,10 +81,6 @@
         toggle.addEventListener('click', function(e) {
             e.stopPropagation();
             var isOpen = menu.classList.contains('show');
-            // Close all other open dropdowns first
-            document.querySelectorAll('.dropdown-menu.show').forEach(function(m) {
-                if (m !== menu) m.classList.remove('show');
-            });
             menu.classList.toggle('show');
             toggle.setAttribute('aria-expanded', !isOpen);
         });

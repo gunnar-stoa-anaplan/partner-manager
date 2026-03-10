@@ -27,6 +27,7 @@ class PsmObjective extends Model
         'completed_at',
         'suggested_by',
         'source_signal',
+        'priority',
     ];
 
     protected function casts(): array
