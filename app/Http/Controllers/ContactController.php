@@ -45,6 +45,7 @@ class ContactController extends Controller
 
         $contacts = Contact::whereIn('partner_id', $partnerIds)
             ->with('partner')
+            ->withCount(['certifications', 'projects', 'interactions'])
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->get();
