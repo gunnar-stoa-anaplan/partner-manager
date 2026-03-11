@@ -200,6 +200,8 @@ Route::middleware(['auth'])->group(function () {
     | Field Enablement (gated by enablement feature flag)
     |--------------------------------------------------------------------------
     */
+    Route::get('/contacts', [ContactController::class, 'directory'])->name('contacts.directory');
+
     Route::middleware('module:enablement.field')->group(function () {
         Route::resource('influencers', ContactController::class);
         Route::post('/influencers/{influencer}/interactions', [ContactController::class, 'storeInteraction'])

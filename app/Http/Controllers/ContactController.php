@@ -36,6 +36,31 @@ class ContactController extends Controller
         return view('influencers.index', compact('influencers', 'partners', 'stats'));
     }
 
+    public function directory()
+    {
+        $user = auth()->user();
+        $partnerIds = $user->isAdmin()
+            ? Partner::pluck('id')
+            : Partner::where('user_id', $user->id)->pluck('id');
+
+        $contacts = Contact::whereIn('partner_id', $partnerIds)
+            ->with('partner')
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
+
+        $partners = Partner::whereIn('id', $partnerIds)->orderBy('name')->get();
+
+        $stats = [
+            'total' => $contacts->count(),
+            'general' => $contacts->where('contact_type', 'general')->count(),
+            'influencer' => $contacts->where('contact_type', 'influencer')->count(),
+            'resource' => $contacts->where('contact_type', 'resource')->count(),
+        ];
+
+        return view('contacts.index', compact('contacts', 'partners', 'stats'));
+    }
+
     public function create()
     {
         $user = auth()->user();
