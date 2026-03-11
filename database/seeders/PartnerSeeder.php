@@ -29,6 +29,15 @@ class PartnerSeeder extends Seeder
         $mappings = $this->loadPsmMappings();
         $this->command->info("  Found {$mappings->count()} partner mappings in Excel.");
 
+        // Collapse multi-row partners: keep first assigned PSM, fall back to Unassigned
+        $collapsed = $mappings->groupBy('Partner')->map(function ($rows) {
+            $assigned = $rows->first(fn ($r) => ! empty(trim($r['PSM'] ?? '')) && trim($r['PSM']) !== 'Unassigned');
+
+            return $assigned ?? $rows->first();
+        })->values();
+
+        $this->command->info("  Collapsed to {$collapsed->count()} unique partners.");
+
         // Look up PSM users by name
         $psmRole = Role::where('slug', 'psm')->first();
         $psmUsers = User::where('role_id', $psmRole->id)->get()->keyBy('name');
@@ -36,7 +45,7 @@ class PartnerSeeder extends Seeder
         $created = 0;
         $updated = 0;
 
-        foreach ($mappings as $row) {
+        foreach ($collapsed as $row) {
             $partnerName = trim($row['Partner']);
             $psmName = trim($row['PSM'] ?? '');
             $geo = trim($row['Geo'] ?? '');
