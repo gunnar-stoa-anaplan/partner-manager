@@ -6,54 +6,14 @@
 
 @section('css')
 <style>
-.contact-card {
+.card-hovered {
     border: 1px solid rgba(0,0,0,.08);
     transition: box-shadow .15s ease, transform .15s ease;
 }
-.contact-card:hover {
+.card-hovered:hover {
     box-shadow: 0 6px 24px rgba(0,0,0,.1) !important;
     transform: translateY(-2px);
 }
-.contact-avatar {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-}
-.contact-avatar-initials {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1.4rem;
-    color: #fff;
-    flex-shrink: 0;
-}
-.contact-stat-label {
-    font-size: 9px;
-    letter-spacing: .07em;
-    text-transform: uppercase;
-    color: #9ca3af;
-    font-weight: 700;
-    display: block;
-    margin-bottom: 2px;
-}
-.contact-stat-value {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #1f2937;
-    line-height: 1;
-}
-.view-profile-link {
-    font-size: .8rem;
-    font-weight: 600;
-    text-decoration: none;
-}
-.view-profile-link:hover { text-decoration: underline; }
 .type-tab.active {
     background: var(--bs-primary) !important;
     color: #fff !important;
@@ -121,112 +81,116 @@
 <div class="row g-3" id="contacts-grid">
     @foreach($contacts as $contact)
     @php
-        $typeColors = [
-            'general'    => ['bg' => '#6b7280', 'badge_bg' => '#f3f4f6', 'badge_text' => '#374151', 'link' => '#6b7280'],
-            'influencer' => ['bg' => '#d97706', 'badge_bg' => '#fef3c7', 'badge_text' => '#92400e', 'link' => '#d97706'],
-            'resource'   => ['bg' => '#059669', 'badge_bg' => '#d1fae5', 'badge_text' => '#065f46', 'link' => '#059669'],
+        $typeBadgeColors = [
+            'general'    => 'bg-secondary',
+            'influencer' => 'bg-warning',
+            'resource'   => 'bg-success',
         ];
-        $tc = $typeColors[$contact->contact_type] ?? $typeColors['general'];
+        $badgeColor = $typeBadgeColors[$contact->contact_type] ?? 'bg-secondary';
+
+        $avatarColors = [
+            'general'    => '#6b7280',
+            'influencer' => '#d97706',
+            'resource'   => '#059669',
+        ];
+        $avatarBg = $avatarColors[$contact->contact_type] ?? '#6b7280';
         $initials = strtoupper(substr($contact->first_name, 0, 1) . substr($contact->last_name, 0, 1));
-        $typeLabel = ucfirst($contact->contact_type);
+
         $roleLabel = match($contact->contact_type) {
             'influencer' => \App\Models\Contact::INFLUENCER_ROLES[$contact->influencer_role] ?? null,
             'resource'   => \App\Models\Contact::RESOURCE_ROLES[$contact->resource_role] ?? null,
             default      => null,
         };
         $partnerName = $contact->partner->name ?? '';
-        // Use notes, LinkedIn headline, or role as the card bio line
         $bio = $contact->linkedin_headline
-            ?: ($contact->notes ? \Illuminate\Support\Str::limit($contact->notes, 100) : null);
+            ?: ($contact->notes ? \Illuminate\Support\Str::limit($contact->notes, 100) : 'Works at ' . $partnerName . '.');
     @endphp
     <div class="col-md-6 col-xl-4 contact-item"
          data-type="{{ $contact->contact_type }}"
          data-partner="{{ $contact->partner_id }}"
          data-search="{{ strtolower($contact->first_name . ' ' . $contact->last_name . ' ' . $partnerName . ' ' . $contact->title . ' ' . $contact->email) }}">
-        <div class="card shadow-0 contact-card mb-0 d-flex flex-column h-100">
-            <div class="card-body flex-grow-1 pb-2">
+        <div class="card card-hovered shadow-0 mb-0 h-100">
+            <div class="card-body">
 
-                {{-- Header: avatar + name/title + menu --}}
-                <div class="d-flex align-items-start gap-3 mb-3">
-                    @if($contact->linkedin_image_url)
-                        <img src="{{ $contact->linkedin_image_url }}" alt="" class="contact-avatar">
-                    @elseif($contact->avatar)
-                        <img src="{{ asset($contact->avatar) }}" alt="" class="contact-avatar">
-                    @else
-                        <div class="contact-avatar-initials" style="background:{{ $tc['bg'] }};">{{ $initials }}</div>
-                    @endif
-
-                    <div class="flex-grow-1 min-width-0 pt-1">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div>
-                                <p class="fw-700 mb-0" style="font-size:.95rem; line-height:1.3;">
-                                    {{ $contact->first_name }} {{ $contact->last_name }}
-                                </p>
-                                <p class="text-muted mb-2" style="font-size:.8rem;">{{ $contact->title ?? '—' }}</p>
+                {{-- Avatar + name + menu --}}
+                <div class="d-flex align-items-center mb-4">
+                    <div class="me-3 position-relative">
+                        @if($contact->linkedin_image_url)
+                            <img src="{{ $contact->linkedin_image_url }}" alt="" class="rounded-circle" width="72" height="72" style="object-fit:cover;">
+                        @elseif($contact->avatar)
+                            <img src="{{ asset($contact->avatar) }}" alt="" class="rounded-circle" width="72" height="72" style="object-fit:cover;">
+                        @else
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-700"
+                                 style="width:72px;height:72px;background:{{ $avatarBg }};font-size:1.4rem;flex-shrink:0;">
+                                {{ $initials }}
                             </div>
-                            {{-- ⋮ menu --}}
-                            <div class="dropdown">
-                                <button class="btn btn-link btn-sm p-0 text-muted" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fal fa-ellipsis-v"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    @if($contact->email)
-                                    <li><a class="dropdown-item fs-xs" href="mailto:{{ $contact->email }}"><i class="fal fa-envelope me-2"></i>Send Email</a></li>
-                                    @endif
-                                    @if($contact->phone)
+                        @endif
+                        <span class="position-absolute bottom-0 end-0 badge {{ $badgeColor }} rounded-circle p-1 shadow-sm"
+                              title="{{ ucfirst($contact->contact_type) }}">
+                            <i class="fal {{ $contact->contact_type === 'resource' ? 'fa-hard-hat' : ($contact->contact_type === 'influencer' ? 'fa-star' : 'fa-user') }} text-white" style="font-size:10px;"></i>
+                        </span>
+                    </div>
+
+                    <div>
+                        <h5 class="mb-1 d-flex align-items-center">
+                            <span class="fw-600 fs-md">{{ $contact->first_name }} {{ $contact->last_name }}</span>
+                        </h5>
+                        <p class="text-muted mb-0" style="font-size:.8rem;">{{ $contact->title ?? ucfirst($contact->contact_type) }}</p>
+                        @if($roleLabel)
+                            <p class="text-muted mb-0" style="font-size:.75rem;">{{ $roleLabel }}</p>
+                        @endif
+                    </div>
+
+                    <div class="ms-auto">
+                        <div class="dropdown">
+                            <a href="#" class="btn btn-sm btn-light text-muted px-2 py-1" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fal fa-ellipsis-v"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                @if($contact->email)
+                                    <li><a class="dropdown-item fs-xs" href="mailto:{{ $contact->email }}"><i class="fal fa-envelope me-2"></i>{{ $contact->email }}</a></li>
+                                @endif
+                                @if($contact->phone)
                                     <li><a class="dropdown-item fs-xs" href="tel:{{ $contact->phone }}"><i class="fal fa-phone me-2"></i>{{ $contact->phone }}</a></li>
-                                    @endif
-                                    @if($contact->linkedin_url)
-                                    <li><a class="dropdown-item fs-xs" href="{{ $contact->linkedin_url }}" target="_blank"><i class="fab fa-linkedin me-2"></i>LinkedIn</a></li>
-                                    @endif
+                                @endif
+                                @if($contact->linkedin_url)
+                                    <li><a class="dropdown-item fs-xs" href="{{ $contact->linkedin_url }}" target="_blank" rel="noopener"><i class="fab fa-linkedin me-2"></i>LinkedIn</a></li>
+                                @endif
+                                @if($contact->email || $contact->phone || $contact->linkedin_url)
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item fs-xs" href="{{ route('partners.show', $contact->partner_id) }}"><i class="fal fa-building me-2"></i>View Partner</a></li>
-                                    @if($contact->contact_type === 'influencer')
+                                @endif
+                                <li><a class="dropdown-item fs-xs" href="{{ route('partners.show', $contact->partner_id) }}"><i class="fal fa-building me-2"></i>View Partner</a></li>
+                                @if($contact->contact_type === 'influencer')
                                     <li><a class="dropdown-item fs-xs" href="{{ route('influencers.show', $contact) }}"><i class="fal fa-user me-2"></i>View Profile</a></li>
-                                    @endif
-                                </ul>
-                            </div>
-                        </div>
-
-                        {{-- Type + role badge --}}
-                        <div class="d-flex flex-wrap gap-1">
-                            <span class="badge rounded-pill fs-xs fw-600 px-2"
-                                  style="background:{{ $tc['badge_bg'] }};color:{{ $tc['badge_text'] }};">
-                                {{ $typeLabel }}{{ $roleLabel ? ' · ' . $roleLabel : '' }}
-                            </span>
-                            @if($contact->portal_access)
-                                <span class="badge rounded-pill bg-info bg-opacity-15 text-info fs-xs fw-600 px-2">Portal</span>
-                            @endif
+                                @endif
+                            </ul>
                         </div>
                     </div>
                 </div>
 
-                {{-- Bio / headline --}}
-                <p class="text-muted mb-2" style="font-size:.8rem; min-height:2.4rem; line-height:1.5;">
-                    {{ $bio ?? 'Works at ' . $partnerName . '.' }}
-                </p>
+                {{-- Bio --}}
+                <p class="text-muted mb-2" style="font-size:.82rem; min-height:2.5rem;">{{ $bio }}</p>
 
-                {{-- View partner link --}}
-                <a href="{{ route('partners.show', $contact->partner_id) }}"
-                   class="view-profile-link" style="color:{{ $tc['link'] }};">
-                    {{ $partnerName }} <i class="fal fa-arrow-right ms-1" style="font-size:.7rem;"></i>
+                {{-- Partner link --}}
+                <a href="{{ route('partners.show', $contact->partner_id) }}" class="d-inline-flex align-items-center gap-1 fw-600 text-primary text-decoration-none" style="font-size:.82rem;">
+                    {{ $partnerName }} <i class="fal fa-arrow-right" style="font-size:.75rem;"></i>
                 </a>
             </div>
 
             {{-- Stats footer --}}
-            <div class="card-footer bg-transparent border-top py-2 px-0">
-                <div class="row g-0 text-center">
-                    <div class="col border-end">
-                        <span class="contact-stat-label">Projects</span>
-                        <span class="contact-stat-value d-block">{{ $contact->projects_count }}</span>
+            <div class="card-footer bg-transparent">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="text-muted fs-xs mb-1">PROJECTS</div>
+                        <div class="fw-bold">{{ $contact->projects_count }}</div>
                     </div>
-                    <div class="col border-end">
-                        <span class="contact-stat-label">Certs</span>
-                        <span class="contact-stat-value d-block">{{ $contact->certifications_count }}</span>
+                    <div class="col-4">
+                        <div class="text-muted fs-xs mb-1">CERTS</div>
+                        <div class="fw-bold">{{ $contact->certifications_count }}</div>
                     </div>
-                    <div class="col">
-                        <span class="contact-stat-label">Interactions</span>
-                        <span class="contact-stat-value d-block">{{ $contact->interactions_count }}</span>
+                    <div class="col-4">
+                        <div class="text-muted fs-xs mb-1">INTERACTIONS</div>
+                        <div class="fw-bold">{{ $contact->interactions_count }}</div>
                     </div>
                 </div>
             </div>
