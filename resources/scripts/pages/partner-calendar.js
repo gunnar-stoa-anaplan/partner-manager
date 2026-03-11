@@ -3,7 +3,7 @@
  * Partner Manager
  */
 
-import bootstrap from 'bootstrap/dist/js/bootstrap.min';
+
 import { Calendar } from '@fullcalendar/core';
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -16,8 +16,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ─── DOM References ────────────────────────────────────────
     const calendarEl = document.getElementById('calendar');
-    const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
-    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const eventModal = new window.bootstrap.Modal(document.getElementById('eventModal'));
+    const deleteModal = new window.bootstrap.Modal(document.getElementById('deleteModal'));
     const eventForm = document.getElementById('eventForm');
     const addEventBtn = document.getElementById('addEventBtn');
 
@@ -722,7 +722,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         `);
         const toastEl = document.getElementById(id);
-        const bsToast = new bootstrap.Toast(toastEl, { delay: 3000 });
+        const bsToast = new window.bootstrap.Toast(toastEl, { delay: 3000 });
         bsToast.show();
         toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
     }

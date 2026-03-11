@@ -14,6 +14,8 @@
     <div class="dropdown d-inline-flex align-items-center" id="dev-switcher">
         <button type="button" id="dev-switcher-toggle"
                 class="btn btn-sm fw-bold border d-flex align-items-center gap-1 px-2 py-1"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="true"
                 aria-expanded="false"
                 style="font-size: 11px; background: {{ $isImpersonating ? '#fff3cd' : '#e8f5e9' }}; border-color: {{ $isImpersonating ? '#ffc107' : '#81c784' }};">
             <svg class="sa-icon" style="width: 14px; height: 14px;">
@@ -71,17 +73,6 @@
         </div>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var toggle = document.getElementById('dev-switcher-toggle');
-        if (!toggle || typeof bootstrap === 'undefined') return;
-        new bootstrap.Dropdown(toggle, {
-            popperConfig: function(defaultConfig) {
-                defaultConfig.strategy = 'fixed';
-                return defaultConfig;
-            }
-        });
-    });
-    </script>
+
 @endif
 @endauth

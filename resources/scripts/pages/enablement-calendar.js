@@ -4,7 +4,6 @@
  * Partner Manager
  */
 
-import bootstrap from 'bootstrap/dist/js/bootstrap.min';
 import { Calendar } from '@fullcalendar/core';
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -248,7 +247,7 @@ function initEnablementCalendar() {
 
     // ─── Admin: Geo Selection Modal Helper ──────────────────────
     var geoSelectModalEl = document.getElementById('geoSelectModal');
-    var geoSelectModal = geoSelectModalEl ? new bootstrap.Modal(geoSelectModalEl) : null;
+    var geoSelectModal = geoSelectModalEl ? new window.bootstrap.Modal(geoSelectModalEl) : null;
     var pendingEventInfo = null;
 
     function showGeoSelectAndCreate(info) {
@@ -547,8 +546,8 @@ function initEnablementCalendar() {
     if (mode === 'psm') {
         var detailModalEl = document.getElementById('sessionDetailModal');
         var nominationModalEl = document.getElementById('nominationModal');
-        if (detailModalEl) sessionDetailModal = new bootstrap.Modal(detailModalEl);
-        if (nominationModalEl) nominationModal = new bootstrap.Modal(nominationModalEl);
+        if (detailModalEl) sessionDetailModal = new window.bootstrap.Modal(detailModalEl);
+        if (nominationModalEl) nominationModal = new window.bootstrap.Modal(nominationModalEl);
     }
 
     function openSessionDetail(sessionId) {
@@ -819,7 +818,7 @@ function initEnablementCalendar() {
 
     if (mode === 'partner') {
         var assignModalEl = document.getElementById(ids.modal);
-        if (assignModalEl) contactAssignModal = new bootstrap.Modal(assignModalEl);
+        if (assignModalEl) contactAssignModal = new window.bootstrap.Modal(assignModalEl);
     }
 
     function openContactAssignModal(fcEvent) {

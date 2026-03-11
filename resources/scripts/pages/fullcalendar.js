@@ -4,7 +4,7 @@
  */
 
 
-import bootstrap from 'bootstrap/dist/js/bootstrap.min';
+
 import {Calendar} from '@fullcalendar/core';
 import {Draggable} from '@fullcalendar/interaction';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -219,9 +219,9 @@ const eventCategories = [
 // Initialize calendar after all scripts are loaded
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize event modals
-    const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
-    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    const categoryModal = new bootstrap.Modal(document.getElementById('categoryModal'));
+    const eventModal = new window.bootstrap.Modal(document.getElementById('eventModal'));
+    const deleteModal = new window.bootstrap.Modal(document.getElementById('deleteModal'));
+    const categoryModal = new window.bootstrap.Modal(document.getElementById('categoryModal'));
 
     // Form element references
     const eventForm = document.getElementById('eventForm');
@@ -450,7 +450,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 // Initialize Bootstrap tooltip
-                new bootstrap.Tooltip(info.el, {
+                new window.bootstrap.Tooltip(info.el, {
                     title: tooltipContent.outerHTML,
                     placement: 'top',
                     trigger: 'hover',
