@@ -114,14 +114,14 @@
 
                 {{-- Avatar + name + menu --}}
                 <div class="d-flex align-items-center mb-4">
-                    <div class="me-3 position-relative">
+                    <div class="me-3 position-relative flex-shrink-0" style="width:72px;height:72px;">
                         @if($contact->linkedin_image_url)
-                            <img src="{{ $contact->linkedin_image_url }}" alt="" class="rounded-circle" width="72" height="72" style="object-fit:cover;">
+                            <img src="{{ $contact->linkedin_image_url }}" alt="" class="rounded-circle w-100 h-100" style="object-fit:cover;">
                         @elseif($contact->avatar)
-                            <img src="{{ asset($contact->avatar) }}" alt="" class="rounded-circle" width="72" height="72" style="object-fit:cover;">
+                            <img src="{{ asset($contact->avatar) }}" alt="" class="rounded-circle w-100 h-100" style="object-fit:cover;">
                         @else
-                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-700"
-                                 style="width:72px;height:72px;background:{{ $avatarBg }};font-size:1.4rem;flex-shrink:0;">
+                            <div class="rounded-circle w-100 h-100 d-flex align-items-center justify-content-center text-white fw-700"
+                                 style="background:{{ $avatarBg }};font-size:1.4rem;">
                                 {{ $initials }}
                             </div>
                         @endif
