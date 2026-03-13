@@ -252,6 +252,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/objectives', [PrioritiesController::class, 'storeObjective'])->name('objectives.store');
         Route::patch('/objectives/{objective}', [PrioritiesController::class, 'updateObjective'])->name('objectives.update');
+        Route::delete('/objectives/{objective}', [PrioritiesController::class, 'destroyObjective'])->name('objectives.destroy');
+        Route::post('/objectives/reorder', [PrioritiesController::class, 'reorderObjectives'])->name('objectives.reorder');
 
         Route::post('/weekly/items', [PrioritiesController::class, 'storeActionItem'])->name('items.store');
         Route::patch('/weekly/items/{item}', [PrioritiesController::class, 'updateActionItem'])->name('items.update');

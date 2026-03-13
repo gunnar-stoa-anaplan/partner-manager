@@ -170,6 +170,12 @@ class PrioritiesController extends Controller
             'current_value' => ['sometimes', 'numeric', 'min:0'],
             'title' => ['sometimes', 'string', 'max:255'],
             'description' => ['sometimes', 'nullable', 'string', 'max:1000'],
+            'category' => ['sometimes', 'string', 'in:delivery,pipeline,enablement,certification,general'],
+            'metric_type' => ['sometimes', 'string', 'in:resources_registered,certifications,pipeline_value,opportunity_count,projects_delivered,manual'],
+            'target_value' => ['sometimes', 'numeric', 'min:0.01'],
+            'target_date' => ['sometimes', 'date', 'after:today'],
+            'partner_id' => ['sometimes', 'exists:partners,id'],
+            'priority' => ['sometimes', 'integer', 'min:0'],
         ]);
 
         if (isset($validated['status']) && $validated['status'] === 'completed') {
@@ -179,6 +185,48 @@ class PrioritiesController extends Controller
         $objective->update($validated);
 
         return redirect()->back()->with('success', 'Objective updated.');
+    }
+
+    /**
+     * Reorder objectives via AJAX (drag-and-drop).
+     */
+    public function reorderObjectives(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:psm_objectives,id'],
+        ]);
+
+        $user = auth()->user();
+
+        foreach ($validated['ids'] as $index => $id) {
+            PsmObjective::where('id', $id)
+                ->where(function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                    if ($user->bypassesPermissions()) {
+                        $q->orWhereRaw('1=1');
+                    }
+                })
+                ->update(['priority' => $index + 1]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Delete an objective.
+     */
+    public function destroyObjective(PsmObjective $objective): RedirectResponse
+    {
+        $user = auth()->user();
+
+        if ($objective->user_id !== $user->id && ! $user->bypassesPermissions()) {
+            abort(403);
+        }
+
+        $objective->delete();
+
+        return redirect()->back()->with('success', 'Objective deleted.');
     }
 
     /**

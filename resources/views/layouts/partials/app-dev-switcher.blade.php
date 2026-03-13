@@ -11,7 +11,7 @@
         $isImpersonating = session('impersonating_user');
     @endphp
 
-    <div class="dropdown d-inline-flex align-items-center" id="dev-switcher">
+    <div class="position-relative d-inline-flex align-items-center" id="dev-switcher">
         <button type="button" id="dev-switcher-toggle"
                 class="btn btn-sm fw-bold border d-flex align-items-center gap-1 px-2 py-1"
                 data-bs-toggle="dropdown"
@@ -24,7 +24,8 @@
             <span class="text-uppercase">{{ $currentRole }}</span>
         </button>
 
-        <div class="dropdown-menu dropdown-menu-end shadow" id="dev-switcher-menu" style="min-width: 240px; max-height: 80vh; overflow-y: auto;">
+        <div class="dropdown-menu dropdown-menu-end shadow" id="dev-switcher-menu"
+             style="min-width: 240px; max-height: 80vh; overflow-y: auto; position: absolute; top: 100%; right: 0; z-index: 9999;">
             <div class="px-3 py-1">
                 <small class="text-muted fw-bold text-uppercase" style="font-size: 10px;">Dev Role Switcher</small>
             </div>
@@ -73,6 +74,27 @@
         </div>
     </div>
 
+    <script>
+    (function() {
+        var toggle = document.getElementById('dev-switcher-toggle');
+        var menu = document.getElementById('dev-switcher-menu');
+        if (!toggle || !menu) return;
+
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var isOpen = menu.classList.contains('show');
+            menu.classList.toggle('show');
+            toggle.setAttribute('aria-expanded', !isOpen);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.remove('show');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    })();
+    </script>
 
 @endif
 @endauth

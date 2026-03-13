@@ -164,6 +164,43 @@ class EnablementGoalService
     }
 
     /**
+     * Compute waterfall breakdown for the Enablement Trends chart.
+     *
+     * @return array{labels: string[], values: int[], colors: string[]}
+     */
+    public function waterfallBreakdown(Collection|array $partnerIds, ?string $snapshotDate = null): array
+    {
+        if (! $snapshotDate) {
+            $snapshotDate = ResourceSnapshot::whereIn('partner_id', $partnerIds)
+                ->max('snapshot_date');
+        }
+
+        if (! $snapshotDate) {
+            return ['labels' => [], 'values' => [], 'colors' => []];
+        }
+
+        $rows = ResourceSnapshot::whereIn('partner_id', $partnerIds)
+            ->where('snapshot_date', $snapshotDate)
+            ->get(['role', 'total_count', 'completed_count']);
+
+        $byRole = $rows->groupBy('role');
+
+        $salesEnabled = (int) ($byRole['Sales'] ?? collect())->sum('completed_count');
+        $preSalesEnabled = (int) ($byRole['Pre-Sales'] ?? collect())->sum('completed_count');
+        $deliveryCompleted = (int) ($byRole['Delivery'] ?? collect())->sum('completed_count');
+        $deliveryTotal = (int) ($byRole['Delivery'] ?? collect())->sum('total_count');
+        $deliveryInProgress = $deliveryTotal - $deliveryCompleted;
+        $totalPractice = (int) $rows->sum('total_count');
+        $notEnabled = $totalPractice - $salesEnabled - $preSalesEnabled - $deliveryTotal;
+
+        return [
+            'labels' => ["Sales\nEnabled", "Pre-Sales\nEnabled", "Delivery\nCompleted", "Delivery\nIn-Progress", "Not\nEnabled", "Total\nPractice"],
+            'values' => [$salesEnabled, $preSalesEnabled, $deliveryCompleted, $deliveryInProgress, max(0, $notEnabled), $totalPractice],
+            'colors' => ['#1b2a4a', '#1b2a4a', '#1b2a4a', '#e8803a', '#f5d5b8', '#e8803a'],
+        ];
+    }
+
+    /**
      * @return array<string, int>
      */
     private function emptyCategoryMap(): array

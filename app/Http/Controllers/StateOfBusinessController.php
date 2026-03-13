@@ -130,6 +130,8 @@ class StateOfBusinessController extends Controller
         }
         $data['sobObjectives'] = $objectivesQuery
             ->orderByRaw("FIELD(status, 'active', 'completed', 'missed', 'cancelled')")
+            ->orderByRaw('CASE WHEN priority > 0 THEN 0 ELSE 1 END')
+            ->orderBy('priority')
             ->orderBy('target_date')
             ->get();
 
@@ -174,6 +176,7 @@ class StateOfBusinessController extends Controller
         $data['enablementGoalGroups'] = EnablementGoal::groups();
         $data['goalPartners'] = $allPartners->whereIn('id', $goalPartnerIds)->keyBy('id');
         $data['enablementTrends'] = $this->goalService->historicalActuals($goalPartnerIds);
+        $data['enablementWaterfall'] = $this->goalService->waterfallBreakdown($goalPartnerIds, $latestSnapshot);
 
         return view('state-of-business.index', $data);
     }

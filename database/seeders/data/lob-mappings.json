@@ -1,0 +1,48 @@
+{
+    "valid_lobs": [
+        "Finance",
+        "Supply Chain",
+        "Sales and Marketing",
+        "HR & Workforce",
+        "HR",
+        "Workforce",
+        "Platform"
+    ],
+    "lob_to_product_area": {
+        "Finance": "Finance",
+        "Supply Chain": "Supply Chain",
+        "Sales and Marketing": "Sales",
+        "HR": "Workforce",
+        "HR & Workforce": "Workforce",
+        "Workforce": "Workforce",
+        "Platform": "Platform",
+        "Other": "Platform"
+    },
+    "pf_to_lob": {
+        "FCR": "Finance",
+        "Finance (non-FCR)": "Finance",
+        "AXL": "Finance",
+        "Ecosystem App - Finance": "Finance",
+        "SCM": "Supply Chain",
+        "Syrup": "Supply Chain",
+        "Ecosystem App - Supply Chain": "Supply Chain",
+        "SPM": "Sales and Marketing",
+        "WFP": "HR & Workforce"
+    },
+    "pn_to_lob": {
+        "Integrated Financial Planning": "Finance",
+        "Financial Planning": "Finance",
+        "Disclosure Management": "Finance",
+        "Merchandise Financial Planning": "Finance",
+        "Demand Planning": "Supply Chain",
+        "Inventory Planning": "Supply Chain",
+        "Production Planning": "Supply Chain",
+        "Trade Promotion Management": "Sales and Marketing",
+        "Territory & Quota Planning": "Sales and Marketing",
+        "Go-to-Market": "Sales and Marketing",
+        "Account Segmentation": "Sales and Marketing",
+        "Operational Workforce Planning": "HR & Workforce",
+        "Contact Center Planning": "HR & Workforce"
+    },
+    "pf_ignore": ["Platform", "AI", "Support"]
+}
