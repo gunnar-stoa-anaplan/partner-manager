@@ -171,7 +171,7 @@ class PrioritiesController extends Controller
             'title' => ['sometimes', 'string', 'max:255'],
             'description' => ['sometimes', 'nullable', 'string', 'max:1000'],
             'category' => ['sometimes', 'string', 'in:delivery,pipeline,enablement,certification,general'],
-            'metric_type' => ['sometimes', 'string', 'in:resources_registered,certifications,pipeline_value,opportunity_count,projects_delivered,manual'],
+            'metric_type' => ['sometimes', 'string', 'in:' . implode(',', array_keys(PsmObjective::METRIC_TYPES))],
             'target_value' => ['sometimes', 'numeric', 'min:0.01'],
             'target_date' => ['sometimes', 'date', 'after:today'],
             'partner_id' => ['sometimes', 'exists:partners,id'],
@@ -189,25 +189,34 @@ class PrioritiesController extends Controller
 
     /**
      * Reorder objectives via AJAX (drag-and-drop).
+     *
+     * Accepts a map of priority tiers to ordered ID arrays:
+     * { "groups": { "1": [id, id], "2": [id], "3": [id] } }
      */
     public function reorderObjectives(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
-            'ids' => ['required', 'array'],
-            'ids.*' => ['integer', 'exists:psm_objectives,id'],
+            'groups' => ['required', 'array'],
+            'groups.*' => ['array'],
+            'groups.*.*' => ['integer', 'exists:psm_objectives,id'],
         ]);
 
         $user = auth()->user();
 
-        foreach ($validated['ids'] as $index => $id) {
-            PsmObjective::where('id', $id)
-                ->where(function ($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                    if ($user->bypassesPermissions()) {
-                        $q->orWhereRaw('1=1');
-                    }
-                })
-                ->update(['priority' => $index + 1]);
+        foreach ($validated['groups'] as $priority => $ids) {
+            foreach ($ids as $sortOrder => $id) {
+                PsmObjective::where('id', $id)
+                    ->where(function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                        if ($user->bypassesPermissions()) {
+                            $q->orWhereRaw('1=1');
+                        }
+                    })
+                    ->update([
+                        'priority' => (int) $priority,
+                        'sort_order' => $sortOrder,
+                    ]);
+            }
         }
 
         return response()->json(['success' => true]);

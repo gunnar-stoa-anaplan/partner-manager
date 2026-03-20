@@ -1025,13 +1025,15 @@
     <div class="col-xl-12">
         <div id="panel-priorities" class="panel panel-icon panel-collapsed">
             <div class="panel-hdr">
-                <h2><i class="fal fa-bullseye-arrow me-2"></i> Priorities <span class="fw-light"><i>& Actions</i></span></h2>
+                <h2><i class="fal fa-bullseye-arrow me-2"></i> Key Objectives</h2>
                 <div class="panel-toolbar">
-                    <button type="button" class="btn btn-xs btn-outline-primary me-2" id="priorities-new-objective-btn">
-                        <i class="fal fa-plus me-1"></i> New Objective
-                    </button>
                     <button class="btn btn-panel waves-effect waves-themed" data-action="panel-collapse" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Toggle">
                         <svg class="sa-icon"><use class="panel-collapsed-icon" href="/img/sprite.svg#minus-circle"></use><use class="panel-expand-icon" href="/img/sprite.svg#plus-circle"></use></svg>
+                    </button>
+                    <button class="btn btn-panel" data-action="panel-fullscreen" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-offset="0,10" data-bs-original-title="Fullscreen" type="button">
+                        <svg class="sa-icon">
+                            <use href="/icons/sprite.svg#stop-circle"></use>
+                        </svg>
                     </button>
                 </div>
             </div>
@@ -1046,153 +1048,132 @@
                     @else
                     <div class="row">
                         {{-- Objectives --}}
-                        <div class="{{ ($sobActionItems ?? collect())->count() > 0 ? 'col-xl-7' : 'col-12' }} mb-3 mb-xl-0">
-                            <h6 class="fw-700 text-uppercase fs-xs text-muted mb-3">
-                                <i class="fal fa-bullseye-arrow me-1"></i> My Objectives
-                                <span class="badge bg-primary text-white ms-1">{{ ($sobObjectives ?? collect())->count() }}</span>
-                            </h6>
-                            <div id="objectives-sortable-list">
-                            @forelse($sobObjectives ?? collect() as $obj)
-                                @php
-                                    $progress = $obj->progressPercentage();
-                                    $progressColor = match(true) {
-                                        $obj->status === 'completed' => 'success',
-                                        $obj->status === 'cancelled' => 'secondary',
-                                        $obj->status === 'missed' => 'danger',
-                                        $progress >= 75 => 'success',
-                                        $progress >= 40 => 'primary',
-                                        $progress >= 15 => 'warning',
-                                        default => 'danger',
-                                    };
-                                    $isOverdue = $obj->isOverdue();
-                                    $categoryColor = PsmObjective::CATEGORY_COLORS[$obj->category] ?? 'secondary';
-                                    $statusColor = PsmObjective::STATUS_COLORS[$obj->status] ?? 'secondary';
-                                    $isActive = $obj->status === 'active';
-                                @endphp
-                                <div class="card border shadow-0 mb-2 {{ !$isActive ? 'opacity-75' : '' }} objective-sortable-item" data-objective-id="{{ $obj->id }}">
-                                    <div class="card-body py-2 px-3">
-                                        <div class="d-flex align-items-start justify-content-between">
-                                            <div class="d-flex align-items-center me-2 objective-drag-handle" style="cursor: grab; opacity: 0.4;" title="Drag to reorder">
-                                                <i class="fal fa-grip-vertical"></i>
-                                            </div>
-                                            <div class="flex-grow-1 me-3">
-                                                <div class="d-flex align-items-center gap-2 mb-1">
-                                                    @if($obj->priority > 0)
-                                                        <span class="badge bg-dark text-white" style="min-width: 22px;">P{{ $obj->priority }}</span>
-                                                    @endif
-                                                    <span class="badge bg-{{ $statusColor }} text-white">{{ ucfirst($obj->status) }}</span>
-                                                    <span class="badge bg-{{ $categoryColor }} text-white">{{ ucfirst($obj->category) }}</span>
-                                                    <span class="fw-500">{{ $obj->title }}</span>
-                                                    @if($obj->partner)
-                                                        <span class="text-muted small">· {{ $obj->partner->name }}</span>
-                                                    @endif
-                                                </div>
-                                                @if($obj->description)
-                                                    <p class="mb-1 small text-muted">{{ Str::limit($obj->description, 120) }}</p>
-                                                @endif
-                                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                                    <div class="progress flex-grow-1" style="height: 6px; max-width: 200px;">
-                                                        <div class="progress-bar bg-{{ $progressColor }}" style="width: {{ $progress }}%"></div>
+                        <div class="col-12 mb-3">
+                            @php
+                                $allObjs = $sobObjectives ?? collect();
+                                $objsByCategory = $allObjs->groupBy('category');
+                            @endphp
+                            <div class="d-flex align-items-center flex-wrap gap-2 mb-3" id="objective-filters">
+                                <small class="text-muted fw-700 text-uppercase me-1">Filter:</small>
+                                <button type="button" class="btn btn-xs btn-outline-secondary obj-filter-btn active" data-filter="all">
+                                    All <span class="badge bg-secondary bg-opacity-25 text-secondary ms-1">{{ $allObjs->count() }}</span>
+                                </button>
+                                <span class="text-muted opacity-50">|</span>
+                                @foreach($objsByCategory as $cat => $group)
+                                    <button type="button" class="btn btn-xs btn-outline-{{ \App\Models\PsmObjective::CATEGORY_COLORS[$cat] ?? 'secondary' }} obj-filter-btn" data-filter="category" data-value="{{ $cat }}">
+                                        {{ ucfirst($cat) }} <span class="badge bg-{{ \App\Models\PsmObjective::CATEGORY_COLORS[$cat] ?? 'secondary' }} bg-opacity-25 ms-1">{{ $group->count() }}</span>
+                                    </button>
+                                @endforeach
+                                <span class="ms-auto"></span>
+                                <button type="button" class="btn btn-xs btn-outline-primary" id="priorities-new-objective-btn">
+                                    <i class="fal fa-plus me-1"></i> New Objective
+                                </button>
+                            </div>
+
+                            <div id="objectives-grouped-list">
+                            @php
+                                $rawGrouped = $allObjs->groupBy(fn ($o) => $o->priority > 0 && $o->priority <= 3 ? $o->priority : 0);
+                                $groupedObjs = collect([1 => collect(), 2 => collect(), 3 => collect(), 0 => collect()])
+                                    ->map(fn ($default, $key) => $rawGrouped->get($key, $default));
+                            @endphp
+                            @foreach($groupedObjs as $tier => $tierObjs)
+                                <div class="objective-priority-group mb-3" data-priority-tier="{{ $tier }}">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        @if($tier > 0)
+                                            @php $tierColor = PsmObjective::PRIORITY_COLORS[$tier] ?? 'secondary'; @endphp
+                                            <span class="badge bg-{{ $tierColor }} text-white px-2">{{ PsmObjective::PRIORITIES[$tier] ?? 'Unknown' }}</span>
+                                            <small class="text-muted fw-500">{{ $tierObjs->count() }} {{ Str::plural('objective', $tierObjs->count()) }}</small>
+                                        @else
+                                            <span class="badge bg-secondary text-white px-2">Unprioritized</span>
+                                            <small class="text-muted fw-500">{{ $tierObjs->count() }} {{ Str::plural('objective', $tierObjs->count()) }}</small>
+                                        @endif
+                                    </div>
+                                    <div class="objective-drop-zone" data-priority="{{ $tier }}" style="min-height: 20px;">
+                                    @foreach($tierObjs as $obj)
+                                        @php
+                                            $progress = $obj->progressPercentage();
+                                            $progressColor = match(true) {
+                                                $progress >= 75 => 'success',
+                                                $progress >= 40 => 'primary',
+                                                $progress >= 15 => 'warning',
+                                                default => 'danger',
+                                            };
+                                            $isOverdue = $obj->isOverdue();
+                                            $categoryColor = PsmObjective::CATEGORY_COLORS[$obj->category] ?? 'secondary';
+                                        @endphp
+                                        <div class="card border shadow-0 mb-2 objective-item" data-objective-id="{{ $obj->id }}" data-category="{{ $obj->category }}" data-priority="{{ $obj->priority }}">
+                                            <div class="card-body py-2 px-3">
+                                                {{-- Row 1: drag handle, title line, actions --}}
+                                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                                    <div class="d-flex align-items-center flex-grow-1 me-2">
+                                                        <div class="me-2 objective-drag-handle" style="cursor: grab; opacity: 0.4;" title="Drag to reorder or change priority">
+                                                            <i class="fal fa-grip-vertical"></i>
+                                                        </div>
+                                                        <span class="badge bg-{{ $categoryColor }} text-white me-2">{{ ucfirst($obj->category) }}</span>
+                                                        <span class="fw-500">{{ $obj->title }}</span>
+                                                        @if($obj->partner)
+                                                            <span class="text-muted small ms-1">· {{ $obj->partner->name }}</span>
+                                                        @endif
                                                     </div>
-                                                    <span class="small fw-500 text-{{ $progressColor }}">{{ $progress }}%</span>
-                                                    <span class="small text-muted">{{ (int) $obj->current_value }}/{{ (int) $obj->target_value }} {{ PsmObjective::METRIC_TYPES[$obj->metric_type] ?? '' }}</span>
-                                                    @if($isActive)
-                                                        {{-- Inline progress update --}}
-                                                        <form method="POST" action="{{ route('priorities.objectives.update', $obj) }}" class="d-inline-flex align-items-center gap-1 ms-2">
-                                                            @csrf
-                                                            @method('PATCH')
-                                                            <input type="number" name="current_value" class="form-control form-control-sm" style="width: 70px; height: 24px; font-size: 11px;" value="{{ (int) $obj->current_value }}" min="0" step="1">
-                                                            <button type="submit" class="btn btn-xs btn-outline-primary" style="height: 24px; padding: 0 6px;" title="Update progress"><i class="fal fa-save" style="font-size: 10px;"></i></button>
-                                                        </form>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <div class="text-end flex-shrink-0">
-                                                <small class="text-muted d-block">Created {{ $obj->created_at->format('M j') }}</small>
-                                                <small class="text-muted d-block">Due {{ $obj->target_date->format('M j') }}</small>
-                                                @if($isOverdue)
-                                                    <span class="badge bg-danger bg-opacity-15 text-danger">Overdue</span>
-                                                @endif
-                                                <div class="d-flex gap-1 mt-1 justify-content-end">
-                                                    @if($isActive)
+                                                    <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                                        <small class="text-muted me-2">Due {{ $obj->target_date->format('M j') }}</small>
+                                                        @if($isOverdue)
+                                                            <span class="badge bg-danger bg-opacity-15 text-danger me-1">Overdue</span>
+                                                        @endif
                                                         <form method="POST" action="{{ route('priorities.objectives.update', $obj) }}" class="d-inline">
                                                             @csrf
                                                             @method('PATCH')
                                                             <input type="hidden" name="status" value="completed">
                                                             <button type="submit" class="btn btn-xs btn-outline-success" title="Mark completed"><i class="fal fa-check me-1"></i>Done</button>
                                                         </form>
-                                                    @endif
-                                                    <button type="button" class="btn btn-xs btn-outline-primary edit-objective-btn" title="Edit"
-                                                        data-obj-id="{{ $obj->id }}"
-                                                        data-obj-title="{{ $obj->title }}"
-                                                        data-obj-description="{{ $obj->description }}"
-                                                        data-obj-category="{{ $obj->category }}"
-                                                        data-obj-metric-type="{{ $obj->metric_type }}"
-                                                        data-obj-target-value="{{ $obj->target_value }}"
-                                                        data-obj-target-date="{{ $obj->target_date->format('Y-m-d') }}"
-                                                        data-obj-partner-id="{{ $obj->partner_id }}"
-                                                        data-obj-status="{{ $obj->status }}"
-                                                        data-obj-priority="{{ $obj->priority }}">
-                                                        <i class="fal fa-pencil"></i>
-                                                    </button>
-                                                    <form method="POST" action="{{ route('priorities.objectives.destroy', $obj) }}" class="d-inline delete-objective-form">
+                                                        <button type="button" class="btn btn-xs btn-outline-primary edit-objective-btn" title="Edit"
+                                                            data-obj-id="{{ $obj->id }}"
+                                                            data-obj-title="{{ $obj->title }}"
+                                                            data-obj-description="{{ $obj->description }}"
+                                                            data-obj-category="{{ $obj->category }}"
+                                                            data-obj-metric-type="{{ $obj->metric_type }}"
+                                                            data-obj-target-value="{{ (int) $obj->target_value }}"
+                                                            data-obj-target-date="{{ $obj->target_date->format('Y-m-d') }}"
+                                                            data-obj-partner-id="{{ $obj->partner_id }}"
+                                                            data-obj-status="{{ $obj->status }}"
+                                                            data-obj-priority="{{ $obj->priority }}">
+                                                            <i class="fal fa-pencil"></i>
+                                                        </button>
+                                                        <form method="POST" action="{{ route('priorities.objectives.destroy', $obj) }}" class="d-inline delete-objective-form">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-xs btn-outline-danger" title="Delete"><i class="fal fa-trash"></i></button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                {{-- Row 2: description — kept clear of the right-side buttons --}}
+                                                @if($obj->description)
+                                                    <p class="mb-1 small text-muted ps-4" style="max-width: calc(100% - 280px);">{{ $obj->description }}</p>
+                                                @endif
+                                                {{-- Row 3: progress bar + inline update --}}
+                                                <div class="d-flex align-items-center gap-2 ps-4" style="max-width: calc(100% - 280px);">
+                                                    <div class="progress flex-grow-1" style="height: 6px; max-width: 300px;">
+                                                        <div class="progress-bar bg-{{ $progressColor }}" style="width: {{ max(0, $progress) }}%"></div>
+                                                    </div>
+                                                    <span class="small fw-500 text-{{ $progressColor }}">{{ $progress }}%</span>
+                                                    <span class="small text-muted">{{ (int) $obj->current_value }}/{{ (int) $obj->target_value }} {{ PsmObjective::METRIC_TYPES[$obj->metric_type] ?? '' }}</span>
+                                                    <form method="POST" action="{{ route('priorities.objectives.update', $obj) }}" class="d-inline-flex align-items-center gap-1 ms-2">
                                                         @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-xs btn-outline-danger" title="Delete"><i class="fal fa-trash"></i></button>
+                                                        @method('PATCH')
+                                                        <input type="number" name="current_value" class="form-control form-control-sm" style="width: 70px; height: 24px; font-size: 11px;" value="{{ (int) $obj->current_value }}" min="0" step="1">
+                                                        <button type="submit" class="btn btn-xs btn-outline-primary" style="height: 24px; padding: 0 6px;" title="Update progress"><i class="fal fa-save" style="font-size: 10px;"></i></button>
                                                     </form>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            @empty
-                                <p class="text-muted small">No objectives yet.</p>
-                            @endforelse
-                            </div>
-                        </div>
-
-                        {{-- Action Items --}}
-                        @if(($sobActionItems ?? collect())->count() > 0)
-                        <div class="col-xl-5">
-                            <h6 class="fw-700 text-uppercase fs-xs text-muted mb-3">
-                                <i class="fal fa-tasks me-1"></i> Action Items
-                                <span class="badge bg-primary bg-opacity-15 text-primary ms-1">{{ $sobActionItems->count() }}</span>
-                            </h6>
-                            @foreach($sobActionItems as $item)
-                                @php
-                                    $statusColor = WeeklyFocusItem::STATUS_COLORS[$item->status] ?? 'secondary';
-                                    $isDone = in_array($item->status, ['completed', 'dropped']);
-                                @endphp
-                                <div class="d-flex align-items-start gap-2 mb-2 {{ $isDone ? 'opacity-50' : '' }}">
-                                    @if(!$isDone)
-                                        <form method="POST" action="{{ route('priorities.items.update', $item) }}" class="d-inline">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status" value="{{ $item->status === 'planned' ? 'in_progress' : 'completed' }}">
-                                            <button type="submit" class="btn btn-xs btn-outline-{{ $statusColor }} rounded-circle p-0" style="width:22px;height:22px;" title="Mark {{ $item->status === 'planned' ? 'in progress' : 'completed' }}">
-                                                @if($item->status === 'in_progress')
-                                                    <i class="fal fa-spinner-third fa-spin" style="font-size:10px;"></i>
-                                                @else
-                                                    <i class="fal fa-circle" style="font-size:8px;"></i>
-                                                @endif
-                                            </button>
-                                        </form>
-                                    @else
-                                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle border border-{{ $statusColor }}" style="width:22px;height:22px;">
-                                            <i class="fal fa-{{ $item->status === 'completed' ? 'check' : 'times' }} text-{{ $statusColor }}" style="font-size:10px;"></i>
-                                        </span>
-                                    @endif
-                                    <div>
-                                        <span class="small {{ $isDone ? 'text-decoration-line-through' : '' }}">{{ $item->description }}</span>
-                                        @if($item->partner)
-                                            <span class="text-muted small">· {{ $item->partner->name }}</span>
-                                        @endif
-                                        <span class="text-muted small d-block">Added {{ $item->created_at->format('M j') }} · <span class="badge bg-{{ $statusColor }} bg-opacity-15 text-{{ $statusColor }}">{{ ucfirst(str_replace('_', ' ', $item->status)) }}</span></span>
+                                    @endforeach
                                     </div>
                                 </div>
                             @endforeach
+                            </div>
                         </div>
-                        @endif
+
+                        {{-- Action items moved to separate panel below --}}
                     </div>
 
                     {{-- Manager View: Direct Reports' Objectives --}}
@@ -1259,6 +1240,59 @@
             </div>
         </div>
     </div>
+
+    {{-- Action Items — separate panel --}}
+    @if(($sobActionItems ?? collect())->count() > 0)
+    <div class="col-xl-12">
+        <div id="panel-action-items" class="panel panel-icon panel-collapsed">
+            <div class="panel-hdr">
+                <h2><i class="fal fa-tasks me-2"></i> Action Items <span class="fw-light"><i>({{ $sobActionItems->count() }})</i></span></h2>
+                <div class="panel-toolbar">
+                    <button class="btn btn-panel waves-effect waves-themed" data-action="panel-collapse" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Toggle">
+                        <svg class="sa-icon"><use class="panel-collapsed-icon" href="/img/sprite.svg#minus-circle"></use><use class="panel-expand-icon" href="/img/sprite.svg#plus-circle"></use></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="panel-container show">
+                <div class="panel-content">
+                    @foreach($sobActionItems as $item)
+                        @php
+                            $statusColor = WeeklyFocusItem::STATUS_COLORS[$item->status] ?? 'secondary';
+                            $isDone = in_array($item->status, ['completed', 'dropped']);
+                        @endphp
+                        <div class="d-flex align-items-start gap-2 mb-2 {{ $isDone ? 'opacity-50' : '' }}">
+                            @if(!$isDone)
+                                <form method="POST" action="{{ route('priorities.items.update', $item) }}" class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="{{ $item->status === 'planned' ? 'in_progress' : 'completed' }}">
+                                    <button type="submit" class="btn btn-xs btn-outline-{{ $statusColor }} rounded-circle p-0" style="width:22px;height:22px;" title="Mark {{ $item->status === 'planned' ? 'in progress' : 'completed' }}">
+                                        @if($item->status === 'in_progress')
+                                            <i class="fal fa-spinner-third fa-spin" style="font-size:10px;"></i>
+                                        @else
+                                            <i class="fal fa-circle" style="font-size:8px;"></i>
+                                        @endif
+                                    </button>
+                                </form>
+                            @else
+                                <span class="d-inline-flex align-items-center justify-content-center rounded-circle border border-{{ $statusColor }}" style="width:22px;height:22px;">
+                                    <i class="fal fa-{{ $item->status === 'completed' ? 'check' : 'times' }} text-{{ $statusColor }}" style="font-size:10px;"></i>
+                                </span>
+                            @endif
+                            <div>
+                                <span class="small {{ $isDone ? 'text-decoration-line-through' : '' }}">{{ $item->description }}</span>
+                                @if($item->partner)
+                                    <span class="text-muted small">· {{ $item->partner->name }}</span>
+                                @endif
+                                <span class="text-muted small d-block">Added {{ $item->created_at->format('M j') }} · <span class="badge bg-{{ $statusColor }} bg-opacity-15 text-{{ $statusColor }}">{{ ucfirst(str_replace('_', ' ', $item->status)) }}</span></span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     {{-- Enablement Calendar (single-partner view only) --}}
     @if($selectedPartnerId ?? false)
@@ -1791,17 +1825,14 @@
                                 <div class="col-md-4">
                                     <label class="form-label fw-500">Metric Type</label>
                                     <select name="metric_type" class="form-select" id="action-metric-type">
-                                        <option value="resources_registered">Resources Registered</option>
-                                        <option value="certifications">Certifications</option>
-                                        <option value="pipeline_value">Pipeline Value</option>
-                                        <option value="opportunity_count">Opportunity Count</option>
-                                        <option value="projects_delivered">Projects Delivered</option>
-                                        <option value="manual">Manual</option>
+                                        @foreach(\App\Models\PsmObjective::METRIC_TYPES as $value => $label)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-500">Target Value <span class="text-danger">*</span></label>
-                                    <input type="number" name="target_value" class="form-control" id="action-target-value" required min="0.01" step="0.01">
+                                    <input type="number" name="target_value" class="form-control" id="action-target-value" required min="1" step="1">
                                 </div>
                             </div>
                             <input type="hidden" name="source_signal" id="action-source-signal" value="">
@@ -1884,43 +1915,42 @@
                             <label class="form-label fw-500">Description</label>
                             <textarea name="description" class="form-control" id="edit-obj-description" rows="2" maxlength="1000"></textarea>
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label fw-500">Priority</label>
-                            <input type="number" name="priority" class="form-control" id="edit-obj-priority" min="0" step="1" placeholder="0">
-                        </div>
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="form-label fw-500">Status</label>
                             <select name="status" class="form-select" id="edit-obj-status">
-                                <option value="active">Active</option>
-                                <option value="completed">Completed</option>
-                                <option value="missed">Missed</option>
-                                <option value="cancelled">Cancelled</option>
+                                @foreach(\App\Models\PsmObjective::STATUSES as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="form-label fw-500">Category</label>
                             <select name="category" class="form-select" id="edit-obj-category">
-                                <option value="delivery">Delivery</option>
-                                <option value="pipeline">Pipeline</option>
-                                <option value="enablement">Enablement</option>
-                                <option value="certification">Certification</option>
-                                <option value="general">General</option>
+                                @foreach(\App\Models\PsmObjective::CATEGORIES as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="form-label fw-500">Metric Type</label>
                             <select name="metric_type" class="form-select" id="edit-obj-metric-type">
-                                <option value="resources_registered">Resources Registered</option>
-                                <option value="certifications">Certifications</option>
-                                <option value="pipeline_value">Pipeline Value</option>
-                                <option value="opportunity_count">Opportunity Count</option>
-                                <option value="projects_delivered">Projects Delivered</option>
-                                <option value="manual">Manual</option>
+                                @foreach(\App\Models\PsmObjective::METRIC_TYPES as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-4">
+                            <label class="form-label fw-500">Priority</label>
+                            <select name="priority" class="form-select" id="edit-obj-priority">
+                                <option value="0">— None —</option>
+                                @foreach(\App\Models\PsmObjective::PRIORITIES as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label fw-500">Target Value <span class="text-danger">*</span></label>
-                            <input type="number" name="target_value" class="form-control" id="edit-obj-target-value" required min="0.01" step="0.01">
+                            <input type="number" name="target_value" class="form-control" id="edit-obj-target-value" required min="1" step="1">
                         </div>
                     </div>
                 </div>
@@ -2422,7 +2452,7 @@ document.querySelectorAll('.edit-objective-btn').forEach(function(btn) {
         document.getElementById('edit-obj-description').value = this.dataset.objDescription || '';
         document.getElementById('edit-obj-category').value = this.dataset.objCategory;
         document.getElementById('edit-obj-metric-type').value = this.dataset.objMetricType;
-        document.getElementById('edit-obj-target-value').value = this.dataset.objTargetValue;
+        document.getElementById('edit-obj-target-value').value = parseInt(this.dataset.objTargetValue) || 0;
         document.getElementById('edit-obj-target-date').value = this.dataset.objTargetDate;
         document.getElementById('edit-obj-partner').value = this.dataset.objPartnerId;
         document.getElementById('edit-obj-status').value = this.dataset.objStatus;
@@ -2431,6 +2461,58 @@ document.querySelectorAll('.edit-objective-btn').forEach(function(btn) {
         modal.show();
     });
 });
+
+// Objective Filters (additive — multiple categories can be active at once)
+(function() {
+    var allBtn = document.querySelector('.obj-filter-btn[data-filter="all"]');
+    var catBtns = document.querySelectorAll('.obj-filter-btn[data-filter="category"]');
+    var items = document.querySelectorAll('.objective-item');
+    var groups = document.querySelectorAll('.objective-priority-group');
+    if (!items.length) return;
+
+    function applyFilters() {
+        var activeCats = [];
+        catBtns.forEach(function(b) {
+            if (b.classList.contains('active')) activeCats.push(b.dataset.value);
+        });
+        var showAll = allBtn && allBtn.classList.contains('active');
+
+        items.forEach(function(item) {
+            if (showAll || activeCats.length === 0) {
+                item.style.display = '';
+            } else {
+                item.style.display = activeCats.indexOf(item.dataset.category) !== -1 ? '' : 'none';
+            }
+        });
+
+        groups.forEach(function(group) {
+            var visibleItems = group.querySelectorAll('.objective-item:not([style*="display: none"])');
+            group.style.display = visibleItems.length > 0 ? '' : 'none';
+        });
+    }
+
+    if (allBtn) {
+        allBtn.addEventListener('click', function() {
+            catBtns.forEach(function(b) { b.classList.remove('active'); });
+            allBtn.classList.add('active');
+            applyFilters();
+        });
+    }
+
+    catBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (allBtn) allBtn.classList.remove('active');
+            this.classList.toggle('active');
+
+            // If nothing selected, revert to All
+            var anyActive = false;
+            catBtns.forEach(function(b) { if (b.classList.contains('active')) anyActive = true; });
+            if (!anyActive && allBtn) allBtn.classList.add('active');
+
+            applyFilters();
+        });
+    });
+})();
 
 // Delete Objective — confirm before submitting
 document.querySelectorAll('.delete-objective-form').forEach(function(form) {
@@ -2441,78 +2523,133 @@ document.querySelectorAll('.delete-objective-form').forEach(function(form) {
     });
 });
 
-// Objective drag-and-drop reordering
+// Objective drag-and-drop: reorder within groups + drag between priority tiers
 (function() {
-    var list = document.getElementById('objectives-sortable-list');
-    if (!list) return;
+    var container = document.getElementById('objectives-grouped-list');
+    if (!container) return;
 
-    var items = list.querySelectorAll('.objective-sortable-item');
+    var dropZones = container.querySelectorAll('.objective-drop-zone');
     var dragItem = null;
 
-    items.forEach(function(item) {
+    // Style for drop zone hover
+    var hoverClass = 'border-primary';
+    var hoverStyle = 'border: 2px dashed var(--bs-primary); border-radius: 6px; background: rgba(var(--bs-primary-rgb), 0.03);';
+
+    function initDraggable(item) {
         item.setAttribute('draggable', 'true');
 
         item.addEventListener('dragstart', function(e) {
             dragItem = this;
             this.style.opacity = '0.4';
             e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', this.dataset.objectiveId);
         });
 
         item.addEventListener('dragend', function() {
             this.style.opacity = '1';
-            list.querySelectorAll('.objective-sortable-item').forEach(function(el) {
-                el.classList.remove('border-primary');
-            });
             dragItem = null;
+            // Clean up all highlights
+            dropZones.forEach(function(z) { z.removeAttribute('style'); z.style.minHeight = '20px'; });
+            container.querySelectorAll('.objective-item').forEach(function(el) {
+                el.classList.remove(hoverClass);
+            });
         });
 
+        // Item-level drag over (for reordering within a zone)
         item.addEventListener('dragover', function(e) {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
-            this.classList.add('border-primary');
+            this.classList.add(hoverClass);
         });
 
         item.addEventListener('dragleave', function() {
-            this.classList.remove('border-primary');
+            this.classList.remove(hoverClass);
         });
 
         item.addEventListener('drop', function(e) {
             e.preventDefault();
-            this.classList.remove('border-primary');
-            if (dragItem === this) return;
+            e.stopPropagation();
+            this.classList.remove(hoverClass);
+            if (!dragItem || dragItem === this) return;
 
-            // Reorder DOM
-            var allItems = Array.from(list.querySelectorAll('.objective-sortable-item'));
-            var fromIdx = allItems.indexOf(dragItem);
-            var toIdx = allItems.indexOf(this);
-            if (fromIdx < toIdx) {
-                this.parentNode.insertBefore(dragItem, this.nextSibling);
-            } else {
+            // Insert before or after based on mouse position
+            var rect = this.getBoundingClientRect();
+            var midY = rect.top + rect.height / 2;
+            if (e.clientY < midY) {
                 this.parentNode.insertBefore(dragItem, this);
+            } else {
+                this.parentNode.insertBefore(dragItem, this.nextSibling);
             }
 
-            // Update priority badges
-            var reordered = Array.from(list.querySelectorAll('.objective-sortable-item'));
-            var ids = [];
-            reordered.forEach(function(el, i) {
-                ids.push(parseInt(el.dataset.objectiveId));
-                var badge = el.querySelector('.badge.bg-dark');
-                if (badge) {
-                    badge.textContent = 'P' + (i + 1);
-                }
-            });
+            saveOrder();
+        });
+    }
 
-            // Save via AJAX
-            fetch('{{ route("priorities.objectives.reorder") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ ids: ids })
-            });
+    // Init all existing items
+    container.querySelectorAll('.objective-item').forEach(initDraggable);
+
+    // Drop zone level: allows dropping into empty groups
+    dropZones.forEach(function(zone) {
+        zone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.setAttribute('style', hoverStyle + ' min-height: 40px;');
+        });
+
+        zone.addEventListener('dragleave', function(e) {
+            // Only if leaving the zone itself, not entering a child
+            if (!this.contains(e.relatedTarget)) {
+                this.removeAttribute('style');
+                this.style.minHeight = '20px';
+            }
+        });
+
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.removeAttribute('style');
+            this.style.minHeight = '20px';
+            if (!dragItem) return;
+
+            // If dropped on the zone (not on an item), append to end
+            if (e.target === this || e.target.classList.contains('objective-drop-zone')) {
+                this.appendChild(dragItem);
+                saveOrder();
+            }
         });
     });
+
+    function saveOrder() {
+        var groups = {};
+        dropZones.forEach(function(zone) {
+            var priority = zone.dataset.priority;
+            var ids = [];
+            zone.querySelectorAll('.objective-item').forEach(function(item) {
+                ids.push(parseInt(item.dataset.objectiveId));
+                // Update the item's data attribute
+                item.dataset.priority = priority;
+            });
+            groups[priority] = ids;
+
+            // Update group count in header
+            var groupEl = zone.closest('.objective-priority-group');
+            if (groupEl) {
+                var countEl = groupEl.querySelector('small.text-muted');
+                if (countEl) {
+                    var n = ids.length;
+                    countEl.textContent = n + ' objective' + (n !== 1 ? 's' : '');
+                }
+            }
+        });
+
+        fetch('{{ route("priorities.objectives.reorder") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ groups: groups })
+        });
+    }
 })();
 
 // Enablement Goals — inline editing

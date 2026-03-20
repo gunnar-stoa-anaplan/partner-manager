@@ -28,6 +28,7 @@ class PsmObjective extends Model
         'suggested_by',
         'source_signal',
         'priority',
+        'sort_order',
     ];
 
     protected function casts(): array
@@ -75,6 +76,18 @@ class PsmObjective extends Model
         'completed' => 'success',
         'missed' => 'danger',
         'cancelled' => 'secondary',
+    ];
+
+    const PRIORITIES = [
+        1 => 'High',
+        2 => 'Medium',
+        3 => 'Low',
+    ];
+
+    const PRIORITY_COLORS = [
+        1 => 'danger',
+        2 => 'warning',
+        3 => 'info',
     ];
 
     const CATEGORY_COLORS = [

@@ -23,12 +23,22 @@ class PrioritiesSeeder extends Seeder
     private const PARTNER_OBJECTIVES = [
         // ── Gunnar's partners ──────────────────────────────────────
         'Deloitte LLP' => [
-            ['title' => 'OWP delivery blueprint completions — 0 of 14 resources ready', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 6, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 6, 'description' => 'CRITICAL: Deloitte US has $800K in OWP pipeline closing Q2-Q3 but zero resources have completed the OWP delivery blueprint. 14 enrollments started, none completed. Must accelerate or deals close with no delivery capacity.'],
-            ['title' => 'IFP blueprint completions to 15', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 15, 'baseline' => 4, 'current' => 9, 'status' => 'active', 'weeks_out' => 3, 'description' => 'Deloitte US needs deeper IFP delivery bench — push through remaining blueprint completions.'],
-            ['title' => 'Build pipeline to $5M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 5000000, 'baseline' => 3200000, 'current' => 4463382, 'status' => 'active', 'weeks_out' => 6, 'description' => 'Deloitte US pipeline target for Q2 — on track, need one more large opportunity.'],
-            ['title' => 'Register 8 delivery resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 8, 'baseline' => 2, 'current' => 4, 'status' => 'active', 'weeks_out' => 4, 'description' => 'Expand Deloitte US delivery bench to support growing project volume.'],
-            ['title' => '10 active certifications', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 10, 'baseline' => 5, 'current' => 8, 'status' => 'completed', 'weeks_out' => -2, 'description' => 'Cert push completed — Deloitte US now has solid coverage across RPM and IFP.'],
-            ['title' => 'Complete marketplace profile', 'category' => 'general', 'metric_type' => 'marketplace_completion', 'target' => 1, 'baseline' => 0, 'current' => 1, 'status' => 'completed', 'weeks_out' => -5, 'description' => 'Marketplace profile approved and live.'],
+            ['title' => 'Deliver the Anaplan Way for Applications methodology point of with view with practice leadership team', 'category' => 'delivery', 'metric_type' => 'enablement_sessions', 'target' => 5, 'baseline' => 1, 'current' => 1, 'status' => 'active', 'target_date' => '2026-03-24', 'priority' => 1, 'sort_order' => 0, 'description' => 'Share the Anaplan Way for Applications methodology point of with view with practice leadership team'],
+            ['title' => 'Increase IFP v2 delivery blueprint completions to 15', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 15, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-04-13', 'priority' => 1, 'sort_order' => 1, 'description' => 'Deloitte US needs deeper IFP delivery bench — push through remaining blueprint completions. Holding a special session for launch partners on 4/13-14'],
+            ['title' => 'Get six people to complete the OWP delivery blueprint', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 6, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-06-10', 'priority' => 1, 'sort_order' => 2, 'description' => 'CRITICAL: Deloitte US has $800K in OWP pipeline closing Q2-Q3 but zero resources have completed the OWP delivery blueprint. 14 enrollments started, none completed. Must accelerate or deals close with no delivery capacity.'],
+            ['title' => 'Get 10 people in AMER to complete the SCM delivery blueprint', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 10, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-05-12', 'priority' => 1, 'sort_order' => 3, 'description' => 'Deloitte US has growing SCM demand but only 3 of 10 enrolled resources have completed the delivery blueprint. Need to push remaining 7 through to support Q3 pipeline.'],
+            ['title' => 'Identify 10 resources and complete the Forecaster delivery blueprint', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 10, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-04-13', 'priority' => 1, 'sort_order' => 4, 'description' => 'Forecaster pipeline building at Deloitte but delivery bench is thin. Must accelerate to support upcoming deals.'],
+            ['title' => 'Identify five resources to complete the CoModeler delivery blueprint', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 5, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-06-05', 'priority' => 1, 'sort_order' => 5, 'description' => 'CoModeler is a newer product for Deloitte — only 1 resource has completed the delivery blueprint out of 6 enrolled. Need early momentum before Q3 pipeline matures.'],
+            ['title' => 'Identify five resources and complete the Agent Studio delivery blueprint', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 5, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-06-05', 'priority' => 1, 'sort_order' => 6, 'description' => 'Agent Studio is brand new to Deloitte — zero completions so far. Need to get initial cohort through the blueprint to unlock first delivery engagements.'],
+            // Medium priority
+            ['title' => 'Get 8 Deloitte resources certified on IFP v2', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 8, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-05-15', 'priority' => 2, 'sort_order' => 0, 'description' => 'Deloitte has strong IFP pipeline but only 3 certified consultants. Need to ramp certification count to support upcoming delivery engagements.'],
+            ['title' => 'Complete SCM solution architect certification for 4 resources', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 4, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-06-30', 'priority' => 2, 'sort_order' => 1, 'description' => 'SCM solution architect certification required for Deloitte to lead their own SCM implementations. Currently zero SA-certified resources.'],
+            ['title' => 'Deliver 3 IFP projects successfully by end of Q2', 'category' => 'delivery', 'metric_type' => 'projects_delivered', 'target' => 3, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-06-30', 'priority' => 2, 'sort_order' => 2, 'description' => 'Deloitte has 5 IFP deals in late-stage pipeline. Must convert at least 3 to active delivery engagements to maintain momentum and build reference stories.'],
+            // Low priority
+            ['title' => 'Build Forecaster pipeline to $1.5M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 1500000, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-07-31', 'priority' => 3, 'sort_order' => 0, 'description' => 'Forecaster is a newer product at Deloitte with no pipeline yet. Target 3-4 qualified opportunities by end of Q2 to build a $1.5M funnel.'],
+            ['title' => 'Identify 2 new CoModeler opportunities', 'category' => 'pipeline', 'metric_type' => 'opportunity_count', 'target' => 2, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-07-15', 'priority' => 3, 'sort_order' => 1, 'description' => 'CoModeler gaining traction in manufacturing vertical — Deloitte has strong mfg practice. Identify initial qualified opportunities.'],
+            ['title' => 'Complete Deloitte marketplace profile update', 'category' => 'general', 'metric_type' => 'marketplace_completion', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-04-30', 'priority' => 3, 'sort_order' => 2, 'description' => 'Deloitte marketplace profile is outdated — missing new product capabilities and recent case studies. Needs refresh to drive inbound leads.'],
+            ['title' => 'Schedule Q2 executive business review with Deloitte leadership', 'category' => 'general', 'metric_type' => 'manual', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'target_date' => '2026-05-31', 'priority' => 3, 'sort_order' => 3, 'description' => 'Quarterly EBR with Deloitte US managing director to review partnership health, discuss expansion into new products, and align on H2 goals.'],
         ],
         'Slalom Consulting' => [
             ['title' => '15 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 15, 'baseline' => 6, 'current' => 11, 'status' => 'active', 'weeks_out' => 4, 'description' => 'Slalom leading in enablement — keep momentum on blueprint completions.'],
@@ -499,9 +509,14 @@ class PrioritiesSeeder extends Seeder
             $objectives = self::PARTNER_OBJECTIVES[$partner->name] ?? [];
 
             foreach ($objectives as $obj) {
-                $targetDate = in_array($obj['status'], ['completed', 'missed'])
-                    ? now()->subWeeks(abs($obj['weeks_out']))
-                    : now()->addWeeks($obj['weeks_out']);
+                // Support explicit target_date or relative weeks_out
+                if (isset($obj['target_date'])) {
+                    $targetDate = \Carbon\Carbon::parse($obj['target_date']);
+                } else {
+                    $targetDate = in_array($obj['status'], ['completed', 'missed'])
+                        ? now()->subWeeks(abs($obj['weeks_out']))
+                        : now()->addWeeks($obj['weeks_out']);
+                }
 
                 $completedAt = null;
                 if ($obj['status'] === 'completed') {
@@ -521,6 +536,8 @@ class PrioritiesSeeder extends Seeder
                         'target_date' => $targetDate,
                         'status' => $obj['status'],
                         'completed_at' => $completedAt,
+                        'priority' => $obj['priority'] ?? 0,
+                        'sort_order' => $obj['sort_order'] ?? 0,
                     ]
                 );
             }

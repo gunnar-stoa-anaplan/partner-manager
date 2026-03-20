@@ -122,16 +122,17 @@ class StateOfBusinessController extends Controller
         // Partner Summary with deltas
         $data['partnerSummary'] = $this->riskService->partnerSummaryWithDeltas($latestSnapshot, $previousSnapshot, $partnerIds);
 
-        // Priorities for scoped partners (all statuses, active first)
+        // Priorities for scoped partners — only active objectives
         $objectivesQuery = PsmObjective::with('partner')
-            ->where('user_id', $user->id);
+            ->where('user_id', $user->id)
+            ->where('status', 'active');
         if ($partnerIds) {
             $objectivesQuery->whereIn('partner_id', $partnerIds);
         }
         $data['sobObjectives'] = $objectivesQuery
-            ->orderByRaw("FIELD(status, 'active', 'completed', 'missed', 'cancelled')")
             ->orderByRaw('CASE WHEN priority > 0 THEN 0 ELSE 1 END')
             ->orderBy('priority')
+            ->orderBy('sort_order')
             ->orderBy('target_date')
             ->get();
 
