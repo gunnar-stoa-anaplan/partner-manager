@@ -17,21 +17,14 @@ class ResourceHistorySeeder extends Seeder
     private const PROGRAMS = ['IFP', 'OWP', 'FCR', 'SPM', 'I&D', 'IBP', 'MFP'];
 
     /**
-     * Priority aliases for multi-entity partners where the simplified Excel name
-     * should route to a specific DB entity (typically the HQ) rather than the
-     * first alphabetical fuzzy match.
+     * Priority aliases for resource partner names that don't exist in the
+     * PSM mappings file. Partners whose names match the PSM canonical names
+     * exactly will resolve via direct DB lookup — no alias needed.
      */
     private const PARTNER_ALIASES = [
-        'Accenture' => 'Accenture - US',
-        'Deloitte LLP' => 'Deloitte Consulting LLP - US (HQ)',
-        'KPMG' => 'KPMG US (HQ)',
-        'Genpact' => 'Genpact Intl',
-        'Genpact International Inc. (Partner)' => 'Genpact Intl',
-        'Fadmoor LLC-Partner' => 'Fadmoor LLC',
-        'EyeOn Switzerland Sarl' => 'EyeOn',
+        'Genpact International Inc. (Partner)' => 'Genpact',
         'Keyrus France' => 'Keyrus EMEA',
-        'Keyrus Global' => 'Keyrus EPM Americas',
-        'BearingPoint Holding B.V.' => 'Bearingpoint GmbH',
+        'BearingPoint Holding B.V.' => 'BearingPoint',
     ];
 
     public function run(): void

@@ -100,18 +100,18 @@ class OpportunityHistorySeeder extends Seeder
 
             // Filter: must have a partner, exclude Anaplan PS
             $filteredRows = $rows->filter(function ($row) {
-                $finalImpl = trim($row['Final Implementation Partner'] ?? '');
                 $partnerHQ = trim($row['Partner Plan HQ'] ?? '');
+                $finalImpl = trim($row['Final Implementation Partner'] ?? '');
 
-                // Resolve partner: Final Implementation Partner takes priority
-                $partner = $finalImpl ?: $partnerHQ;
+                // Resolve partner: Partner Plan HQ takes priority
+                $partner = $partnerHQ ?: $finalImpl;
 
                 if (empty($partner)) {
                     return false;
                 }
 
                 // Exclude Anaplan PS
-                if (str_contains(strtolower($finalImpl), 'anaplan ps')) {
+                if (str_contains(strtolower($partner), 'anaplan ps')) {
                     return false;
                 }
 
@@ -146,14 +146,14 @@ class OpportunityHistorySeeder extends Seeder
             $skippedPartners = 0;
 
             foreach ($filteredRows as $row) {
-                $finalImpl = trim($row['Final Implementation Partner'] ?? '');
                 $partnerHQ = trim($row['Partner Plan HQ'] ?? '');
-                $resolvedPartner = $finalImpl ?: $partnerHQ;
+                $finalImpl = trim($row['Final Implementation Partner'] ?? '');
+                $resolvedPartner = $partnerHQ ?: $finalImpl;
 
-                // Match partner to DB — try both Final Implementation Partner and Partner Plan HQ
+                // Match partner to DB — try Partner Plan HQ first, then Final Implementation Partner
                 $partnerId = $partnerMap->get($resolvedPartner)
-                    ?? $partnerMap->get($finalImpl)
-                    ?? $partnerMap->get($partnerHQ);
+                    ?? $partnerMap->get($partnerHQ)
+                    ?? $partnerMap->get($finalImpl);
 
                 if (! $partnerId) {
                     $skippedPartners++;

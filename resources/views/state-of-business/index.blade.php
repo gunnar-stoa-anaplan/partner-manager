@@ -2285,11 +2285,7 @@ requestAnimationFrame(function() { setTimeout(forceCollapsePanels, 100); });
 // Retry until dependencies are available.
 (function waitForDeps() {
     if (window.ApexCharts && window.colorMap) {
-        try {
-            initSobCharts();
-        } catch (e) {
-            console.error('SoB chart init error:', e);
-        }
+        initSobCharts();
         // Force charts to recalculate width after layout settles
         setTimeout(function() { window.dispatchEvent(new Event('resize')); }, 250);
     } else {

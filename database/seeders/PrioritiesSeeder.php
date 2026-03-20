@@ -15,44 +15,41 @@ use Illuminate\Support\Facades\DB;
 class PrioritiesSeeder extends Seeder
 {
     /**
-     * Partner-specific objectives keyed by partner name.
+     * Partner-specific objectives keyed by partner name (PSM canonical names).
      * Each objective uses realistic values aligned with actual seeded data.
      *
      * @var array<string, list<array>>
      */
     private const PARTNER_OBJECTIVES = [
         // ── Gunnar's partners ──────────────────────────────────────
-        'Deloitte' => [
-            ['title' => 'OWP delivery blueprint completions — 0 of 14 resources ready', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 6, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 6, 'description' => 'CRITICAL: Deloitte has $800K in OWP pipeline closing Q2-Q3 but zero resources have completed the OWP delivery blueprint. 14 enrollments started, none completed. Must accelerate or deals close with no delivery capacity.'],
-            ['title' => 'IFP blueprint completions to 15', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 15, 'baseline' => 4, 'current' => 9, 'status' => 'active', 'weeks_out' => 3, 'description' => 'Deloitte needs deeper IFP delivery bench — push through remaining blueprint completions.'],
-            ['title' => 'Build pipeline to $5M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 5000000, 'baseline' => 3200000, 'current' => 4463382, 'status' => 'active', 'weeks_out' => 6, 'description' => 'Deloitte pipeline target for Q2 — on track, need one more large opportunity.'],
-            ['title' => 'Register 8 delivery resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 8, 'baseline' => 2, 'current' => 4, 'status' => 'active', 'weeks_out' => 4, 'description' => 'Expand Deloitte delivery bench to support growing project volume.'],
-            ['title' => '10 active certifications', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 10, 'baseline' => 5, 'current' => 8, 'status' => 'completed', 'weeks_out' => -2, 'description' => 'Cert push completed — Deloitte now has solid coverage across RPM and IFP.'],
+        'Deloitte LLP' => [
+            ['title' => 'OWP delivery blueprint completions — 0 of 14 resources ready', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 6, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 6, 'description' => 'CRITICAL: Deloitte US has $800K in OWP pipeline closing Q2-Q3 but zero resources have completed the OWP delivery blueprint. 14 enrollments started, none completed. Must accelerate or deals close with no delivery capacity.'],
+            ['title' => 'IFP blueprint completions to 15', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 15, 'baseline' => 4, 'current' => 9, 'status' => 'active', 'weeks_out' => 3, 'description' => 'Deloitte US needs deeper IFP delivery bench — push through remaining blueprint completions.'],
+            ['title' => 'Build pipeline to $5M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 5000000, 'baseline' => 3200000, 'current' => 4463382, 'status' => 'active', 'weeks_out' => 6, 'description' => 'Deloitte US pipeline target for Q2 — on track, need one more large opportunity.'],
+            ['title' => 'Register 8 delivery resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 8, 'baseline' => 2, 'current' => 4, 'status' => 'active', 'weeks_out' => 4, 'description' => 'Expand Deloitte US delivery bench to support growing project volume.'],
+            ['title' => '10 active certifications', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 10, 'baseline' => 5, 'current' => 8, 'status' => 'completed', 'weeks_out' => -2, 'description' => 'Cert push completed — Deloitte US now has solid coverage across RPM and IFP.'],
             ['title' => 'Complete marketplace profile', 'category' => 'general', 'metric_type' => 'marketplace_completion', 'target' => 1, 'baseline' => 0, 'current' => 1, 'status' => 'completed', 'weeks_out' => -5, 'description' => 'Marketplace profile approved and live.'],
         ],
-        'PwC' => [
-            ['title' => '15 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 15, 'baseline' => 6, 'current' => 11, 'status' => 'active', 'weeks_out' => 4, 'description' => 'PwC leading in enablement — keep momentum on blueprint completions.'],
-            ['title' => 'Build pipeline to $5M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 5000000, 'baseline' => 2800000, 'current' => 4238395, 'status' => 'active', 'weeks_out' => 5, 'description' => 'PwC pipeline nearly at target — focus on progressing existing deals to close.'],
-            ['title' => 'Submit marketplace profile', 'category' => 'general', 'metric_type' => 'marketplace_completion', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 2, 'description' => 'PwC profile submitted but not yet approved — follow up with marketplace team.'],
+        'Slalom Consulting' => [
+            ['title' => '15 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 15, 'baseline' => 6, 'current' => 11, 'status' => 'active', 'weeks_out' => 4, 'description' => 'Slalom leading in enablement — keep momentum on blueprint completions.'],
+            ['title' => 'Build pipeline to $5M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 5000000, 'baseline' => 2800000, 'current' => 4238395, 'status' => 'active', 'weeks_out' => 5, 'description' => 'Slalom pipeline nearly at target — focus on progressing existing deals to close.'],
+            ['title' => 'Submit marketplace profile', 'category' => 'general', 'metric_type' => 'marketplace_completion', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 2, 'description' => 'Slalom profile submitted but not yet approved — follow up with marketplace team.'],
             ['title' => '8 certifications active', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 8, 'baseline' => 3, 'current' => 6, 'status' => 'active', 'weeks_out' => 3, 'description' => 'Need 2 more active certs to hit target.'],
-            ['title' => 'Identify 2 new SCM opportunities', 'category' => 'pipeline', 'metric_type' => 'manual', 'target' => 2, 'baseline' => 0, 'current' => 1, 'status' => 'active', 'weeks_out' => 4, 'description' => 'PwC has SCM expertise but no current SCM deals — need to activate.'],
         ],
-        'Infosys' => [
-            ['title' => 'Build pipeline to $2M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 2000000, 'baseline' => 800000, 'current' => 1396822, 'status' => 'active', 'weeks_out' => 5, 'description' => 'Infosys pipeline growing — need to convert more influenced deals to sourced.'],
-            ['title' => '8 active certifications', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 8, 'baseline' => 3, 'current' => 6, 'status' => 'active', 'weeks_out' => 4, 'description' => 'Infosys cert count lagging behind tier expectations.'],
+        'Spaulding Ridge' => [
+            ['title' => 'Build pipeline to $2M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 2000000, 'baseline' => 800000, 'current' => 1396822, 'status' => 'active', 'weeks_out' => 5, 'description' => 'Spaulding Ridge pipeline growing — need to convert more influenced deals to sourced.'],
+            ['title' => '8 active certifications', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 8, 'baseline' => 3, 'current' => 6, 'status' => 'active', 'weeks_out' => 4, 'description' => 'Spaulding Ridge cert count lagging behind tier expectations.'],
             ['title' => '10 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 10, 'baseline' => 2, 'current' => 5, 'status' => 'active', 'weeks_out' => 5, 'description' => 'Blueprint adoption slow — schedule enablement workshop to accelerate.'],
-            ['title' => 'Register 6 delivery resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 6, 'baseline' => 2, 'current' => 4, 'status' => 'active', 'weeks_out' => 3, 'description' => 'Infosys delivery bench needs expansion for upcoming projects.'],
-            ['title' => '3 enablement sessions attended', 'category' => 'enablement', 'metric_type' => 'enablement_sessions', 'target' => 3, 'baseline' => 0, 'current' => 3, 'status' => 'completed', 'weeks_out' => -3, 'description' => 'Infosys team attended all three Q1 enablement sessions.'],
+            ['title' => 'Register 6 delivery resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 6, 'baseline' => 2, 'current' => 4, 'status' => 'active', 'weeks_out' => 3, 'description' => 'Spaulding Ridge delivery bench needs expansion for upcoming projects.'],
+            ['title' => '3 enablement sessions attended', 'category' => 'enablement', 'metric_type' => 'enablement_sessions', 'target' => 3, 'baseline' => 0, 'current' => 3, 'status' => 'completed', 'weeks_out' => -3, 'description' => 'Spaulding Ridge team attended all three Q1 enablement sessions.'],
         ],
-        'IBM' => [
-            ['title' => 'Build pipeline to $2M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 2000000, 'baseline' => 900000, 'current' => 1605483, 'status' => 'active', 'weeks_out' => 4, 'description' => 'IBM pipeline strong but need to close gap to $2M target.'],
-            ['title' => 'Complete marketplace profile', 'category' => 'general', 'metric_type' => 'marketplace_completion', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 2, 'description' => 'IBM marketplace profile still in draft — need partner contact to finalize.'],
-            ['title' => '10 certifications active', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 10, 'baseline' => 4, 'current' => 7, 'status' => 'active', 'weeks_out' => 5, 'description' => 'IBM has strong talent pool — push for more cert completions.'],
+        'Argano, LLC (Partner)' => [
+            ['title' => 'Build pipeline to $2M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 2000000, 'baseline' => 900000, 'current' => 1605483, 'status' => 'active', 'weeks_out' => 4, 'description' => 'Argano pipeline strong but need to close gap to $2M target.'],
+            ['title' => 'Complete marketplace profile', 'category' => 'general', 'metric_type' => 'marketplace_completion', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 2, 'description' => 'Argano marketplace profile still in draft — need partner contact to finalize.'],
+            ['title' => '10 certifications active', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 10, 'baseline' => 4, 'current' => 7, 'status' => 'active', 'weeks_out' => 5, 'description' => 'Argano has strong talent pool — push for more cert completions.'],
             ['title' => '8 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 8, 'baseline' => 1, 'current' => 3, 'status' => 'active', 'weeks_out' => 6, 'description' => 'Blueprint adoption needs acceleration — schedule 1:1 with enablement lead.'],
-            ['title' => 'Identify 1 ADO opportunity', 'category' => 'pipeline', 'metric_type' => 'manual', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 4, 'description' => 'IBM has ADO capability but no current ADO pipeline.'],
-            ['title' => 'Register 6 resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 6, 'baseline' => 1, 'current' => 4, 'status' => 'active', 'weeks_out' => 3, 'description' => 'IBM resource registration behind — need to push partner admin.'],
         ],
-        'BCG' => [
+        'The Boston Consulting Group' => [
             ['title' => 'Build pipeline to $1M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 1000000, 'baseline' => 300000, 'current' => 635643, 'status' => 'active', 'weeks_out' => 5, 'description' => 'BCG pipeline growing steadily — need 2-3 more opportunities to hit $1M.'],
             ['title' => '6 certifications active', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 6, 'baseline' => 1, 'current' => 3, 'status' => 'active', 'weeks_out' => 4, 'description' => 'BCG cert count low — schedule cert prep sessions with partner team.'],
             ['title' => 'Complete marketplace profile', 'category' => 'general', 'metric_type' => 'marketplace_completion', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 2, 'description' => 'BCG marketplace profile in draft — follow up with partner marketing.'],
@@ -68,59 +65,80 @@ class PrioritiesSeeder extends Seeder
             ['title' => '12 active certifications', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 12, 'baseline' => 7, 'current' => 12, 'status' => 'completed', 'weeks_out' => -1],
             ['title' => 'Complete marketplace profile', 'category' => 'general', 'metric_type' => 'marketplace_completion', 'target' => 1, 'baseline' => 0, 'current' => 1, 'status' => 'completed', 'weeks_out' => -4],
         ],
-        'KPMG' => [
+        'Accordion Partners LLC' => [
             ['title' => 'Build pipeline to $1.5M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 1500000, 'baseline' => 500000, 'current' => 980000, 'status' => 'active', 'weeks_out' => 4],
             ['title' => '6 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 6, 'baseline' => 1, 'current' => 4, 'status' => 'active', 'weeks_out' => 3],
             ['title' => 'Register 4 delivery resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 4, 'baseline' => 1, 'current' => 3, 'status' => 'active', 'weeks_out' => 3],
         ],
-        'Wipro' => [
+        'Keyrus Global' => [
             ['title' => '8 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 8, 'baseline' => 2, 'current' => 6, 'status' => 'active', 'weeks_out' => 4],
             ['title' => '5 certifications active', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 5, 'baseline' => 2, 'current' => 5, 'status' => 'completed', 'weeks_out' => -1],
-            ['title' => 'Identify 1 RPM opportunity', 'category' => 'pipeline', 'metric_type' => 'manual', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 3],
+            ['title' => 'Identify 1 SCM opportunity', 'category' => 'pipeline', 'metric_type' => 'manual', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 3],
         ],
-        'HCL' => [
+        'Fadmoor LLC' => [
             ['title' => 'Build pipeline to $1M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 1000000, 'baseline' => 400000, 'current' => 720000, 'status' => 'active', 'weeks_out' => 5],
             ['title' => 'Register 5 resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 5, 'baseline' => 1, 'current' => 3, 'status' => 'active', 'weeks_out' => 3],
             ['title' => '3 enablement sessions attended', 'category' => 'enablement', 'metric_type' => 'enablement_sessions', 'target' => 3, 'baseline' => 0, 'current' => 3, 'status' => 'completed', 'weeks_out' => -2],
         ],
-        'Bain' => [
+        'TruQua, an IBM Company' => [
             ['title' => '6 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 6, 'baseline' => 0, 'current' => 2, 'status' => 'active', 'weeks_out' => 5],
             ['title' => '4 certifications active', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 4, 'baseline' => 0, 'current' => 2, 'status' => 'active', 'weeks_out' => 4],
             ['title' => 'Complete marketplace profile', 'category' => 'general', 'metric_type' => 'marketplace_completion', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'missed', 'weeks_out' => -1],
         ],
 
         // ── Nicole's partners ──────────────────────────────────────
-        'EY' => [
+        'PwC' => [
             ['title' => 'Build pipeline to $2M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 2000000, 'baseline' => 800000, 'current' => 1400000, 'status' => 'active', 'weeks_out' => 5],
             ['title' => '10 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 10, 'baseline' => 3, 'current' => 7, 'status' => 'active', 'weeks_out' => 4],
             ['title' => '8 active certifications', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 8, 'baseline' => 4, 'current' => 8, 'status' => 'completed', 'weeks_out' => -1],
+            ['title' => 'Identify 2 new SCM opportunities', 'category' => 'pipeline', 'metric_type' => 'manual', 'target' => 2, 'baseline' => 0, 'current' => 1, 'status' => 'active', 'weeks_out' => 4],
         ],
-        'TCS' => [
+        'KPMG' => [
             ['title' => '6 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 6, 'baseline' => 1, 'current' => 4, 'status' => 'active', 'weeks_out' => 3],
             ['title' => 'Register 5 resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 5, 'baseline' => 1, 'current' => 4, 'status' => 'active', 'weeks_out' => 2],
             ['title' => 'Build pipeline to $1M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 1000000, 'baseline' => 200000, 'current' => 600000, 'status' => 'active', 'weeks_out' => 5],
         ],
-        'Tech Mahindra' => [
+        'Genpact' => [
             ['title' => '4 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 4, 'baseline' => 0, 'current' => 2, 'status' => 'active', 'weeks_out' => 4],
             ['title' => 'Register 4 resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 4, 'baseline' => 0, 'current' => 2, 'status' => 'active', 'weeks_out' => 3],
             ['title' => 'Identify 1 IFP opportunity', 'category' => 'pipeline', 'metric_type' => 'manual', 'target' => 1, 'baseline' => 0, 'current' => 1, 'status' => 'completed', 'weeks_out' => -2],
         ],
+        'Cervello, a Kearney Company' => [
+            ['title' => 'Build pipeline to $1.5M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 1500000, 'baseline' => 600000, 'current' => 1100000, 'status' => 'active', 'weeks_out' => 5],
+            ['title' => '6 certifications active', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 6, 'baseline' => 2, 'current' => 5, 'status' => 'active', 'weeks_out' => 3],
+            ['title' => 'Submit marketplace profile', 'category' => 'general', 'metric_type' => 'marketplace_completion', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 2],
+        ],
+        'Valizant' => [
+            ['title' => '5 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 5, 'baseline' => 1, 'current' => 3, 'status' => 'active', 'weeks_out' => 4],
+            ['title' => 'Register 3 delivery resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 3, 'baseline' => 0, 'current' => 2, 'status' => 'active', 'weeks_out' => 3],
+            ['title' => 'Build pipeline to $800K', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 800000, 'baseline' => 200000, 'current' => 450000, 'status' => 'active', 'weeks_out' => 5],
+        ],
 
         // ── Ben's partners ─────────────────────────────────────────
-        'Capgemini' => [
+        'Peloton Group' => [
             ['title' => '10 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 10, 'baseline' => 3, 'current' => 7, 'status' => 'active', 'weeks_out' => 4],
             ['title' => 'Build pipeline to $2M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 2000000, 'baseline' => 700000, 'current' => 1300000, 'status' => 'active', 'weeks_out' => 5],
             ['title' => '6 certifications active', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 6, 'baseline' => 2, 'current' => 6, 'status' => 'completed', 'weeks_out' => -1],
         ],
-        'Cognizant' => [
+        'Grant Thornton LLP' => [
             ['title' => '8 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 8, 'baseline' => 1, 'current' => 5, 'status' => 'active', 'weeks_out' => 4],
             ['title' => 'Register 5 delivery resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 5, 'baseline' => 1, 'current' => 3, 'status' => 'active', 'weeks_out' => 3],
             ['title' => 'Build pipeline to $1M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 1000000, 'baseline' => 300000, 'current' => 650000, 'status' => 'active', 'weeks_out' => 5],
         ],
-        'McKinsey' => [
+        'Karta Consulting Group' => [
             ['title' => '6 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 6, 'baseline' => 1, 'current' => 3, 'status' => 'active', 'weeks_out' => 5],
             ['title' => '4 certifications active', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 4, 'baseline' => 0, 'current' => 2, 'status' => 'active', 'weeks_out' => 4],
             ['title' => 'Complete marketplace profile', 'category' => 'general', 'metric_type' => 'marketplace_completion', 'target' => 1, 'baseline' => 0, 'current' => 0, 'status' => 'active', 'weeks_out' => 2],
+        ],
+        'Alpha Alternatives' => [
+            ['title' => 'Build pipeline to $1.5M', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 1500000, 'baseline' => 500000, 'current' => 900000, 'status' => 'active', 'weeks_out' => 5],
+            ['title' => '5 certifications active', 'category' => 'certification', 'metric_type' => 'certifications', 'target' => 5, 'baseline' => 1, 'current' => 3, 'status' => 'active', 'weeks_out' => 4],
+            ['title' => 'Register 4 resources', 'category' => 'enablement', 'metric_type' => 'resources_registered', 'target' => 4, 'baseline' => 0, 'current' => 2, 'status' => 'active', 'weeks_out' => 3],
+        ],
+        'Tru Consulting' => [
+            ['title' => '4 blueprint completions', 'category' => 'enablement', 'metric_type' => 'blueprint_completions', 'target' => 4, 'baseline' => 0, 'current' => 2, 'status' => 'active', 'weeks_out' => 4],
+            ['title' => 'Build pipeline to $500K', 'category' => 'pipeline', 'metric_type' => 'pipeline_value', 'target' => 500000, 'baseline' => 100000, 'current' => 280000, 'status' => 'active', 'weeks_out' => 5],
+            ['title' => '2 enablement sessions attended', 'category' => 'enablement', 'metric_type' => 'enablement_sessions', 'target' => 2, 'baseline' => 0, 'current' => 2, 'status' => 'completed', 'weeks_out' => -2],
         ],
     ];
 
@@ -131,60 +149,60 @@ class PrioritiesSeeder extends Seeder
      */
     private const WEEKLY_SUMMARIES = [
         'gunnar.stoa@gmail.com' => [
-            'PRIORITY: Deloitte OWP delivery gap — $800K pipeline closing Q2-Q3, zero blueprint completions. Scheduling sprint with enablement. Also driving IFP completions for PwC.',
-            'Escalated Deloitte OWP readiness to enablement team. PwC pipeline near $5M target. BCG resource registration almost done.',
-            'Scheduled QBRs with Deloitte and Infosys leadership. Deloitte OWP workshop dates being coordinated with product team.',
-            'Deloitte pipeline hit $4.4M — strong overall but OWP delivery readiness still at zero. Working on BCG cert prep sessions.',
-            'Infosys team completed all Q1 enablement sessions. PwC SCM opportunity identified. Identified Deloitte OWP gap this week.',
-            'Pushed Deloitte marketplace profile through approval. BCG blueprint adoption starting.',
-            'PwC blueprint completions accelerating. IBM pipeline review with sales team.',
-            'Infosys cert renewals processed. Deloitte delivery bench expansion in progress.',
-            'BCG onboarded 2 new delivery resources this week. PwC cert push underway.',
-            'Deloitte IFP blueprint sprint — moved from 4 to 7 completions. Strong momentum.',
-            'IBM marketplace profile drafted. Infosys pipeline development call with regional lead.',
+            'PRIORITY: Deloitte US OWP delivery gap — $800K pipeline closing Q2-Q3, zero blueprint completions. Scheduling sprint with enablement. Also driving IFP completions for Slalom.',
+            'Escalated Deloitte US OWP readiness to enablement team. Slalom pipeline near $5M target. BCG resource registration almost done.',
+            'Scheduled QBRs with Deloitte US and Spaulding Ridge leadership. Deloitte OWP workshop dates being coordinated with product team.',
+            'Deloitte US pipeline hit $4.4M — strong overall but OWP delivery readiness still at zero. Working on BCG cert prep sessions.',
+            'Spaulding Ridge team completed all Q1 enablement sessions. Slalom SCM opportunity identified. Identified Deloitte OWP gap this week.',
+            'Pushed Deloitte US marketplace profile through approval. BCG blueprint adoption starting.',
+            'Slalom blueprint completions accelerating. Argano pipeline review with sales team.',
+            'Spaulding Ridge cert renewals processed. Deloitte US delivery bench expansion in progress.',
+            'BCG onboarded 2 new delivery resources this week. Slalom cert push underway.',
+            'Deloitte US IFP blueprint sprint — moved from 4 to 7 completions. Strong momentum.',
+            'Argano marketplace profile drafted. Spaulding Ridge pipeline development call with regional lead.',
             'Kicked off Q1 priorities — baseline captured for all partners. Focus on enablement and pipeline.',
         ],
         'rick.palmer@example.com' => [
-            'Accenture blueprint completions at 9/12 — strong push this week. KPMG resource registration progressing.',
-            'Bain marketplace profile deadline missed — rescheduling. Wipro RPM opportunity exploration.',
-            'Accenture pipeline approaching $6M. HCL delivery resources growing.',
-            'KPMG blueprint adoptions at 4/6 — need to maintain pace. Accenture certs completed.',
-            'Wipro certification target achieved. Bain blueprint adoption slow start.',
-            'HCL enablement sessions completed. Accenture marketplace profile approved.',
-            'KPMG pipeline development ongoing. Wipro blueprint completions accelerating.',
-            'Accenture QBR prep in progress. Bain cert push initiated.',
-            'HCL pipeline growing — $720K toward $1M target. Wipro enablement coordination.',
-            'Bain just getting started — initial baseline set for all metrics.',
-            'KPMG resource registration underway. Accenture pipeline review scheduled.',
-            'Q1 kickoff — mapped priorities for Accenture and KPMG. Bain onboarding.',
+            'Accenture blueprint completions at 9/12 — strong push this week. Accordion Partners resource registration progressing.',
+            'TruQua marketplace profile deadline missed — rescheduling. Keyrus Global SCM opportunity exploration.',
+            'Accenture pipeline approaching $6M. Fadmoor delivery resources growing.',
+            'Accordion Partners blueprint adoptions at 4/6 — need to maintain pace. Accenture certs completed.',
+            'Keyrus Global certification target achieved. TruQua blueprint adoption slow start.',
+            'Fadmoor enablement sessions completed. Accenture marketplace profile approved.',
+            'Accordion Partners pipeline development ongoing. Keyrus Global blueprint completions accelerating.',
+            'Accenture QBR prep in progress. TruQua cert push initiated.',
+            'Fadmoor pipeline growing — $720K toward $1M target. Keyrus enablement coordination.',
+            'TruQua just getting started — initial baseline set for all metrics.',
+            'Accordion Partners resource registration underway. Accenture pipeline review scheduled.',
+            'Q1 kickoff — mapped priorities for Accenture and Accordion Partners. TruQua onboarding.',
         ],
         'nicole.demary@example.com' => [
-            'EY pipeline at $1.4M — need $600K more. TCS resource registration nearly complete.',
-            'Tech Mahindra IFP opportunity identified and closed. EY certifications complete.',
-            'TCS blueprint completions at 4/6. Tech Mahindra resource onboarding.',
-            'EY blueprint completions progressing well. TCS pipeline development focus.',
-            'EY cert push completed — all 8 targets met. Tech Mahindra blueprint kickoff.',
-            'TCS resource registration started. EY pipeline review with leadership.',
-            'Tech Mahindra enablement planning. EY blueprint workshop scheduled.',
-            'TCS enablement sessions underway. EY pipeline at $1.1M.',
-            'EY pipeline growing steadily. Tech Mahindra initial assessments.',
-            'TCS getting ramped up — baseline captured. EY cert push started.',
-            'Tech Mahindra onboarding calls. EY enablement planning.',
-            'Q1 kickoff — priorities mapped for EY, TCS, Tech Mahindra.',
+            'PwC pipeline at $1.4M — need $600K more. KPMG resource registration nearly complete. Cervello pipeline strong.',
+            'Genpact IFP opportunity identified and closed. PwC certifications complete. Valizant blueprint progressing.',
+            'KPMG blueprint completions at 4/6. Genpact resource onboarding. Cervello cert push underway.',
+            'PwC blueprint completions progressing well. KPMG pipeline development focus. Valizant resource registration.',
+            'PwC cert push completed — all 8 targets met. Genpact blueprint kickoff. Cervello marketplace profile drafted.',
+            'KPMG resource registration started. PwC pipeline review with leadership. Valizant enablement planning.',
+            'Genpact enablement planning. PwC blueprint workshop scheduled. Cervello pipeline at $1.1M.',
+            'KPMG enablement sessions underway. PwC pipeline at $1.1M. Valizant getting ramped up.',
+            'PwC pipeline growing steadily. Genpact initial assessments. Cervello onboarding calls.',
+            'KPMG getting ramped up — baseline captured. PwC cert push started. Valizant enablement planning.',
+            'Genpact onboarding calls. PwC enablement planning. Cervello marketplace profile review.',
+            'Q1 kickoff — priorities mapped for PwC, KPMG, Genpact, Cervello, and Valizant.',
         ],
         'ben.wilson@example.com' => [
-            'Capgemini pipeline at $1.3M — strong momentum. Cognizant resource registration at 3/5.',
-            'McKinsey blueprint adoption slow — scheduling enablement. Capgemini certs completed.',
-            'Cognizant pipeline development ongoing. McKinsey marketplace profile drafted.',
-            'Capgemini blueprint completions at 7/10. Cognizant enablement coordination.',
-            'McKinsey cert push started. Capgemini marketplace profile submitted.',
-            'Cognizant blueprint at 5/8 — need push. McKinsey initial assessments.',
-            'Capgemini cert target achieved. Cognizant pipeline at $650K.',
-            'McKinsey enablement workshops scheduled. Capgemini pipeline review.',
-            'Cognizant resource onboarding progressing. McKinsey blueprint kickoff.',
-            'Capgemini enablement sprint. Cognizant cert discussions.',
-            'McKinsey onboarding. Capgemini pipeline development push.',
-            'Q1 kickoff — priorities mapped for Capgemini, Cognizant, McKinsey.',
+            'Peloton Group pipeline at $1.3M — strong momentum. Grant Thornton resource registration at 3/5.',
+            'Karta Consulting blueprint adoption slow — scheduling enablement. Peloton Group certs completed.',
+            'Grant Thornton pipeline development ongoing. Karta Consulting marketplace profile drafted.',
+            'Peloton Group blueprint completions at 7/10. Alpha Alternatives enablement coordination.',
+            'Alpha Alternatives cert push started. Tru Consulting enablement sessions completed.',
+            'Grant Thornton blueprint at 5/8 — need push. Karta Consulting initial assessments.',
+            'Peloton Group cert target achieved. Alpha Alternatives pipeline at $900K.',
+            'Karta Consulting enablement workshops scheduled. Peloton Group pipeline review.',
+            'Grant Thornton resource onboarding progressing. Tru Consulting blueprint kickoff.',
+            'Peloton Group enablement sprint. Alpha Alternatives cert discussions.',
+            'Karta Consulting onboarding. Tru Consulting pipeline development push.',
+            'Q1 kickoff — priorities mapped for Peloton Group, Grant Thornton, Karta, Alpha, Tru Consulting.',
         ],
     ];
 
@@ -194,41 +212,41 @@ class PrioritiesSeeder extends Seeder
      * @var array<string, list<string>>
      */
     private const PARTNER_ACTION_ITEMS = [
-        'Deloitte' => [
-            'URGENT: Schedule OWP blueprint sprint with Deloitte delivery leads — $800K pipeline at risk',
-            'Escalate Deloitte OWP readiness gap to enablement team — 0/14 completions',
-            'Schedule QBR with Deloitte practice lead — include OWP delivery risk',
-            'Review Deloitte IFP delivery blueprint progress with enablement',
-            'Coordinate Deloitte OWP workshop dates with product specialist',
-            'Prepare Deloitte pipeline summary for leadership review — highlight OWP gap',
-            'Follow up on Deloitte marketplace profile analytics',
-            'Send Deloitte team the OWP delivery blueprint requirements and timeline',
+        'Deloitte LLP' => [
+            'URGENT: Schedule OWP blueprint sprint with Deloitte US delivery leads — $800K pipeline at risk',
+            'Escalate Deloitte US OWP readiness gap to enablement team — 0/14 completions',
+            'Schedule QBR with Deloitte US practice lead — include OWP delivery risk',
+            'Review Deloitte US IFP delivery blueprint progress with enablement',
+            'Coordinate Deloitte US OWP workshop dates with product specialist',
+            'Prepare Deloitte US pipeline summary for leadership review — highlight OWP gap',
+            'Follow up on Deloitte US marketplace profile analytics',
+            'Send Deloitte US team the OWP delivery blueprint requirements and timeline',
         ],
-        'PwC' => [
-            'Follow up with PwC on marketplace profile approval',
-            'Schedule PwC blueprint kickoff with new resources',
-            'Review PwC SCM opportunity with sales overlay',
-            'Coordinate PwC cert prep sessions',
-            'Send PwC team the workshop recording links',
-            'Prepare PwC health summary for 1:1 with Bikram',
+        'Slalom Consulting' => [
+            'Follow up with Slalom on marketplace profile approval',
+            'Schedule Slalom blueprint kickoff with new resources',
+            'Review Slalom SCM opportunity with sales overlay',
+            'Coordinate Slalom cert prep sessions',
+            'Send Slalom team the workshop recording links',
+            'Prepare Slalom health summary for 1:1 with Bikram',
         ],
-        'Infosys' => [
-            'Schedule Infosys enablement workshop follow-up',
-            'Review Infosys pipeline with regional sales lead',
-            'Follow up on Infosys cert renewals coming due',
-            'Coordinate Infosys resource registration with partner admin',
-            'Prepare Infosys QBR deck with delivery metrics',
-            'Send Infosys team the updated blueprint catalog',
+        'Spaulding Ridge' => [
+            'Schedule Spaulding Ridge enablement workshop follow-up',
+            'Review Spaulding Ridge pipeline with regional sales lead',
+            'Follow up on Spaulding Ridge cert renewals coming due',
+            'Coordinate Spaulding Ridge resource registration with partner admin',
+            'Prepare Spaulding Ridge QBR deck with delivery metrics',
+            'Send Spaulding Ridge team the updated blueprint catalog',
         ],
-        'IBM' => [
-            'Draft IBM marketplace profile with partner marketing',
-            'Schedule IBM blueprint kickoff meeting',
-            'Review IBM pipeline with ADO product specialist',
-            'Coordinate IBM cert push with enablement team',
-            'Follow up on IBM resource registration with HR contact',
-            'Prepare IBM partner path progress review',
+        'Argano, LLC (Partner)' => [
+            'Draft Argano marketplace profile with partner marketing',
+            'Schedule Argano blueprint kickoff meeting',
+            'Review Argano pipeline with product specialist',
+            'Coordinate Argano cert push with enablement team',
+            'Follow up on Argano resource registration with HR contact',
+            'Prepare Argano partner path progress review',
         ],
-        'BCG' => [
+        'The Boston Consulting Group' => [
             'Schedule BCG marketplace profile review call',
             'Coordinate BCG cert prep sessions with training team',
             'Follow up on BCG delivery resource onboarding',
@@ -242,55 +260,76 @@ class PrioritiesSeeder extends Seeder
             'Follow up on Accenture pipeline opportunities with sales',
             'Coordinate Accenture marketplace analytics review',
         ],
+        'Accordion Partners LLC' => [
+            'Schedule Accordion Partners enablement workshop',
+            'Review Accordion Partners resource registration progress',
+            'Follow up on Accordion Partners pipeline development',
+        ],
+        'Keyrus Global' => [
+            'Coordinate Keyrus Global SCM opportunity research',
+            'Review Keyrus Global blueprint progress',
+            'Schedule Keyrus Global enablement session follow-up',
+        ],
+        'Fadmoor LLC' => [
+            'Follow up on Fadmoor resource registration',
+            'Review Fadmoor pipeline with sales overlay',
+            'Coordinate Fadmoor delivery team onboarding',
+        ],
+        'TruQua, an IBM Company' => [
+            'Schedule TruQua marketplace profile working session',
+            'Review TruQua cert prep schedule',
+            'Coordinate TruQua blueprint kickoff',
+        ],
+        'PwC' => [
+            'Schedule PwC pipeline review with sales lead',
+            'Review PwC blueprint completion status',
+            'Follow up on PwC delivery resource pipeline',
+            'Coordinate PwC SCM opportunity with sales overlay',
+        ],
         'KPMG' => [
-            'Schedule KPMG enablement workshop',
-            'Review KPMG resource registration progress',
-            'Follow up on KPMG pipeline development',
+            'Coordinate KPMG resource registration push',
+            'Review KPMG blueprint progress',
+            'Schedule KPMG pipeline development call',
         ],
-        'Wipro' => [
-            'Coordinate Wipro RPM opportunity research',
-            'Review Wipro blueprint progress',
-            'Schedule Wipro enablement session follow-up',
+        'Genpact' => [
+            'Follow up on Genpact resource onboarding',
+            'Review Genpact blueprint adoption plan',
+            'Coordinate Genpact enablement schedule',
         ],
-        'HCL' => [
-            'Follow up on HCL resource registration',
-            'Review HCL pipeline with sales overlay',
-            'Coordinate HCL delivery team onboarding',
+        'Cervello, a Kearney Company' => [
+            'Schedule Cervello QBR preparation meeting',
+            'Review Cervello pipeline with sales team',
+            'Follow up on Cervello marketplace profile submission',
         ],
-        'Bain' => [
-            'Schedule Bain marketplace profile working session',
-            'Review Bain cert prep schedule',
-            'Coordinate Bain blueprint kickoff',
+        'Valizant' => [
+            'Coordinate Valizant resource registration',
+            'Review Valizant pipeline development strategy',
+            'Schedule Valizant enablement workshop',
         ],
-        'EY' => [
-            'Schedule EY pipeline review with sales lead',
-            'Review EY blueprint completion status',
-            'Follow up on EY delivery resource pipeline',
+        'Peloton Group' => [
+            'Schedule Peloton Group QBR preparation meeting',
+            'Review Peloton Group pipeline with sales team',
+            'Follow up on Peloton Group blueprint completions',
         ],
-        'TCS' => [
-            'Coordinate TCS resource registration push',
-            'Review TCS blueprint progress',
-            'Schedule TCS pipeline development call',
+        'Grant Thornton LLP' => [
+            'Coordinate Grant Thornton resource registration',
+            'Review Grant Thornton pipeline development strategy',
+            'Schedule Grant Thornton enablement workshop',
         ],
-        'Tech Mahindra' => [
-            'Follow up on Tech Mahindra resource onboarding',
-            'Review Tech Mahindra blueprint adoption plan',
-            'Coordinate Tech Mahindra enablement schedule',
+        'Karta Consulting Group' => [
+            'Draft Karta Consulting marketplace profile',
+            'Coordinate Karta Consulting cert prep sessions',
+            'Review Karta Consulting enablement plan',
         ],
-        'Capgemini' => [
-            'Schedule Capgemini QBR preparation meeting',
-            'Review Capgemini pipeline with sales team',
-            'Follow up on Capgemini blueprint completions',
+        'Alpha Alternatives' => [
+            'Schedule Alpha Alternatives cert prep sessions',
+            'Review Alpha Alternatives pipeline opportunities',
+            'Coordinate Alpha Alternatives resource registration push',
         ],
-        'Cognizant' => [
-            'Coordinate Cognizant resource registration',
-            'Review Cognizant pipeline development strategy',
-            'Schedule Cognizant enablement workshop',
-        ],
-        'McKinsey' => [
-            'Draft McKinsey marketplace profile',
-            'Coordinate McKinsey cert prep sessions',
-            'Review McKinsey enablement plan',
+        'Tru Consulting' => [
+            'Follow up on Tru Consulting blueprint progress',
+            'Review Tru Consulting pipeline development',
+            'Coordinate Tru Consulting enablement follow-up',
         ],
     ];
 
@@ -300,22 +339,26 @@ class PrioritiesSeeder extends Seeder
      * @var array<string, array{score: float, risk_level: string, signals: list<string>, dimensions: array}>
      */
     private const HEALTH_SNAPSHOTS = [
-        'Deloitte' => ['score' => 38.0, 'risk_level' => 'at_risk', 'signals' => ['CRITICAL: $800K OWP pipeline closing Q2-Q3 with zero delivery blueprint completions', 'OWP delivery readiness gap — 0 of 14 resources certified for upcoming engagements', 'Blueprint adoption strong for IFP but zero completions for OWP and Forecaster'], 'dimensions' => ['scorecard' => 45.0, 'pipeline_trend' => 85.0, 'goal_attainment' => 30.0, 'enablement' => 15.0, 'contact_freshness' => 80.0, 'delivery_csat' => 25.0]],
-        'PwC' => ['score' => 72.0, 'risk_level' => 'healthy', 'signals' => ['Marketplace profile pending approval', 'Strong pipeline but SCM gap'], 'dimensions' => ['scorecard' => 75.0, 'pipeline_trend' => 80.0, 'goal_attainment' => 65.0, 'enablement' => 72.0, 'contact_freshness' => 70.0, 'delivery_csat' => 70.0]],
-        'Infosys' => ['score' => 55.0, 'risk_level' => 'monitor', 'signals' => ['Low enablement dimension — blueprint completions below threshold', 'Pipeline grew but cert count lagging tier expectations'], 'dimensions' => ['scorecard' => 55.0, 'pipeline_trend' => 60.0, 'goal_attainment' => 50.0, 'enablement' => 40.0, 'contact_freshness' => 65.0, 'delivery_csat' => 60.0]],
-        'IBM' => ['score' => 48.0, 'risk_level' => 'at_risk', 'signals' => ['Low enablement dimension — blueprint completions below threshold', 'No marketplace profile submitted', 'Stale deals — 3 opportunities unchanged for 45+ days'], 'dimensions' => ['scorecard' => 50.0, 'pipeline_trend' => 55.0, 'goal_attainment' => 40.0, 'enablement' => 30.0, 'contact_freshness' => 55.0, 'delivery_csat' => 58.0]],
-        'BCG' => ['score' => 38.0, 'risk_level' => 'critical', 'signals' => ['Low enablement dimension — blueprint completions below threshold', 'No marketplace profile submitted', 'Pipeline declined significantly over last 90 days', 'Certifications below minimum threshold'], 'dimensions' => ['scorecard' => 35.0, 'pipeline_trend' => 30.0, 'goal_attainment' => 35.0, 'enablement' => 25.0, 'contact_freshness' => 50.0, 'delivery_csat' => 55.0]],
+        'Deloitte LLP' => ['score' => 38.0, 'risk_level' => 'at_risk', 'signals' => ['CRITICAL: $800K OWP pipeline closing Q2-Q3 with zero delivery blueprint completions', 'OWP delivery readiness gap — 0 of 14 resources certified for upcoming engagements', 'Blueprint adoption strong for IFP but zero completions for OWP and Forecaster'], 'dimensions' => ['scorecard' => 45.0, 'pipeline_trend' => 85.0, 'goal_attainment' => 30.0, 'enablement' => 15.0, 'contact_freshness' => 80.0, 'delivery_csat' => 25.0]],
+        'Slalom Consulting' => ['score' => 72.0, 'risk_level' => 'healthy', 'signals' => ['Marketplace profile pending approval', 'Strong pipeline but SCM gap'], 'dimensions' => ['scorecard' => 75.0, 'pipeline_trend' => 80.0, 'goal_attainment' => 65.0, 'enablement' => 72.0, 'contact_freshness' => 70.0, 'delivery_csat' => 70.0]],
+        'Spaulding Ridge' => ['score' => 55.0, 'risk_level' => 'monitor', 'signals' => ['Low enablement dimension — blueprint completions below threshold', 'Pipeline grew but cert count lagging tier expectations'], 'dimensions' => ['scorecard' => 55.0, 'pipeline_trend' => 60.0, 'goal_attainment' => 50.0, 'enablement' => 40.0, 'contact_freshness' => 65.0, 'delivery_csat' => 60.0]],
+        'Argano, LLC (Partner)' => ['score' => 48.0, 'risk_level' => 'at_risk', 'signals' => ['Low enablement dimension — blueprint completions below threshold', 'No marketplace profile submitted', 'Stale deals — 3 opportunities unchanged for 45+ days'], 'dimensions' => ['scorecard' => 50.0, 'pipeline_trend' => 55.0, 'goal_attainment' => 40.0, 'enablement' => 30.0, 'contact_freshness' => 55.0, 'delivery_csat' => 58.0]],
+        'The Boston Consulting Group' => ['score' => 38.0, 'risk_level' => 'critical', 'signals' => ['Low enablement dimension — blueprint completions below threshold', 'No marketplace profile submitted', 'Pipeline declined significantly over last 90 days', 'Certifications below minimum threshold'], 'dimensions' => ['scorecard' => 35.0, 'pipeline_trend' => 30.0, 'goal_attainment' => 35.0, 'enablement' => 25.0, 'contact_freshness' => 50.0, 'delivery_csat' => 55.0]],
         'Accenture' => ['score' => 82.0, 'risk_level' => 'healthy', 'signals' => ['Top performer — pipeline and enablement both strong'], 'dimensions' => ['scorecard' => 85.0, 'pipeline_trend' => 88.0, 'goal_attainment' => 80.0, 'enablement' => 78.0, 'contact_freshness' => 82.0, 'delivery_csat' => 80.0]],
-        'KPMG' => ['score' => 52.0, 'risk_level' => 'monitor', 'signals' => ['Pipeline below target', 'Resource registration behind schedule'], 'dimensions' => ['scorecard' => 50.0, 'pipeline_trend' => 48.0, 'goal_attainment' => 55.0, 'enablement' => 45.0, 'contact_freshness' => 60.0, 'delivery_csat' => 55.0]],
-        'Wipro' => ['score' => 60.0, 'risk_level' => 'monitor', 'signals' => ['No RPM pipeline identified', 'Blueprint adoption needs acceleration'], 'dimensions' => ['scorecard' => 60.0, 'pipeline_trend' => 55.0, 'goal_attainment' => 58.0, 'enablement' => 55.0, 'contact_freshness' => 68.0, 'delivery_csat' => 65.0]],
-        'HCL' => ['score' => 50.0, 'risk_level' => 'at_risk', 'signals' => ['Pipeline below target', 'Resource registration significantly behind'], 'dimensions' => ['scorecard' => 48.0, 'pipeline_trend' => 45.0, 'goal_attainment' => 50.0, 'enablement' => 42.0, 'contact_freshness' => 58.0, 'delivery_csat' => 55.0]],
-        'Bain' => ['score' => 32.0, 'risk_level' => 'critical', 'signals' => ['Marketplace profile deadline missed', 'Low enablement dimension — blueprint completions below threshold', 'Certifications below minimum threshold', 'No resources registered'], 'dimensions' => ['scorecard' => 30.0, 'pipeline_trend' => 25.0, 'goal_attainment' => 30.0, 'enablement' => 20.0, 'contact_freshness' => 45.0, 'delivery_csat' => 42.0]],
-        'EY' => ['score' => 65.0, 'risk_level' => 'monitor', 'signals' => ['Pipeline needs push to hit $2M target', 'Blueprint completions on track'], 'dimensions' => ['scorecard' => 65.0, 'pipeline_trend' => 60.0, 'goal_attainment' => 62.0, 'enablement' => 68.0, 'contact_freshness' => 70.0, 'delivery_csat' => 65.0]],
-        'TCS' => ['score' => 45.0, 'risk_level' => 'at_risk', 'signals' => ['Pipeline significantly below target', 'Resource registration behind schedule', 'Low enablement dimension — blueprint completions below threshold'], 'dimensions' => ['scorecard' => 42.0, 'pipeline_trend' => 38.0, 'goal_attainment' => 45.0, 'enablement' => 35.0, 'contact_freshness' => 55.0, 'delivery_csat' => 52.0]],
-        'Tech Mahindra' => ['score' => 42.0, 'risk_level' => 'at_risk', 'signals' => ['Low enablement dimension — blueprint completions below threshold', 'Resource registration behind schedule'], 'dimensions' => ['scorecard' => 40.0, 'pipeline_trend' => 35.0, 'goal_attainment' => 42.0, 'enablement' => 30.0, 'contact_freshness' => 50.0, 'delivery_csat' => 55.0]],
-        'Capgemini' => ['score' => 68.0, 'risk_level' => 'healthy', 'signals' => ['Pipeline growing well', 'Blueprint adoption strong'], 'dimensions' => ['scorecard' => 70.0, 'pipeline_trend' => 72.0, 'goal_attainment' => 65.0, 'enablement' => 68.0, 'contact_freshness' => 65.0, 'delivery_csat' => 68.0]],
-        'Cognizant' => ['score' => 50.0, 'risk_level' => 'monitor', 'signals' => ['Resource registration behind', 'Pipeline below target'], 'dimensions' => ['scorecard' => 48.0, 'pipeline_trend' => 45.0, 'goal_attainment' => 50.0, 'enablement' => 48.0, 'contact_freshness' => 55.0, 'delivery_csat' => 58.0]],
-        'McKinsey' => ['score' => 35.0, 'risk_level' => 'critical', 'signals' => ['No marketplace profile submitted', 'Low enablement dimension — blueprint completions below threshold', 'Certifications below minimum threshold'], 'dimensions' => ['scorecard' => 32.0, 'pipeline_trend' => 28.0, 'goal_attainment' => 35.0, 'enablement' => 25.0, 'contact_freshness' => 48.0, 'delivery_csat' => 42.0]],
+        'Accordion Partners LLC' => ['score' => 52.0, 'risk_level' => 'monitor', 'signals' => ['Pipeline below target', 'Resource registration behind schedule'], 'dimensions' => ['scorecard' => 50.0, 'pipeline_trend' => 48.0, 'goal_attainment' => 55.0, 'enablement' => 45.0, 'contact_freshness' => 60.0, 'delivery_csat' => 55.0]],
+        'Keyrus Global' => ['score' => 60.0, 'risk_level' => 'monitor', 'signals' => ['No SCM pipeline identified', 'Blueprint adoption needs acceleration'], 'dimensions' => ['scorecard' => 60.0, 'pipeline_trend' => 55.0, 'goal_attainment' => 58.0, 'enablement' => 55.0, 'contact_freshness' => 68.0, 'delivery_csat' => 65.0]],
+        'Fadmoor LLC' => ['score' => 50.0, 'risk_level' => 'at_risk', 'signals' => ['Pipeline below target', 'Resource registration significantly behind'], 'dimensions' => ['scorecard' => 48.0, 'pipeline_trend' => 45.0, 'goal_attainment' => 50.0, 'enablement' => 42.0, 'contact_freshness' => 58.0, 'delivery_csat' => 55.0]],
+        'TruQua, an IBM Company' => ['score' => 32.0, 'risk_level' => 'critical', 'signals' => ['Marketplace profile deadline missed', 'Low enablement dimension — blueprint completions below threshold', 'Certifications below minimum threshold', 'No resources registered'], 'dimensions' => ['scorecard' => 30.0, 'pipeline_trend' => 25.0, 'goal_attainment' => 30.0, 'enablement' => 20.0, 'contact_freshness' => 45.0, 'delivery_csat' => 42.0]],
+        'PwC' => ['score' => 65.0, 'risk_level' => 'monitor', 'signals' => ['Pipeline needs push to hit $2M target', 'Blueprint completions on track'], 'dimensions' => ['scorecard' => 65.0, 'pipeline_trend' => 60.0, 'goal_attainment' => 62.0, 'enablement' => 68.0, 'contact_freshness' => 70.0, 'delivery_csat' => 65.0]],
+        'KPMG' => ['score' => 45.0, 'risk_level' => 'at_risk', 'signals' => ['Pipeline significantly below target', 'Resource registration behind schedule', 'Low enablement dimension — blueprint completions below threshold'], 'dimensions' => ['scorecard' => 42.0, 'pipeline_trend' => 38.0, 'goal_attainment' => 45.0, 'enablement' => 35.0, 'contact_freshness' => 55.0, 'delivery_csat' => 52.0]],
+        'Genpact' => ['score' => 42.0, 'risk_level' => 'at_risk', 'signals' => ['Low enablement dimension — blueprint completions below threshold', 'Resource registration behind schedule'], 'dimensions' => ['scorecard' => 40.0, 'pipeline_trend' => 35.0, 'goal_attainment' => 42.0, 'enablement' => 30.0, 'contact_freshness' => 50.0, 'delivery_csat' => 55.0]],
+        'Cervello, a Kearney Company' => ['score' => 68.0, 'risk_level' => 'healthy', 'signals' => ['Pipeline growing well', 'Blueprint adoption strong'], 'dimensions' => ['scorecard' => 70.0, 'pipeline_trend' => 72.0, 'goal_attainment' => 65.0, 'enablement' => 68.0, 'contact_freshness' => 65.0, 'delivery_csat' => 68.0]],
+        'Valizant' => ['score' => 50.0, 'risk_level' => 'monitor', 'signals' => ['Resource registration behind', 'Pipeline below target'], 'dimensions' => ['scorecard' => 48.0, 'pipeline_trend' => 45.0, 'goal_attainment' => 50.0, 'enablement' => 48.0, 'contact_freshness' => 55.0, 'delivery_csat' => 58.0]],
+        'Peloton Group' => ['score' => 68.0, 'risk_level' => 'healthy', 'signals' => ['Pipeline growing well', 'Cert target achieved'], 'dimensions' => ['scorecard' => 70.0, 'pipeline_trend' => 72.0, 'goal_attainment' => 65.0, 'enablement' => 68.0, 'contact_freshness' => 65.0, 'delivery_csat' => 68.0]],
+        'Grant Thornton LLP' => ['score' => 50.0, 'risk_level' => 'monitor', 'signals' => ['Resource registration behind', 'Pipeline below target'], 'dimensions' => ['scorecard' => 48.0, 'pipeline_trend' => 45.0, 'goal_attainment' => 50.0, 'enablement' => 48.0, 'contact_freshness' => 55.0, 'delivery_csat' => 58.0]],
+        'Karta Consulting Group' => ['score' => 35.0, 'risk_level' => 'critical', 'signals' => ['No marketplace profile submitted', 'Low enablement dimension — blueprint completions below threshold', 'Certifications below minimum threshold'], 'dimensions' => ['scorecard' => 32.0, 'pipeline_trend' => 28.0, 'goal_attainment' => 35.0, 'enablement' => 25.0, 'contact_freshness' => 48.0, 'delivery_csat' => 42.0]],
+        'Alpha Alternatives' => ['score' => 52.0, 'risk_level' => 'monitor', 'signals' => ['Pipeline growing but cert count low', 'Resource registration in early stages'], 'dimensions' => ['scorecard' => 50.0, 'pipeline_trend' => 55.0, 'goal_attainment' => 48.0, 'enablement' => 42.0, 'contact_freshness' => 60.0, 'delivery_csat' => 55.0]],
+        'Tru Consulting' => ['score' => 45.0, 'risk_level' => 'at_risk', 'signals' => ['Pipeline below target', 'Blueprint adoption needs acceleration'], 'dimensions' => ['scorecard' => 42.0, 'pipeline_trend' => 38.0, 'goal_attainment' => 45.0, 'enablement' => 40.0, 'contact_freshness' => 52.0, 'delivery_csat' => 50.0]],
     ];
 
     private const MANAGER_REVIEW_NOTES = [
@@ -326,7 +369,7 @@ class PrioritiesSeeder extends Seeder
         'Solid progress across the board. Focus on the at-risk partners next week.',
         'Blueprint completions looking good. Need more attention on cert renewals.',
         'Great work on pipeline growth. Keep the enablement workshops going.',
-        'Good recovery on the critical partners. Maintain focus on BCG/Bain enablement.',
+        'Good recovery on the critical partners. Maintain focus on TruQua/Karta enablement.',
     ];
 
     public function run(): void
@@ -343,10 +386,10 @@ class PrioritiesSeeder extends Seeder
         }
 
         $this->seedHealthSnapshots();
-        $this->command->info('  ✓ Seeded partner health snapshots');
+        $this->command->info('  Seeded partner health snapshots');
 
         $this->fixDeloitteOwpScenario();
-        $this->command->info('  ✓ Fixed Deloitte OWP delivery gap scenario');
+        $this->command->info('  Fixed Deloitte OWP delivery gap scenario');
 
         foreach ($psms as $psm) {
             $partners = $psm->psmPartners;
@@ -356,7 +399,7 @@ class PrioritiesSeeder extends Seeder
 
             $this->seedObjectivesForPsm($psm, $partners);
             $this->seedWeeklyFocusesForPsm($psm, $partners, $bikram);
-            $this->command->info("  ✓ Seeded priorities for {$psm->name} ({$partners->count()} partners)");
+            $this->command->info("  Seeded priorities for {$psm->name} ({$partners->count()} partners)");
         }
 
         $objectiveStats = PsmObjective::selectRaw('status, COUNT(*) as cnt')->groupBy('status')->pluck('cnt', 'status');
@@ -400,13 +443,13 @@ class PrioritiesSeeder extends Seeder
     }
 
     /**
-     * Fix Deloitte OWP opportunity close dates to Q2/Q3 2026 and ensure
+     * Fix Deloitte US OWP opportunity close dates to Q2/Q3 2026 and ensure
      * zero OWP delivery blueprint completions — creating a realistic
      * pipeline-vs-readiness gap scenario.
      */
     private function fixDeloitteOwpScenario(): void
     {
-        $deloitte = Partner::where('name', 'Deloitte')->first();
+        $deloitte = Partner::where('name', 'Deloitte LLP')->first();
         $owp = Product::where('slug', 'operational-workforce-planning')->first();
 
         if (! $deloitte || ! $owp) {
@@ -430,7 +473,7 @@ class PrioritiesSeeder extends Seeder
             ]);
         }
 
-        // Ensure all OWP blueprint enrollments for Deloitte are NOT completed
+        // Ensure all OWP blueprint enrollments for Deloitte US are NOT completed
         $owpBlueprints = DB::table('blueprints')
             ->where('name', 'like', '%Operational Workforce Planning%')
             ->where('status', 'published')
