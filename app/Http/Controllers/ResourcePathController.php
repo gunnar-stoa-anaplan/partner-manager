@@ -85,11 +85,42 @@ class ResourcePathController extends Controller
             ? round($enrollments->avg(fn ($e) => $e->stage_entered_at->diffInDays(now())))
             : 0;
 
+        // Funnel data: for each path, count resources at or beyond each stage
+        $funnelData = collect();
+        foreach ($paths as $path) {
+            $pathEnrollments = $enrollmentsByPath->get($path->id, collect());
+            if ($pathEnrollments->isEmpty()) {
+                continue;
+            }
+
+            $stages = $path->stages->sortBy('sort_order')->values();
+            $funnelStages = [];
+
+            foreach ($stages as $stage) {
+                // Count resources currently at or past this stage
+                $atOrBeyond = $pathEnrollments->filter(
+                    fn ($e) => $e->currentStage->stage_number >= $stage->stage_number
+                )->count();
+
+                $funnelStages[] = [
+                    'name' => $stage->name,
+                    'color' => $stage->color,
+                    'count' => $atOrBeyond,
+                ];
+            }
+
+            $funnelData->put($path->id, [
+                'path_name' => $path->name,
+                'total' => $pathEnrollments->count(),
+                'stages' => $funnelStages,
+            ]);
+        }
+
         return view('plan.resource-paths.index', compact(
             'paths', 'enrollments', 'enrollmentsByPath', 'stageGroups', 'chartData',
             'partners', 'partnersForDropdown', 'psmUsers', 'canSeeAll',
             'selectedPsmId', 'selectedPartnerId', 'selectedPathId',
-            'totalEnrolled', 'byPathCounts', 'avgDaysInStage'
+            'totalEnrolled', 'byPathCounts', 'avgDaysInStage', 'funnelData'
         ));
     }
 

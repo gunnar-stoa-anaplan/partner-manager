@@ -104,6 +104,25 @@
     </div>
 </div>
 
+{{-- Progression Funnels --}}
+@if($funnelData->isNotEmpty())
+<div class="row mb-g">
+    @foreach($funnelData as $pathId => $funnel)
+    <div class="col-xl-{{ $funnelData->count() === 1 ? '12' : ($funnelData->count() === 2 ? '6' : '4') }} mb-g">
+        <div class="card shadow-0 h-100">
+            <div class="card-header d-flex align-items-center justify-content-between py-2">
+                <div class="card-title mb-0">{{ $funnel['path_name'] }} Funnel</div>
+                <span class="badge bg-primary">{{ $funnel['total'] }} enrolled</span>
+            </div>
+            <div class="card-body py-2">
+                <div id="funnel-{{ $pathId }}" style="min-height: 220px;"></div>
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
+@endif
+
 {{-- Enrollments by Path --}}
 @forelse($enrollmentsByPath as $pathId => $pathEnrollments)
 @php
@@ -178,4 +197,90 @@
 </div>
 @endforelse
 
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const funnelData = @json($funnelData);
+
+    Object.keys(funnelData).forEach(function(pathId) {
+        const funnel = funnelData[pathId];
+        const el = document.getElementById('funnel-' + pathId);
+        if (!el || !funnel.stages.length) return;
+
+        const stages = funnel.stages;
+        const maxCount = stages[0].count || 1;
+
+        new ApexCharts(el, {
+            chart: {
+                type: 'bar',
+                height: Math.max(180, stages.length * 48),
+                toolbar: { show: false },
+                fontFamily: 'inherit',
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    barHeight: '70%',
+                    borderRadius: 4,
+                    distributed: true,
+                    dataLabels: { position: 'center' },
+                }
+            },
+            series: [{
+                name: 'Resources',
+                data: stages.map(function(s) { return s.count; })
+            }],
+            colors: stages.map(function(s) { return s.color; }),
+            xaxis: {
+                categories: stages.map(function(s) { return s.name; }),
+                max: Math.ceil(maxCount * 1.15),
+                labels: { show: false },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                labels: {
+                    style: { fontSize: '13px', fontWeight: 500 },
+                }
+            },
+            grid: {
+                xaxis: { lines: { show: false } },
+                yaxis: { lines: { show: false } },
+                padding: { left: 0, right: 10 },
+            },
+            dataLabels: {
+                enabled: true,
+                textAnchor: 'middle',
+                formatter: function(val, opts) {
+                    var idx = opts.dataPointIndex;
+                    var pct = maxCount > 0 ? Math.round((val / maxCount) * 100) : 0;
+                    if (idx === 0) return val + ' resources';
+                    var dropoff = stages[idx - 1].count > 0
+                        ? Math.round(((stages[idx - 1].count - val) / stages[idx - 1].count) * 100)
+                        : 0;
+                    return val + ' (' + pct + '%)' + (dropoff > 0 ? '  \u25BC' + dropoff + '%' : '');
+                },
+                style: {
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    colors: ['#fff'],
+                },
+                dropShadow: { enabled: true, top: 1, left: 1, blur: 2, opacity: 0.3 },
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val, opts) {
+                        var idx = opts.dataPointIndex;
+                        var pct = maxCount > 0 ? Math.round((val / maxCount) * 100) : 0;
+                        return val + ' resources (' + pct + '% of total)';
+                    }
+                }
+            },
+            legend: { show: false },
+        }).render();
+    });
+});
+</script>
 @endsection
