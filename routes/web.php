@@ -52,6 +52,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\QbrController;
 use App\Http\Controllers\ReportingHierarchyController;
+use App\Http\Controllers\ResourcePathConfigurationController;
+use App\Http\Controllers\ResourcePathController;
 use App\Http\Controllers\RiskAnalyzerController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoutingController;
@@ -325,7 +327,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/partners/{partner}/advisor', [PartnerController::class, 'advisor'])->name('partners.advisor');
         Route::get('/partners/{id}/tab/{tab}', [PartnerController::class, 'partnerTab'])
             ->name('partners.tab')
-            ->where('tab', 'overview|pipeline|deal-registrations|enablement|projects|calendar|influencers|resources|blueprints|app-enablement|launch-programs|workspaces|portal-users|marketplace|psm-priorities');
+            ->where('tab', 'overview|pipeline|deal-registrations|enablement|projects|calendar|influencers|resources|blueprints|app-enablement|launch-programs|workspaces|portal-users|marketplace|psm-priorities|resource-paths');
     });
 
     // Marketplace Profile Review (gated by deal_registration.marketplace)
@@ -689,6 +691,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/paths/{enrollment}', [PartnerPathController::class, 'show'])->name('paths.show');
             Route::post('/paths/{enrollment}/advance', [PartnerPathController::class, 'advanceStage'])->name('paths.advance');
 
+            // Resource Paths
+            Route::get('/resource-paths', [ResourcePathController::class, 'index'])->name('resource-paths.index');
+            Route::post('/resource-paths/enroll', [ResourcePathController::class, 'enroll'])->name('resource-paths.enroll');
+            Route::get('/resource-paths/{enrollment}', [ResourcePathController::class, 'show'])->name('resource-paths.show');
+            Route::post('/resource-paths/{enrollment}/advance', [ResourcePathController::class, 'advanceStage'])->name('resource-paths.advance');
+
             // Scorecard
             Route::get('/scorecard', [ScorecardController::class, 'index'])->name('scorecard.index');
             Route::get('/scorecard/{partner}', [ScorecardController::class, 'show'])->name('scorecard.show');
@@ -851,6 +859,24 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/task-templates', [PathConfigurationController::class, 'storeTaskTemplate'])->name('task-templates.store');
             Route::put('/task-templates/{template}', [PathConfigurationController::class, 'updateTaskTemplate'])->name('task-templates.update');
             Route::delete('/task-templates/{template}', [PathConfigurationController::class, 'destroyTaskTemplate'])->name('task-templates.destroy');
+
+            // Resource Path Configuration
+            Route::get('/resource-paths', [ResourcePathConfigurationController::class, 'index'])->name('resource-paths.index');
+            Route::post('/resource-paths', [ResourcePathConfigurationController::class, 'store'])->name('resource-paths.store');
+            Route::get('/resource-paths/{path}', [ResourcePathConfigurationController::class, 'show'])->name('resource-paths.show');
+            Route::put('/resource-paths/{path}', [ResourcePathConfigurationController::class, 'update'])->name('resource-paths.update');
+            Route::post('/resource-paths/{path}/stages', [ResourcePathConfigurationController::class, 'addStage'])->name('resource-paths.stages.store');
+            Route::put('/resource-path-stages/{stage}', [ResourcePathConfigurationController::class, 'updateStage'])->name('resource-path-stages.update');
+            Route::delete('/resource-path-stages/{stage}', [ResourcePathConfigurationController::class, 'destroyStage'])->name('resource-path-stages.destroy');
+            Route::post('/resource-paths/{path}/gates', [ResourcePathConfigurationController::class, 'addGate'])->name('resource-paths.gates.store');
+            Route::put('/resource-path-gates/{gate}', [ResourcePathConfigurationController::class, 'updateGate'])->name('resource-path-gates.update');
+            Route::delete('/resource-path-gates/{gate}', [ResourcePathConfigurationController::class, 'destroyGate'])->name('resource-path-gates.destroy');
+
+            // Resource Task Template Management
+            Route::get('/resource-task-templates', [ResourcePathConfigurationController::class, 'taskTemplates'])->name('resource-task-templates.index');
+            Route::post('/resource-task-templates', [ResourcePathConfigurationController::class, 'storeTaskTemplate'])->name('resource-task-templates.store');
+            Route::put('/resource-task-templates/{template}', [ResourcePathConfigurationController::class, 'updateTaskTemplate'])->name('resource-task-templates.update');
+            Route::delete('/resource-task-templates/{template}', [ResourcePathConfigurationController::class, 'destroyTaskTemplate'])->name('resource-task-templates.destroy');
 
             // Scorecard Weight Configuration
             Route::get('/scorecard-weights', [ScorecardController::class, 'weights'])->name('scorecard-weights.index');

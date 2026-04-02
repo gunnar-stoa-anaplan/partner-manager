@@ -31,6 +31,8 @@ class DatabaseSeeder extends Seeder
 
             // === Phase 1: Reference Data & Configuration ===
             PartnerPathSeeder::class,          // paths, stages, gates
+            ResourcePathSeeder::class,         // resource paths, stages, gates
+            ResourceTaskTemplateSeeder::class, // resource task templates per stage
             ScorecardWeightSeeder::class,      // scorecard dimension weights
             CertificationRequirementSeeder::class, // cert requirements per stage
             TaskTemplateSeeder::class,         // task templates per stage
@@ -61,8 +63,9 @@ class DatabaseSeeder extends Seeder
             StrategySeeder::class,             // CoE users, FY27/FY28 plans, scenarios, reviews
 
             // === Phase 3: Plan Section ===
-            PartnerPathEnrollmentSeeder::class, // enrollments + stage history
-            PartnerTaskSeeder::class,           // tasks + comments (depends on enrollments)
+            PartnerPathEnrollmentSeeder::class,   // enrollments + stage history
+            ResourcePathEnrollmentSeeder::class,  // resource enrollments + stage history
+            PartnerTaskSeeder::class,             // tasks + comments (depends on enrollments)
             PartnerScorecardSeeder::class,      // scorecards (depends on weights)
             PartnerGoalSeeder::class,           // goals + dimensions
             ActionPlanSeeder::class,            // action plans + items

@@ -143,6 +143,21 @@ class Contact extends Authenticatable
         return $this->hasMany(LabParticipant::class);
     }
 
+    public function resourcePathEnrollments()
+    {
+        return $this->hasMany(ResourcePathEnrollment::class);
+    }
+
+    public function resourceStageHistory()
+    {
+        return $this->hasMany(ResourceStageHistory::class);
+    }
+
+    public function resourceTasks()
+    {
+        return $this->hasMany(ResourceTask::class);
+    }
+
     public function scopeInfluencers($query)
     {
         return $query->where('contact_type', 'influencer');

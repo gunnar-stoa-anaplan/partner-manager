@@ -1,0 +1,23 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\ResourcePath;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class ResourcePathFactory extends Factory
+{
+    protected $model = ResourcePath::class;
+
+    public function definition(): array
+    {
+        return [
+            'name' => $this->faker->words(3, true).' Path',
+            'description' => $this->faker->sentence(),
+            'is_default' => false,
+            'is_active' => true,
+            'created_by' => User::factory(),
+        ];
+    }
+}

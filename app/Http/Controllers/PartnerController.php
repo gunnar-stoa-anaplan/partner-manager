@@ -125,6 +125,7 @@ class PartnerController extends Controller
             'blueprints' => $this->blueprintsTabData($partner),
             'marketplace' => $this->marketplaceTabData($partner),
             'psm-priorities' => $this->psmPrioritiesTabData($partner),
+            'resource-paths' => $this->resourcePathsTabData($partner),
             default => abort(404),
         };
 
@@ -1896,5 +1897,26 @@ class PartnerController extends Controller
             ->get();
 
         return compact('activeObjectives', 'recentCompleted');
+    }
+
+    private function resourcePathsTabData(Partner $partner): array
+    {
+        $enrollments = \App\Models\ResourcePathEnrollment::where('partner_id', $partner->id)
+            ->with(['contact', 'path', 'currentStage'])
+            ->orderBy('status')
+            ->get();
+
+        $paths = \App\Models\ResourcePath::where('is_active', true)->orderBy('name')->get();
+
+        $stageDistribution = $enrollments->where('status', 'active')
+            ->groupBy(fn ($e) => $e->currentStage->name)
+            ->map->count();
+
+        $contacts = $partner->contacts()
+            ->whereIn('contact_type', ['resource', 'influencer'])
+            ->orderBy('first_name')
+            ->get();
+
+        return compact('enrollments', 'paths', 'stageDistribution', 'contacts');
     }
 }

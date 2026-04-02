@@ -8,6 +8,8 @@ use App\Http\Controllers\NotificationTemplateController;
 use App\Http\Controllers\PartnerGoalController;
 use App\Http\Controllers\PartnerPathController;
 use App\Http\Controllers\PathConfigurationController;
+use App\Http\Controllers\ResourcePathConfigurationController;
+use App\Http\Controllers\ResourcePathController;
 use App\Http\Controllers\ScorecardController;
 use App\Http\Controllers\TaskBoardController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +31,12 @@ Route::prefix('plan')->name('plan.')->group(function () {
     Route::post('/paths/enroll', [PartnerPathController::class, 'enroll'])->name('paths.enroll');
     Route::get('/paths/{enrollment}', [PartnerPathController::class, 'show'])->name('paths.show');
     Route::post('/paths/{enrollment}/advance', [PartnerPathController::class, 'advanceStage'])->name('paths.advance');
+
+    // Resource Paths
+    Route::get('/resource-paths', [ResourcePathController::class, 'index'])->name('resource-paths.index');
+    Route::post('/resource-paths/enroll', [ResourcePathController::class, 'enroll'])->name('resource-paths.enroll');
+    Route::get('/resource-paths/{enrollment}', [ResourcePathController::class, 'show'])->name('resource-paths.show');
+    Route::post('/resource-paths/{enrollment}/advance', [ResourcePathController::class, 'advanceStage'])->name('resource-paths.advance');
 
     // Scorecard
     Route::get('/scorecard', [ScorecardController::class, 'index'])->name('scorecard.index');
@@ -80,6 +88,24 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
     Route::post('/paths/{path}/gates', [PathConfigurationController::class, 'addGate'])->name('paths.gates.store');
     Route::put('/path-gates/{gate}', [PathConfigurationController::class, 'updateGate'])->name('path-gates.update');
     Route::delete('/path-gates/{gate}', [PathConfigurationController::class, 'destroyGate'])->name('path-gates.destroy');
+
+    // Resource Path Configuration
+    Route::get('/resource-paths', [ResourcePathConfigurationController::class, 'index'])->name('resource-paths.index');
+    Route::post('/resource-paths', [ResourcePathConfigurationController::class, 'store'])->name('resource-paths.store');
+    Route::get('/resource-paths/{path}', [ResourcePathConfigurationController::class, 'show'])->name('resource-paths.show');
+    Route::put('/resource-paths/{path}', [ResourcePathConfigurationController::class, 'update'])->name('resource-paths.update');
+    Route::post('/resource-paths/{path}/stages', [ResourcePathConfigurationController::class, 'addStage'])->name('resource-paths.stages.store');
+    Route::put('/resource-path-stages/{stage}', [ResourcePathConfigurationController::class, 'updateStage'])->name('resource-path-stages.update');
+    Route::delete('/resource-path-stages/{stage}', [ResourcePathConfigurationController::class, 'destroyStage'])->name('resource-path-stages.destroy');
+    Route::post('/resource-paths/{path}/gates', [ResourcePathConfigurationController::class, 'addGate'])->name('resource-paths.gates.store');
+    Route::put('/resource-path-gates/{gate}', [ResourcePathConfigurationController::class, 'updateGate'])->name('resource-path-gates.update');
+    Route::delete('/resource-path-gates/{gate}', [ResourcePathConfigurationController::class, 'destroyGate'])->name('resource-path-gates.destroy');
+
+    // Resource Task Template Management
+    Route::get('/resource-task-templates', [ResourcePathConfigurationController::class, 'taskTemplates'])->name('resource-task-templates.index');
+    Route::post('/resource-task-templates', [ResourcePathConfigurationController::class, 'storeTaskTemplate'])->name('resource-task-templates.store');
+    Route::put('/resource-task-templates/{template}', [ResourcePathConfigurationController::class, 'updateTaskTemplate'])->name('resource-task-templates.update');
+    Route::delete('/resource-task-templates/{template}', [ResourcePathConfigurationController::class, 'destroyTaskTemplate'])->name('resource-task-templates.destroy');
 
     // Task Template Management
     Route::get('/task-templates', [PathConfigurationController::class, 'taskTemplates'])->name('task-templates.index');

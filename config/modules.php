@@ -112,11 +112,19 @@ return [
                     ['label' => 'Competency Matrix', 'route' => 'plan.competency-matrix.index', 'icon' => 'grid'],
                 ],
             ],
+            'resource_paths' => [
+                'label' => 'Resource Paths',
+                'icon' => 'users',
+                'items' => [
+                    ['label' => 'Resource Dashboard', 'route' => 'plan.resource-paths.index', 'icon' => 'home'],
+                ],
+            ],
             'administration' => [
                 'label' => 'Competency Administration',
                 'icon' => 'settings',
                 'items' => [
                     ['label' => 'Path Configuration', 'route' => 'admin.paths.index', 'icon' => 'sliders'],
+                    ['label' => 'Resource Path Config', 'route' => 'admin.resource-paths.index', 'icon' => 'user-check'],
                     ['label' => 'Task Templates', 'route' => 'admin.task-templates.index', 'icon' => 'file-text'],
                     ['label' => 'Scorecard Weights', 'route' => 'admin.scorecard-weights.index', 'icon' => 'bar-chart-2'],
                     ['label' => 'Path Reviews', 'route' => 'act.path-reviews.index', 'icon' => 'check-circle'],
@@ -127,6 +135,11 @@ return [
             'partner_management.management' => [
                 'items' => [
                     ['label' => 'Partner Paths', 'route' => 'plan.paths.index', 'icon' => 'map'],
+                ],
+            ],
+            'partner_detail' => [
+                'tabs' => [
+                    ['label' => 'Resource Paths', 'slug' => 'resource-paths', 'icon' => 'user-graduate', 'partial' => 'partner.tabs.resource-paths', 'section' => 'resource_paths', 'sort' => 72],
                 ],
             ],
         ],
