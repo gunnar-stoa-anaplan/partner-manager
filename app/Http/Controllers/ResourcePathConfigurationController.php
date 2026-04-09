@@ -10,11 +10,91 @@ use Illuminate\Http\Request;
 
 class ResourcePathConfigurationController extends Controller
 {
+    /**
+     * Platform technologies that get their own path group.
+     */
+    private const PLATFORMS = ['Polaris', 'ADO', 'Forecaster', 'CoModeler', 'Agent Studio'];
+
+    /**
+     * Product groups for categorization.
+     */
+    private const PRODUCT_GROUPS = ['Finance', 'Supply Chain', 'HR & Workforce', 'Sales & Marketing'];
+
     public function index()
     {
-        $paths = ResourcePath::with(['stages', 'gates'])->get();
+        $paths = ResourcePath::withCount(['stages', 'gates', 'enrollments', 'taskTemplates'])
+            ->with(['stages' => fn ($q) => $q->orderBy('sort_order')])
+            ->orderBy('name')
+            ->get();
 
-        return view('admin.resource-path-configuration.index', compact('paths'));
+        // Categorize paths
+        $generalTechnical = collect(['Model Builder', 'Solution Architect', 'Master Anaplanner']);
+        $generalNonTechnical = collect(['Sales', 'Pre-Sales', 'Champion']);
+
+        $categorized = [
+            'general' => $paths->filter(fn ($p) => $generalTechnical->contains($p->name) || $generalNonTechnical->contains($p->name)),
+            'platform' => $paths->filter(fn ($p) => collect(self::PLATFORMS)->contains(fn ($t) => str_starts_with($p->name, $t.':'))),
+            'product_group' => $paths->filter(fn ($p) => collect(self::PRODUCT_GROUPS)->contains(fn ($g) => str_starts_with($p->name, $g.':'))),
+            'application' => collect(),
+        ];
+
+        // Application paths = everything not in the above categories
+        $nonAppIds = $categorized['general']->pluck('id')
+            ->merge($categorized['platform']->pluck('id'))
+            ->merge($categorized['product_group']->pluck('id'));
+        $categorized['application'] = $paths->reject(fn ($p) => $nonAppIds->contains($p->id));
+
+        // Group application paths by product group for nested display
+        $appsByGroup = [];
+        foreach (self::PRODUCT_GROUPS as $group) {
+            $groupApps = $categorized['application']->filter(fn ($p) => ! str_starts_with($p->name, $group.':') && $this->belongsToGroup($p->name, $group));
+            if ($groupApps->isNotEmpty()) {
+                $appsByGroup[$group] = $groupApps->sortBy('name');
+            }
+        }
+
+        // Detect role type for each path
+        $pathRoleTypes = $paths->mapWithKeys(fn ($p) => [$p->id => $this->detectRoleType($p->name)]);
+
+        return view('admin.resource-path-configuration.index', compact('paths', 'categorized', 'appsByGroup', 'pathRoleTypes'));
+    }
+
+    /**
+     * Detect the role type (delivery, sales, pre-sales) from a path name.
+     */
+    private function detectRoleType(string $name): string
+    {
+        $lower = strtolower($name);
+        if (str_ends_with($lower, ': sales') || $name === 'Sales') {
+            return 'sales';
+        }
+        if (str_ends_with($lower, ': pre-sales') || $name === 'Pre-Sales') {
+            return 'pre-sales';
+        }
+
+        return 'delivery';
+    }
+
+    /**
+     * Check if an application path belongs to a product group.
+     */
+    private function belongsToGroup(string $pathName, string $group): bool
+    {
+        $appNames = config("resource_paths.groups.{$group}", []);
+        if (! empty($appNames)) {
+            return collect($appNames)->contains(fn ($app) => str_starts_with($pathName, $app.':'));
+        }
+
+        // Fallback: use the seeder's product group data
+        $groupApps = match ($group) {
+            'Finance' => ['Project Cost Planning', 'Profitability Analysis', 'Subscription Revenue Planning', 'Consensus Margin Planning', 'Financial Close and Consolidation', 'Disclosure Management', 'Integrated Financial Planning'],
+            'Supply Chain' => ['Trade Promotion Management', 'Spend Analysis and Forecasting', 'Assortment Planning', 'Allocation and Replenishment Planning', 'Demand Planning', 'Production Planning', 'Inventory Planning', 'Capacity Planning', 'Merchandise Financial Planning', 'Integrated Business Planning'],
+            'HR & Workforce' => ['Contact Center Planning', 'Project Resource Planning', 'Operational Workforce Planning'],
+            'Sales & Marketing' => ['Sales Forecasting', 'Territory & Quota Planning', 'Go-To-Market Capacity Planning'],
+            default => [],
+        };
+
+        return collect($groupApps)->contains(fn ($app) => str_starts_with($pathName, $app.':'));
     }
 
     public function show(ResourcePath $path)
