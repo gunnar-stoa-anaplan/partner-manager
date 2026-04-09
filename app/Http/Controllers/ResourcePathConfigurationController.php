@@ -44,19 +44,10 @@ class ResourcePathConfigurationController extends Controller
             ->merge($categorized['product_group']->pluck('id'));
         $categorized['application'] = $paths->reject(fn ($p) => $nonAppIds->contains($p->id));
 
-        // Group application paths by product group for nested display
-        $appsByGroup = [];
-        foreach (self::PRODUCT_GROUPS as $group) {
-            $groupApps = $categorized['application']->filter(fn ($p) => ! str_starts_with($p->name, $group.':') && $this->belongsToGroup($p->name, $group));
-            if ($groupApps->isNotEmpty()) {
-                $appsByGroup[$group] = $groupApps->sortBy('name');
-            }
-        }
-
         // Detect role type for each path
         $pathRoleTypes = $paths->mapWithKeys(fn ($p) => [$p->id => $this->detectRoleType($p->name)]);
 
-        return view('admin.resource-path-configuration.index', compact('paths', 'categorized', 'appsByGroup', 'pathRoleTypes'));
+        return view('admin.resource-path-configuration.index', compact('paths', 'categorized', 'pathRoleTypes'));
     }
 
     /**
@@ -78,25 +69,6 @@ class ResourcePathConfigurationController extends Controller
     /**
      * Check if an application path belongs to a product group.
      */
-    private function belongsToGroup(string $pathName, string $group): bool
-    {
-        $appNames = config("resource_paths.groups.{$group}", []);
-        if (! empty($appNames)) {
-            return collect($appNames)->contains(fn ($app) => str_starts_with($pathName, $app.':'));
-        }
-
-        // Fallback: use the seeder's product group data
-        $groupApps = match ($group) {
-            'Finance' => ['Project Cost Planning', 'Profitability Analysis', 'Subscription Revenue Planning', 'Consensus Margin Planning', 'Financial Close and Consolidation', 'Disclosure Management', 'Integrated Financial Planning'],
-            'Supply Chain' => ['Trade Promotion Management', 'Spend Analysis and Forecasting', 'Assortment Planning', 'Allocation and Replenishment Planning', 'Demand Planning', 'Production Planning', 'Inventory Planning', 'Capacity Planning', 'Merchandise Financial Planning', 'Integrated Business Planning'],
-            'HR & Workforce' => ['Contact Center Planning', 'Project Resource Planning', 'Operational Workforce Planning'],
-            'Sales & Marketing' => ['Sales Forecasting', 'Territory & Quota Planning', 'Go-To-Market Capacity Planning'],
-            default => [],
-        };
-
-        return collect($groupApps)->contains(fn ($app) => str_starts_with($pathName, $app.':'));
-    }
-
     public function show(ResourcePath $path)
     {
         $path->load(['stages' => fn ($q) => $q->orderBy('stage_number'), 'gates', 'taskTemplates' => fn ($q) => $q->orderBy('sort_order')]);

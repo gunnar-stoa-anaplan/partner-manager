@@ -110,95 +110,38 @@
 <div class="tab-content">
     {{-- General Tab --}}
     <div class="tab-pane fade show active" id="tab-general">
-        <div class="row">
-            {{-- Technical --}}
-            <div class="col-xl-6 mb-g">
-                <div class="card shadow-0 h-100">
-                    <div class="card-header"><div class="card-title">General Technical</div></div>
-                    <div class="card-body p-0">
-                        @include('admin.resource-path-configuration._path-table', ['tablePaths' => $categorized['general']->filter(fn($p) => in_array($p->name, ['Model Builder', 'Solution Architect', 'Master Anaplanner']))])
-                    </div>
-                </div>
-            </div>
-            {{-- Non-Technical --}}
-            <div class="col-xl-6 mb-g">
-                <div class="card shadow-0 h-100">
-                    <div class="card-header"><div class="card-title">General Non-Technical</div></div>
-                    <div class="card-body p-0">
-                        @include('admin.resource-path-configuration._path-table', ['tablePaths' => $categorized['general']->filter(fn($p) => in_array($p->name, ['Sales', 'Pre-Sales', 'Champion']))])
-                    </div>
-                </div>
+        <div class="card shadow-0 mb-g">
+            <div class="card-body p-0">
+                @include('admin.resource-path-configuration._path-table', ['tablePaths' => $categorized['general']->sortBy('name')])
             </div>
         </div>
     </div>
 
     {{-- Platform Tab --}}
     <div class="tab-pane fade" id="tab-platform">
-        @php
-            $platformGroups = $categorized['platform']->groupBy(fn($p) => explode(':', $p->name)[0]);
-        @endphp
-        <div class="row">
-            @foreach($platformGroups as $techName => $techPaths)
-            <div class="col-xl-6 col-xxl-4 mb-g">
-                <div class="card shadow-0 h-100">
-                    <div class="card-header"><div class="card-title">{{ trim($techName) }}</div></div>
-                    <div class="card-body p-0">
-                        @include('admin.resource-path-configuration._path-table', ['tablePaths' => $techPaths->sortBy('name')])
-                    </div>
-                </div>
+        <div class="card shadow-0 mb-g">
+            <div class="card-body p-0">
+                @include('admin.resource-path-configuration._path-table', ['tablePaths' => $categorized['platform']->sortBy('name')])
             </div>
-            @endforeach
         </div>
     </div>
 
     {{-- Product Groups Tab --}}
     <div class="tab-pane fade" id="tab-product-group">
-        <div class="row">
-            @php
-                $pgGroups = $categorized['product_group']->groupBy(fn($p) => explode(':', $p->name)[0]);
-            @endphp
-            @foreach($pgGroups as $groupName => $groupPaths)
-            <div class="col-xl-6 col-xxl-3 mb-g">
-                <div class="card shadow-0 h-100">
-                    <div class="card-header"><div class="card-title">{{ trim($groupName) }}</div></div>
-                    <div class="card-body p-0">
-                        @include('admin.resource-path-configuration._path-table', ['tablePaths' => $groupPaths->sortBy('name')])
-                    </div>
-                </div>
+        <div class="card shadow-0 mb-g">
+            <div class="card-body p-0">
+                @include('admin.resource-path-configuration._path-table', ['tablePaths' => $categorized['product_group']->sortBy('name')])
             </div>
-            @endforeach
         </div>
     </div>
 
     {{-- Applications Tab --}}
     <div class="tab-pane fade" id="tab-applications">
-        @foreach($appsByGroup as $groupName => $groupApps)
-        @php
-            $appGroups = $groupApps->groupBy(fn($p) => explode(':', $p->name)[0]);
-        @endphp
         <div class="card shadow-0 mb-g">
-            <div class="card-header d-flex align-items-center justify-content-between py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#appGroup-{{ Str::slug($groupName) }}">
-                <div class="card-title mb-0">
-                    <i class="fal fa-chevron-down me-1 collapse-icon"></i>{{ $groupName }}
-                    <span class="badge bg-primary ms-2">{{ $groupApps->count() }} paths</span>
-                    <span class="badge bg-light text-dark ms-1">{{ $appGroups->count() }} apps</span>
-                </div>
-            </div>
-            <div class="collapse show" id="appGroup-{{ Str::slug($groupName) }}">
-                <div class="card-body p-0">
-                    @foreach($appGroups as $appName => $appPaths)
-                    <div class="border-bottom path-app-group" data-app-name="{{ strtolower(trim($appName)) }}">
-                        <div class="px-3 py-2 bg-light fw-500 small d-flex justify-content-between align-items-center">
-                            <span>{{ trim($appName) }}</span>
-                            <span class="badge bg-secondary">{{ $appPaths->count() }} paths</span>
-                        </div>
-                        @include('admin.resource-path-configuration._path-table', ['tablePaths' => $appPaths->sortBy('name'), 'compact' => true])
-                    </div>
-                    @endforeach
-                </div>
+            <div class="card-body p-0">
+                @include('admin.resource-path-configuration._path-table', ['tablePaths' => $categorized['application']->sortBy('name')])
             </div>
         </div>
-        @endforeach
     </div>
 </div>
 
@@ -253,11 +196,6 @@ document.addEventListener('DOMContentLoaded', function() {
             var query = this.value.toLowerCase();
             document.querySelectorAll('tr[data-path-name]').forEach(function(row) {
                 row.style.display = row.dataset.pathName.includes(query) ? '' : 'none';
-            });
-            // Also filter app groups
-            document.querySelectorAll('.path-app-group').forEach(function(group) {
-                var visibleRows = group.querySelectorAll('tr[data-path-name]:not([style*="display: none"])');
-                group.style.display = visibleRows.length > 0 || group.dataset.appName.includes(query) ? '' : 'none';
             });
         });
     }
