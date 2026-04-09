@@ -100,5 +100,112 @@ class TaskTemplateSeeder extends Seeder
                 ]));
             }
         }
+
+        $this->seedAppBuilderTemplates($adminId);
+    }
+
+    /**
+     * Task templates for the Application Builder Partner path.
+     */
+    private function seedAppBuilderTemplates(int $adminId): void
+    {
+        $path = PartnerPath::where('name', 'Application Builder Partner')->first();
+        if (! $path) {
+            return;
+        }
+
+        $stages = $path->stages()->pluck('id', 'stage_number');
+
+        // ─── Stage 1: Onboarded ─────────────────────────────────
+        if ($stages->has(1)) {
+            $tasks = [
+                ['category' => 'account', 'requirement_level' => 'required', 'title' => 'Sign App Builder Program Agreement', 'description' => 'Execute the Application Builder addendum covering IP ownership, revenue share, support obligations, and SLAs.', 'effort_size' => 'medium', 'default_owner' => 'psm', 'due_days_offset' => 14, 'evidence_type' => 'file_upload'],
+                ['category' => 'account', 'requirement_level' => 'required', 'title' => 'Register Product Owner & Technical Lead', 'description' => 'Register the partner product owner, technical lead, and designated support contact in Partner Central.', 'effort_size' => 'small', 'default_owner' => 'joint', 'due_days_offset' => 14, 'evidence_type' => 'system_verified'],
+                ['category' => 'enablement', 'requirement_level' => 'required', 'title' => 'Provision Development Sandbox', 'description' => 'Request and provision an Anaplan development sandbox for the app build team.', 'effort_size' => 'small', 'default_owner' => 'psm', 'due_days_offset' => 7, 'evidence_type' => 'psm_attestation'],
+                ['category' => 'enablement', 'requirement_level' => 'required', 'title' => 'Complete App Design Specification Review', 'description' => 'Review Anaplan app design specifications, UX guidelines, API standards, and security requirements with the partner team.', 'effort_size' => 'medium', 'default_owner' => 'joint', 'due_days_offset' => 21, 'evidence_type' => 'psm_attestation'],
+                ['category' => 'enablement', 'requirement_level' => 'required', 'title' => 'Certify 2 Developers as Model Builders', 'description' => 'Ensure at least 2 developers on the app team obtain Model Builder certification.', 'effort_size' => 'large', 'default_owner' => 'partner', 'due_days_offset' => 60, 'evidence_type' => 'system_verified'],
+                ['category' => 'program', 'requirement_level' => 'required', 'title' => 'Submit App Concept Brief', 'description' => 'Submit a one-page concept brief describing the application, target market, differentiation, and estimated timeline.', 'effort_size' => 'medium', 'default_owner' => 'partner', 'due_days_offset' => 30, 'evidence_type' => 'file_upload'],
+            ];
+
+            foreach ($tasks as $i => $task) {
+                TaskTemplate::create(array_merge($task, [
+                    'partner_path_id' => $path->id,
+                    'stage_id' => $stages[1],
+                    'sort_order' => $i,
+                    'is_active' => true,
+                    'created_by' => $adminId,
+                ]));
+            }
+        }
+
+        // ─── Stage 2: Building ──────────────────────────────────
+        if ($stages->has(2)) {
+            $tasks = [
+                ['category' => 'solution', 'requirement_level' => 'required', 'title' => 'Submit App Architecture Document', 'description' => 'Submit detailed application architecture including data model, module design, integrations, and UX wireframes for Anaplan engineering review.', 'effort_size' => 'large', 'default_owner' => 'partner', 'due_days_offset' => 30, 'evidence_type' => 'file_upload'],
+                ['category' => 'solution', 'requirement_level' => 'required', 'title' => 'Complete Bi-Weekly Design Reviews', 'description' => 'Participate in bi-weekly design review sessions with Anaplan engineering team to ensure platform compliance.', 'effort_size' => 'medium', 'default_owner' => 'joint', 'evidence_type' => 'psm_attestation'],
+                ['category' => 'enablement', 'requirement_level' => 'required', 'title' => 'Complete App-Specific Blueprint', 'description' => 'Finish the application builder enablement blueprint covering Anaplan APIs, extension framework, and deployment patterns.', 'effort_size' => 'large', 'default_owner' => 'partner', 'due_days_offset' => 60, 'evidence_type' => 'system_verified'],
+                ['category' => 'enablement', 'requirement_level' => 'required', 'title' => 'Grow Dev Team to 3 Certified', 'description' => 'Expand certified development team to at least 3 resources.', 'effort_size' => 'large', 'default_owner' => 'partner', 'due_days_offset' => 90, 'evidence_type' => 'system_verified'],
+                ['category' => 'solution', 'requirement_level' => 'required', 'title' => 'Submit Application for Validation', 'description' => 'Submit the application build to Anaplan for technical validation including UX review, security audit, and performance benchmarking.', 'effort_size' => 'large', 'default_owner' => 'partner', 'due_days_offset' => 120, 'evidence_type' => 'psm_attestation'],
+                ['category' => 'program', 'requirement_level' => 'recommended', 'title' => 'Draft Support Runbook', 'description' => 'Begin drafting the L1/L2 support runbook including escalation paths, known issues, and troubleshooting guides.', 'effort_size' => 'medium', 'default_owner' => 'partner', 'due_days_offset' => 90, 'evidence_type' => 'file_upload'],
+            ];
+
+            foreach ($tasks as $i => $task) {
+                TaskTemplate::create(array_merge($task, [
+                    'partner_path_id' => $path->id,
+                    'stage_id' => $stages[2],
+                    'sort_order' => $i,
+                    'is_active' => true,
+                    'created_by' => $adminId,
+                ]));
+            }
+        }
+
+        // ─── Stage 3: Validated ─────────────────────────────────
+        if ($stages->has(3)) {
+            $tasks = [
+                ['category' => 'solution', 'requirement_level' => 'required', 'title' => 'Complete Marketplace Profile & Listing', 'description' => 'Submit full marketplace listing with app description, screenshots, pricing tiers, and target customer profile.', 'effort_size' => 'medium', 'default_owner' => 'partner', 'due_days_offset' => 30, 'evidence_type' => 'system_verified'],
+                ['category' => 'business_development', 'requirement_level' => 'required', 'title' => 'Create Sales Enablement Package', 'description' => 'Deliver complete sales kit: battle cards, ROI calculator, competitive positioning, pricing sheet, and standard demo script.', 'effort_size' => 'large', 'default_owner' => 'partner', 'due_days_offset' => 45, 'evidence_type' => 'file_upload'],
+                ['category' => 'business_development', 'requirement_level' => 'required', 'title' => 'Build Demo Environment', 'description' => 'Create and maintain a dedicated demo environment with sample data for field sales presentations.', 'effort_size' => 'large', 'default_owner' => 'partner', 'due_days_offset' => 30, 'evidence_type' => 'psm_attestation'],
+                ['category' => 'business_development', 'requirement_level' => 'required', 'title' => 'Finalize Pricing & Contract Templates', 'description' => 'Finalize customer pricing tiers, licensing terms, and standard contract templates approved by Anaplan legal.', 'effort_size' => 'medium', 'default_owner' => 'joint', 'due_days_offset' => 45, 'evidence_type' => 'file_upload'],
+                ['category' => 'enablement', 'requirement_level' => 'required', 'title' => 'Deliver Field Sales Enablement', 'description' => 'Conduct training sessions for Anaplan AEs and SEs covering the application value prop, demo flow, qualification criteria, and objection handling.', 'effort_size' => 'large', 'default_owner' => 'partner', 'due_days_offset' => 60, 'evidence_type' => 'psm_attestation'],
+                ['category' => 'enablement', 'requirement_level' => 'required', 'title' => 'Deliver L1 Support Enablement', 'description' => 'Train Anaplan L1 support team on the application: common issues, triage procedures, and escalation to partner L2.', 'effort_size' => 'large', 'default_owner' => 'partner', 'due_days_offset' => 60, 'evidence_type' => 'psm_attestation'],
+                ['category' => 'program', 'requirement_level' => 'required', 'title' => 'Finalize L2 Support & SLA Agreement', 'description' => 'Sign off on L2 support SLAs covering response times, bug fix timelines, enhancement request process, and escalation procedures.', 'effort_size' => 'medium', 'default_owner' => 'joint', 'due_days_offset' => 30, 'evidence_type' => 'file_upload'],
+                ['category' => 'business_development', 'requirement_level' => 'required', 'title' => 'Build Initial Pipeline', 'description' => 'Work with field sales to identify and register at least 2 qualified opportunities.', 'effort_size' => 'large', 'default_owner' => 'joint', 'due_days_offset' => 90, 'evidence_type' => 'system_verified'],
+            ];
+
+            foreach ($tasks as $i => $task) {
+                TaskTemplate::create(array_merge($task, [
+                    'partner_path_id' => $path->id,
+                    'stage_id' => $stages[3],
+                    'sort_order' => $i,
+                    'is_active' => true,
+                    'created_by' => $adminId,
+                ]));
+            }
+        }
+
+        // ─── Stage 4: Go-to-Market ─────────────────────────────
+        if ($stages->has(4)) {
+            $tasks = [
+                ['category' => 'business_development', 'requirement_level' => 'required', 'title' => 'Close 3 Customer Deals', 'description' => 'Drive at least 3 closed-won customer deals through the field co-sell motion.', 'effort_size' => 'large', 'default_owner' => 'joint', 'evidence_type' => 'system_verified'],
+                ['category' => 'business_development', 'requirement_level' => 'required', 'title' => 'Build Pipeline to $1M', 'description' => 'Grow active pipeline to at least $1M with qualified opportunities across multiple accounts.', 'effort_size' => 'large', 'default_owner' => 'joint', 'evidence_type' => 'system_verified'],
+                ['category' => 'delivery', 'requirement_level' => 'required', 'title' => 'Achieve 4.0 Customer Satisfaction', 'description' => 'Maintain average CSAT of at least 4.0 across all deployed customers.', 'effort_size' => 'large', 'default_owner' => 'partner', 'evidence_type' => 'system_verified'],
+                ['category' => 'delivery', 'requirement_level' => 'required', 'title' => 'Meet 90% SLA Compliance', 'description' => 'Resolve at least 90% of L2 support tickets within agreed SLA timeframes.', 'effort_size' => 'large', 'default_owner' => 'partner', 'evidence_type' => 'psm_attestation'],
+                ['category' => 'delivery', 'requirement_level' => 'required', 'title' => 'Deliver Quarterly Enhancement Release', 'description' => 'Ship at least 1 enhancement release per quarter with release notes and customer communication.', 'effort_size' => 'large', 'default_owner' => 'partner', 'evidence_type' => 'psm_attestation'],
+                ['category' => 'enablement', 'requirement_level' => 'required', 'title' => 'Grow Support Team to 8 Certified', 'description' => 'Expand certified team to at least 8 resources covering development, L2 support, and sales engineering.', 'effort_size' => 'large', 'default_owner' => 'partner', 'evidence_type' => 'system_verified'],
+                ['category' => 'enablement', 'requirement_level' => 'required', 'title' => 'Refresh Field Sales Enablement', 'description' => 'Update field sales training with new features, customer case studies, and updated competitive positioning.', 'effort_size' => 'medium', 'default_owner' => 'partner', 'evidence_type' => 'psm_attestation'],
+                ['category' => 'program', 'requirement_level' => 'recommended', 'title' => 'Expand to Second Vertical or Geography', 'description' => 'Identify and begin targeting a second vertical market or geography for the application.', 'effort_size' => 'large', 'default_owner' => 'joint', 'evidence_type' => 'psm_attestation'],
+            ];
+
+            foreach ($tasks as $i => $task) {
+                TaskTemplate::create(array_merge($task, [
+                    'partner_path_id' => $path->id,
+                    'stage_id' => $stages[4],
+                    'sort_order' => $i,
+                    'is_active' => true,
+                    'created_by' => $adminId,
+                ]));
+            }
+        }
     }
 }
