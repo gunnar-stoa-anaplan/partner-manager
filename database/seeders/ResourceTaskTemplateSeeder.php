@@ -10,130 +10,102 @@ use Illuminate\Database\Seeder;
 class ResourceTaskTemplateSeeder extends Seeder
 {
     /**
-     * Task templates keyed by path name → stage number → list of templates.
+     * Task templates by role type, keyed by stage number.
+     * {context} is replaced with the path name at seed time.
      *
      * @var array<string, array<int, list<array>>>
      */
-    private const TEMPLATES = [
-        'Model Builder' => [
+    private const ROLE_TEMPLATES = [
+        'delivery' => [
             1 => [
-                ['title' => 'Complete partner resource profile', 'category' => 'enablement', 'description' => 'Fill out full profile in Partner Central including skills, experience, and availability.', 'effort_size' => 'small', 'owner' => 'resource', 'due_days' => 14],
-                ['title' => 'Review Anaplan platform overview', 'category' => 'training', 'description' => 'Complete the self-paced platform overview course.', 'effort_size' => 'small', 'owner' => 'resource', 'due_days' => 21],
-                ['title' => 'Enroll in Model Builder blueprint', 'category' => 'enablement', 'description' => 'Enroll in the core Model Builder learning blueprint.', 'effort_size' => 'small', 'owner' => 'psm', 'due_days' => 14],
+                ['title' => 'Complete resource profile', 'category' => 'enablement', 'description' => 'Fill out profile in Partner Central including skills, experience, and availability for {context}.', 'effort' => 'small', 'owner' => 'resource', 'days' => 14],
+                ['title' => 'Review product overview', 'category' => 'training', 'description' => 'Complete the self-paced {context} product overview course.', 'effort' => 'small', 'owner' => 'resource', 'days' => 21],
+                ['title' => 'Enroll in learning blueprint', 'category' => 'enablement', 'description' => 'Enroll in the {context} learning blueprint.', 'effort' => 'small', 'owner' => 'psm', 'days' => 14],
             ],
             2 => [
-                ['title' => 'Complete Model Builder certification prep', 'category' => 'certification', 'description' => 'Work through certification prep materials and practice exams.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 30],
-                ['title' => 'Schedule and pass MB certification exam', 'category' => 'certification', 'description' => 'Register for and pass the Model Builder certification exam.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 45],
-                ['title' => 'Complete first learning blueprint', 'category' => 'training', 'description' => 'Finish all modules in the assigned learning blueprint.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => 60],
+                ['title' => 'Complete certification prep', 'category' => 'certification', 'description' => 'Work through {context} certification prep materials and practice exams.', 'effort' => 'medium', 'owner' => 'resource', 'days' => 30],
+                ['title' => 'Pass certification exam', 'category' => 'certification', 'description' => 'Register for and pass the {context} certification exam.', 'effort' => 'medium', 'owner' => 'resource', 'days' => 45],
+                ['title' => 'Complete learning blueprint', 'category' => 'training', 'description' => 'Finish all modules in the assigned {context} blueprint.', 'effort' => 'large', 'owner' => 'resource', 'days' => 60],
             ],
             3 => [
-                ['title' => 'Shadow first delivery project', 'category' => 'project', 'description' => 'Observe and assist on an active project under senior guidance.', 'effort_size' => 'large', 'owner' => 'psm', 'due_days' => 30],
-                ['title' => 'Complete application-specific blueprint', 'category' => 'training', 'description' => 'Finish a product-specific blueprint (IFP, SCM, etc.).', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 60],
+                ['title' => 'Shadow first project', 'category' => 'project', 'description' => 'Observe and assist on an active {context} project under senior guidance.', 'effort' => 'large', 'owner' => 'psm', 'days' => 30],
+                ['title' => 'Complete product-specific blueprint', 'category' => 'training', 'description' => 'Finish a {context}-specific advanced blueprint.', 'effort' => 'medium', 'owner' => 'resource', 'days' => 60],
             ],
             4 => [
-                ['title' => 'Lead model build on client project', 'category' => 'delivery', 'description' => 'Take ownership of model building on a delivery engagement.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => 90],
-                ['title' => 'Obtain second certification', 'category' => 'certification', 'description' => 'Expand expertise by obtaining a second Anaplan certification.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 90],
-                ['title' => 'Mentor a Stage 2 resource', 'category' => 'enablement', 'description' => 'Pair with a training-stage resource to share practical knowledge.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => null],
+                ['title' => 'Lead delivery on project', 'category' => 'delivery', 'description' => 'Take ownership of {context} delivery on a client engagement.', 'effort' => 'large', 'owner' => 'resource', 'days' => 90],
+                ['title' => 'Obtain additional certification', 'category' => 'certification', 'description' => 'Expand expertise by obtaining an additional {context}-related certification.', 'effort' => 'medium', 'owner' => 'resource', 'days' => 90],
+                ['title' => 'Mentor a junior resource', 'category' => 'enablement', 'description' => 'Pair with a training-stage resource to share practical {context} knowledge.', 'effort' => 'medium', 'owner' => 'resource'],
             ],
         ],
 
-        'Solution Architect' => [
+        'sales' => [
             1 => [
-                ['title' => 'Complete SA resource profile', 'category' => 'enablement', 'description' => 'Register profile with architecture background and experience.', 'effort_size' => 'small', 'owner' => 'resource', 'due_days' => 14],
-                ['title' => 'Enroll in SA learning track', 'category' => 'training', 'description' => 'Enroll in Solution Architect blueprints and training modules.', 'effort_size' => 'small', 'owner' => 'psm', 'due_days' => 14],
+                ['title' => 'Complete sales onboarding', 'category' => 'training', 'description' => 'Review {context} product overview, pricing guide, and competitive positioning.', 'effort' => 'small', 'owner' => 'resource', 'days' => 14],
+                ['title' => 'Attend sales enablement kickoff', 'category' => 'enablement', 'description' => 'Attend initial {context} sales enablement session with PSM.', 'effort' => 'small', 'owner' => 'psm', 'days' => 21],
             ],
             2 => [
-                ['title' => 'Complete SA certification prep', 'category' => 'certification', 'description' => 'Work through SA-specific certification materials.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 45],
-                ['title' => 'Pass SA certification exam', 'category' => 'certification', 'description' => 'Register for and pass the Solution Architect certification.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 60],
-                ['title' => 'Complete solution design blueprints', 'category' => 'training', 'description' => 'Finish at least 2 solution design learning blueprints.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => 75],
+                ['title' => 'Register first deal', 'category' => 'enablement', 'description' => 'Submit first {context} deal registration through the partner portal.', 'effort' => 'small', 'owner' => 'resource', 'days' => 45],
+                ['title' => 'Complete value selling workshop', 'category' => 'training', 'description' => 'Attend {context} value selling methodology workshop.', 'effort' => 'medium', 'owner' => 'resource', 'days' => 60],
             ],
             3 => [
-                ['title' => 'Lead solution design on project', 'category' => 'project', 'description' => 'Own the technical architecture and solution design for a delivery engagement.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => 90],
-                ['title' => 'Expand to second product area', 'category' => 'certification', 'description' => 'Obtain certification in a second product area for broader design capability.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 90],
+                ['title' => 'Build qualified pipeline', 'category' => 'enablement', 'description' => 'Develop and maintain pipeline of qualified {context} opportunities.', 'effort' => 'large', 'owner' => 'resource'],
+                ['title' => 'Close first deal', 'category' => 'enablement', 'description' => 'Win first {context} deal registration to Closed Won.', 'effort' => 'large', 'owner' => 'resource', 'days' => 90],
             ],
             4 => [
-                ['title' => 'Contribute to solution asset or IP', 'category' => 'delivery', 'description' => 'Create reusable solution template, accelerator, or methodology artifact.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => null],
-                ['title' => 'Present at enablement session', 'category' => 'enablement', 'description' => 'Share architecture best practices at a partner or Anaplan enablement session.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => null],
+                ['title' => 'Expand into multi-product selling', 'category' => 'training', 'description' => 'Learn to position {context} alongside other Anaplan products in a single deal.', 'effort' => 'medium', 'owner' => 'resource'],
+                ['title' => 'Mentor a new sales resource', 'category' => 'enablement', 'description' => 'Guide a newly registered partner sales rep through {context} enablement.', 'effort' => 'medium', 'owner' => 'resource'],
             ],
         ],
 
-        'Master Anaplanner' => [
+        'pre-sales' => [
             1 => [
-                ['title' => 'Verify prerequisite certifications', 'category' => 'assessment', 'description' => 'Confirm MB and SA certifications are active and current.', 'effort_size' => 'small', 'owner' => 'psm', 'due_days' => 14],
-                ['title' => 'Submit Master Anaplanner application', 'category' => 'assessment', 'description' => 'Complete the nomination form with project portfolio and references.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 30],
+                ['title' => 'Request demo environment access', 'category' => 'enablement', 'description' => 'Submit request for {context} demo environment credentials.', 'effort' => 'small', 'owner' => 'psm', 'days' => 7],
+                ['title' => 'Review standard demo scripts', 'category' => 'training', 'description' => 'Review standard {context} demo talk tracks and environment walkthroughs.', 'effort' => 'small', 'owner' => 'resource', 'days' => 14],
             ],
             2 => [
-                ['title' => 'Build delivery portfolio documentation', 'category' => 'assessment', 'description' => 'Document project history with outcomes, complexity, and client feedback.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => 60],
-                ['title' => 'Expand product area coverage', 'category' => 'certification', 'description' => 'Obtain certification in additional product areas to demonstrate breadth.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 90],
+                ['title' => 'Complete demo certification', 'category' => 'certification', 'description' => 'Pass the {context} demo delivery qualification assessment.', 'effort' => 'medium', 'owner' => 'resource', 'days' => 30],
+                ['title' => 'Deliver supervised demo', 'category' => 'assessment', 'description' => 'Deliver a full {context} product demo under PSM or SE observation.', 'effort' => 'medium', 'owner' => 'resource', 'days' => 45],
             ],
             3 => [
-                ['title' => 'Complete Master Anaplanner assessment', 'category' => 'certification', 'description' => 'Pass the Master Anaplanner assessment exam.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => 60],
-                ['title' => 'Deliver complex multi-product project', 'category' => 'delivery', 'description' => 'Lead a project spanning multiple Anaplan product areas.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => null],
+                ['title' => 'Run independent pre-sales engagement', 'category' => 'project', 'description' => 'Lead a full {context} pre-sales cycle: discovery, demo, POC scoping.', 'effort' => 'large', 'owner' => 'resource', 'days' => 60],
             ],
             4 => [
-                ['title' => 'Present at Anaplan community event', 'category' => 'enablement', 'description' => 'Share expertise at a community event, webinar, or partner summit.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => null],
-                ['title' => 'Create reusable solution asset', 'category' => 'delivery', 'description' => 'Build a solution accelerator, template, or methodology guide.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => null],
-            ],
-        ],
-
-        'Sales' => [
-            1 => [
-                ['title' => 'Complete sales onboarding materials', 'category' => 'training', 'description' => 'Review Anaplan product overview, pricing guide, and competitive positioning.', 'effort_size' => 'small', 'owner' => 'resource', 'due_days' => 14],
-                ['title' => 'Attend sales enablement kickoff', 'category' => 'enablement', 'description' => 'Attend initial sales enablement session with PSM.', 'effort_size' => 'small', 'owner' => 'psm', 'due_days' => 21],
-            ],
-            2 => [
-                ['title' => 'Register first deal', 'category' => 'enablement', 'description' => 'Submit first deal registration through the partner portal.', 'effort_size' => 'small', 'owner' => 'resource', 'due_days' => 45],
-                ['title' => 'Complete value selling workshop', 'category' => 'training', 'description' => 'Attend Anaplan value selling methodology workshop.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 60],
-            ],
-            3 => [
-                ['title' => 'Build qualified pipeline to target', 'category' => 'enablement', 'description' => 'Develop and maintain pipeline of qualified Anaplan opportunities.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => null],
-                ['title' => 'Close first Anaplan deal', 'category' => 'enablement', 'description' => 'Win first deal registration to Closed Won.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => 90],
-            ],
-            4 => [
-                ['title' => 'Expand into multi-product selling', 'category' => 'training', 'description' => 'Learn to position multiple Anaplan products in a single deal.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => null],
-                ['title' => 'Mentor a new partner sales resource', 'category' => 'enablement', 'description' => 'Guide a newly registered partner sales rep through the enablement process.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => null],
-            ],
-        ],
-
-        'Pre-Sales' => [
-            1 => [
-                ['title' => 'Request demo environment access', 'category' => 'enablement', 'description' => 'Submit request for partner demo environment credentials.', 'effort_size' => 'small', 'owner' => 'psm', 'due_days' => 7],
-                ['title' => 'Review standard demo scripts', 'category' => 'training', 'description' => 'Review standard demo talk tracks and environment walkthroughs.', 'effort_size' => 'small', 'owner' => 'resource', 'due_days' => 14],
-            ],
-            2 => [
-                ['title' => 'Complete demo certification', 'category' => 'certification', 'description' => 'Pass the demo delivery qualification assessment.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 30],
-                ['title' => 'Deliver supervised demo', 'category' => 'assessment', 'description' => 'Deliver a full product demo under PSM or SE observation.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 45],
-                ['title' => 'Complete MB certification', 'category' => 'certification', 'description' => 'Obtain Model Builder certification for technical credibility.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 60],
-            ],
-            3 => [
-                ['title' => 'Run independent pre-sales engagement', 'category' => 'project', 'description' => 'Lead a full pre-sales cycle: discovery, demo, POC scoping.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => 60],
-                ['title' => 'Expand demo capability to second product', 'category' => 'training', 'description' => 'Learn and certify on demo for a second product area.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 90],
-            ],
-            4 => [
-                ['title' => 'Build custom demo environment', 'category' => 'delivery', 'description' => 'Create a custom demo for a specific industry or use case.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => null],
-                ['title' => 'Contribute to pre-sales playbook', 'category' => 'enablement', 'description' => 'Document discovery frameworks or objection handling for the team.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => null],
-            ],
-        ],
-
-        'Champion' => [
-            1 => [
-                ['title' => 'Schedule introductory alignment call', 'category' => 'enablement', 'description' => 'Meet with PSM to align on partnership goals and champion role.', 'effort_size' => 'small', 'owner' => 'psm', 'due_days' => 14],
-                ['title' => 'Review partnership overview materials', 'category' => 'training', 'description' => 'Review Anaplan partnership framework and mutual value proposition.', 'effort_size' => 'small', 'owner' => 'resource', 'due_days' => 21],
-            ],
-            2 => [
-                ['title' => 'Attend quarterly partner advisory board', 'category' => 'enablement', 'description' => 'Participate in partner advisory board or planning session.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 90],
-                ['title' => 'Facilitate internal Anaplan awareness session', 'category' => 'enablement', 'description' => 'Run internal session introducing Anaplan opportunity to practice team.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => 60],
-            ],
-            3 => [
-                ['title' => 'Drive internal resource onboarding', 'category' => 'enablement', 'description' => 'Champion the enrollment of new resources into Anaplan training paths.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => null],
-                ['title' => 'Co-develop joint business plan', 'category' => 'enablement', 'description' => 'Work with PSM to develop annual joint business plan.', 'effort_size' => 'large', 'owner' => 'joint', 'due_days' => null],
-            ],
-            4 => [
-                ['title' => 'Sponsor executive-level engagement', 'category' => 'enablement', 'description' => 'Facilitate executive-to-executive connection between partner and Anaplan leadership.', 'effort_size' => 'medium', 'owner' => 'resource', 'due_days' => null],
-                ['title' => 'Present at Anaplan partner summit', 'category' => 'enablement', 'description' => 'Represent the partnership at an Anaplan partner event.', 'effort_size' => 'large', 'owner' => 'resource', 'due_days' => null],
+                ['title' => 'Build custom demo environment', 'category' => 'delivery', 'description' => 'Create a custom {context} demo for a specific industry or use case.', 'effort' => 'large', 'owner' => 'resource'],
+                ['title' => 'Contribute to pre-sales playbook', 'category' => 'enablement', 'description' => 'Document {context} discovery frameworks or objection handling for the team.', 'effort' => 'medium', 'owner' => 'resource'],
             ],
         ],
     ];
+
+    /**
+     * Detect which role type a path uses based on its name suffix.
+     */
+    private function detectRoleType(string $pathName): ?string
+    {
+        $lower = strtolower($pathName);
+
+        // Exact matches for general paths
+        if (in_array($pathName, ['Sales', 'Pre-Sales'])) {
+            return $pathName === 'Sales' ? 'sales' : 'pre-sales';
+        }
+
+        // Suffix-based detection for product paths
+        if (str_ends_with($lower, ': delivery') || str_ends_with($lower, ' delivery')) {
+            return 'delivery';
+        }
+        if (str_ends_with($lower, ': sales')) {
+            return 'sales';
+        }
+        if (str_ends_with($lower, ': pre-sales')) {
+            return 'pre-sales';
+        }
+
+        // General technical paths use delivery templates
+        if (in_array($pathName, ['Model Builder', 'Solution Architect'])) {
+            return 'delivery';
+        }
+
+        return null;
+    }
 
     public function run(): void
     {
@@ -142,33 +114,37 @@ class ResourceTaskTemplateSeeder extends Seeder
         $admin = User::whereRelation('role', 'slug', 'admin')->first() ?? User::first();
         $templateCount = 0;
 
-        foreach (self::TEMPLATES as $pathName => $stageTemplates) {
-            $path = ResourcePath::where('name', $pathName)->first();
-            if (! $path) {
-                $this->command->warn("  Path '{$pathName}' not found — skipping templates.");
+        $paths = ResourcePath::with(['stages' => fn ($q) => $q->orderBy('sort_order')])->get();
 
+        foreach ($paths as $path) {
+            $roleType = $this->detectRoleType($path->name);
+            if (! $roleType || ! isset(self::ROLE_TEMPLATES[$roleType])) {
                 continue;
             }
 
-            $stages = $path->stages()->orderBy('sort_order')->get()->keyBy('stage_number');
+            $stages = $path->stages->keyBy('stage_number');
+            $templates = self::ROLE_TEMPLATES[$roleType];
 
-            foreach ($stageTemplates as $stageNumber => $templates) {
+            // Use the path name as context, stripping the role suffix for cleaner descriptions
+            $context = preg_replace('/:\s*(Delivery|Sales|Pre-Sales)$/i', '', $path->name);
+
+            foreach ($templates as $stageNumber => $stageTemplates) {
                 $stage = $stages->get($stageNumber);
                 if (! $stage) {
                     continue;
                 }
 
-                foreach ($templates as $sortOrder => $tpl) {
+                foreach ($stageTemplates as $sortOrder => $tpl) {
                     ResourceTaskTemplate::create([
                         'resource_path_id' => $path->id,
                         'stage_id' => $stage->id,
                         'category' => $tpl['category'],
                         'requirement_level' => 'required',
-                        'title' => $tpl['title'],
-                        'description' => $tpl['description'],
-                        'effort_size' => $tpl['effort_size'],
+                        'title' => str_replace('{context}', $context, $tpl['title']),
+                        'description' => str_replace('{context}', $context, $tpl['description']),
+                        'effort_size' => $tpl['effort'],
                         'default_owner' => $tpl['owner'],
-                        'due_days_offset' => $tpl['due_days'],
+                        'due_days_offset' => $tpl['days'] ?? null,
                         'evidence_type' => 'psm_attestation',
                         'sort_order' => $sortOrder,
                         'is_active' => true,
