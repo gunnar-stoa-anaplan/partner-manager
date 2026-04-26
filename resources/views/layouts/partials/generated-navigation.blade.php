@@ -87,6 +87,18 @@
     @endif
     @endcan
 
+    {{-- Journeys (visible to admins and assigned PSMs) --}}
+    @if(Route::has('journeys.index'))
+    <li>
+        <a href="{{ route('journeys.index') }}" title="Journeys" data-filter-tags="journeys">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#map"></use>
+            </svg>
+            <span class="nav-link-text">Journeys</span>
+        </a>
+    </li>
+    @endif
+
     {{-- User Profile (always visible) --}}
     <li>
         <a href="{{ route('profile.edit') }}" title="Profile" data-filter-tags="profile settings">
