@@ -32,6 +32,7 @@ use App\Http\Controllers\GoalsController;
 use App\Http\Controllers\GoalTemplateController;
 use App\Http\Controllers\HealthDashboardController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\JourneyController;
 use App\Http\Controllers\LabController;
 use App\Http\Controllers\LabFacilitatorController;
 use App\Http\Controllers\LaunchProgramController;
@@ -900,6 +901,19 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/notification-templates/{template}', [NotificationTemplateController::class, 'destroy'])->name('notification-templates.destroy');
             Route::post('/notification-templates/{template}/test', [NotificationTemplateController::class, 'preview'])->name('notification-templates.test');
         });
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Journeys
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('journeys')->name('journeys.')->group(function () {
+        Route::get('/', [JourneyController::class, 'index'])->name('index');
+        Route::get('/{journey}', [JourneyController::class, 'show'])->name('show');
+        Route::get('/{journey}/participants', [JourneyController::class, 'participants'])->name('participants');
+        Route::get('/{journey}/pending', [JourneyController::class, 'pending'])->name('pending');
+        Route::get('/{journey}/activity', [JourneyController::class, 'activity'])->name('activity');
     });
 
     /*
