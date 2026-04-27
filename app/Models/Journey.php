@@ -38,6 +38,21 @@ class Journey extends Model
         return $this->hasMany(JourneyAssignment::class);
     }
 
+    public function participants(): HasMany
+    {
+        return $this->hasMany(JourneyParticipant::class);
+    }
+
+    public function agentLogs(): HasMany
+    {
+        return $this->hasMany(JourneyAgentLog::class);
+    }
+
+    public function pendingActions(): HasMany
+    {
+        return $this->hasMany(JourneyPendingAction::class);
+    }
+
     /**
      * Scope for journeys visible to the given user.
      * Admins see all; PSMs see only assigned journeys.
