@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\PartnerAdvisorController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\EnablementController;
 use App\Http\Controllers\Api\V1\ImportController;
+use App\Http\Controllers\Api\V1\JourneyRuntimeController;
 use App\Http\Controllers\Api\V1\PartnerController;
 use App\Http\Controllers\Api\V1\TokenController;
 use Illuminate\Support\Facades\Route;
@@ -57,4 +58,25 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/enablement/designer', EnablementDesignerController::class)->name('api.enablement.designer');
         Route::post('/enablement/lab-designer', LabDesignerController::class)->name('api.enablement.lab-designer');
     });
+
+    Route::prefix('journeys/{journey:journey_key}')
+        ->middleware('journey.token')
+        ->group(function (): void {
+            Route::middleware('abilities:journey:read')->group(function (): void {
+                Route::get('/participants', [JourneyRuntimeController::class, 'listParticipants']);
+                Route::get('/participants/{participant}', [JourneyRuntimeController::class, 'showParticipant']);
+                Route::get('/participants/{participant}/history', [JourneyRuntimeController::class, 'participantHistory']);
+                Route::get('/logs', [JourneyRuntimeController::class, 'listLogs']);
+                Route::get('/pending-actions', [JourneyRuntimeController::class, 'listPendingActions']);
+            });
+
+            Route::middleware('abilities:journey:write')->group(function (): void {
+                Route::post('/participants', [JourneyRuntimeController::class, 'storeParticipant']);
+                Route::patch('/participants/{participant}', [JourneyRuntimeController::class, 'updateParticipant']);
+                Route::post('/participants/{participant}/transition', [JourneyRuntimeController::class, 'transitionStage']);
+                Route::post('/logs', [JourneyRuntimeController::class, 'storeLog']);
+                Route::post('/pending-actions', [JourneyRuntimeController::class, 'storePendingAction']);
+                Route::patch('/pending-actions/{action}/complete', [JourneyRuntimeController::class, 'completePendingAction']);
+            });
+        });
 });
