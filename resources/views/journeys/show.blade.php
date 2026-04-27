@@ -128,6 +128,10 @@
             <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#activity"></use></svg>
             Activity Log
         </a>
+        <a href="{{ route('journeys.builder', $journey) }}" class="btn btn-outline-success btn-sm">
+            <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#layers"></use></svg>
+            Builder
+        </a>
     </div>
 
 @endsection

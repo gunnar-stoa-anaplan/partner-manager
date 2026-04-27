@@ -146,6 +146,128 @@ class JourneyController extends Controller
     }
 
     /**
+     * Drag/drop builder — owner attaches assets (and later, sub-journeys) to stages.
+     */
+    public function builder(Journey $journey): \Illuminate\View\View
+    {
+        $this->authorizeJourneyAccess($journey);
+
+        $assets = \App\Models\Asset::query()
+            ->active()
+            ->availableTo($journey)
+            ->orderBy('type')
+            ->orderBy('name')
+            ->get();
+
+        $items = $journey->stageItems()
+            ->orderBy('stage_number')
+            ->orderBy('position')
+            ->get();
+
+        $assetIndex = \App\Models\Asset::query()
+            ->whereIn('id', $items->where('item_type', \App\Models\JourneyStageItem::ITEM_TYPE_ASSET)->pluck('item_id'))
+            ->get()
+            ->keyBy('id');
+
+        $itemsByStage = collect(JourneyDatabase::STAGES)
+            ->keys()
+            ->mapWithKeys(fn ($stageNum) => [$stageNum => $items->where('stage_number', $stageNum)->map(function ($item) use ($assetIndex) {
+                $asset = $item->item_type === \App\Models\JourneyStageItem::ITEM_TYPE_ASSET
+                    ? $assetIndex->get($item->item_id)
+                    : null;
+
+                return [
+                    'item_id' => $item->id,
+                    'item_type' => $item->item_type,
+                    'asset_id' => $asset?->id,
+                    'name' => $asset?->name ?? '(missing)',
+                    'type' => $asset?->type,
+                    'type_label' => $asset?->typeLabel(),
+                    'required' => $item->required,
+                    'position' => $item->position,
+                ];
+            })->values()->all()]);
+
+        $stages = collect(JourneyDatabase::STAGES)
+            ->map(fn ($s, $num) => array_merge($s, ['num' => $num]))
+            ->values();
+
+        return view('journeys.builder', compact('journey', 'assets', 'stages', 'itemsByStage'));
+    }
+
+    /**
+     * Attach an item (asset for v1) to a stage.
+     */
+    public function attachItem(\App\Http\Requests\AttachJourneyStageItemRequest $request, Journey $journey): \Illuminate\Http\JsonResponse
+    {
+        $this->authorizeJourneyAccess($journey);
+
+        $data = $request->validated();
+        $type = $data['item_type'] ?? \App\Models\JourneyStageItem::ITEM_TYPE_ASSET;
+
+        if ($type === \App\Models\JourneyStageItem::ITEM_TYPE_ASSET) {
+            $asset = \App\Models\Asset::query()
+                ->active()
+                ->availableTo($journey)
+                ->findOrFail($data['item_id']);
+
+            $type = \App\Models\JourneyStageItem::ITEM_TYPE_ASSET;
+            $itemId = $asset->id;
+            $name = $asset->name;
+            $typeLabel = $asset->typeLabel();
+            $assetType = $asset->type;
+            $assetId = $asset->id;
+        } else {
+            abort(422, 'Sub-journey items not yet supported.');
+        }
+
+        $position = $journey->stageItems()
+            ->where('stage_number', $data['stage_number'])
+            ->max('position') ?? -1;
+
+        $item = $journey->stageItems()->updateOrCreate(
+            [
+                'stage_number' => $data['stage_number'],
+                'item_type' => $type,
+                'item_id' => $itemId,
+            ],
+            [
+                'position' => $position + 1,
+                'required' => $data['required'] ?? false,
+                'added_by' => auth()->id(),
+            ]
+        );
+
+        return response()->json([
+            'item_id' => $item->id,
+            'item_type' => $type,
+            'asset_id' => $assetId,
+            'name' => $name,
+            'type' => $assetType,
+            'type_label' => $typeLabel,
+            'required' => $item->required,
+            'stage_number' => $item->stage_number,
+            'position' => $item->position,
+        ]);
+    }
+
+    /**
+     * Detach an item from a stage.
+     */
+    public function detachItem(Journey $journey, \App\Models\JourneyStageItem $item): \Illuminate\Http\JsonResponse
+    {
+        $this->authorizeJourneyAccess($journey);
+
+        if ($item->journey_id !== $journey->id) {
+            abort(404);
+        }
+
+        $item->delete();
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
      * Enforce that the current user can view this journey.
      * Admins can view all; PSMs only their assigned journeys.
      */

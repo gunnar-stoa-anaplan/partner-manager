@@ -914,6 +914,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{journey}/participants', [JourneyController::class, 'participants'])->name('participants');
         Route::get('/{journey}/pending', [JourneyController::class, 'pending'])->name('pending');
         Route::get('/{journey}/activity', [JourneyController::class, 'activity'])->name('activity');
+        Route::get('/{journey}/builder', [JourneyController::class, 'builder'])->name('builder');
+        Route::post('/{journey}/builder/items', [JourneyController::class, 'attachItem'])->name('builder.attach');
+        Route::delete('/{journey}/builder/items/{item}', [JourneyController::class, 'detachItem'])->name('builder.detach');
     });
 
     /*
