@@ -1,0 +1,69 @@
+{
+  "_meta": {
+    "description": "Stage 3 (Credentialized) for the Connected Planning Sales Foundations journey. AI-graded mock pitch (Connected Planning narrative + universal objection handling) followed by the Sales Foundations Academy course / certification. Completion of Stage 3 satisfies the Sales-track foundational prereq required for every per-application Sales journey.",
+    "iteration_date": "2026-05-01",
+    "persona": "sales",
+    "foundational": true,
+    "terminal_for_foundational": true,
+    "_terminal_note": "Stage 3 is the final stage of the Sales Foundations journey — no Stage 4 or 5. Real-customer selling happens in per-application Sales journeys, not here.",
+    "open_items_parked_for_later": [
+      "AI mock-pitch agent — shared infrastructure with the per-app Sales journey mock pitches. Confirm scenario library covers a generic Connected Planning pitch.",
+      "Sales Foundations Academy course — name and content scope to be confirmed by Op Cmte / sales enablement.",
+      "Mock pitch rubric — generic version of the per-app rubric; needs definition."
+    ]
+  },
+
+  "_fixed": false,
+  "_note": "Stage 3 task structure is FIXED. Mock pitch scenario and rubric are defined externally.",
+  "stage_number": 3,
+  "name": "Credentialized",
+  "phase": "learning",
+  "description": "Seller demonstrates universal Anaplan selling fluency through an AI-graded mock pitch and earns the Sales Foundations certification.",
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "task_id": "mock-pitch-connected-planning",
+      "title": "Mock pitch — Connected Planning narrative + universal objection handling",
+      "description": "AI-graded mock pitch focused on the Connected Planning enterprise narrative pitched at executive level (e.g., to a CFO or COO), with the AI agent surfacing universal objections (Excel, Workday, ChatGPT, TCO, change management) for the seller to handle. Generic across applications — per-app specifics in per-app Sales journey Stage 3 mocks.",
+      "asset": "Mock Pitch — Connected Planning Narrative (AI scenario + rubric)",
+      "source_system": "AI mock-pitch agent",
+      "estimated_effort": "60-90 min (mock + feedback review; allow time for retry if needed)",
+      "completion_mechanism": "ai_lab_verification",
+      "pass_criteria": "rubric_threshold",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "sales-foundations-academy",
+      "title": "Sales Foundations Academy course",
+      "description": "Self-paced Academy course consolidating Stage 2 content with a comprehensive comprehension exam. Confirms the seller has internalized Connected Planning narrative, discovery, value messaging, competitive, and universal objection handling. Mix of multiple-choice questions and case-style questions.",
+      "asset": "Sales Foundations Academy course (with exam)",
+      "source_system": "Academy",
+      "estimated_effort": "60-90 min",
+      "completion_mechanism": "academy_xls",
+      "required": true,
+      "prerequisite": "mock-pitch-connected-planning"
+    }
+  ],
+
+  "stage_entry_gates": [
+    { "_fixed": true, "gate_id": "ai-mock-pitch-agent-available", "description": "AI mock-pitch agent infrastructure available (program-level dependency on P10 tooling spec)", "verification_source": "external_system" }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "mock-pitch-connected-planning-passed",  "description": "Mock pitch (Connected Planning narrative) passed — AI rubric threshold met",                  "verification_source": "ai_lab_verification" },
+    { "_fixed": true, "gate_id": "sales-foundations-certified",            "description": "Sales Foundations Academy course completion confirmed (exam passed) — credential issued",      "verification_source": "academy_xls" }
+  ],
+
+  "estimated_effort_total": "2h 0min - 3h 0min",
+  "_estimated_effort_total_note": "Mock pitch + certification course. Considerably lighter than per-app Sales Stage 3 (~4-5.5 hrs) since this is a single mock and exam, not 3 mocks + senior reviewer credential.",
+
+  "_per_product_authoring_obligations": {
+    "description": "Foundational journey — single canonical asset set.",
+    "items": [
+      { "item": "Mock Pitch — Connected Planning Narrative (AI scenario + rubric)", "scope": "AI scenario script with universal-objection prompts + grading rubric." },
+      { "item": "Sales Foundations Academy course (with exam)",                     "scope": "Academy-authored; consolidates Stage 2 content into a coherent comprehension exam." }
+    ]
+  }
+}

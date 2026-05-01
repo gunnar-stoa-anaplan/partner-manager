@@ -1,0 +1,79 @@
+{
+  "_meta": {
+    "description": "Stage 1 (Registered) for the Connected Planning Sales Foundations journey — the universal sales-track foundational journey required before any per-application Sales journey.",
+    "iteration_date": "2026-05-01",
+    "persona": "sales",
+    "foundational": true,
+    "_audience_note": "Required for Sales persona. Replaces 'Anaplan Platform' as Sales' second prereq because sellers need value-messaging and Connected Planning narrative grounding rather than deep platform fluency."
+  },
+
+  "_fixed": false,
+  "_note": "Stage 1 task structure for the Connected Planning Sales Foundations journey.",
+  "stage_number": 1,
+  "name": "Registered",
+  "phase": "onboarding",
+  "description": "Sales-track resource confirms journey understanding, partner portal access, sales-resource profile, Partner Success engagement model, and Anaplan Overview prereq completion.",
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "task_id": "journey-orientation",
+      "title": "Review Connected Planning Sales Foundations roadmap & expectations",
+      "description": "Walk through the 3 stages of the Sales Foundations journey, what's covered in each, and how this foundational journey routes to per-application Sales journeys (IFP Sales, FCR Sales, etc.) on completion.",
+      "asset": "Connected Planning Sales Foundations roadmap",
+      "source_system": "Seismic",
+      "estimated_effort": "10-15 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "join-partner-portal",
+      "title": "Join the partner portal",
+      "completion_mechanism": "external_system",
+      "estimated_effort": "30 min",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "complete-sales-resource-profile",
+      "title": "Complete sales-resource profile",
+      "description": "Augment the resource profile with sales-specialization fields: prior sales experience (years), prior products sold, primary customer segments (Enterprise / Mid-Market / SMB), industries covered, region/territory, and language coverage. Manager attestation required to exit Stage 2.",
+      "completion_mechanism": "self_attest",
+      "estimated_effort": "15-20 min",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "partner-sales-support-engagement",
+      "title": "Understand how to engage Anaplan partner-sales support",
+      "description": "Review the partner-sales support engagement model — channel manager / Partner Account Manager contact, deal-desk and pricing escalation path, pre-sales support request mechanism, competitive-intelligence support, and how to use the Partner Sales agent. Differs from the Partner Success / technical support paths used in foundational technical journeys.",
+      "asset": "Partner Sales support engagement guide",
+      "source_system": "Seismic",
+      "estimated_effort": "15 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "verify-anaplan-overview-complete",
+      "title": "Verify Anaplan Overview journey complete",
+      "completion_mechanism": "prereq_journey_check",
+      "required": true
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "journey-orientation-acknowledged",            "description": "Connected Planning Sales Foundations roadmap reviewed and acknowledged",   "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "portal-active",                                "description": "Partner portal login active",                                              "verification_source": "external_system" },
+    { "_fixed": true, "gate_id": "profile-complete",                              "description": "Sales-resource profile complete",                                          "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "partner-sales-support-engagement-acknowledged","description": "Partner-sales support engagement model acknowledged",                      "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "anaplan-overview-complete",                    "description": "Anaplan Overview journey marked complete",                                  "verification_source": "prereq_journey_check" }
+  ],
+
+  "stage_exit_actions": [],
+  "_stage_exit_actions_note": "No system-side actions on Stage 1 exit. No sandbox provisioning — Sales Foundations Stage 3 mock pitch is conducted via the AI mock-pitch agent.",
+
+  "estimated_effort_total": "1h 10min - 1h 20min",
+  "_estimated_effort_total_note": "Lightweight Stage 1 — sales onboarding rather than technical onboarding."
+}

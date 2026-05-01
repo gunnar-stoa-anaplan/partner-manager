@@ -65,6 +65,8 @@ class FoundationalJourneySeeder extends Seeder
         $assetSeedTargets = [
             'anaplan-overview',
             'anaplan-platform',
+            'connected-planning-sales-foundations',
+            'connected-planning-pre-sales-foundations',
         ];
         foreach ($assetSeedTargets as $slug) {
             $journey = Journey::query()->where('journey_key', $slug)->first();
