@@ -58,7 +58,7 @@
                                 <th>Asset</th>
                                 <th>Kind</th>
                                 <th>Linked Asset</th>
-                                <th>Assigned To</th>
+                                <th>Owner</th>
                                 <th>Status</th>
                                 <th class="text-end">Actions</th>
                             </tr>
@@ -68,9 +68,6 @@
                             <tr>
                                 <td>
                                     <div class="fw-semibold">{{ $asset->asset_name }}</div>
-                                    @if ($asset->task_id)
-                                        <div class="text-muted small font-monospace">{{ $asset->task_id }}</div>
-                                    @endif
                                 </td>
                                 <td><span class="text-muted small">{{ $asset->asset_kind ?? '—' }}</span></td>
                                 <td>
@@ -118,7 +115,7 @@
                                             </select>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label small">Assigned To</label>
+                                            <label class="form-label small">Owner</label>
                                             <select name="assigned_to_user_id" class="form-select form-select-sm">
                                                 <option value="">— none —</option>
                                                 @foreach ($assignableUsers as $u)
