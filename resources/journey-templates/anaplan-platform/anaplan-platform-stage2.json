@@ -1,0 +1,138 @@
+{
+  "_meta": {
+    "description": "Stage 2 (Trained) for the Anaplan Platform foundational journey. Six content blocks covering the platform domains: Architecture, Dimensions, Calculation Layer, UX, Data & Integrations, Admin & Maintenance. Mix of self-paced Academy courses and supplementary recordings. Heavier than Anaplan Overview Stage 2 — this is the technical foundation every Delivery and Pre-Sales resource builds on.",
+    "iteration_date": "2026-05-01",
+    "persona": "technical",
+    "foundational": true,
+    "boundary_with_stage_3": "End of Stage 2: resource has consumed all platform-domain content and has hands-on sandbox access ready for Stage 3 labs and certification. They have NOT been certified yet — Stage 3 covers labs + Anaplan Certified Solutions Associate (or equivalent) exam."
+  },
+
+  "_fixed": false,
+  "_note": "Stage 2 task structure is FIXED. Asset content references the canonical Anaplan Academy curriculum where applicable.",
+  "stage_number": 2,
+  "name": "Trained",
+  "phase": "learning",
+  "description": "Resource builds platform fluency across architecture, dimensions, calculation layer, UX, data/integrations, and admin/maintenance. Combination of Academy courses (Level 1 and Level 2 Model Builder) and supplementary recordings.",
+
+  "blocks": [
+    { "block_id": "A", "name": "Architecture Foundations",      "description": "Workspaces, models, environments (dev/test/prod), ALM (Application Lifecycle Management) basics." },
+    { "block_id": "B", "name": "Dimensions",                     "description": "Lists, hierarchies, time scales — the dimensional foundation that drives every model." },
+    { "block_id": "C", "name": "Calculation Layer",              "description": "Modules, line items, formulas. The 'how' of Anaplan calculations." },
+    { "block_id": "D", "name": "User Experience & Pages",        "description": "Anaplan UX (Pages), dashboards, action buttons, drill-through, mobile." },
+    { "block_id": "E", "name": "Data & Integrations",            "description": "Data hubs, model-to-model imports, Anaplan Connect, CloudWorks, Anaplan API." },
+    { "block_id": "F", "name": "Admin, Security & Maintenance", "description": "Roles, selective access, model performance optimization, maintenance routines." }
+  ],
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "block": "A",
+      "task_id": "architecture-foundations",
+      "title": "Anaplan Architecture Foundations",
+      "description": "Recording covering workspaces, models, environment progression (dev/test/prod), and ALM (Application Lifecycle Management) basics. Anchors the rest of Stage 2 in the architectural mental model.",
+      "asset": "Anaplan Architecture Foundations recording",
+      "source_system": "Seismic",
+      "estimated_effort": "30-45 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "B",
+      "task_id": "level-1-model-builder",
+      "title": "Level 1 Model Builder Academy course",
+      "description": "Self-paced Academy course covering lists, hierarchies, time scales, modules, line items, and basic formulas. Includes practice exercises and a completion quiz. Covers blocks B and C foundationally; deeper content in Level 2.",
+      "asset": "Level 1 Model Builder Academy",
+      "source_system": "Academy",
+      "estimated_effort": "8-12 hrs",
+      "completion_mechanism": "academy_xls",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "C",
+      "task_id": "level-2-model-builder",
+      "title": "Level 2 Model Builder Academy course",
+      "description": "Self-paced Academy course covering advanced calculation patterns, complex formulas, summary methods, time-shifted calculations, and module performance considerations. Builds on Level 1.",
+      "asset": "Level 2 Model Builder Academy",
+      "source_system": "Academy",
+      "estimated_effort": "8-12 hrs",
+      "completion_mechanism": "academy_xls",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "D",
+      "task_id": "ux-pages-design",
+      "title": "Anaplan UX (Pages) design",
+      "description": "Self-paced Academy course covering Anaplan Pages — board / worksheet / report page types, action buttons, contextual selectors, drill-through, and mobile responsiveness. Includes design-pattern guidance.",
+      "asset": "Anaplan UX (Pages) Design Academy course",
+      "source_system": "Academy",
+      "estimated_effort": "3-4 hrs",
+      "completion_mechanism": "academy_xls",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "E",
+      "task_id": "data-hub-and-integrations",
+      "title": "Data Hubs & Integration Patterns",
+      "description": "Recording covering data hub architecture, model-to-model imports, Anaplan Connect / CloudWorks for batch integration, and Anaplan API basics. Concrete patterns for getting data into and out of Anaplan in real customer engagements.",
+      "asset": "Data Hubs & Integration Patterns recording",
+      "source_system": "Seismic",
+      "estimated_effort": "60-90 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "F",
+      "task_id": "admin-security-maintenance",
+      "title": "Admin, Security & Maintenance Essentials",
+      "description": "Recording covering workspace admin tasks, model roles vs page builder, selective access, common security pitfalls, model-size and performance monitoring, and routine maintenance practices. The 'what to do when the model is in production' content.",
+      "asset": "Admin, Security & Maintenance Essentials recording",
+      "source_system": "Seismic",
+      "estimated_effort": "45-60 min",
+      "completion_mechanism": "self_attest",
+      "required": true,
+      "_triggers_action": "stage_2_lab_sandbox_provisioning"
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "architecture-foundations-acknowledged",      "description": "Architecture Foundations recording acknowledged",                                          "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "level-1-model-builder-complete",             "description": "Level 1 Model Builder Academy completion confirmed (quiz passed)",                          "verification_source": "academy_xls" },
+    { "_fixed": true, "gate_id": "level-2-model-builder-complete",             "description": "Level 2 Model Builder Academy completion confirmed (quiz passed)",                          "verification_source": "academy_xls" },
+    { "_fixed": true, "gate_id": "ux-pages-design-complete",                   "description": "Anaplan UX (Pages) Design course completion confirmed (quiz passed)",                       "verification_source": "academy_xls" },
+    { "_fixed": true, "gate_id": "data-hub-and-integrations-acknowledged",     "description": "Data Hubs & Integration Patterns recording acknowledged",                                  "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "admin-security-maintenance-acknowledged",    "description": "Admin, Security & Maintenance Essentials recording acknowledged",                          "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "manager-info-populated",                     "description": "Manager name, email, and role populated in resource profile (REQUIRED to exit Stage 2)",     "verification_source": "self_attest" }
+  ],
+
+  "stage_actions": [
+    {
+      "action_id": "stage_2_lab_sandbox_provisioning",
+      "name": "Provision per-resource Anaplan Platform lab sandbox",
+      "description": "Automated provisioning of a per-resource sandbox workspace for the Stage 3 hands-on labs. Sandbox is loaded with starter data sets used in the labs (sample lists, sample integration files).",
+      "trigger": "on_task_complete:admin-security-maintenance",
+      "trigger_rationale": "Fires after the last Stage 2 task completes. Provisioning has time to complete during the gap between Stage 2 close and Stage 3 entry.",
+      "verification_at_stage_3_entry": "platform-sandbox-active gate verifies provisioning succeeded.",
+      "_provisioning_manifest_status": "TBD — define the sandbox workspace, sample data sets, and access role for the platform labs."
+    }
+  ],
+
+  "estimated_effort_total": "23-31 hrs",
+  "_estimated_effort_total_note": "Heavy Stage 2 — Level 1 + Level 2 Model Builder are substantial Academy courses (8-12 hrs each). This is real technical training.",
+
+  "_per_product_authoring_obligations": {
+    "description": "Foundational journey — single canonical asset set, not per-product. Most content references existing Anaplan Academy courses; the recordings are net-new and need to be authored.",
+    "assets": [
+      { "asset": "Anaplan Architecture Foundations recording",          "duration": "~30-45 min", "block": "A", "note": "Net-new authoring." },
+      { "asset": "Level 1 Model Builder Academy",                       "duration": "~8-12 hrs",  "block": "B", "note": "Existing Academy course; confirm canonical name and completion-tracking integration." },
+      { "asset": "Level 2 Model Builder Academy",                       "duration": "~8-12 hrs",  "block": "C", "note": "Existing Academy course; same as above." },
+      { "asset": "Anaplan UX (Pages) Design Academy course",             "duration": "~3-4 hrs",   "block": "D", "note": "May exist; confirm canonical name." },
+      { "asset": "Data Hubs & Integration Patterns recording",          "duration": "~60-90 min", "block": "E", "note": "Net-new or refreshed authoring." },
+      { "asset": "Admin, Security & Maintenance Essentials recording", "duration": "~45-60 min", "block": "F", "note": "Net-new or refreshed authoring." }
+    ]
+  }
+}

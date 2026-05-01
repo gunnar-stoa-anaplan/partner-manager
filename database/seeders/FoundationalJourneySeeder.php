@@ -62,9 +62,15 @@ class FoundationalJourneySeeder extends Seeder
             );
         }
 
-        $anaplanOverview = Journey::query()->where('journey_key', 'anaplan-overview')->first();
-        if ($anaplanOverview !== null) {
-            $initializer->initialize($anaplanOverview, [], 'anaplan-overview');
+        $assetSeedTargets = [
+            'anaplan-overview',
+            'anaplan-platform',
+        ];
+        foreach ($assetSeedTargets as $slug) {
+            $journey = Journey::query()->where('journey_key', $slug)->first();
+            if ($journey !== null) {
+                $initializer->initialize($journey, [], $slug);
+            }
         }
     }
 }
