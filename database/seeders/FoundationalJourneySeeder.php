@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Journey;
+use App\Services\JourneyAssetInitializer;
 use Illuminate\Database\Seeder;
 
 class FoundationalJourneySeeder extends Seeder
@@ -17,7 +18,7 @@ class FoundationalJourneySeeder extends Seeder
      *   - 'technical' → Delivery + Pre-Sales (technical roles)
      *   - 'sales' / 'pre-sales' → role-specific
      */
-    public function run(): void
+    public function run(JourneyAssetInitializer $initializer): void
     {
         $foundationals = [
             [
@@ -59,6 +60,11 @@ class FoundationalJourneySeeder extends Seeder
                 ['journey_key' => $f['journey_key']],
                 $f,
             );
+        }
+
+        $anaplanOverview = Journey::query()->where('journey_key', 'anaplan-overview')->first();
+        if ($anaplanOverview !== null) {
+            $initializer->initialize($anaplanOverview, [], 'anaplan-overview');
         }
     }
 }

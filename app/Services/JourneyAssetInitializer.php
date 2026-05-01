@@ -25,15 +25,29 @@ class JourneyAssetInitializer
      *                                                 adjacent_product, adjacent_journey_id, terminal_outcome).
      * @return int Count of journey_assets rows created.
      */
-    public function initialize(Journey $journey, array $productContext): int
+    /**
+     * Seed journey_assets rows from the persona templates for the given journey.
+     *
+     * @param  array<string, string>  $productContext  Substitutions for template placeholders.
+     * @param  string|null  $templateSlug  Override the persona-based directory lookup with a
+     *                                     specific template slug (e.g. 'anaplan-overview' for
+     *                                     foundational journeys). When set, looks for templates
+     *                                     in resources/journey-templates/{slug}/.
+     */
+    public function initialize(Journey $journey, array $productContext, ?string $templateSlug = null): int
     {
-        $persona = $journey->persona;
-        $personaDir = $this->personaDirectory($persona);
+        $prefix = $templateSlug !== null ? $templateSlug : $journey->persona;
+        $templateDir = $templateSlug !== null
+            ? $this->customTemplateDirectory($templateSlug)
+            : $this->personaDirectory($journey->persona);
         $created = 0;
 
-        DB::transaction(function () use ($journey, $persona, $personaDir, $productContext, &$created) {
+        DB::transaction(function () use ($journey, $prefix, $templateDir, $productContext, &$created) {
             for ($stage = 1; $stage <= 5; $stage++) {
-                $template = $this->loadStageTemplate($personaDir, $persona, $stage);
+                $template = $this->loadStageTemplate($templateDir, $prefix, $stage);
+                if ($template === null) {
+                    continue;
+                }
                 $assets = $this->extractAssets($template, $stage, $productContext);
                 foreach ($assets as $row) {
                     $created += $this->upsertJourneyAsset($journey, $row);
@@ -64,24 +78,48 @@ class JourneyAssetInitializer
         return $path;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    protected function loadStageTemplate(string $personaDir, string $persona, int $stage): array
+    protected function customTemplateDirectory(string $templateSlug): string
     {
-        $personaPrefix = strtolower($persona) === 'pre-sales' || strtolower($persona) === 'pre_sales'
-            ? 'pre-sales'
-            : strtolower($persona);
-        $file = $personaDir.DIRECTORY_SEPARATOR."{$personaPrefix}-journey-template-stage{$stage}.json";
-        if (! is_file($file)) {
-            throw new RuntimeException("Template file not found: {$file}");
-        }
-        $decoded = json_decode((string) file_get_contents($file), true);
-        if (! is_array($decoded)) {
-            throw new RuntimeException("Failed to decode template: {$file}");
+        $path = $this->templatesPath.DIRECTORY_SEPARATOR.$templateSlug;
+        if (! is_dir($path)) {
+            throw new RuntimeException("Template directory not found: {$path}");
         }
 
-        return $decoded;
+        return $path;
+    }
+
+    /**
+     * Load a stage template from disk. Returns null if the stage file does not
+     * exist (foundational journeys only have stages 1-3, for example).
+     *
+     * Filename conventions tried in order:
+     *  - {prefix}-journey-template-stage{N}.json  (per-app convention)
+     *  - {prefix}-stage{N}.json                   (foundational convention)
+     *  - stage{N}.json                            (generic fallback)
+     *
+     * @return array<string, mixed>|null
+     */
+    protected function loadStageTemplate(string $personaDir, string $prefix, int $stage): ?array
+    {
+        $prefixSlug = strtolower($prefix) === 'pre_sales' ? 'pre-sales' : strtolower($prefix);
+        $candidates = [
+            $personaDir.DIRECTORY_SEPARATOR."{$prefixSlug}-journey-template-stage{$stage}.json",
+            $personaDir.DIRECTORY_SEPARATOR."{$prefixSlug}-stage{$stage}.json",
+            $personaDir.DIRECTORY_SEPARATOR."stage{$stage}.json",
+        ];
+        foreach ($candidates as $file) {
+            if (! is_file($file)) {
+                continue;
+            }
+            $decoded = json_decode((string) file_get_contents($file), true);
+            if (! is_array($decoded)) {
+                throw new RuntimeException("Failed to decode template: {$file}");
+            }
+
+            return $decoded;
+        }
+
+        return null;
     }
 
     /**
@@ -114,7 +152,7 @@ class JourneyAssetInitializer
             }
             $resolvedName = $this->substitutePlaceholders($assetName, $productContext);
             $taskId = $this->substitutePlaceholders((string) ($task['task_id'] ?? ''), $productContext);
-            $key = $stage.'|'.$taskId.'|'.$resolvedName;
+            $key = $stage.'|'.$resolvedName;
             if (isset($seen[$key])) {
                 continue;
             }
@@ -144,7 +182,7 @@ class JourneyAssetInitializer
                 }
                 $resolvedName = $this->substitutePlaceholders($name, $productContext);
                 $taskId = '_authoring_obligation';
-                $key = $stage.'|'.$taskId.'|'.$resolvedName;
+                $key = $stage.'|'.$resolvedName;
                 if (isset($seen[$key])) {
                     continue;
                 }
