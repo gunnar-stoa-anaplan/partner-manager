@@ -31,6 +31,11 @@
                                 @endphp
                                 <span class="badge bg-{{ $statusColor }} ms-2">{{ ucfirst($journey->status) }}</span>
                             </div>
+                            @if ($journey->description)
+                                <p class="text-muted small mb-3" style="display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;">
+                                    {{ $journey->description }}
+                                </p>
+                            @endif
                             <div class="text-muted small mb-1">
                                 <strong>Product Area:</strong> {{ $journey->product_area }}
                             </div>

@@ -13,6 +13,7 @@ class Journey extends Model
 
     protected $fillable = [
         'name',
+        'description',
         'journey_key',
         'product_area',
         'persona',
