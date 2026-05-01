@@ -1,0 +1,254 @@
+{
+  "_meta": {
+    "description": "Stage 5 (Expert) for the universal Anaplan product Sales journey template. Earn-once-then-maintain designation model — Expert sellers earn designation through contributive deliverables (deal narratives, client references, sales-playbook contributions, initial independent closed deals) and maintain it via ongoing selling + mentorship. Slots into the larger Sales template at stages[4].",
+    "iteration_date": "2026-04-30",
+    "persona": "sales",
+    "structural_alignment_with_delivery": [
+      "Same Model C structure: earn_set (required deliverables) → designation event → maintain_set (ongoing activities) → optional_set (recognized but not required)",
+      "Same six earn_set tasks mapped to sales-equivalents: deal narrative, client reference, sales-playbook contribution, initial independent closed deals, adjacent product overview review, adjacent product credentialing intent",
+      "Same maintain_set shape (2 tasks): ongoing independent deals + mentor a junior seller",
+      "Same optional_set shape: community contribution + Sales SME registration",
+      "Phase = 'expert' (matches Delivery's phase change from 'doing' to 'expert')"
+    ],
+    "persona_specific_calls": [
+      "Earn_set 'submit-customer-project-overview' (Delivery) → 'submit-deal-narrative' (Sales) — structured account of one closed-won deal: discovery, pitch, objections handled, competitive context, close mechanics. Becomes per-product knowledge asset.",
+      "Earn_set 'contribute-blueprint' (Delivery) → 'contribute-sales-playbook' (Sales) — per-product sales playbook covering value-framing patterns, objection-response patterns, competitive plays, industry-tailored pitches.",
+      "Earn_set 'complete-initial-independent-deliveries' (Delivery) → 'complete-initial-independent-closed-deals' (Sales) — 2 closed-won deals beyond the Stage 4 engagements, no senior-seller co-lead. Demonstrates self-sufficient selling.",
+      "Maintain_set 'lead-independent-deliveries-ongoing' (Delivery) → 'lead-ongoing-deals' (Sales) — continued selling activity expected of active Sales Experts.",
+      "Optional_set 'community-contribution' kept persona-broad — Sales contribution shapes are slightly different (case studies, conference speaking, thought leadership)."
+    ],
+    "open_items_parked_for_later": [
+      "Multi-product credentialing intent declaration — same parking-lot as Delivery (parent-journey work).",
+      "Expert maintenance review cadence — annual / on-demand / activity-driven. Program-level operational decision.",
+      "Loss of Expert status — what triggers it, what the recovery path is.",
+      "Per-product sales playbook review process — which CoE / sales enablement team owns reviewing and accepting playbook contributions.",
+      "Deal narrative standard — template/format for the structured deal-narrative document.",
+      "Client reference sponsorship process — operational integration with Anaplan customer reference programs (shared with Delivery).",
+      "User direction: 'your recommendations are fine for now and will be adjusted later after review' — this Stage 5 design is a starting point, expected to be refined."
+    ]
+  },
+
+  "_fixed": false,
+  "_note": "Stage 5 task structure is FIXED across all product journeys within the Sales persona. Adjacent product references are VARIABLE per product. Asset templates (deal narrative, sales playbook contribution) are fixed; specific contributions are per-Expert.",
+  "stage_number": 5,
+  "name": "Expert",
+  "phase": "expert",
+  "terminal_stage": true,
+  "terminal_outcome": "{{TERMINAL_OUTCOME}}",
+  "_terminal_outcome_example_ifp": "Finance Sales Expert designation → FCR and Connected Planning Champion sales pathways",
+  "designation_model": "earn_once_then_maintain",
+  "_designation_model_note": "Model C — same as Delivery. Expert designation is EARNED by completing the earn_set tasks (contributive deliverables that convert individual selling experience into ecosystem value), then MAINTAINED by ongoing-state activities in the maintain_set. Optional_set tasks are recognized but not required for either earning or maintaining the designation.",
+  "description": "Seller achieves and maintains Sales Expert designation for {{PRODUCT_NAME}} by contributing structured deliverables back to the ecosystem (deal narratives, client references, sales-playbook contributions) and maintaining ongoing practitioner activities (independent deals, mentorship). The Sales Expert is no longer just someone who can close deals — they are someone who actively shapes how others sell and which references customers see.",
+
+  "task_groups": {
+    "earn_set": {
+      "description": "Required contributive deliverables. All must be completed to achieve Sales Expert designation.",
+      "tasks": [
+        "submit-deal-narrative",
+        "sponsor-client-reference",
+        "contribute-sales-playbook",
+        "complete-initial-independent-closed-deals",
+        "{{ADJACENT_JOURNEY_ID}}-overview-review",
+        "{{ADJACENT_JOURNEY_ID}}-credentialing-intent"
+      ]
+    },
+    "maintain_set": {
+      "description": "Ongoing activities expected of an active Sales Expert. Status maintenance reviewed on cadence (TBD).",
+      "tasks": [
+        "lead-ongoing-deals",
+        "mentor-junior-seller"
+      ]
+    },
+    "optional_set": {
+      "description": "Recognized contributions that are not required for earning or maintaining Sales Expert designation.",
+      "tasks": [
+        "community-contribution",
+        "sales-sme-designation-registration"
+      ]
+    }
+  },
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "group": "earn_set",
+      "task_id": "submit-deal-narrative",
+      "title": "Submit deal narrative",
+      "description": "Produce a structured narrative of one closed-won {{PRODUCT_NAME}} deal — customer, deal scope, discovery findings, value-pitch construction, objections encountered and responses, competitive context, close mechanics, and what was learned. Becomes a per-product knowledge asset future sellers can learn from. Distinct from Stage 4 engagement artifacts (which were per-engagement advisory reviews) — this is a full deal story.",
+      "deliverable": "Structured deal narrative document",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM + sales enablement reviews the deal narrative against the standard format and accepts it as a per-product knowledge asset.",
+      "minimum_count": 1,
+      "required": true,
+      "examples_of_good_output": [
+        "Customer: Mid-market manufacturer (5,000 employees). Deal scope: IFP for 12 cost centers, 3-year contract. Discovery: surfaced existing budget-cycle pain costing 8 weeks per quarter. Pitch construction: tied IFP outcomes to CFO's stated quarterly-close target. Key objection: 'we already use Hyperion' — countered with Anaplan's connected-planning argument. Close: 9-week sales cycle, $X ACV.",
+        "Customer: Global retailer (40,000 employees). Deal scope: IFP for revenue planning across 6 regions. Discovery: surfaced regional-finance fragmentation and ROI gap. Competitive: head-to-head vs Workday Adaptive — won on multi-region scalability. Close: 6-month cycle, multi-year commit including FCR follow-on. Key learning: regional CFO endorsement was the decisive factor, not central-finance buy-in."
+      ]
+    },
+    {
+      "_fixed": true,
+      "group": "earn_set",
+      "task_id": "sponsor-client-reference",
+      "title": "Sponsor a client reference",
+      "description": "Sponsor at least one customer reference. Customer agrees to be referenced for the {{PRODUCT_NAME}} sale and deployment. Real signal — the customer is willing, the partner has the relationship, and the deal was successful enough to warrant referencing.",
+      "deliverable": "Customer reference confirmation (customer-acknowledged willingness to be referenced)",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM confirms the reference is sponsored and integrated into Anaplan's customer reference program.",
+      "minimum_count": 1,
+      "required": true,
+      "examples_of_good_output": [
+        "Customer X agrees to participate in 1-2 prospect reference calls per quarter and to be named in case study materials. Reference scope: {{PRODUCT_NAME}} purchase decision, timeline, and outcomes specified.",
+        "Customer Y agrees to a video case study and conference speaking opportunity. Reference scope: {{PRODUCT_NAME}} multi-year roadmap including adjacent product expansion."
+      ]
+    },
+    {
+      "_fixed": true,
+      "group": "earn_set",
+      "task_id": "contribute-sales-playbook",
+      "title": "Contribute to {{PRODUCT_NAME}} sales playbook",
+      "description": "Submit at least one accepted contribution to the {{PRODUCT_NAME}} sales playbook. Contributions can be drawn from Stage 4 artifact review feedback, deal narrative learnings, or independent observation. The Stage 4 engagement reviews and the deal narrative are likely raw material for playbook contribution.",
+      "deliverable": "Accepted sales playbook contribution",
+      "examples_of_contribution_types": [
+        "New value-framing pattern (e.g., 'tying {{PRODUCT_NAME}} to quarterly-close acceleration for CFOs')",
+        "New objection-response pattern (e.g., 'positioning vs. an entrenched Hyperion installation')",
+        "New competitive play (e.g., 'multi-region scalability talk-track vs. Workday Adaptive')",
+        "New industry-tailored pitch variant or case study addition",
+        "Edit to existing playbook section (e.g., 'expanded discovery questions for the data-readiness signal')"
+      ],
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "Sales enablement / playbook owner reviews and accepts the contribution.",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "group": "earn_set",
+      "task_id": "complete-initial-independent-closed-deals",
+      "title": "Complete initial independent {{PRODUCT_NAME}} closed deals",
+      "description": "Close 2 independent {{PRODUCT_NAME}} deals (no senior-seller co-lead, senior available on call only). These are closed-won deals beyond the 3 engagements from Stage 4. Demonstrates ability to sell without senior-seller scaffolding.",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM + senior seller (or sales coach) confirms the deals were independently led and closed-won.",
+      "minimum_count": 2,
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "group": "earn_set",
+      "task_id": "{{ADJACENT_JOURNEY_ID}}-overview-review",
+      "title": "Review {{ADJACENT_PRODUCT}} sales overview",
+      "description": "Review {{ADJACENT_PRODUCT}} sales overview content to inform the credentialing intent declaration. Provides context for whether to pursue, defer, or decline the adjacent product Sales journey.",
+      "asset": "{{ADJACENT_PRODUCT}} Sales overview content",
+      "source_system": "Seismic",
+      "estimated_effort": "30 min",
+      "completion_mechanism": "self_attest",
+      "required": true,
+      "prerequisite_for": "{{ADJACENT_JOURNEY_ID}}-credentialing-intent"
+    },
+    {
+      "_variable": "adjacent product varies per journey",
+      "group": "earn_set",
+      "task_id": "{{ADJACENT_JOURNEY_ID}}-credentialing-intent",
+      "title": "Declare {{ADJACENT_PRODUCT}} sales credentialing intent",
+      "description": "After reviewing {{ADJACENT_PRODUCT}} sales overview, declare credentialing intent. Signal-only — does not start the adjacent journey, only captures the Sales Expert's intent for partner-firm and Anaplan planning.",
+      "options": ["pursue", "defer", "decline"],
+      "completion_mechanism": "self_attest",
+      "required": true,
+      "prerequisite": "{{ADJACENT_JOURNEY_ID}}-overview-review",
+      "_multi_product_note": "v0 captures one adjacent product. Multi-product credentialing intent (for parent-journey enrolees) is parking-lot for parent-journey work — same as Delivery."
+    },
+    {
+      "_fixed": true,
+      "_inserted_after_earn_set_complete": true,
+      "task_id": "expert-designation-event",
+      "title": "{{PRODUCT_NAME}} Sales Expert designation",
+      "description": "Formal recognition moment when the earn_set is complete. Issues Sales Expert credential, badge, and announces designation in partner community channels.",
+      "deliverable": "Sales Expert credential issued; participant added to Sales Expert directory; community announcement",
+      "completion_mechanism": "external_system",
+      "_completion_mechanism_note": "Triggered automatically when all earn_set tasks complete. No participant action required.",
+      "required": true,
+      "trigger": "all_earn_set_tasks_complete"
+    },
+    {
+      "_fixed": true,
+      "group": "maintain_set",
+      "task_id": "lead-ongoing-deals",
+      "title": "Lead ongoing independent {{PRODUCT_NAME}} deals",
+      "description": "Continue leading independent {{PRODUCT_NAME}} sales activity to maintain active Sales Expert status. No fixed count — review on cadence (TBD) confirms continued practitioner activity.",
+      "completion_mechanism": "admin_signoff",
+      "verification_cadence": "TBD",
+      "required_for": "expert_status_maintenance"
+    },
+    {
+      "_fixed": true,
+      "group": "maintain_set",
+      "task_id": "mentor-junior-seller",
+      "title": "Mentor a junior {{PRODUCT_NAME}} seller",
+      "description": "Active mentorship of a junior seller progressing through the {{PRODUCT_NAME}} Sales Journey. Requires named mentee and ongoing relationship.",
+      "deliverable": "Named mentee + active relationship",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM acknowledges the mentee-mentor relationship and confirms ongoing activity. Mentee may be asked to attest to the relationship.",
+      "verification_cadence": "TBD",
+      "required_for": "expert_status_maintenance"
+    },
+    {
+      "_fixed": true,
+      "group": "optional_set",
+      "task_id": "community-contribution",
+      "title": "Community contribution",
+      "description": "Recognized contributions to the partner community beyond the required earn_set deliverables.",
+      "completion_mechanism": "admin_signoff",
+      "required": false,
+      "examples": [
+        "Polished case study (beyond the structured deal narrative)",
+        "Sales conference speaking",
+        "Webinar on selling {{PRODUCT_NAME}}",
+        "Customer-facing thought-leadership content",
+        "Industry analyst conversation participation",
+        "Partner community Q&A leadership"
+      ]
+    },
+    {
+      "_fixed": true,
+      "group": "optional_set",
+      "task_id": "sales-sme-designation-registration",
+      "title": "Register as {{PRODUCT_SHORT}} Sales SME",
+      "description": "Opt-in registry entry as a {{PRODUCT_SHORT}} Sales Subject Matter Expert. Discoverable in the Anaplan Sales SME directory; eligible for community speaking opportunities, strategic-deal advisory queries, and partner-firm staffing queries.",
+      "completion_mechanism": "admin_signoff",
+      "required": false
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "deal-narrative-accepted",                                 "description": "Deal narrative submitted and accepted by PSM + sales enablement (≥1)",                                  "verification_source": "admin_signoff",   "type": "earn_gate" },
+    { "_fixed": true, "gate_id": "client-reference-sponsored",                              "description": "Client reference sponsored and integrated into Anaplan reference program (≥1)",                          "verification_source": "admin_signoff",   "type": "earn_gate" },
+    { "_fixed": true, "gate_id": "sales-playbook-contribution-accepted",                    "description": "≥1 accepted contribution to {{PRODUCT_NAME}} sales playbook",                                            "verification_source": "admin_signoff",   "type": "earn_gate" },
+    { "_fixed": true, "gate_id": "initial-independent-closed-deals-confirmed",              "description": "≥2 initial independent {{PRODUCT_NAME}} closed-won deals confirmed by PSM + senior seller",            "verification_source": "admin_signoff",   "type": "earn_gate" },
+    { "_fixed": true, "gate_id": "{{ADJACENT_JOURNEY_ID}}-overview-acknowledged",            "description": "{{ADJACENT_PRODUCT}} sales overview reviewed and acknowledged",                                          "verification_source": "self_attest",     "type": "earn_gate" },
+    { "_variable": true, "gate_id": "{{ADJACENT_JOURNEY_ID}}-pathway-declared",              "description": "{{ADJACENT_PRODUCT}} sales credentialing intent declared (pursue / defer / decline)",                    "verification_source": "self_attest",     "type": "earn_gate" },
+    { "_fixed": true, "gate_id": "sales-expert-designated",                                  "description": "Sales Expert designation issued — earn_set complete, credential and badge issued, community announcement made", "verification_source": "external_system", "type": "designation_event" },
+    { "_fixed": true, "gate_id": "ongoing-deals-active",                                     "description": "Active Sales Expert continues leading independent {{PRODUCT_NAME}} deals",                              "verification_source": "admin_signoff",   "type": "maintain_gate" },
+    { "_fixed": true, "gate_id": "mentorship-active",                                        "description": "Active mentee-mentor relationship logged with named junior seller",                                       "verification_source": "admin_signoff",   "type": "maintain_gate" }
+  ],
+
+  "estimated_effort_total": "Variable — earn_set typically achieved 6-18 months after Stage 4 completion depending on deal velocity and contribution opportunities. Maintain_set is ongoing.",
+  "_estimated_effort_total_note": "Stage 5 is bound by real deal availability, playbook contribution opportunities, and customer reference relationships — not participant work hours.",
+
+  "_per_product_authoring_obligations": {
+    "description": "Stage 5 has minimal per-product asset authoring. Per-product obligations are review and acceptance processes.",
+    "items": [
+      { "item": "Deal narrative standard",                "scope": "Template/format for the structured deal-narrative document. Same template across products preferred." },
+      { "item": "Sales playbook review process",          "scope": "Per-product sales-enablement / playbook owner identified and review process defined." },
+      { "item": "Adjacent product mapping",               "scope": "Identify the correct {{ADJACENT_PRODUCT}} and {{ADJACENT_JOURNEY_ID}} for each Sales journey." }
+    ]
+  },
+
+  "_operational_considerations": {
+    "items": [
+      "Expert maintenance review cadence — when and how Sales Expert status is re-confirmed against the maintain_set.",
+      "Sales playbook contribution review SLA — time from contribution submission to acceptance.",
+      "Client reference sponsorship coordination — Anaplan customer reference programs may have their own gates and processes (shared with Delivery Stage 5).",
+      "Mentee pool — Stage 5 mentorship requires a junior seller available to mentor.",
+      "Multi-product Sales Experts — under parent journeys, an Expert may hold designation for IFP + FCR + AI simultaneously."
+    ]
+  }
+}

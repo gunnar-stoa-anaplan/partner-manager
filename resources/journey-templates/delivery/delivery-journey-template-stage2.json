@@ -1,0 +1,188 @@
+{
+  "_meta": {
+    "description": "Updated Stage 2 (Trained) for the universal Anaplan product Delivery journey template. Slots into the larger template at stages[1]. Reflects iteration from Stage 2 review pass.",
+    "iteration_date": "2026-04-27",
+    "changes_from_previous": [
+      "Restructured: Stage 2 now organized around three blocks — A (positioning), B (deep OOTB understanding), C (methodology phases) — replacing the original 7-task content-consumption list",
+      "Removed: Anaplan Way for Apps (moved to Anaplan Platform prereq journey)",
+      "Removed: Adjacent Product Relationship Overview (moved to Stage 5 where it supports credentialing-intent declaration)",
+      "Removed: Standalone Delivery Blueprint read task (Blueprint becomes per-phase reference material consumed during Stage 3 hands-on work)",
+      "Removed: Standalone Admin Guide / Process Def / Glossary read task (folded into reference orientation + guided walkthrough)",
+      "Added: Strategy & positioning webcast (Block A, ~15 min)",
+      "Added: Application walkthrough & demo recording — the 'show me' (Block B)",
+      "Added: Guided walkthrough recording of reference docs + Configuration Guide (Block B)",
+      "Added: Methodology phases webcast covering 10 phases (Block C, fixed outline, variable per-product content)",
+      "Moved into Stage 2: Configuration Guide (now a Stage 2 reference asset with guided walkthrough; the act of configuring lives in Stage 3)",
+      "Added: Manager info exit gate (manager name/email/role required in profile to exit Stage 2)",
+      "Added: Stage entry action — auto-provisioning of {{PRODUCT_NAME}} delivery workspaces and workshop models, triggered after Block B complete (after task ootb-reference-walkthrough)",
+      "Decision: No Stage 2 exit comprehension check. Stage 3 hands-on workshop is the real proof of understanding."
+    ],
+    "open_items_parked_for_later": [
+      "Per-product authoring spec — Strategy & positioning webcast, Application walkthrough & demo recording, Guided walkthrough recording, and Methodology phases webcast must be authored per product. Spec/template for each asset type to be defined as a separate work item.",
+      "Block C 10-phase outline — embedded here as authoritative structure. Future revisions to the methodology should update this outline once and propagate to all product journeys.",
+      "Provisioning failure handling — auto-ticket vs surfaced state vs both. Program-level decision.",
+      "Provisioning manifest per product — what workspaces and models constitute the Stage 3 workshop environment for {{PRODUCT_NAME}}. Separate per-product spec."
+    ],
+    "boundary_with_stage_3": "End of Stage 2: participant deeply understands the out-of-the-box application — what it does, what it delivers, the methodology phases that produce it, and the reference materials that support it. They have NOT touched the application themselves. Stage 3 begins with the hands-on workshop in a live (provisioned) environment, starting with configuration. Verb shift: understand → do."
+  },
+
+  "_fixed": false,
+  "_note": "Stage 2 task structure is FIXED across all product journeys. Asset content is VARIABLE per product. Block C (methodology phases webcast) follows a fixed 10-phase outline regardless of product — only illustrations and examples vary by product.",
+  "stage_number": 2,
+  "name": "Trained",
+  "phase": "learning",
+  "description": "Participant gains deep conceptual understanding of the {{PRODUCT_NAME}} out-of-the-box application, the reference materials that support it, and the 10 methodology phases that produce a delivered customer outcome. No hands-on application work in this stage — that begins in Stage 3.",
+
+  "blocks": [
+    {
+      "block_id": "A",
+      "name": "Strategy & Positioning",
+      "description": "Frames why the application exists, who it's for, and how it's positioned. Sets up Block B."
+    },
+    {
+      "block_id": "B",
+      "name": "Deep OOTB Understanding",
+      "description": "Cluster of complementary content types — read, see, reference — aimed at total clarity on what the pre-built application delivers. Heaviest block of Stage 2."
+    },
+    {
+      "block_id": "C",
+      "name": "Methodology Phases Walkthrough",
+      "description": "Conceptual walkthrough of the 10 methodology phases the participant will execute in Stage 3 sandbox and Stage 4 customer engagements."
+    }
+  ],
+
+  "tasks": [
+    {
+      "_fixed": "task definition fixed; asset content variable per product",
+      "_new": true,
+      "block": "A",
+      "task_id": "{{PRODUCT_ID}}-strategy-positioning",
+      "title": "{{PRODUCT_NAME}} strategy & positioning webcast",
+      "description": "Short webcast framing why the application exists, who it's for, and how it's positioned in the Anaplan portfolio. Prepares the participant for Block B's deep OOTB understanding work.",
+      "asset": "{{PRODUCT_NAME}} Strategy & Positioning webcast recording",
+      "source_system": "Seismic",
+      "estimated_effort": "15 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": "task definition fixed; asset content variable per product",
+      "block": "B",
+      "task_id": "{{PRODUCT_ID}}-application-overview",
+      "title": "{{PRODUCT_NAME}} {{PRODUCT_VERSION}} Application Overview course",
+      "description": "Self-paced Academy course providing a high-level overview of the application. Includes a short completion quiz.",
+      "asset": "{{PRODUCT_NAME}} {{PRODUCT_VERSION}} Application Overview",
+      "source_system": "Academy",
+      "estimated_effort": "30 min",
+      "completion_mechanism": "academy_xls",
+      "required": true
+    },
+    {
+      "_fixed": "task definition fixed; asset content variable per product",
+      "_new": true,
+      "block": "B",
+      "task_id": "{{PRODUCT_ID}}-application-walkthrough-demo",
+      "title": "{{PRODUCT_NAME}} application walkthrough & demo recording",
+      "description": "The 'show me' asset. Full walkthrough of the configured, populated application as it is delivered to a customer — what the dashboards look like, what the planning workflows feel like, what the OOTB outputs are. Closes the gap between reading about the application and seeing it in action.",
+      "asset": "{{PRODUCT_NAME}} Application Walkthrough & Demo recording",
+      "source_system": "Seismic",
+      "estimated_effort": "45-60 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_modified": true,
+      "_modification_note": "In the original template, this was a 2-hour cover-to-cover read task. In the new structure, it is a brief orientation to the reference document set — the deeper walkthrough lives in the next task. The Configuration Guide is now part of the Stage 2 reference set.",
+      "block": "B",
+      "task_id": "ootb-reference-orientation",
+      "title": "Orient to {{PRODUCT_NAME}} reference document set",
+      "description": "Brief orientation to the four reference documents the participant will use throughout Stages 2-4: Admin Guide, Process Definition, Product Glossary, and Configuration Guide. Goal is to know what each document is for and how to navigate it — NOT cover-to-cover reading.",
+      "asset": "Admin Guide + Process Definition + Product Glossary + Configuration Guide",
+      "source_system": "Seismic",
+      "estimated_effort": "15 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": "task definition fixed; asset content variable per product",
+      "_new": true,
+      "block": "B",
+      "task_id": "{{PRODUCT_ID}}-ootb-reference-walkthrough",
+      "title": "{{PRODUCT_NAME}} reference docs guided walkthrough recording",
+      "description": "Recorded guided walkthrough of the Admin Guide, Process Definition, Product Glossary, and Configuration Guide for {{PRODUCT_NAME}}. Walks the participant through what is in each document, how the documents relate, and how to use them as reference during Stage 3 hands-on work and Stage 4 customer engagements.",
+      "asset": "{{PRODUCT_NAME}} Reference Documents Guided Walkthrough recording",
+      "source_system": "Seismic",
+      "estimated_effort": "60-90 min",
+      "completion_mechanism": "self_attest",
+      "required": true,
+      "_triggers_action": "stage_2_provisioning"
+    },
+    {
+      "_fixed": "task definition AND outline fixed; only illustrations/examples variable per product",
+      "_new": true,
+      "block": "C",
+      "task_id": "{{PRODUCT_ID}}-methodology-phases-webcast",
+      "title": "{{PRODUCT_NAME}} methodology phases webcast",
+      "description": "Single webcast covering all 10 methodology phases at a conceptual level. Same outline across every product journey. Per-product illustrations and examples bring the methodology to life for {{PRODUCT_NAME}}. Goal is a working mental model of each phase — deep learning happens in Stage 3 by doing.",
+      "asset": "{{PRODUCT_NAME}} Methodology Phases webcast recording",
+      "source_system": "Seismic",
+      "estimated_effort": "60-90 min",
+      "completion_mechanism": "self_attest",
+      "required": true,
+      "outline": {
+        "_note": "This 10-phase outline is FIXED across all product journeys. Per-product webcasts must cover all 10 phases in this order, illustrated with product-specific content.",
+        "phases": [
+          { "phase": 1,  "group": "Pre-project",   "name": "Discovery workshop" },
+          { "phase": 2,  "group": "Pre-project",   "name": "Functional scope" },
+          { "phase": 3,  "group": "Pre-project",   "name": "Application mapping" },
+          { "phase": 4,  "group": "Pre-project",   "name": "Data readiness and template review" },
+          { "phase": 5,  "group": "Configuration", "name": "Customer data validation" },
+          { "phase": 6,  "group": "Configuration", "name": "Configure application" },
+          { "phase": 7,  "group": "Configuration", "name": "Loading customer data" },
+          { "phase": 8,  "group": "Configuration", "name": "List and hierarchy validation" },
+          { "phase": 9,  "group": "Configuration", "name": "Application-led workshops" },
+          { "phase": 10, "group": "Configuration", "name": "Handling extensions" }
+        ]
+      }
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "_new": true,     "gate_id": "{{PRODUCT_ID}}-strategy-positioning-acknowledged", "description": "{{PRODUCT_NAME}} strategy & positioning webcast acknowledged",                          "verification_source": "self_attest" },
+    { "_variable": true,                 "gate_id": "{{PRODUCT_ID}}-application-overview-complete",      "description": "{{PRODUCT_NAME}} Application Overview Academy course completion confirmed (quiz passed)", "verification_source": "academy_xls" },
+    { "_fixed": true, "_new": true,     "gate_id": "{{PRODUCT_ID}}-application-walkthrough-demo-acknowledged", "description": "{{PRODUCT_NAME}} application walkthrough & demo recording acknowledged",      "verification_source": "self_attest" },
+    { "_fixed": true, "_modified": true, "gate_id": "ootb-reference-orientation-acknowledged",            "description": "{{PRODUCT_NAME}} reference document set orientation acknowledged",                       "verification_source": "self_attest" },
+    { "_fixed": true, "_new": true,     "gate_id": "{{PRODUCT_ID}}-ootb-reference-walkthrough-acknowledged", "description": "{{PRODUCT_NAME}} reference docs guided walkthrough recording acknowledged",       "verification_source": "self_attest" },
+    { "_fixed": true, "_new": true,     "gate_id": "{{PRODUCT_ID}}-methodology-phases-webcast-acknowledged", "description": "{{PRODUCT_NAME}} methodology phases webcast acknowledged",                          "verification_source": "self_attest" },
+    { "_fixed": true, "_new": true,     "gate_id": "manager-info-populated",                              "description": "Manager name, email, and role populated in resource profile (carry-over from Stage 1 profile, REQUIRED to exit Stage 2)", "verification_source": "self_attest" }
+  ],
+
+  "stage_actions": [
+    {
+      "_new": true,
+      "action_id": "stage_2_provisioning",
+      "name": "Auto-provision delivery workspaces and workshop models",
+      "description": "Automated provisioning of the {{PRODUCT_NAME}} delivery workspaces and workshop models required for the Stage 3 hands-on workshop. Provisioning is product-scoped and role-scoped (Delivery role).",
+      "trigger": "on_task_complete:{{PRODUCT_ID}}-ootb-reference-walkthrough",
+      "trigger_rationale": "Fires after Block B is complete. At this point the participant has done the deep 'understand the application' work and earned the workshop environment. The remaining Block C webcast (~60-90 min) provides a buffer for provisioning to complete and for any failures to be resolved before the participant enters Stage 3.",
+      "verification_at_stage_3_entry": "tenant-access-active gate verifies provisioning succeeded and the {{PRODUCT_NAME}} workshop environment is accessible.",
+      "_provisioning_manifest_status": "TBD per product — list of workspaces and models constituting the Stage 3 workshop environment for {{PRODUCT_NAME}} to be defined as a separate per-product spec.",
+      "_failure_handling_status": "TBD — auto-ticket vs surfaced state vs both. Program-level decision."
+    }
+  ],
+
+  "estimated_effort_total": "3h 45min - 5h 0min",
+  "_estimated_effort_total_note": "Computed from task estimates. Roughly half the original Stage 2 estimate (~10.5 hrs) — every minute is purpose-built for the deep OOTB-understanding outcome. Time is what the journey-orientation task in Stage 1 surfaces to the resource as the Stage 2 commitment.",
+
+  "_per_product_authoring_obligations": {
+    "description": "For every product journey instantiation, the following assets must be authored. The template specifies; the product team produces.",
+    "assets": [
+      { "asset": "Strategy & Positioning webcast",                  "duration": "~15 min",     "block": "A" },
+      { "asset": "Application Overview Academy course (with quiz)",  "duration": "~30 min",     "block": "B", "note": "May already exist for some products." },
+      { "asset": "Application Walkthrough & Demo recording",        "duration": "~45-60 min",  "block": "B" },
+      { "asset": "Reference Documents Guided Walkthrough recording", "duration": "~60-90 min",  "block": "B" },
+      { "asset": "Methodology Phases webcast",                      "duration": "~60-90 min",  "block": "C", "note": "Must follow the fixed 10-phase outline embedded in the methodology-phases-webcast task." }
+    ]
+  }
+}

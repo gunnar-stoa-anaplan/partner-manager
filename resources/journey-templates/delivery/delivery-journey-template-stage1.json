@@ -1,0 +1,128 @@
+{
+  "_meta": {
+    "description": "Updated Stage 1 (Onboarding / Registered) for the universal Anaplan product Delivery journey template. Slots into the larger template at stages[0]. Reflects iteration from Stage 1 review pass.",
+    "iteration_date": "2026-04-27",
+    "changes_from_previous": [
+      "Added: journey-orientation task (new, placed first)",
+      "Added: partner-success-engagement task (new) — replaces assumption of a dedicated PSM",
+      "Added: confirm-parent-journey-enrollment task (new, conditional)",
+      "Modified: complete-resource-profile — effort upgraded from 15 min to 30-45 min to reflect expanded fields; manager info captured here as OPTIONAL, becomes REQUIRED to exit Stage 2",
+      "Renamed: confirm-{{PRODUCT_ID}}-focus → confirm-{{PRODUCT_ID}}-primary-focus (reflects multi-focus reality across journeys)",
+      "Decision: NO system-side stage-exit actions. Auto-provisioning of workspaces and workshop models is triggered within Stage 2, not on Stage 1 exit"
+    ],
+    "open_items_parked_for_later": [
+      "Resource profile field spec — to be locked as a separate work item alongside the data model",
+      "Computed time per stage — to be wired in once Stage 2 and Stage 3 task lists are locked",
+      "Parent-journey conditional logic — needs parent-journey concept defined as its own structural layer",
+      "Prereq recency policy (Anaplan Overview / Platform staleness) — program-level decision",
+      "Dormancy / stale-state handling — program-level decision"
+    ]
+  },
+
+  "_fixed": false,
+  "_note": "Stage 1 is mostly fixed across all products. Variable elements: confirm-primary-focus task title and primary-focus-confirmed gate description.",
+  "stage_number": 1,
+  "name": "Registered",
+  "phase": "onboarding",
+  "description": "Partner resource confirms journey understanding, portal access, expanded profile, Partner Success engagement model, primary focus area, parent-journey enrollment if applicable, and prerequisite journey completion before product-specific work begins.",
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "journey-orientation",
+      "title": "Review {{PRODUCT_NAME}} Delivery Journey roadmap & expectations",
+      "description": "Walk through the 5 stages, computed time commitment per stage, the Expert outcome, and how multi-journey / parent-journey enrollment works. Sets expectations before any other work begins. Supports just-in-time enablement framing across the journey.",
+      "asset": "{{PRODUCT_NAME}} Delivery Journey roadmap",
+      "source_system": "Seismic",
+      "estimated_effort": "20-30 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "join-partner-portal",
+      "title": "Join the partner portal",
+      "completion_mechanism": "external_system",
+      "estimated_effort": "30 min",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_modified": true,
+      "_modification_note": "Effort upgraded from 15 min to reflect expanded field set. Manager info captured here is optional at this gate; the requirement to populate manager info is enforced as an exit gate on Stage 2.",
+      "task_id": "complete-resource-profile",
+      "title": "Complete resource profile",
+      "description": "Capture firm, practice, prior delivery role, years on Anaplan, prior certifications and badges, region and language coverage, current utilization band, prior products delivered, and manager contact info (name, email, role). Profile is a living record — fields can be updated as the resource progresses across journeys.",
+      "completion_mechanism": "self_attest",
+      "estimated_effort": "30-45 min",
+      "required": true,
+      "_profile_field_spec_status": "draft — to be locked as a separate work item"
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "partner-success-engagement",
+      "title": "Understand how to engage Anaplan Partner Success",
+      "description": "Review the Partner Success engagement model — how to raise tickets, which Slack channels apply, and how to use the Partner Success agent. Replaces the assumption of a dedicated PSM, since access path varies between white-glove and long-tail partners.",
+      "asset": "Partner Success engagement guide",
+      "source_system": "Seismic",
+      "estimated_effort": "15 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_variable": "task_id suffix and title only",
+      "_renamed_from": "confirm-{{PRODUCT_ID}}-focus",
+      "task_id": "confirm-{{PRODUCT_ID}}-primary-focus",
+      "title": "Confirm {{PRODUCT_NAME}} as primary focus for this journey",
+      "description": "Resources may hold multiple active focus declarations across concurrent journeys. This declaration scopes the current journey only, not the resource's overall product coverage.",
+      "completion_mechanism": "self_attest",
+      "estimated_effort": "5 min",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "_conditional": "Required only if resource is enrolled in a parent journey (e.g., a logical bundle such as IFP + FCR + AI). Otherwise auto-skipped.",
+      "task_id": "confirm-parent-journey-enrollment",
+      "title": "Confirm parent journey enrollment (if applicable)",
+      "description": "If this journey is part of a parent journey, confirm enrollment so progression, gates, and Expert outcomes are tracked at the parent-journey level.",
+      "completion_mechanism": "self_attest",
+      "estimated_effort": "5 min",
+      "required": false,
+      "conditional_required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "verify-anaplan-overview-complete",
+      "title": "Verify Anaplan Overview journey complete",
+      "completion_mechanism": "prereq_journey_check",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "verify-anaplan-platform-complete",
+      "title": "Verify Anaplan Platform journey complete",
+      "completion_mechanism": "prereq_journey_check",
+      "required": true
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true,  "_new": true,      "gate_id": "journey-orientation-acknowledged",        "description": "{{PRODUCT_NAME}} Delivery Journey roadmap reviewed and acknowledged",                                              "verification_source": "self_attest"          },
+    { "_fixed": true,                      "gate_id": "portal-active",                            "description": "Partner portal login active",                                                                                       "verification_source": "external_system"      },
+    { "_fixed": true,  "_modified": true,  "gate_id": "profile-complete",                          "description": "Resource profile complete with Role = Delivery and required fields populated. Manager info is OPTIONAL at this gate and REQUIRED at Stage 2 exit.", "verification_source": "self_attest" },
+    { "_fixed": true,  "_new": true,      "gate_id": "partner-success-engagement-acknowledged",  "description": "Partner Success engagement model acknowledged",                                                                       "verification_source": "self_attest"          },
+    { "_variable": true,                   "gate_id": "primary-focus-confirmed",                  "description": "{{PRODUCT_NAME}} confirmed as primary focus for this journey",                                                       "verification_source": "self_attest"          },
+    { "_fixed": true,  "_new": true,  "_conditional": true, "gate_id": "parent-journey-enrollment-confirmed", "description": "Parent journey enrollment confirmed (only required if resource is enrolled in a parent journey)",  "verification_source": "self_attest"          },
+    { "_fixed": true,                      "gate_id": "anaplan-overview-complete",                "description": "Anaplan Overview journey marked complete",                                                                          "verification_source": "prereq_journey_check" },
+    { "_fixed": true,                      "gate_id": "anaplan-platform-complete",                "description": "Anaplan Platform journey marked complete",                                                                          "verification_source": "prereq_journey_check" }
+  ],
+
+  "stage_exit_actions": [],
+  "_stage_exit_actions_note": "No system-side actions on Stage 1 exit. Auto-provisioning of {{PRODUCT_NAME}} delivery workspaces and workshop models is triggered within Stage 2 and verified at Stage 3 entry.",
+
+  "estimated_effort_total": "1h 50min - 2h 15min",
+  "_estimated_effort_total_note": "Computed from task estimates excluding zero-effort verification tasks. This value is what the journey-orientation task surfaces to the resource as the Stage 1 time commitment."
+}

@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\FilterDataController;
 use App\Http\Controllers\Api\PartnerEventController;
 use App\Http\Controllers\ApiTokenController;
 use App\Http\Controllers\BenchmarkController;
+use App\Http\Controllers\BlockerController;
 use App\Http\Controllers\BlueprintAssignmentController;
 use App\Http\Controllers\BlueprintController;
 use App\Http\Controllers\BlueprintDashboardController;
@@ -32,13 +33,16 @@ use App\Http\Controllers\GoalsController;
 use App\Http\Controllers\GoalTemplateController;
 use App\Http\Controllers\HealthDashboardController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\JourneyAssetController;
 use App\Http\Controllers\JourneyController;
+use App\Http\Controllers\JourneyStandupController;
 use App\Http\Controllers\LabController;
 use App\Http\Controllers\LabFacilitatorController;
 use App\Http\Controllers\LaunchProgramController;
 use App\Http\Controllers\LaunchProgramDashboardController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\MeasureController;
+use App\Http\Controllers\MyJourneysController;
 use App\Http\Controllers\NotificationTemplateController;
 use App\Http\Controllers\ObjectiveController;
 use App\Http\Controllers\PartnerController;
@@ -917,7 +921,23 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{journey}/builder', [JourneyController::class, 'builder'])->name('builder');
         Route::post('/{journey}/builder/items', [JourneyController::class, 'attachItem'])->name('builder.attach');
         Route::delete('/{journey}/builder/items/{item}', [JourneyController::class, 'detachItem'])->name('builder.detach');
+
+        // Asset workflow (status, link, assign)
+        Route::get('/{journey}/assets', [JourneyAssetController::class, 'index'])->name('assets.index');
+        Route::patch('/{journey}/assets/{asset}', [JourneyAssetController::class, 'update'])->name('assets.update');
+
+        // Standup view (trends + open blockers)
+        Route::get('/{journey}/standup', [JourneyStandupController::class, 'show'])->name('standup');
+
+        // Blocker CRUD
+        Route::get('/{journey}/blockers', [BlockerController::class, 'index'])->name('blockers.index');
+        Route::post('/{journey}/blockers', [BlockerController::class, 'store'])->name('blockers.store');
+        Route::patch('/{journey}/blockers/{blocker}', [BlockerController::class, 'update'])->name('blockers.update');
+        Route::delete('/{journey}/blockers/{blocker}', [BlockerController::class, 'destroy'])->name('blockers.destroy');
     });
+
+    // My Journeys — owner dashboard
+    Route::get('/my-journeys', [MyJourneysController::class, 'index'])->name('my-journeys.index');
 
     /*
     |--------------------------------------------------------------------------

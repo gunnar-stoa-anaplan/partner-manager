@@ -58,6 +58,16 @@ class Journey extends Model
         return $this->hasMany(JourneyStageItem::class);
     }
 
+    public function journeyAssets(): HasMany
+    {
+        return $this->hasMany(JourneyAsset::class);
+    }
+
+    public function blockers(): HasMany
+    {
+        return $this->hasMany(Blocker::class);
+    }
+
     /**
      * Scope for journeys visible to the given user.
      * Admins see all; PSMs see only assigned journeys.

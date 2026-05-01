@@ -132,6 +132,18 @@
             <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#layers"></use></svg>
             Builder
         </a>
+        <a href="{{ route('journeys.assets.index', $journey) }}" class="btn btn-outline-primary btn-sm">
+            <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#file-text"></use></svg>
+            Assets
+        </a>
+        <a href="{{ route('journeys.standup', $journey) }}" class="btn btn-outline-info btn-sm">
+            <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#trending-up"></use></svg>
+            Standup
+        </a>
+        <a href="{{ route('journeys.blockers.index', $journey) }}" class="btn btn-outline-warning btn-sm">
+            <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#alert-circle"></use></svg>
+            Blockers
+        </a>
     </div>
 
 @endsection
