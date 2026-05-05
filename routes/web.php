@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\EnablementController;
 use App\Http\Controllers\Api\FilterDataController;
 use App\Http\Controllers\Api\PartnerEventController;
 use App\Http\Controllers\ApiTokenController;
+use App\Http\Controllers\AssetCatalogController;
 use App\Http\Controllers\BenchmarkController;
 use App\Http\Controllers\BlueprintAssignmentController;
 use App\Http\Controllers\BlueprintController;
@@ -39,6 +40,7 @@ use App\Http\Controllers\LaunchProgramController;
 use App\Http\Controllers\LaunchProgramDashboardController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\MeasureController;
+use App\Http\Controllers\MyJourneysController;
 use App\Http\Controllers\NotificationTemplateController;
 use App\Http\Controllers\ObjectiveController;
 use App\Http\Controllers\PartnerController;
@@ -908,6 +910,18 @@ Route::middleware(['auth'])->group(function () {
     | Journeys
     |--------------------------------------------------------------------------
     */
+    /*
+    |--------------------------------------------------------------------------
+    | My Journeys (owner dashboard) + Asset Catalog
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('module:journeys.my_journeys')->group(function () {
+        Route::get('/my-journeys', [MyJourneysController::class, 'index'])->name('journeys.my');
+    });
+    Route::middleware('module:journeys.catalog')->group(function () {
+        Route::get('/assets', [AssetCatalogController::class, 'index'])->name('assets.index');
+    });
+
     Route::prefix('journeys')->name('journeys.')->group(function () {
         Route::get('/', [JourneyController::class, 'index'])->name('index');
         Route::get('/{journey}', [JourneyController::class, 'show'])->name('show');

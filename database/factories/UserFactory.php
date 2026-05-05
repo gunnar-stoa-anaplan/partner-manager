@@ -98,4 +98,9 @@ class UserFactory extends Factory
     {
         return $this->withRole('integration', ['display_name' => 'Integration']);
     }
+
+    public function journeyOwner(): static
+    {
+        return $this->withRole('journey_owner', ['display_name' => 'Journey Owner']);
+    }
 }

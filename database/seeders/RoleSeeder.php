@@ -172,6 +172,23 @@ class RoleSeeder extends Seeder
             'strategy.strategy' => 'read',
         ]);
 
+        // Journey Owner — minimal role for users whose only function is owning journeys.
+        // Sees only: My Journeys, Asset Catalog, plus the journey detail/builder pages
+        // (gated separately by journey_assignments).
+        $journeyOwner = Role::updateOrCreate(['slug' => 'journey_owner'], [
+            'display_name' => 'Journey Owner',
+            'type' => 'internal',
+            'is_protected' => true,
+            'bypass_permissions' => false,
+            'landing_route' => 'journeys.my',
+            'sort_order' => 5,
+            'description' => 'Owns one or more journeys; can compose stages and browse the asset catalog.',
+        ]);
+        $this->syncPermissions($journeyOwner, [
+            'journeys.my_journeys' => 'write',
+            'journeys.catalog' => 'read',
+        ]);
+
         // Integration
         $integration = Role::updateOrCreate(['slug' => 'integration'], [
             'display_name' => 'Integration',

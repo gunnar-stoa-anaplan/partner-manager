@@ -35,6 +35,9 @@ class GunnarSeeder extends Seeder
         'integration' => [
             ['email' => 'integration@example.com', 'name' => 'Integration Hub'],
         ],
+        'journey_owner' => [
+            ['email' => 'journey.owner@example.com', 'name' => 'Maya Chen'],
+        ],
         'psm' => [
             ['email' => 'gunnar.stoa@gmail.com', 'name' => 'Gunnar Stoa'],
             ['email' => 'rick.palmer@example.com', 'name' => 'Rick Palmer'],
@@ -88,6 +91,19 @@ class GunnarSeeder extends Seeder
             $pam->update(['manager_id' => $ray->id]);
         }
         $this->command->info("  ✓ All PAMs report to {$ray->name}");
+
+        // Assign the Journey Owner (Maya Chen) to all existing journeys.
+        if (! empty($createdUsers['journey_owner'])) {
+            $maya = $createdUsers['journey_owner'][0];
+            $journeyIds = \App\Models\Journey::query()->pluck('id');
+            foreach ($journeyIds as $journeyId) {
+                \App\Models\JourneyAssignment::firstOrCreate([
+                    'journey_id' => $journeyId,
+                    'user_id' => $maya->id,
+                ]);
+            }
+            $this->command->info("  ✓ Assigned {$maya->name} to {$journeyIds->count()} journey(s)");
+        }
 
         // Seed deal registrations (partners are now created by PartnerSeeder from Excel data)
         if (DealRegistration::count() === 0) {

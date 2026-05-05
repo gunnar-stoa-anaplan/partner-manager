@@ -84,6 +84,9 @@ class DatabaseSeeder extends Seeder
             GalleryThemeSeeder::class,         // gallery wall templates + frame slots
             IdeaRoomSeeder::class,             // ideas, buckets, tags, edges, rooms
 
+            // === Content Asset Catalog ===
+            ContentAssetSeeder::class,         // app content + consensus demos from asset-index.json
+
             // === Activation Paths (must run last — purges and resets all Pennant feature flags) ===
             ActivationPathSeeder::class,       // activation paths, steps, user assignments, feature flag state
         ]);
