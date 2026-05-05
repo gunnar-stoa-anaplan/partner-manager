@@ -49,6 +49,18 @@ class MyJourneysController extends Controller
         }
         $aggregate['total'] = array_sum($aggregate);
 
+        $pipelineSum = $journeys->whereNotNull('linked_pipeline_value')->sum('linked_pipeline_value');
+        $winRateValues = $journeys->whereNotNull('linked_win_rate')->pluck('linked_win_rate');
+        $deliveryValues = $journeys->whereNotNull('delivery_zero_trouble_rate')->pluck('delivery_zero_trouble_rate');
+        $businessPillars = [
+            'pipeline_value' => $pipelineSum > 0 ? $pipelineSum : null,
+            'win_rate_avg' => $winRateValues->count() > 0 ? round($winRateValues->avg(), 1) : null,
+            'delivery_excellence_avg' => $deliveryValues->count() > 0 ? round($deliveryValues->avg(), 1) : null,
+            'pipeline_journey_count' => $journeys->whereNotNull('linked_pipeline_value')->count(),
+            'win_rate_journey_count' => $winRateValues->count(),
+            'delivery_journey_count' => $deliveryValues->count(),
+        ];
+
         $recentChanges = AssetStatusHistory::query()
             ->whereHas('journeyAsset', fn ($q) => $q->whereIn('journey_id', $journeyIds))
             ->with(['journeyAsset.journey', 'changedByUser'])
@@ -61,6 +73,7 @@ class MyJourneysController extends Controller
             'statusByJourney',
             'aggregate',
             'recentChanges',
+            'businessPillars',
         ));
     }
 }

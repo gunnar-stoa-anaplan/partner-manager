@@ -35,6 +35,63 @@
         <div class="alert alert-success">{{ session('flash.success') }}</div>
     @endif
 
+    {{-- Three Business Pillars --}}
+    <div class="card shadow-0 mb-4 border-start border-4 border-primary">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Business outcomes — what these journeys exist to drive</h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-uppercase text-muted small fw-bold mb-1">Pipeline</div>
+                        <div class="display-6 fw-bold text-primary">
+                            @if ($businessPillars['pipeline_value'] !== null)
+                                ${{ number_format($businessPillars['pipeline_value'] / 1000, 0) }}K
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </div>
+                        <div class="text-muted small">
+                            Linked pipeline across {{ $businessPillars['pipeline_journey_count'] }} of {{ $journeys->count() }} journey(s)
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-uppercase text-muted small fw-bold mb-1">Win rate</div>
+                        <div class="display-6 fw-bold text-success">
+                            @if ($businessPillars['win_rate_avg'] !== null)
+                                {{ $businessPillars['win_rate_avg'] }}%
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </div>
+                        <div class="text-muted small">
+                            Avg close rate, journey-attributed opportunities
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-uppercase text-muted small fw-bold mb-1">Delivery excellence</div>
+                        <div class="display-6 fw-bold text-info">
+                            @if ($businessPillars['delivery_excellence_avg'] !== null)
+                                {{ $businessPillars['delivery_excellence_avg'] }}%
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </div>
+                        <div class="text-muted small">
+                            Zero-trouble deployment rate, post-launch
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-muted small mt-3">
+                Manual entry for v0; auto-mapping from Salesforce + delivery health pipelines is a follow-up build (see <code>journey-opportunity-mapping-design.md</code>).
+            </div>
+        </div>
+    </div>
+
     {{-- Aggregate Across All My Journeys --}}
     <div class="card shadow-0 mb-4">
         <div class="card-body">

@@ -20,7 +20,21 @@ class Journey extends Model
         'status',
         'db_path',
         'config_path',
+        'linked_pipeline_value',
+        'linked_win_rate',
+        'delivery_zero_trouble_rate',
+        'pillar_metrics_updated_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'linked_pipeline_value' => 'decimal:2',
+            'linked_win_rate' => 'decimal:2',
+            'delivery_zero_trouble_rate' => 'decimal:2',
+            'pillar_metrics_updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Many-to-many relationship with User through journey_assignments.
