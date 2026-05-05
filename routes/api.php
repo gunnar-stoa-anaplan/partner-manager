@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\InternalSignalAggregateController;
 use App\Http\Controllers\Api\LabDesignerController;
 use App\Http\Controllers\Api\PartnerAdvisorController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\ContentAssetController;
 use App\Http\Controllers\Api\V1\EnablementController;
 use App\Http\Controllers\Api\V1\ImportController;
 use App\Http\Controllers\Api\V1\JourneyRuntimeController;
@@ -57,6 +58,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/enablement/events/{id}', [EnablementController::class, 'show']);
         Route::post('/enablement/designer', EnablementDesignerController::class)->name('api.enablement.designer');
         Route::post('/enablement/lab-designer', LabDesignerController::class)->name('api.enablement.lab-designer');
+    });
+
+    // --- Content Asset Catalog (read-only, gated by journey:read ability) ---
+    Route::middleware('abilities:journey:read')->group(function (): void {
+        Route::get('/assets', [ContentAssetController::class, 'index']);
+        Route::get('/assets/app/{application}', [ContentAssetController::class, 'byApplication'])
+            ->where('application', '.*');
+        Route::get('/assets/{id}', [ContentAssetController::class, 'show'])->whereNumber('id');
+        Route::get('/journey-stage-assets/{journey_key}/{stage}', [ContentAssetController::class, 'forJourneyStage'])
+            ->whereNumber('stage');
     });
 
     Route::prefix('journeys/{journey:journey_key}')

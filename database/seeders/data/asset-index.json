@@ -1,0 +1,1441 @@
+{
+  "apps": [
+    {
+      "name": "Consensus Margin Planning",
+      "lob": "Finance",
+      "core": "N",
+      "launch_year": 2026,
+      "personas": {
+        "sales": {
+          "coe_lead": "Ankit Jain",
+          "solutions_marketing_lead": "Danielle Dahlstrom",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCMf9qR4hFHWJ87H8WgcWC8QbTJ8",
+          "icp": "https://anaplan.seismic.com/Link/Content/DCMXbHGq7GTmq8MRRqVJMbp9F4Pj",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCMXbHGq7GTmq8MRRqVJMbp9F4Pj",
+          "faq": "https://anaplan.seismic.com/Link/Content/DCfXqCPPHbqcmGCTG7BjcPcf4pRd",
+          "positioning": "https://anaplan.seismic.com/Link/Content/DCMXbHGq7GTmq8MRRqVJMbp9F4Pj",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Tony Wright",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Andrew Wong",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Disclosure Management",
+      "lob": "Finance",
+      "core": "N",
+      "launch_year": "pre-2025",
+      "personas": {
+        "sales": {
+          "coe_lead": "Ankit Jain",
+          "solutions_marketing_lead": "Danielle Dahlstrom",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DC8FfF7V9BjFM89GqBM7J3TDpQXG",
+          "icp": "Need?",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCFQb9qj2bPHF8CTcj337pQFP6g8",
+          "faq": "Need?",
+          "positioning": "Need?",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Tony Wright",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Andrew Wong",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Financial Consolidation",
+      "lob": "Finance",
+      "core": "Y",
+      "launch_year": "pre-2025",
+      "personas": {
+        "sales": {
+          "coe_lead": "Ankit Jain",
+          "solutions_marketing_lead": "Danielle Dahlstrom",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCf9BVqPhQ7g984CPCQJBBJ2TFV8",
+          "icp": "In Sales Program",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DC8J3c2bHQ6MXGHDgMcP9Q37gWQP",
+          "faq": "In Sales Program",
+          "positioning": "In Sales Program",
+          "seismic_courses": null,
+          "notes": "wrapped in sales program",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Tony Wright",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Andrew Wong",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Financial Planning and Consolidation SALES PROGRAM BUNDLE",
+      "lob": "Finance",
+      "core": "Y",
+      "launch_year": 2025,
+      "personas": {
+        "sales": {
+          "coe_lead": "Ankit Jain",
+          "solutions_marketing_lead": "Danielle Dahlstrom",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DC84mWhpG7bpWGTGPPMVXbTTPmWG",
+          "icp": "https://anaplan.seismic.com/Link/Content/DC24fJBWdGDJM8TQdBVp2MVDjmXG",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCWJW9bC9pbgX8fR88pq36h98Bhd",
+          "faq": "https://anaplan.seismic.com/Link/Content/DChF6HpfjmMmJ84RfQWWJ4BQJ8WB",
+          "positioning": "https://anaplan.seismic.com/Link/Content/DC6b8TXJ6pChJGQMTVXXhb98bff8",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Tony Wright",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Andrew Wong",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Integrated Financial Planning",
+      "lob": "Finance",
+      "core": "Y",
+      "launch_year": "pre-2025",
+      "personas": {
+        "sales": {
+          "coe_lead": "Ankit Jain",
+          "solutions_marketing_lead": "Danielle Dahlstrom",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DC8V4WfJgdmc3GhVfBjqdFQjR7dG",
+          "icp": "https://anaplan.seismic.com/Link/Content/DC8dJJWFpGbTTGTD2WqRCmjc3dmB",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DC3RMJ39GcX428qTTcVfb8mgMFXd",
+          "faq": "https://anaplan.seismic.com/Link/Content/DC7pb9XmqJDWR8MH4hWDGQgRpPT8",
+          "positioning": "Need?",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Tony Wright",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Andrew Wong",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Profitability Analysis",
+      "lob": "Finance",
+      "core": "N",
+      "launch_year": 2026,
+      "personas": {
+        "sales": {
+          "coe_lead": "Ankit Jain",
+          "solutions_marketing_lead": "Danielle Dahlstrom",
+          "pitch_deck": "Need?",
+          "icp": "https://anaplan.seismic.com/Link/Content/DCXp3m3h4CPjT8MTMHpHWqGWV4Fj",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCqD2hP37f9BXGCB3dbTMRVcH4Xd",
+          "faq": "Need?",
+          "positioning": "Need?",
+          "seismic_courses": null,
+          "notes": "in launch process",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Tony Wright",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Andrew Wong",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Project Cost Planning",
+      "lob": "Finance",
+      "core": "N",
+      "launch_year": 2026,
+      "personas": {
+        "sales": {
+          "coe_lead": "Ankit Jain",
+          "solutions_marketing_lead": "Danielle Dahlstrom",
+          "pitch_deck": "Need?",
+          "icp": "Need?",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCCcBVc9V9Jh3G2RBFqbdPTV2bJV",
+          "faq": "Need?",
+          "positioning": "Need?",
+          "seismic_courses": null,
+          "notes": "in launch process",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Tony Wright",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Andrew Wong",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Subscription Revenue Planning",
+      "lob": "Finance",
+      "core": "N",
+      "launch_year": 2026,
+      "personas": {
+        "sales": {
+          "coe_lead": "Ankit Jain",
+          "solutions_marketing_lead": "Danielle Dahlstrom",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCgFCpRffVpjM8MXM68GpJQJ3Wf3",
+          "icp": "https://anaplan.seismic.com/Link/Content/DCCWC9VHGDhJR8WPMFqfXVP2cjMP",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCfPbTmC9CbPD8hRD2cXf4bWPbjB",
+          "faq": "https://anaplan.seismic.com/Link/Content/DCfPbTmC9CbPD8hRD2cXf4bWPbjB",
+          "positioning": "https://anaplan.seismic.com/Link/Content/DCCWC9VHGDhJR8WPMFqfXVP2cjMP",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Tony Wright",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Andrew Wong",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Contact Center Planning",
+      "lob": "HR",
+      "core": "N",
+      "launch_year": 2026,
+      "personas": {
+        "sales": {
+          "coe_lead": "Bashir Bashir",
+          "solutions_marketing_lead": "Kouros Behzad",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCmfjHdcRgCR2GCWQWPJb9HpH7jj",
+          "icp": "Need?",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCh3pc7QVM7H48C2QVjHBMcCWJTB",
+          "faq": "Need?",
+          "positioning": "Need?",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Bashir Bashir",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Anju Rao",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Operational Workforce Planning",
+      "lob": "HR",
+      "core": "Y",
+      "launch_year": "pre-2025",
+      "personas": {
+        "sales": {
+          "coe_lead": "Bashir Bashir",
+          "solutions_marketing_lead": "Kouros Behzad",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCBpBQM2RmFqWGcVDMBHR4HJPbDd",
+          "icp": "Need?",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCBpp8dcHmjg2G2F6TX4hHh3BDcd",
+          "faq": "Need?",
+          "positioning": "Need?",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Bashir Bashir",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Anju Rao",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Project Resource Planning",
+      "lob": "HR",
+      "core": "N",
+      "launch_year": 2026,
+      "personas": {
+        "sales": {
+          "coe_lead": "Bashir Bashir",
+          "solutions_marketing_lead": "Kouros Behzad",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DC8DFqH4MVqpQGcCqBhpGcBFVFqV",
+          "icp": "Need?",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCXqJPdPRpCj68FRbTWB8CmPfgVj",
+          "faq": "Need?",
+          "positioning": "Need?",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Bashir Bashir",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Anju Rao",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Allocation and Replenishment Planning",
+      "lob": "Retail",
+      "core": "Y",
+      "launch_year": 2026,
+      "personas": {
+        "sales": {
+          "coe_lead": "James Theuekauf",
+          "solutions_marketing_lead": "Elena Izakson",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCJHRGFVT4RgW8c2V3QX2BhV46fj",
+          "icp": "https://anaplan.seismic.com/Link/Content/DC96Cf6BXFpbFGh2RXbqHFdGdFCV",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCVf8g6RGfm89GcT7QHQGcb8bH3P",
+          "faq": "https://anaplan.seismic.com/Link/Content/DCTCmcgdDhdX2G7MG2624pWHD9Fj",
+          "positioning": "https://anaplan.seismic.com/Link/Content/DCmDMWj4gM9M2GFMcFhR4mbMHJPV",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Kirby Bumpus",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Linda Williams",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Assortment Planning",
+      "lob": "Retail",
+      "core": "Y",
+      "launch_year": 2026,
+      "personas": {
+        "sales": {
+          "coe_lead": "James Theuekauf",
+          "solutions_marketing_lead": "Elena Izakson",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DC6dGcp8h8WWCG7WR7pWFF4hmb6d",
+          "icp": "https://anaplan.seismic.com/Link/Content/DC3V72XR27Q9X8cJjWCCcbjdFbTB",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DC9pTB8qq23B88WXbhQ89Q7TmCRj",
+          "faq": "https://anaplan.seismic.com/Link/Content/DCcQh4DgGmT9P8QQWgG7HJD49HpG",
+          "positioning": "https://anaplan.seismic.com/Link/Content/DCqf48hfgXJM3GMRhV7RGRf8gq9d",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Kirby Bumpus",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Linda Williams",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Merchandise Financial Planning",
+      "lob": "Retail",
+      "core": "Y",
+      "launch_year": 2025,
+      "personas": {
+        "sales": {
+          "coe_lead": "James Theuekauf",
+          "solutions_marketing_lead": "Elena Izakson",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCm43Xm6Vm9hRG2JmBMPqG6TPPHd",
+          "icp": "https://anaplan.seismic.com/Link/Content/DCbVbHpmGjHq68fRDpjGXCd2WTDV",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCcmhjf4qG7hVGhDjF9JX494mJ7V",
+          "faq": "https://anaplan.seismic.com/Link/Content/DCGhjjbGbqMWj84J6R84qPfb3R83",
+          "positioning": "https://anaplan.seismic.com/Link/Content/DCdCqbTF3TCHb8hT2FhRJfPQfTp8",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Kirby Bumpus",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Linda Williams",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "GTM Capacity Planning",
+      "lob": "RPM",
+      "core": "Y",
+      "launch_year": "pre-2025",
+      "personas": {
+        "sales": {
+          "coe_lead": "Kyle Welling",
+          "solutions_marketing_lead": "Scott Hirsch",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCq6MbgcD4cmdGWTMmXMXFHdM82V",
+          "icp": "https://anaplan.seismic.com/Link/Content/DC3GCHFGXV4bqGFDHbp6DTbBD46B",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCcXpJHcgXJp4GTF67F6mmXgBXbP",
+          "faq": "https://anaplan.seismic.com/apps/doccenter/f4c8d4fe-f6c0-46d8-85cc-d94645d413ce/doc/%25252Fddd8bbf4ee-8337-8374-22a2-b0e05c0afa1b%25252FdfZjBhMWY0ZTQtY2JjNC00MTgzLTgzYTQtMGJhYzZlZjMzMTcw%25252CPT0%25253D%25252CU2VnbWVudGF0aW9uICYgU2NvcmluZw%25253D%25253D%25252FdfNjhjNWQyNGUtMzdhOC00ZDYzLWE5NzQtYmJhZTgyYTQyNjg4%25252CPT0%25253D%25252CRkFR%25252Flff44bbec0-2771-4d77-af78-077bfb4ba53a/?mode=view",
+          "positioning": "Slide 68-74",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Erik Bangsund (EB)",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "John Newcomb",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Sales Forecasting",
+      "lob": "RPM",
+      "core": "N",
+      "launch_year": 2026,
+      "personas": {
+        "sales": {
+          "coe_lead": "Kyle Welling",
+          "solutions_marketing_lead": "Scott Hirsch",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCWgT9WDRfBRB89Dj73hMR7jc23P",
+          "icp": "https://anaplan.seismic.com/Link/Content/DC9d32hhgVhqPGcD4fXm7Bj99CcP",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DC9JX42W3G7c2G7CqjXMVdC2q3Q8",
+          "faq": "https://anaplan.seismic.com/apps/contentmanager/detail/1/97ff6b88-8c47-4ce3-b86b-b577940749f7/info/LIST/title?versionId=688ccb01-1c1b-4c9a-8342-709f7e384542&structureId=undefined&focusSpecifedPageId=undefined&panel=undefined",
+          "positioning": "https://anaplan.seismic.com/Link/Content/DCVhbPPHVVcB282PXGQG62XqbBjj",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Erik Bangsund (EB)",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "John Newcomb",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Segmentation and Scoring",
+      "lob": "RPM",
+      "core": "Y",
+      "launch_year": "pre-2025",
+      "personas": {
+        "sales": {
+          "coe_lead": "Kyle Welling",
+          "solutions_marketing_lead": "Scott Hirsch",
+          "pitch_deck": "https://anaplan.seismic.com/apps/contentmanager/detail/1/5767a748-986a-4cec-ab1d-54f84b6dab0f/info/LIST/title",
+          "icp": "https://anaplan.seismic.com/Link/Content/DCc6f2pf78DPF8FH6RmJQPbTPm28",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DC29qQqV8q8ddGWPDTbFHGCqPfcP",
+          "faq": "https://anaplan.seismic.com/apps/doccenter/f4c8d4fe-f6c0-46d8-85cc-d94645d413ce/doc/%25252Fddd8bbf4ee-8337-8374-22a2-b0e05c0afa1b%25252FdfZjBhMWY0ZTQtY2JjNC00MTgzLTgzYTQtMGJhYzZlZjMzMTcw%25252CPT0%25253D%25252CU2VnbWVudGF0aW9uICYgU2NvcmluZw%25253D%25253D%25252FdfNjhjNWQyNGUtMzdhOC00ZDYzLWE5NzQtYmJhZTgyYTQyNjg4%25252CPT0%25253D%25252CRkFR%25252Flff44bbec0-2771-4d77-af78-077bfb4ba53a/?mode=view",
+          "positioning": "Slide 59-67",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Erik Bangsund (EB)",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "John Newcomb",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Territory and Quota Planning",
+      "lob": "RPM",
+      "core": "Y",
+      "launch_year": "pre-2025",
+      "personas": {
+        "sales": {
+          "coe_lead": "Kyle Welling",
+          "solutions_marketing_lead": "Scott Hirsch",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCpg3fXmQDH6282VVF2HGmVPJXQ3",
+          "icp": "https://anaplan.seismic.com/Link/Content/DCBMXbG9B8MHb8cBfRWDWdHhFFqP",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DC638X8WmqJ6V89B9Ghqjfgq4B8B",
+          "faq": "https://anaplan.seismic.com/Link/Content/DCC9hmWR6BGGH8mT8HdThD87bDVV",
+          "positioning": "https://anaplan.seismic.com/Link/Content/DCdTXWfdgbT828HFmpTfcc8JF6cP",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Erik Bangsund (EB)",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "John Newcomb",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Demand Planning",
+      "lob": "SCM",
+      "core": "Y",
+      "launch_year": "pre-2025",
+      "personas": {
+        "sales": {
+          "coe_lead": "Emily Nicholls",
+          "solutions_marketing_lead": "Elena Izakson",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCfGRHgfF39MbG9PcP9GHPPFTT8d",
+          "icp": "Need",
+          "datasheet": "Need",
+          "faq": "Need",
+          "positioning": "Need",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Kirby Bumpus",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Linda Williams",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Integrated Business Planning",
+      "lob": "SCM",
+      "core": "Y",
+      "launch_year": 2025,
+      "personas": {
+        "sales": {
+          "coe_lead": "Emily Nicholls",
+          "solutions_marketing_lead": "Elena Izakson",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCBqmh7H88jVT84PWDXQb29hbpbB",
+          "icp": "https://anaplan.seismic.com/Link/Content/DCXg793fRJqpM8WRD2DfGWHFF6Dj",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCBqmh7H88jVT84PWDXQb29hbpbB",
+          "faq": "https://anaplan.seismic.com/Link/Content/DCDQB42QV678G8mJ7bjbhBGV3m4B",
+          "positioning": "https://anaplan.seismic.com/Link/Content/DC8X2qGggW2TF8QDBGG6Vh3GXDf3",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Kirby Bumpus",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Linda Williams",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Inventory Planning",
+      "lob": "SCM",
+      "core": "Y",
+      "launch_year": "pre-2025",
+      "personas": {
+        "sales": {
+          "coe_lead": "Emily Nicholls",
+          "solutions_marketing_lead": "Elena Izakson",
+          "pitch_deck": "Need",
+          "icp": "Need",
+          "datasheet": "Need",
+          "faq": "Need",
+          "positioning": "Need",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Kirby Bumpus",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Linda Williams",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Rough Cut Capacity Planning",
+      "lob": "SCM",
+      "core": "N",
+      "launch_year": "pre-2025",
+      "personas": {
+        "sales": {
+          "coe_lead": "Emily Nicholls",
+          "solutions_marketing_lead": "Elena Izakson",
+          "pitch_deck": "Need",
+          "icp": "Need",
+          "datasheet": "Need",
+          "faq": "Need",
+          "positioning": "Need",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Kirby Bumpus",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Linda Williams",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Spend Analysis and Forecasting",
+      "lob": "SCM",
+      "core": "N",
+      "launch_year": 2026,
+      "personas": {
+        "sales": {
+          "coe_lead": "Emily Nicholls",
+          "solutions_marketing_lead": "Elena Izakson",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DCMdH79gCbQWJGqJ3PR49D8Q7CWj",
+          "icp": "https://anaplan.seismic.com/Link/Content/DCm8mgB7RhHhm8qQ6FG4RB4jHqD8",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCm8mgB7RhHhm8qQ6FG4RB4jHqD8",
+          "faq": "https://anaplan.seismic.com/Link/Content/DCm8mgB7RhHhm8qQ6FG4RB4jHqD8",
+          "positioning": "https://anaplan.seismic.com/Link/Content/DCgm6M94c8CG9G2H3WmcH2TJVRC3",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Kirby Bumpus",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Linda Williams",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Statistical Forecasting",
+      "lob": "SCM",
+      "core": "Y",
+      "launch_year": "pre-2025",
+      "personas": {
+        "sales": {
+          "coe_lead": "Emily Nicholls",
+          "solutions_marketing_lead": "Elena Izakson",
+          "pitch_deck": "Need?",
+          "icp": "Need?",
+          "datasheet": "Need?",
+          "faq": "Need?",
+          "positioning": "Need?",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Kirby Bumpus",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Linda Williams",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Supply Planning",
+      "lob": "SCM",
+      "core": "Y",
+      "launch_year": "pre-2025",
+      "personas": {
+        "sales": {
+          "coe_lead": "Emily Nicholls",
+          "solutions_marketing_lead": "Elena Izakson",
+          "pitch_deck": "Need",
+          "icp": "https://anaplan.seismic.com/Link/Content/DCmBChJ8qbh6QGM2JMR6Wf2J8dpP",
+          "datasheet": "Need",
+          "faq": "Need",
+          "positioning": "Need",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Kirby Bumpus",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Linda Williams",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Trade Promotion Management",
+      "lob": "SCM",
+      "core": "N",
+      "launch_year": 2026,
+      "personas": {
+        "sales": {
+          "coe_lead": "Emily Nicholls",
+          "solutions_marketing_lead": "Elena Izakson",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DC4dbTfqP3p3bGhCp6HqQGpCg73V",
+          "icp": "https://anaplan.seismic.com/Link/Content/DCGCV87pRMBb389HXM38VTCffd8d",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCVBXPCBX9F3p8HXqgBM4c69FH2d",
+          "faq": "https://anaplan.seismic.com/Link/Content/DCdjVpgmqHd62GhX8QX2Hc2HdhD3",
+          "positioning": "https://anaplan.seismic.com/Link/Content/DCJB6hGGBPq4984DMQGPb3WQJP88",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Kirby Bumpus",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Linda Williams",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    },
+    {
+      "name": "Supply Chain Transformation SALES PROGRAM",
+      "lob": "SCM",
+      "core": "N/A",
+      "launch_year": 2025,
+      "personas": {
+        "sales": {
+          "coe_lead": "Emily Nicholls",
+          "solutions_marketing_lead": "Elena Izakson",
+          "pitch_deck": "https://anaplan.seismic.com/Link/Content/DChWJ7GBJXdBTG2T7RpXQH4CVDqV",
+          "icp": "https://anaplan.seismic.com/Link/Content/DCBJ2XTXMdJ4V8hDRP7hdfFCQBfd",
+          "datasheet": "https://anaplan.seismic.com/Link/Content/DCjgWQcPBC4mfG4H2fGJRmb4dQdj",
+          "faq": "https://anaplan.seismic.com/Link/Content/DC993DT2jf4d9GMTqhPg8DG674CV",
+          "positioning": "https://anaplan.seismic.com/Link/Content/DCBJ2XTXMdJ4V8hDRP7hdfFCQBfd",
+          "seismic_courses": null,
+          "notes": "n/a",
+          "is_priority": null,
+          "is_launching": null
+        },
+        "pre_sales": {
+          "pre_sales_lead": "Kirby Bumpus",
+          "consensus_demo_link": null,
+          "feature_demo_link": null
+        },
+        "delivery": {
+          "coe_lead": "Linda Williams",
+          "technical_docs": null,
+          "academy_courses": null
+        }
+      }
+    }
+  ],
+  "consensus_demos": [
+    {
+      "name": "AI-Guided Supply, Inventory, and Production Planning (~30 min)",
+      "total_minutes": 30.5,
+      "topics": [
+        "Demo Overview and Supply Risk Resolution",
+        "Supply Chain AI-Analyst",
+        "Supplier Collaboration",
+        "Inventory Planning",
+        "Financial Tie Out and Demo Close"
+      ],
+      "products": [
+        "AI Analyst",
+        "Inventory Planning",
+        "Production Planning",
+        "Supply Planning"
+      ],
+      "play_link": "https://play.goconsensus.com/ae5f985e4",
+      "description": "This demo was also submitted to Gartner, it shows how Anaplan enables holistic, scenario-driven decision-making across supply, production, and inventory planning, supported by the AI supply chain analyst."
+    },
+    {
+      "name": "AI-Powered Demand Planning (~24 min)",
+      "total_minutes": 24.0,
+      "topics": [
+        "Demo Overview, Data Review & Correction",
+        "Anaplan Forecaster",
+        "Product Lifecycle Planning",
+        "Risk, Opportunity, and Promotion Planning",
+        "Scenario Comparison and Plan Finalization"
+      ],
+      "products": [
+        "Demand Planning"
+      ],
+      "play_link": "https://play.goconsensus.com/b03933790",
+      "description": "This demand planning demo covers data review & correction, Forecaster, product lifecycle planning, risk, opportunity, and promotion planning, using workflow and supply chain analyst throughout."
+    },
+    {
+      "name": "Anaplan CoModeler (~13.5 min)",
+      "total_minutes": 15.0,
+      "topics": [
+        "An Introduction to Anaplan CoModeler: Build a New Model",
+        "Documentation and Extension: Understand & Extend any Model Faster",
+        "Productivity: Apply Mass Formatting Changes",
+        "Productivity: Run Bulk Administration Tasks",
+        "Optimization: Get Model Building Guidance with CoModeler",
+        "Productivity: Auto-Generate Rules with CoModeler"
+      ],
+      "products": [
+        "CoModeler"
+      ],
+      "play_link": "https://play.goconsensus.com/s9052f37e",
+      "description": "This demo showcases how CoModeler uses natural language prompts to automate and accelerate model building, including creating calculations, formatting line items, summarizing existing models, and building entire models from scratch."
+    },
+    {
+      "name": "Anaplan CoPlanner for IFP: Day in the Life (~ 7.5 min)",
+      "total_minutes": 7.5,
+      "topics": [
+        "Executives: Accelerate Decision Making with On Demand Insights",
+        "Reviewers: Stay Proactive without Slowing Down Teams",
+        "Analysts: Increase Confidence in Analysis & Support Stakeholders"
+      ],
+      "products": [
+        "CoPlanner",
+        "IFP"
+      ],
+      "play_link": "https://play.goconsensus.com/bd9327a51",
+      "description": "This demo provides 3 examples of using Anaplan CoPlanner across an executive, finance leader/reviewer, and analyst persona in the IFP application."
+    },
+    {
+      "name": "Anaplan Data Orchestrator (ADO) (~21 min)",
+      "total_minutes": 20.5,
+      "topics": [
+        "[RECOMMENDED] ADO Overview",
+        "ADO Setup",
+        "Options for Data Connections",
+        "Transforming your data with ADO",
+        "Linking Transformations to your Models",
+        "Visibility into the data map",
+        "Automating ADO flows and schedules"
+      ],
+      "products": [
+        "ADO"
+      ],
+      "play_link": "https://play.goconsensus.com/sc9686479",
+      "description": "Jarret Good doing an ADO demo, giving customers a look at the options and ways they could leverage ADO for their business"
+    },
+    {
+      "name": "Anaplan Demand Planning Application (~20 min)",
+      "total_minutes": 20.0,
+      "topics": [
+        "Demand Planning Overview",
+        "Promotion Uplift",
+        "Product Life Cycle",
+        "Tops Down and Risks/Opps",
+        "Demand Planner Command Center"
+      ],
+      "products": [
+        "Demand Planning"
+      ],
+      "play_link": "https://play.goconsensus.com/udba63619",
+      "description": "Demand Planning App from a consumer product goods perspective - Includes core demand planning and building blocks, *does not include* stat or AI/ML or Finalizing forecast for supply."
+    },
+    {
+      "name": "Anaplan Financial Consolidation & Reporting Technical Overview (~15 min)",
+      "total_minutes": 14.5,
+      "topics": [
+        "Platform Overview",
+        "Security and Hosting",
+        "Integration",
+        "Support"
+      ],
+      "products": [
+        "FCR"
+      ],
+      "play_link": "https://play.goconsensus.com/ba53a95ab",
+      "description": "Technical platform overview of Financial Consolidation & Reporting (FCR), for prospects where consolidation is being positioned standalone. (authored by Presales Architecture)"
+    },
+    {
+      "name": "Anaplan Integrated Business Planning Demo (~44 min)",
+      "total_minutes": 43.5,
+      "topics": [
+        "[HIGHLY RECOMMENDED] Introduce Foundations of Integrated Business Planning",
+        "Orchestrate IBP Across the Organization",
+        "Align Portfolio Strategy with Business Objectives",
+        "Adjust Forecasts based on Market Realities",
+        "Balance Supply Constraints with Demand Commitments",
+        "Resolve Planning Misalignments Across Functions",
+        "Enable Executive Alignment and Strategic Execution"
+      ],
+      "products": [
+        "IBP"
+      ],
+      "play_link": "https://play.goconsensus.com/s15beba3f",
+      "description": "Matt Besselsen showcases how Anaplan enables organizations to align strategic, tactical, and operational plans across functions through a connected IBP process. It highlights scenario planning, cross-functional collaboration, and executive alignment to drive strategic decision-making and business plan execution."
+    },
+    {
+      "name": "Anaplan Intelligence - Architecture Security Overview (~18 min)",
+      "total_minutes": 17.5,
+      "topics": [
+        "Anaplan Intelligence introduction",
+        "AI Guiding Principles",
+        "Enterprise Integration",
+        "AI Governance",
+        "Security Controls",
+        "LLM Boundary and Guardrails",
+        "Operational Assurances"
+      ],
+      "products": [
+        "Platform"
+      ],
+      "play_link": "https://play.goconsensus.com/b17eb0b00",
+      "description": "Anaplan's AI architecture and security overview by Colin Bundy"
+    },
+    {
+      "name": "Anaplan Merchandise Financial Planning (MFP) Application Demo (~21 min)",
+      "total_minutes": 21.0,
+      "topics": [
+        "Eliminating Merchandising Plan Silos",
+        "Smarter Bottom-Up Plans by Attribute",
+        "Real-Time Sync Between Plans & Margins",
+        "Buyer Alerts for informed Decision-Making",
+        "Aligning Finance, Merch & S&OP Plans"
+      ],
+      "products": [
+        "MFP"
+      ],
+      "play_link": "https://play.goconsensus.com/ac23c5386",
+      "description": "This demo walks through key challenges in retail planning and explains how connected planning improves decision speed, cross-functional alignment, and margin visibility. Topics include merchandising silos, bottom-up planning, real-time integration, buyer workflows, and top-down financial alignment."
+    },
+    {
+      "name": "Anaplan Planning & Financial Consolidation Technical Overview (~22 min)",
+      "total_minutes": 22.0,
+      "topics": [
+        "Platform Overview",
+        "Security and Hosting",
+        "Integration",
+        "Support"
+      ],
+      "products": [
+        "FCR"
+      ],
+      "play_link": "https://play.goconsensus.com/bf5e51430",
+      "description": "Technical platform overview of planning and Financial Close & Reporting (FCR), for prospects where FCR is being positioned alongside planning. (authored by Presales Architecture)"
+    },
+    {
+      "name": "Anaplan Planning Platform Security Overview (~25 min)",
+      "total_minutes": 25.0,
+      "topics": [
+        "Platform overview",
+        "Security, Hosting, DR",
+        "Authentication",
+        "Integration",
+        "Support"
+      ],
+      "products": [
+        "Platform"
+      ],
+      "play_link": "https://play.goconsensus.com/sd9ea0b32",
+      "description": "Technical platform overview of planning, for prospects where planning only is being positioned. (authored by Presales Architecture)"
+    },
+    {
+      "name": "Anaplan Platform Showcase (~ 14.5 min)",
+      "total_minutes": 14.0,
+      "topics": [
+        "Automate business processes",
+        "Data Integration",
+        "Faster decision making",
+        "Optimize performance"
+      ],
+      "products": [
+        "ADO",
+        "Optimizer",
+        "Platform",
+        "Polaris",
+        "V5"
+      ],
+      "play_link": "https://play.goconsensus.com/ua5b3f6dc",
+      "description": "Tour of Anaplan Platform Capabilities associated with V5 including workflow, ADO, optimizer, and Polaris."
+    },
+    {
+      "name": "Anaplan's Operational Workforce Planning Application (~28 min)",
+      "total_minutes": 29.0,
+      "topics": [
+        "Introducing Operational Workforce Planning [RECOMMENDED]",
+        "Continuous Forecasting",
+        "HR Business Partner Workflow",
+        "Alignment with Finance",
+        "Demo Conclusion"
+      ],
+      "products": [
+        "OWP"
+      ],
+      "play_link": "https://play.goconsensus.com/sb72e293a",
+      "description": "This demo follows an end-to-end workforce planning story where business, HR, and finance personas align on hiring for a high-growth AI initiative in the OWP application."
+    },
+    {
+      "name": "Anaplan's Public Sector Budgeting & Financial Planning Demo (~24 min)",
+      "total_minutes": 24.5,
+      "topics": [
+        "Grant Management & Scenario Planning",
+        "Long Range Forecasting",
+        "Workforce/Personnel Planning",
+        "Capital Planning",
+        "Budget Development",
+        "Budget Monitoring"
+      ],
+      "products": [],
+      "play_link": "https://play.goconsensus.com/b4f1b25c1",
+      "description": "Operating budget development with workflow, personnel planning with scenario analysis, grant monitoring/tracking with scenario analysis & reallocations, capital budget development and project dashboards/reports with geomapping"
+    },
+    {
+      "name": "Anaplan's Revenue Planning Applications (~16 min)",
+      "total_minutes": 16.0,
+      "topics": [
+        "Segmentation and Scoring",
+        "Capacity Planning",
+        "Territory and Quota Planning"
+      ],
+      "products": [
+        "RPM"
+      ],
+      "play_link": "https://play.goconsensus.com/b5c126e0f",
+      "description": "This demo highlights how Anaplan\u2019s revenue planning applications connect account segmentation, capacity planning, and territory & quota management into a single platform. This enables companies to align their go-to-market teams and make smarter resource allocation decisions to reliably hit their revenue targets."
+    },
+    {
+      "name": "Anaplan's Supply Chain Applications (~40 min)",
+      "total_minutes": 40.5,
+      "topics": [
+        "Optimizing Your Supply Chain with Anaplan",
+        "Integrated Business Planning",
+        "Demand Planning",
+        "Inventory Planning Overview",
+        "AI-Assisted Inventory Planning"
+      ],
+      "products": [
+        "Demand Planning",
+        "Inventory Planning",
+        "SC",
+        "Supply Planning"
+      ],
+      "play_link": "https://play.goconsensus.com/a2ae3c034",
+      "description": "Collection of existing demo content for the core supply chain applications (demand, inventory and supply planning)"
+    },
+    {
+      "name": "Anaplan's Workflow Demo (~26 min)",
+      "total_minutes": 26.0,
+      "topics": [
+        "[RECOMMENDED] Workflow Key Values",
+        "Task Status & Data Governance",
+        "Templates to Orchestrate & Automate",
+        "Connecting Workflow & Models",
+        "End-User Experience"
+      ],
+      "products": [
+        "Workflow"
+      ],
+      "play_link": "https://play.goconsensus.com/sa3e0cb74",
+      "description": "Willy Tan (SME) doing an Workflow demo, giving customers a look at the options and ways they could leverage Workflow to communicate and automate their processes and plans"
+    },
+    {
+      "name": "AnaplanXL (~28 min)",
+      "total_minutes": 27.0,
+      "topics": [
+        "[RECOMMENDED] AnaplanXL Overview",
+        "Rapid Analysis",
+        "Purpose-built Formula-based Reporting",
+        "Ad Hoc Reporting",
+        "High Impact Visuals",
+        "Flexible Write-back",
+        "Easy Access to your Data"
+      ],
+      "products": [
+        "AXL"
+      ],
+      "play_link": "https://play.goconsensus.com/b95eb64d4",
+      "description": "This demo from Ben Reddall (SME) showcases how AnaplanXL provides a live, secure connection to backend data sources (including Anaplan models) for advanced reporting, dynamic visualizations, and data write-back capabilities."
+    },
+    {
+      "name": "Business Services Resourcing & Costing (~20.5 min)",
+      "total_minutes": 20.5,
+      "topics": [
+        "Initiative Target Setting",
+        "Services and Position Planning",
+        "Management sign-off"
+      ],
+      "products": [
+        "OWP"
+      ],
+      "play_link": "https://play.goconsensus.com/a9572a72d",
+      "description": "Business Services or Professional Services to plan the resourcing and costing of projects or services. Begin at a strategic level and drill down to the execution of resourcing and position planning with its impact on margin."
+    },
+    {
+      "name": "Connected GTM + HR Planning (~14.5 min)",
+      "total_minutes": 14.5,
+      "topics": [
+        "Demo Overview",
+        "GTM Capacity Planning",
+        "Operationalize Hiring Plan",
+        "Talent Acquisition Planning",
+        "Scenario Comparison and Plan Finalization"
+      ],
+      "products": [
+        "GTM",
+        "OWP"
+      ],
+      "play_link": "https://play.goconsensus.com/s67c1eaf3",
+      "description": "This demo showcases how aligning sales, HR, and talent acquisition teams with the GTM and OWP applications leads to more accurate and efficient planning to meet revenue targets."
+    },
+    {
+      "name": "Custom Analyst with Agent Studio: AI that understands your business (~14 min)",
+      "total_minutes": 14.0,
+      "topics": [
+        "Overview: Democratize Data with Anaplan Intelligence",
+        "Leverage AI Analysts: Drive Insightful Decisions",
+        "Deploy Agent Studio: Configure Governed Analysts"
+      ],
+      "products": [
+        "AI Analyst",
+        "Agent Studio",
+        "CoPlanner",
+        "OWP",
+        "Platform"
+      ],
+      "play_link": "https://play.goconsensus.com/u5918e3c0",
+      "description": "This demo showcases Agent Studio, a no-code platform for configuring Anaplan's AI Analysts. These Analysts enable business users to get answers from their data using plain English, all within a secure and governed framework."
+    },
+    {
+      "name": "Data Integration Walkthrough: Anaplan Connect (~ 28 min)",
+      "total_minutes": 24.5,
+      "topics": [
+        "Anaplan Connect: Import a file",
+        "Anaplan Connect: Export a file",
+        "Anaplan Connect: Import via JDBC",
+        "Anaplan Connect: Export via JDBC"
+      ],
+      "products": [],
+      "play_link": "https://play.goconsensus.com/s228c0465",
+      "description": "Technical walkthrough of the Anaplan Connect data integration utility"
+    },
+    {
+      "name": "Data Integration Walkthrough: Anaplan Data Orchestrator (~89 min)",
+      "total_minutes": 89.0,
+      "topics": [
+        "ADO: Azure blob storage connection",
+        "ADO: Google Big Query connection",
+        "ADO: Google cloud storage connection",
+        "ADO: AWS S3 connection",
+        "ADO: Salesforce connection",
+        "ADO: SAP S/4 HANA connection",
+        "ADO: SAP ECC connection",
+        "ADO: Snowflake Connection",
+        "ADO: Snowflake Connection (key pair auth)",
+        "ADO: SQL Server"
+      ],
+      "products": [],
+      "play_link": "https://play.goconsensus.com/u15392c46",
+      "description": "Technical walkthrough of the Anaplan Data Orchestrator and how to connect to source systems to retrieve data and bring it into Anaplan"
+    },
+    {
+      "name": "Data Integration Walkthrough: Cloudworks (~50,5 min)",
+      "total_minutes": 50.5,
+      "topics": [
+        "Cloudworks: AWS S3 Integration",
+        "Cloudworks: Azure Blob Storage Integration",
+        "Cloudworks: Google Big Query Integration",
+        "Cloudworks: API"
+      ],
+      "products": [],
+      "play_link": "https://play.goconsensus.com/bc297631a",
+      "description": "Technical walkthrough of Cloudworks data integration"
+    },
+    {
+      "name": "Data Integration Walkthrough: ETL (~36,5 min)",
+      "total_minutes": 36.5,
+      "topics": [
+        "ETL: Informatica Cloud",
+        "ETL: Mulesoft",
+        "ETL: SAP integration Suite"
+      ],
+      "products": [],
+      "play_link": "https://play.goconsensus.com/b2ac7bb5d",
+      "description": "Technical walkthrough of a selection of the third party ETL tools with native Anaplan connectors"
+    },
+    {
+      "name": "Data Integration Walkthrough: Manual Import & Export (~ 12 min)",
+      "total_minutes": 12.0,
+      "topics": [
+        "Manual Export",
+        "Manual import"
+      ],
+      "products": [],
+      "play_link": "https://play.goconsensus.com/udb660855",
+      "description": "Technical walkthrough of manual import & export in planning"
+    },
+    {
+      "name": "Finance Planning Transformation (~13.5 min)",
+      "total_minutes": 14.0,
+      "topics": [
+        "Anaplan Differentiation: Alignment, Ownership & Agility",
+        "Align Strategy & Execution: LRP & Strategic Initiatives",
+        "Handle Complexity: Revenue Planning",
+        "Ultimate Flexibility: OpEx Planning",
+        "Streamline Processes: CapEx Planning",
+        "True Connection: Reporting & Analysis",
+        "Powerful Agility: Scenario Planning"
+      ],
+      "products": [
+        "IFP"
+      ],
+      "play_link": "https://play.goconsensus.com/u1bcab354",
+      "description": "This demo highlights how the Anaplan platform unifies strategic, financial, and operational planning for agile scenario modeling and faster, data-driven decisions."
+    },
+    {
+      "name": "Financial Consolidation and Reporting (~37 min)",
+      "total_minutes": 38.0,
+      "topics": [
+        "Key benefits of Anaplan Financial Consolidation",
+        "Overview, Home screen and Workflow",
+        "Business Owned Configuration",
+        "Data Collection and Review",
+        "Cash Flow Reporting",
+        "Intercompany Eliminations",
+        "Reviewing Consolidated Results"
+      ],
+      "products": [
+        "FCR"
+      ],
+      "play_link": "https://play.goconsensus.com/bc6af5239",
+      "description": "An end-to-end walkthrough of Anaplan Financial Consolidation, showing how finance teams can streamline consolidation cycles from data collection to reporting. It highlights key capabilities including business-owned configuration, intercompany eliminations, cash flow reporting, and reviewing consolidated results\u2014all within a connected, automated workflow that improves speed, transparency, and accuracy."
+    },
+    {
+      "name": "From Actuals to Plan: Unify your Planning and Consolidation (~14 min)",
+      "total_minutes": 14.0,
+      "topics": [
+        "CFO View: Real-Time Consolidation & Reporting",
+        "Integrated Planning & Disclosure"
+      ],
+      "products": [
+        "Disclosure Management",
+        "FCR",
+        "FPC",
+        "IFP"
+      ],
+      "play_link": "https://play.goconsensus.com/a07732a65",
+      "description": "This high-level demo highlights how Anaplan streamlines key steps of the financial process\u2014from integrated planning to final reporting. It connects the strategic CFO view with the IFP application, consolidation application, and disclosure management through a seamless, unified user experience."
+    },
+    {
+      "name": "Incentive Compensation Management Demo (~12 min)",
+      "total_minutes": 12.0,
+      "topics": [
+        "Anaplan POV on RPM",
+        "Compensation Admin Command Center",
+        "Compensation Plan Design",
+        "Handling Disputes",
+        "Payee Experience"
+      ],
+      "products": [
+        "ICM"
+      ],
+      "play_link": "https://play.goconsensus.com/b6b06d306",
+      "description": "Julia Dahm discussing Anaplan POV on RPM, Comp Admin Command Center, discussing/settling compensation disputes, from the POV of both Payees/Sellers and Comp Admins."
+    },
+    {
+      "name": "Integrated Financial Planning (IFP) Configurator & Application Overview (~22 min)",
+      "total_minutes": 21.5,
+      "topics": [
+        "IFP Configurator",
+        "IFP Application"
+      ],
+      "products": [
+        "Configurator",
+        "IFP"
+      ],
+      "play_link": "https://play.goconsensus.com/s5e3d955a",
+      "description": "Originally presented at San Jose Connect, Tony Wright and Joanna Cole provide high level demos of the configurator and IFP application."
+    },
+    {
+      "name": "Narrative and Disclosure Reporting (~40 min)",
+      "total_minutes": 40.5,
+      "topics": [
+        "What is Disclosure and Narrative Reporting?",
+        "Report Management and Workflow",
+        "Managing Reports in Microsoft Word",
+        "Managing Reports in Microsoft PowerPoint",
+        "Managing Data from different Sources",
+        "Build a new report in Minutes"
+      ],
+      "products": [
+        "Disclosure Management"
+      ],
+      "play_link": "https://play.goconsensus.com/b554fe7ed",
+      "description": "This demo showcases how Disclosure Management enables the creation and management of secure, data-driven reports and presentations, with version control, workflow automation, and seamless integration with Microsoft Office for automated updates."
+    },
+    {
+      "name": "Polaris Demo (~19 min)",
+      "total_minutes": 18.5,
+      "topics": [
+        "[RECOMMENDED] Right Tool, Right Job, Right Way",
+        "Understanding Sparsity & Density",
+        "Eliminating Model Workarounds",
+        "Ad Hoc Analysis with Natural Dimensionality"
+      ],
+      "products": [
+        "Polaris"
+      ],
+      "play_link": "https://play.goconsensus.com/bf90c90d4",
+      "description": "Willy Tan (SME) doing a Polaris Demo, and comparing/contrasting Classic and Polaris engine benefits for current Anaplan customers"
+    },
+    {
+      "name": "Proactive Project Resource Planning (~20 min)",
+      "total_minutes": 19.5,
+      "topics": [
+        "Solving Modern Resource Challenges: Anaplan's Vision",
+        "Portfolio Management: Transparent Planning & Prioritization",
+        "Portfolio Management: Bridge Capacity Gaps",
+        "Resource Management: Connect Demand and Supply",
+        "Resource Management: Skills as a Strategic Asset",
+        "Elevating Project Planning: Reactive Work to Proactive Success"
+      ],
+      "products": [
+        "Project Resource Planning"
+      ],
+      "play_link": "https://play.goconsensus.com/ae2d95bee",
+      "description": "This demo illustrates how the Project Resource Planning connects strategic project portfolio planning with operational resource management to resolve staffing gaps and align execution with financial goals. It showcases how a portfolio manager can model scenarios to make data-driven trade-offs, and how a resource manager can then use intelligent, criteria-based matching to assign the right person to the right project in real-time."
+    },
+    {
+      "name": "Supply Chain Transformation (~21.5 min)",
+      "total_minutes": 21.5,
+      "topics": [
+        "Demo Overview",
+        "Management Opportunity Review",
+        "Demand Plan Scenarios",
+        "Supply Response",
+        "Management Sign-off"
+      ],
+      "products": [
+        "Demand Planning",
+        "Production Planning",
+        "Supply Planning"
+      ],
+      "play_link": "https://play.goconsensus.com/ub6a22005",
+      "description": "This demo showcases how Anaplan supply chain apps empower a business to rapidly and profitably seize a major market opportunity by simulating various scenarios and optimizing complex supply chain decisions in real-time."
+    },
+    {
+      "name": "Territory & Quota Art of the Possible (~ 14 min)",
+      "total_minutes": 13.0,
+      "topics": [
+        "Establishing the Planning Foundation",
+        "Aligning Targets & Analyzing Coverage",
+        "Designing & Optimizing Sales Territories",
+        "Managing In-Year Adjustments & Workforce Changes"
+      ],
+      "products": [
+        "GTM",
+        "Territory and Quota"
+      ],
+      "play_link": "https://play.goconsensus.com/b687de718",
+      "description": "This demo showcases how Anaplan aligns corporate targets with field-level capacity by integrating key data, visually optimizing sales territories, and seamlessly managing organizational changes to maximize selling potential."
+    }
+  ]
+}
