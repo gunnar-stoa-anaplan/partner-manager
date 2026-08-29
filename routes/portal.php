@@ -16,6 +16,8 @@ use App\Http\Controllers\Portal\PortalLoginController;
 use App\Http\Controllers\Portal\PortalPathController;
 use App\Http\Controllers\Portal\PortalProjectsController;
 use App\Http\Controllers\Portal\PortalWorkspaceController;
+use App\Http\Controllers\Portal\WorkshopController as PortalWorkshopController;
+use App\Http\Controllers\Portal\WorkshopParticipationController as PortalWorkshopParticipationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -98,6 +100,15 @@ Route::middleware('portal')->group(function () {
         Route::post('/launch-programs/{programPartner}/feedback', [PortalLaunchProgramController::class, 'submitFeedback'])->name('launch-programs.submit-feedback');
         Route::post('/launch-programs/{programPartner}/participants', [PortalLaunchProgramController::class, 'addParticipant'])->name('launch-programs.add-participant');
         Route::delete('/launch-programs/{programPartner}/participants/{participant}', [PortalLaunchProgramController::class, 'removeParticipant'])->name('launch-programs.remove-participant');
+    });
+
+    Route::middleware('portal.can:workshops')->group(function () {
+        Route::get('/workshops', [PortalWorkshopController::class, 'index'])->name('workshops.index');
+        Route::get('/workshops/{session}', [PortalWorkshopController::class, 'show'])->name('workshops.show');
+        Route::post('/workshops/{session}/invite', [PortalWorkshopController::class, 'invite'])->name('workshops.invite');
+
+        Route::get('/my-workshops', [PortalWorkshopParticipationController::class, 'index'])->name('my-workshops.index');
+        Route::get('/my-workshops/{session}', [PortalWorkshopParticipationController::class, 'show'])->name('my-workshops.show');
     });
 
     Route::middleware('portal.can:deal_registrations')->group(function () {

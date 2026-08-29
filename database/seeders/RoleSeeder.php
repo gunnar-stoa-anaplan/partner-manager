@@ -69,8 +69,9 @@ class RoleSeeder extends Seeder
             'partner_management.priorities' => 'read',
             'strategy.strategy' => 'write',
             'system_administration.admin' => 'write',
-            'enablement.workshops' => 'write',
-            'enablement.workshop_admin' => 'write',
+            'enablement.lab_content' => 'write',
+            'enablement.lab_administration' => 'write',
+            'workshops.management' => 'write',
         ]);
 
         // Manager
@@ -135,8 +136,9 @@ class RoleSeeder extends Seeder
             'launch_programs.projects' => 'write',
             'partner_management.provisioning' => 'write',
             'strategy.strategy' => 'read',
-            'enablement.workshops' => 'write',
-            'enablement.workshop_admin' => 'write',
+            'enablement.lab_content' => 'write',
+            'enablement.lab_administration' => 'write',
+            'workshops.management' => 'write',
         ]);
 
         // PAM
@@ -186,6 +188,19 @@ class RoleSeeder extends Seeder
             'integration_hub.hub' => 'write',
             'integration_hub.mcp' => 'write',
             'integration_hub.api_tokens' => 'write',
+        ]);
+
+        // Workshop Owner - focused role for testing the Workshops feature in
+        // isolation, without the rest of the app's nav. Mirrors journey_owner.
+        $workshopOwner = Role::updateOrCreate(['slug' => 'workshop_owner'], [
+            'display_name' => 'Workshop Owner',
+            'type' => 'internal',
+            'landing_route' => 'workshops.index',
+            'sort_order' => 7,
+            'description' => 'Focused role for creating, scheduling, and facilitating partner delivery workshops.',
+        ]);
+        $this->syncPermissions($workshopOwner, [
+            'workshops.management' => 'write',
         ]);
     }
 
@@ -289,6 +304,7 @@ class RoleSeeder extends Seeder
                     'partner_management.provisioning' => 'read',
                     'measurement.qbr' => 'write',
                     'scorecard' => 'read',
+                    'workshops' => 'write',
                 ],
             ],
             [
@@ -368,6 +384,27 @@ class RoleSeeder extends Seeder
                     'portal.partner' => 'read',
                     'launch_programs.projects' => 'write',
                     'projects' => 'write',
+                    'workshops' => 'read',
+                ],
+            ],
+            [
+                'slug' => 'workshop_practice_lead',
+                'display_name' => 'Workshop Practice Lead',
+                'dashboard_group' => 'delivery',
+                'sort_order' => 9,
+                'description' => 'Focused role for testing the Workshops portal experience in isolation - invites resources and tracks progress, nothing else.',
+                'permissions' => [
+                    'workshops' => 'write',
+                ],
+            ],
+            [
+                'slug' => 'workshop_delivery_resource',
+                'display_name' => 'Workshop Delivery Resource',
+                'dashboard_group' => 'delivery',
+                'sort_order' => 10,
+                'description' => 'Focused role for testing the Workshops portal experience in isolation - views own invited sessions, nothing else.',
+                'permissions' => [
+                    'workshops' => 'read',
                 ],
             ],
         ];

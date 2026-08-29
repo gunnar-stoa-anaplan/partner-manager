@@ -58,6 +58,18 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
             }
 
+            // Partner Workshops (gated by workshops.management)
+            // Note: URL prefix is "partner-workshops", not "workshops" - that
+            // prefix already belongs to routes/workshop-guides.php.
+            $workshopsWeb = base_path('routes/modules/workshops.php');
+
+            if (file_exists($workshopsWeb)) {
+                Route::middleware(['web', 'auth', 'module:workshops.management'])
+                    ->prefix('partner-workshops')
+                    ->name('workshops.')
+                    ->group($workshopsWeb);
+            }
+
             // Knowledge Base (gated by ai_knowledge.knowledge_base)
             $knowledgeBaseWeb = base_path('routes/modules/knowledge-base.php');
 

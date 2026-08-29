@@ -153,7 +153,7 @@ return [
 
     'enablement' => [
         'name' => 'Enablement',
-        'description' => 'Enablement events, calendar, field enablement, blueprints, workshops, zoom chat, and administration.',
+        'description' => 'Enablement events, calendar, field enablement, blueprints, lab content, zoom chat, and administration.',
         'icon' => 'layers',
         'group' => 'enablement',
         'enabled' => env('MODULE_ENABLEMENT', true),
@@ -194,15 +194,15 @@ return [
                     ['label' => 'Blueprint Assignments', 'route' => 'blueprints.catalog', 'icon' => 'clipboard'],
                 ],
             ],
-            'workshops' => [
-                'label' => 'Workshops',
+            'lab_content' => [
+                'label' => 'Lab Content',
                 'icon' => 'check-square',
                 'items' => [
                     ['label' => 'Labs', 'route' => 'labs.index', 'icon' => 'check-square'],
                 ],
             ],
-            'workshop_admin' => [
-                'label' => 'Workshop Administration',
+            'lab_administration' => [
+                'label' => 'Lab Administration',
                 'icon' => 'settings',
                 'items' => [
                     ['label' => 'Lab Designer', 'route' => 'labs.create', 'icon' => 'edit'],
@@ -242,6 +242,23 @@ return [
     | Engagement
     |--------------------------------------------------------------------------
     */
+
+    'workshops' => [
+        'name' => 'Workshops',
+        'description' => 'Partner workshop delivery — scheduling, session management, and participant invitations.',
+        'icon' => 'check-square',
+        'group' => 'engagement',
+        'enabled' => env('MODULE_WORKSHOPS', true),
+        'sections' => [
+            'management' => [
+                'label' => 'Workshops',
+                'icon' => 'check-square',
+                'items' => [
+                    ['label' => 'Workshops', 'route' => 'workshops.index', 'icon' => 'check-square'],
+                ],
+            ],
+        ],
+    ],
 
     'launch_programs' => [
         'name' => 'Launch Programs',

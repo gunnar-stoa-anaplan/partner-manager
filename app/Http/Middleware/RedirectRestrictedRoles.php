@@ -27,7 +27,7 @@ class RedirectRestrictedRoles
             'landing' => 'integration_hub.dashboard',
         ],
         'coe' => [
-            'prefixes' => ['strategy', 'activation', 'logout', 'impersonate', 'welcome', 'livewire', '_boost', 'plan/paths', 'admin/paths', 'admin/task-templates', 'act/path-reviews', 'launch-programs', 'knowledge-base', 'branding', 'ai-agents', 'partner-goals', 'admin/goal-templates', 'blueprint', 'my-blueprints', 'enablement-events', 'enablement-calendar', 'enablement-dashboard', 'enablement-sessions', 'enablement-registrations', 'program-dashboard', 'reporting-hierarchy', 'users', 'partners', 'partner-assignments', 'directory-sync'],
+            'prefixes' => ['strategy', 'activation', 'logout', 'impersonate', 'welcome', 'livewire', '_boost', 'plan/paths', 'admin/paths', 'admin/task-templates', 'act/path-reviews', 'launch-programs', 'knowledge-base', 'branding', 'ai-agents', 'partner-goals', 'admin/goal-templates', 'blueprint', 'my-blueprints', 'enablement-events', 'enablement-calendar', 'enablement-dashboard', 'enablement-sessions', 'enablement-registrations', 'program-dashboard', 'reporting-hierarchy', 'users', 'partners', 'partner-assignments', 'directory-sync', 'partner-workshops'],
             'landing' => 'strategy.dashboard',
         ],
     ];

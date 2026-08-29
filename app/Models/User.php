@@ -94,6 +94,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Workshops created by this user.
+     */
+    public function workshopsCreated(): HasMany
+    {
+        return $this->hasMany(Workshop::class, 'created_by');
+    }
+
+    /**
+     * Workshop sessions this user is a facilitator/monitor for.
+     */
+    public function workshopMonitorships(): HasMany
+    {
+        return $this->hasMany(WorkshopSessionMonitor::class);
+    }
+
+    /**
      * The user's assigned role.
      */
     public function role(): BelongsTo

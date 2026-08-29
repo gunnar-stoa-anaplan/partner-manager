@@ -143,6 +143,23 @@ class Contact extends Authenticatable
         return $this->hasMany(LabParticipant::class);
     }
 
+    public function workshopParticipations()
+    {
+        return $this->hasMany(WorkshopSessionParticipant::class, 'contact_id');
+    }
+
+    public function workshopSessions()
+    {
+        return $this->belongsToMany(WorkshopSession::class, 'workshop_session_participants')
+            ->withPivot('status', 'enrolled_at', 'enrolled_by_user_id', 'enrolled_by_contact_id', 'removed_at')
+            ->withTimestamps();
+    }
+
+    public function workshopInvitesSent()
+    {
+        return $this->hasMany(WorkshopSessionParticipant::class, 'enrolled_by_contact_id');
+    }
+
     public function resourcePathEnrollments()
     {
         return $this->hasMany(ResourcePathEnrollment::class);

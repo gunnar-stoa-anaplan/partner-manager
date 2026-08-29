@@ -93,6 +93,18 @@
                            class="nav-link-portal {{ request()->routeIs('portal.path.*') ? 'active' : '' }}">Path</a>
                     </li>
                     @endif
+                    @if($portalUser->canAccess('workshops'))
+                    @if($portalUser->role?->hasWritePermission('workshops'))
+                    <li class="nav-item">
+                        <a href="{{ route('portal.workshops.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.workshops.*') ? 'active' : '' }}">Workshops</a>
+                    </li>
+                    @endif
+                    <li class="nav-item">
+                        <a href="{{ route('portal.my-workshops.index') }}"
+                           class="nav-link-portal {{ request()->routeIs('portal.my-workshops.*') ? 'active' : '' }}">My Workshops</a>
+                    </li>
+                    @endif
                     @if($portalUser->canAccess('deal_registrations'))
                     <li class="nav-item">
                         <a href="{{ route('portal.deal-registrations.index') }}"
