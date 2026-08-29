@@ -85,6 +85,16 @@ return Application::configure(basePath: dirname(__DIR__))
                     ->group($workshopSurveysWeb);
             }
 
+            // Workshop Reports (gated by workshops.reports)
+            $workshopReportsWeb = base_path('routes/modules/workshop-reports.php');
+
+            if (file_exists($workshopReportsWeb)) {
+                Route::middleware(['web', 'auth', 'module:workshops.reports'])
+                    ->prefix('partner-workshops/reports')
+                    ->name('workshops.reports.')
+                    ->group($workshopReportsWeb);
+            }
+
             // Workshop Monitor Dashboard - deliberately NOT gated by the
             // workshops.management module permission. A user assigned as a
             // session monitor should be able to reach this lightweight view

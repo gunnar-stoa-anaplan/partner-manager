@@ -18,7 +18,9 @@
             <div class="card-header d-flex align-items-center">
                 <div class="card-title flex-grow-1"><i class="fal fa-users me-2"></i> Participants</div>
                 <span class="badge bg-secondary">{{ \App\Models\WorkshopSession::STATUSES[$session->status] ?? $session->status }}</span>
-                <a href="{{ route('workshops.sessions.edit', [$workshop, $session]) }}" class="btn btn-outline-secondary btn-sm ms-2">Edit Session</a>
+                <a href="{{ route('workshops.reports.leaderboard', [$workshop, $session]) }}" class="btn btn-outline-secondary btn-sm ms-2">Leaderboard</a>
+                <a href="{{ route('workshops.reports.exec-summary', [$workshop, $session]) }}" class="btn btn-outline-secondary btn-sm ms-1">Reports</a>
+                <a href="{{ route('workshops.sessions.edit', [$workshop, $session]) }}" class="btn btn-outline-secondary btn-sm ms-1">Edit Session</a>
             </div>
             <div class="card-body">
                 <form action="{{ route('workshops.sessions.participants.invite', [$workshop, $session]) }}" method="POST" class="mb-4">
