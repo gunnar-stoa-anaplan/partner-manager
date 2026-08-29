@@ -219,13 +219,18 @@ class WorkshopSeeder extends Seeder
                     ->limit(4)
                     ->get();
 
-                foreach ($contacts as $contact) {
+                foreach ($contacts as $index => $contact) {
+                    $isPastSession = $session->end_date->isPast();
+                    $completed = $isPastSession && $index % 2 === 0;
+
                     $session->participants()->updateOrCreate(
                         ['contact_id' => $contact->id],
                         [
                             'status' => 'active',
                             'enrolled_at' => $session->created_at ?? now(),
                             'enrolled_by_user_id' => $facilitator->id,
+                            'completed_at' => $completed ? $session->end_date : null,
+                            'completed_by' => $completed ? $facilitator->id : null,
                         ],
                     );
                     $enrolled++;

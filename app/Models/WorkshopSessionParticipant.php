@@ -14,6 +14,8 @@ class WorkshopSessionParticipant extends Model
         'workshop_session_id',
         'contact_id',
         'status',
+        'completed_at',
+        'completed_by',
         'enrolled_at',
         'enrolled_by_user_id',
         'enrolled_by_contact_id',
@@ -22,6 +24,7 @@ class WorkshopSessionParticipant extends Model
 
     protected $casts = [
         'enrolled_at' => 'datetime',
+        'completed_at' => 'datetime',
         'removed_at' => 'datetime',
     ];
 
@@ -49,5 +52,20 @@ class WorkshopSessionParticipant extends Model
     public function enrolledByContact(): BelongsTo
     {
         return $this->belongsTo(Contact::class, 'enrolled_by_contact_id');
+    }
+
+    public function completedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'completed_by');
+    }
+
+    public function scopeCompleted(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->whereNotNull('completed_at');
+    }
+
+    public function scopeNotRemoved(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->where('status', '!=', 'removed');
     }
 }

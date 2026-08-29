@@ -9,6 +9,7 @@ Route::get('/', [WorkshopController::class, 'index'])->name('index');
 Route::get('/create', [WorkshopController::class, 'create'])->name('create');
 Route::post('/', [WorkshopController::class, 'store'])->name('store');
 Route::get('/{workshop}', [WorkshopController::class, 'show'])->name('show');
+Route::get('/{workshop}/rollup', [WorkshopController::class, 'rollup'])->name('rollup');
 Route::get('/{workshop}/edit', [WorkshopController::class, 'edit'])->name('edit');
 Route::put('/{workshop}', [WorkshopController::class, 'update'])->name('update');
 Route::delete('/{workshop}', [WorkshopController::class, 'destroy'])->name('destroy');
@@ -21,5 +22,7 @@ Route::delete('/{workshop}/sessions/{session}', [WorkshopSessionController::clas
 
 Route::post('/{workshop}/sessions/{session}/participants', [WorkshopParticipantController::class, 'invite'])->name('sessions.participants.invite');
 Route::delete('/{workshop}/sessions/{session}/participants/{participant}', [WorkshopParticipantController::class, 'remove'])->name('sessions.participants.remove');
+Route::post('/{workshop}/sessions/{session}/participants/{participant}/complete', [WorkshopParticipantController::class, 'complete'])->name('sessions.participants.complete');
+Route::post('/{workshop}/sessions/{session}/participants/{participant}/uncomplete', [WorkshopParticipantController::class, 'uncomplete'])->name('sessions.participants.uncomplete');
 Route::post('/{workshop}/sessions/{session}/monitors', [WorkshopParticipantController::class, 'assignMonitor'])->name('sessions.monitors.store');
 Route::delete('/{workshop}/sessions/{session}/monitors/{monitorUser}', [WorkshopParticipantController::class, 'removeMonitor'])->name('sessions.monitors.destroy');

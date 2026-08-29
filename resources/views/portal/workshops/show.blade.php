@@ -42,6 +42,7 @@
                         <th>Name</th>
                         <th>Status</th>
                         <th>Enrolled</th>
+                        <th>Completion</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,10 +51,17 @@
                             <td>{{ $participant->contact->full_name }} <span class="text-muted">{{ $participant->contact->email }}</span></td>
                             <td><span class="badge bg-secondary">{{ \App\Models\WorkshopSessionParticipant::STATUSES[$participant->status] ?? $participant->status }}</span></td>
                             <td>{{ $participant->enrolled_at?->format('M j, Y') }}</td>
+                            <td>
+                                @if($participant->completed_at)
+                                    <span class="badge bg-success">Completed</span>
+                                @else
+                                    <span class="badge bg-light text-dark">In progress</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="text-center text-muted py-4">No one from your organization is enrolled yet.</td>
+                            <td colspan="4" class="text-center text-muted py-4">No one from your organization is enrolled yet.</td>
                         </tr>
                     @endforelse
                 </tbody>

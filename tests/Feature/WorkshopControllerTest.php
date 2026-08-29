@@ -98,4 +98,44 @@ class WorkshopControllerTest extends TestCase
 
         $this->assertDatabaseCount('workshop_session_participants', 1);
     }
+
+    public function test_internal_user_can_mark_a_participant_complete_and_incomplete(): void
+    {
+        $session = WorkshopSession::factory()->create();
+        $contact = Contact::factory()->create();
+        $participant = $session->participants()->create(['contact_id' => $contact->id, 'status' => 'active', 'enrolled_at' => now()]);
+
+        $this->actingAs($this->coe)->post(
+            route('workshops.sessions.participants.complete', [$session->workshop, $session, $participant]),
+        );
+
+        $this->assertDatabaseHas('workshop_session_participants', [
+            'id' => $participant->id,
+            'completed_by' => $this->coe->id,
+        ]);
+        $this->assertNotNull($participant->fresh()->completed_at);
+
+        $this->actingAs($this->coe)->post(
+            route('workshops.sessions.participants.uncomplete', [$session->workshop, $session, $participant]),
+        );
+
+        $this->assertNull($participant->fresh()->completed_at);
+    }
+
+    public function test_rollup_report_computes_completion_stats(): void
+    {
+        $workshop = Workshop::factory()->create();
+        $session = WorkshopSession::factory()->create(['workshop_id' => $workshop->id]);
+        $partner = Partner::factory()->create();
+        $completedContact = Contact::factory()->create(['partner_id' => $partner->id]);
+        $incompleteContact = Contact::factory()->create(['partner_id' => $partner->id]);
+
+        $session->participants()->create(['contact_id' => $completedContact->id, 'status' => 'active', 'enrolled_at' => now(), 'completed_at' => now()]);
+        $session->participants()->create(['contact_id' => $incompleteContact->id, 'status' => 'active', 'enrolled_at' => now()]);
+
+        $response = $this->actingAs($this->coe)->get(route('workshops.rollup', $workshop));
+
+        $response->assertOk();
+        $response->assertSee('50%');
+    }
 }

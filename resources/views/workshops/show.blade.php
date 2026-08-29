@@ -20,6 +20,7 @@
                     <i class="fal fa-check-square me-2"></i> Sessions
                 </div>
                 <span class="badge bg-secondary me-2">{{ \App\Models\Workshop::STATUSES[$workshop->status] ?? $workshop->status }}</span>
+                <a href="{{ route('workshops.rollup', $workshop) }}" class="btn btn-outline-primary btn-sm me-2">Progress Report</a>
                 <a href="{{ route('workshops.edit', $workshop) }}" class="btn btn-outline-secondary btn-sm">Edit Workshop</a>
                 <button type="button" class="btn btn-primary btn-sm ms-2" data-bs-toggle="collapse" data-bs-target="#newSessionForm">
                     <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#plus"></use></svg>

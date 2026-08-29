@@ -38,6 +38,7 @@
                                 <th>Partner</th>
                                 <th>Status</th>
                                 <th>Enrolled</th>
+                                <th>Completion</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -49,8 +50,26 @@
                                     <td><span class="badge bg-secondary">{{ \App\Models\WorkshopSessionParticipant::STATUSES[$participant->status] ?? $participant->status }}</span></td>
                                     <td>{{ $participant->enrolled_at?->format('M j, Y') }}</td>
                                     <td>
+                                        @if($participant->completed_at)
+                                            <span class="badge bg-success">Completed {{ $participant->completed_at->format('M j') }}</span>
+                                        @else
+                                            <span class="badge bg-light text-dark">In progress</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-nowrap">
                                         @if($participant->status !== 'removed')
-                                        <form action="{{ route('workshops.sessions.participants.remove', [$workshop, $session, $participant]) }}" method="POST" onsubmit="return confirm('Remove {{ $participant->contact->full_name }} from this session?')">
+                                        @if($participant->completed_at)
+                                        <form action="{{ route('workshops.sessions.participants.uncomplete', [$workshop, $session, $participant]) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary">Mark Incomplete</button>
+                                        </form>
+                                        @else
+                                        <form action="{{ route('workshops.sessions.participants.complete', [$workshop, $session, $participant]) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-success">Mark Complete</button>
+                                        </form>
+                                        @endif
+                                        <form action="{{ route('workshops.sessions.participants.remove', [$workshop, $session, $participant]) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove {{ $participant->contact->full_name }} from this session?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
@@ -60,7 +79,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted py-4">No participants invited yet.</td>
+                                    <td colspan="6" class="text-center text-muted py-4">No participants invited yet.</td>
                                 </tr>
                             @endforelse
                         </tbody>

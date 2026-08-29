@@ -35,6 +35,28 @@ class WorkshopParticipantController extends Controller
             ->with('success', $message);
     }
 
+    public function complete(Request $request, Workshop $workshop, WorkshopSession $session, WorkshopSessionParticipant $participant): RedirectResponse
+    {
+        $participant->update([
+            'completed_at' => Carbon::now(),
+            'completed_by' => $request->user()->id,
+        ]);
+
+        return redirect()->route('workshops.sessions.show', [$workshop, $session])
+            ->with('success', $participant->contact->full_name.' marked complete.');
+    }
+
+    public function uncomplete(Workshop $workshop, WorkshopSession $session, WorkshopSessionParticipant $participant): RedirectResponse
+    {
+        $participant->update([
+            'completed_at' => null,
+            'completed_by' => null,
+        ]);
+
+        return redirect()->route('workshops.sessions.show', [$workshop, $session])
+            ->with('success', $participant->contact->full_name.' marked incomplete.');
+    }
+
     public function remove(Workshop $workshop, WorkshopSession $session, WorkshopSessionParticipant $participant): RedirectResponse
     {
         $participant->update([
