@@ -14,6 +14,10 @@ class WorkshopSurveyResponse extends Model
         'workshop_survey_template_id',
         'workshop_session_id',
         'contact_id',
+        'is_anonymous',
+        'raw_email',
+        'source',
+        'import_batch',
         'responses_json',
         'score',
         'passed',
@@ -24,6 +28,7 @@ class WorkshopSurveyResponse extends Model
     protected $casts = [
         'responses_json' => 'array',
         'passed' => 'boolean',
+        'is_anonymous' => 'boolean',
         'submitted_at' => 'datetime',
     ];
 

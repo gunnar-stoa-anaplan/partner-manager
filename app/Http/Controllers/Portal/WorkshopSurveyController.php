@@ -33,7 +33,9 @@ class WorkshopSurveyController extends Controller
                 ->with('error', "You've used all {$template->max_attempts} attempt(s) for this survey.");
         }
 
-        return view('portal.my-workshops.survey', compact('session', 'template', 'attempts'));
+        $questions = $template->questionsForAttempt();
+
+        return view('portal.my-workshops.survey', compact('session', 'template', 'attempts', 'questions'));
     }
 
     public function submit(Request $request, WorkshopSession $session, WorkshopSurveyTemplate $template): RedirectResponse
@@ -46,7 +48,8 @@ class WorkshopSurveyController extends Controller
         }
 
         $responses = $request->input('responses', []);
-        $result = $template->score($responses);
+        $presentedIds = $request->input('presented_ids', []);
+        $result = $template->score($responses, $presentedIds ?: null);
 
         $attemptNumber = WorkshopSurveyResponse::where('workshop_survey_template_id', $template->id)
             ->where('contact_id', $contact->id)

@@ -14,7 +14,8 @@
     <form action="{{ route('portal.my-workshops.surveys.submit', [$session, $template]) }}" method="POST">
         @csrf
 
-        @foreach($template->questions_json as $question)
+        @foreach($questions as $question)
+            <input type="hidden" name="presented_ids[]" value="{{ $question['id'] }}">
             <div class="card portal-card mb-3">
                 <div class="card-body">
                     <p class="fw-medium">{{ $question['text'] }}</p>

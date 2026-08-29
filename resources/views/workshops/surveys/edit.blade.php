@@ -29,6 +29,19 @@
                         </div>
                     </div>
 
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Questions Per Attempt <span class="text-muted">(blank = show all)</span></label>
+                            <input type="number" class="form-control" name="questions_per_attempt" value="{{ old('questions_per_attempt', $template->questions_per_attempt) }}" min="1">
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="shuffle_options" name="shuffle_options" value="1" @checked(old('shuffle_options', $template->shuffle_options))>
+                                <label class="form-check-label" for="shuffle_options">Shuffle answer options</label>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Questions (JSON) <span class="text-danger">*</span></label>
                         <textarea class="form-control font-monospace" name="questions_json" rows="14" required>{{ old('questions_json', json_encode($template->questions_json, JSON_PRETTY_PRINT)) }}</textarea>

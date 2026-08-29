@@ -108,6 +108,120 @@ class WorkshopSurveyTest extends TestCase
         $this->actingAs($contact, 'portal')->get(route('portal.my-workshops.surveys.show', [$session, $template]))->assertOk();
     }
 
+    public function test_questions_per_attempt_narrows_the_pool_and_only_scores_presented_questions(): void
+    {
+        $template = WorkshopSurveyTemplate::factory()->create([
+            'passing_score' => 100,
+            'questions_per_attempt' => 1,
+            'questions_json' => [
+                ['id' => 'q1', 'text' => 'Q1', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']],
+                ['id' => 'q2', 'text' => 'Q2', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']],
+            ],
+        ]);
+
+        $questions = $template->questionsForAttempt();
+        $this->assertCount(1, $questions);
+
+        // Only answer the one presented question - should still be 100%, not
+        // penalized for the question that was never shown.
+        $presentedId = $questions[0]['id'];
+        $result = $template->score([$presentedId => 'A'], [$presentedId]);
+
+        $this->assertEquals(100, $result['score']);
+        $this->assertTrue($result['passed']);
+    }
+
+    public function test_admin_can_import_survey_results_from_a_csv(): void
+    {
+        $session = WorkshopSession::factory()->create();
+        $template = WorkshopSurveyTemplate::factory()->create([
+            'workshop_id' => $session->workshop_id,
+            'passing_score' => 50,
+            'questions_json' => [['id' => 'q1', 'text' => 'Q', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']]],
+        ]);
+        $contact = Contact::factory()->create();
+
+        $csv = "email,q1\n{$contact->email},A\nunknown@nowhere.com,B\n";
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('results.csv', $csv);
+
+        $response = $this->actingAs($this->coe)->post(route('workshops.surveys.upload', $template), [
+            'workshop_session_id' => $session->id,
+            'file' => $file,
+        ]);
+
+        $response->assertRedirect(route('workshops.surveys.results', $template));
+        $this->assertDatabaseHas('workshop_survey_responses', [
+            'contact_id' => $contact->id,
+            'score' => 100,
+            'source' => 'import',
+        ]);
+        $this->assertDatabaseHas('workshop_survey_responses', [
+            'contact_id' => null,
+            'raw_email' => 'unknown@nowhere.com',
+            'is_anonymous' => 1,
+        ]);
+    }
+
+    public function test_admin_can_remove_an_imported_batch(): void
+    {
+        $template = WorkshopSurveyTemplate::factory()->create();
+        $template->responses()->create([
+            'workshop_session_id' => WorkshopSession::factory()->create(['workshop_id' => $template->workshop_id])->id,
+            'contact_id' => Contact::factory()->create()->id,
+            'source' => 'import',
+            'import_batch' => 'batch-1',
+            'responses_json' => [],
+            'score' => 0,
+            'passed' => false,
+            'submitted_at' => now(),
+        ]);
+
+        $this->actingAs($this->coe)->delete(route('workshops.surveys.destroy-batch', $template), [
+            'import_batch' => 'batch-1',
+        ]);
+
+        $this->assertDatabaseCount('workshop_survey_responses', 0);
+    }
+
+    public function test_pre_post_comparison_appears_on_results_when_both_templates_exist(): void
+    {
+        $workshop = Workshop::factory()->create();
+        $pre = WorkshopSurveyTemplate::factory()->create([
+            'workshop_id' => $workshop->id,
+            'kind' => 'pre',
+            'questions_json' => [['id' => 'q1', 'text' => 'Shared question', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']]],
+        ]);
+        $post = WorkshopSurveyTemplate::factory()->create([
+            'workshop_id' => $workshop->id,
+            'kind' => 'post',
+            'questions_json' => [['id' => 'q1', 'text' => 'Shared question', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']]],
+        ]);
+        $session = WorkshopSession::factory()->create(['workshop_id' => $workshop->id]);
+
+        $pre->responses()->create([
+            'workshop_session_id' => $session->id,
+            'contact_id' => Contact::factory()->create()->id,
+            'responses_json' => ['q1' => 'B'],
+            'score' => 0,
+            'passed' => false,
+            'submitted_at' => now(),
+        ]);
+        $post->responses()->create([
+            'workshop_session_id' => $session->id,
+            'contact_id' => Contact::factory()->create()->id,
+            'responses_json' => ['q1' => 'A'],
+            'score' => 100,
+            'passed' => true,
+            'submitted_at' => now(),
+        ]);
+
+        $response = $this->actingAs($this->coe)->get(route('workshops.surveys.results', $post));
+
+        $response->assertOk();
+        $response->assertSee('Pre vs Post Comparison');
+        $response->assertSee('Shared question');
+    }
+
     public function test_a_non_participant_cannot_submit_a_survey_for_a_session(): void
     {
         $session = WorkshopSession::factory()->create();

@@ -18,11 +18,14 @@ class WorkshopSurveyTemplate extends Model
         'questions_json',
         'passing_score',
         'max_attempts',
+        'questions_per_attempt',
+        'shuffle_options',
         'updated_by',
     ];
 
     protected $casts = [
         'questions_json' => 'array',
+        'shuffle_options' => 'boolean',
     ];
 
     const KINDS = [
@@ -46,16 +49,52 @@ class WorkshopSurveyTemplate extends Model
     }
 
     /**
+     * Select the questions to present for one attempt: a random subset when
+     * questions_per_attempt is set (otherwise all questions), with option
+     * order shuffled per question when shuffle_options is enabled.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function questionsForAttempt(): array
+    {
+        $questions = collect($this->questions_json);
+
+        if ($this->questions_per_attempt && $this->questions_per_attempt < $questions->count()) {
+            $questions = $questions->shuffle()->take($this->questions_per_attempt);
+        }
+
+        if ($this->shuffle_options) {
+            $questions = $questions->map(function (array $question) {
+                if (! empty($question['options'])) {
+                    $question['options'] = collect($question['options'])->shuffle()->values()->all();
+                }
+
+                return $question;
+            });
+        }
+
+        return $questions->values()->all();
+    }
+
+    /**
      * Score a set of submitted responses against this template's questions.
      * Only questions with a defined "correct" answer contribute to scoring -
-     * open-text questions are recorded but not scored.
+     * open-text questions are recorded but not scored. Pass $presentedIds
+     * (the question ids actually shown for this attempt, e.g. when
+     * questions_per_attempt narrows the pool) so questions the participant
+     * never saw aren't counted against them.
      *
      * @param  array<string, mixed>  $responses  Keyed by question id.
+     * @param  array<int, string>|null  $presentedIds
      * @return array{score: int, passed: bool}
      */
-    public function score(array $responses): array
+    public function score(array $responses, ?array $presentedIds = null): array
     {
-        $scorable = collect($this->questions_json)->filter(fn (array $q) => ! empty($q['correct']));
+        $pool = $presentedIds
+            ? collect($this->questions_json)->filter(fn (array $q) => in_array($q['id'], $presentedIds, true))
+            : collect($this->questions_json);
+
+        $scorable = $pool->filter(fn (array $q) => ! empty($q['correct']));
 
         if ($scorable->isEmpty()) {
             return ['score' => 0, 'passed' => false];

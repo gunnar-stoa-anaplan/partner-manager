@@ -9,3 +9,5 @@ Route::post('/', [WorkshopSurveyController::class, 'store'])->name('store');
 Route::get('/{survey}/edit', [WorkshopSurveyController::class, 'edit'])->name('edit');
 Route::put('/{survey}', [WorkshopSurveyController::class, 'update'])->name('update');
 Route::get('/{survey}/results', [WorkshopSurveyController::class, 'results'])->name('results');
+Route::post('/{survey}/upload', [WorkshopSurveyController::class, 'upload'])->name('upload');
+Route::delete('/{survey}/batch', [WorkshopSurveyController::class, 'destroyBatch'])->name('destroy-batch');
