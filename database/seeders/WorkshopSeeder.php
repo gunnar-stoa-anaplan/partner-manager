@@ -7,6 +7,8 @@ use App\Models\Partner;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Workshop;
+use App\Models\WorkshopCredential;
+use App\Models\WorkshopSurveyTemplate;
 use Illuminate\Database\Seeder;
 
 class WorkshopSeeder extends Seeder
@@ -105,6 +107,7 @@ class WorkshopSeeder extends Seeder
 
         $this->seedDemoParticipation($facilitator);
         $this->seedSessionParticipants($facilitator);
+        $this->seedSurveyTemplatesAndCredentials($facilitator);
     }
 
     /**
@@ -239,5 +242,66 @@ class WorkshopSeeder extends Seeder
         }
 
         $this->command->info("  ✓ Enrolled {$enrolled} demo participants across all real sessions");
+    }
+
+    /**
+     * A sample post-workshop knowledge check and a sample sandbox credential
+     * for the IFP workshop, plus a demo discussion thread, so the reporting
+     * and Q&A features have real data to show.
+     */
+    private function seedSurveyTemplatesAndCredentials(User $facilitator): void
+    {
+        $ifp = Workshop::where('slug', 'ifp')->first();
+
+        if (! $ifp) {
+            return;
+        }
+
+        WorkshopSurveyTemplate::updateOrCreate(
+            ['workshop_id' => $ifp->id, 'kind' => 'post'],
+            [
+                'intro' => 'A few quick questions to confirm what you took away from the workshop.',
+                'questions_json' => [
+                    ['id' => 'q1', 'text' => 'Which module type holds transactional detail data in an IFP model?', 'type' => 'single', 'options' => ['Line Item', 'List', 'Module', 'Dashboard'], 'correct' => ['Module']],
+                    ['id' => 'q2', 'text' => 'Which of these are part of the standard IFP dimensionality? (select all that apply)', 'type' => 'multiple', 'options' => ['Location', 'Customer', 'Job', 'Weather'], 'correct' => ['Location', 'Customer', 'Job']],
+                    ['id' => 'q3', 'text' => 'What would you like covered in more depth next time?', 'type' => 'text'],
+                ],
+                'passing_score' => 70,
+                'updated_by' => $facilitator->id,
+            ],
+        );
+
+        WorkshopCredential::updateOrCreate(
+            ['workshop_id' => $ifp->id, 'username' => 'ifp-sandbox-01'],
+            [
+                'email' => 'ifp-sandbox-01@anaplan-demo.com',
+                'password_enc' => 'DemoPass!2026',
+                'status' => 'available',
+                'notes' => 'Seeded demo credential - not a real Anaplan tenant.',
+            ],
+        );
+
+        $session = $ifp->sessions()->where('slug', '2026-06-9')->first();
+
+        if ($session && $session->threads()->count() === 0) {
+            $lead = Contact::where('email', 'alex.morgan@moorezemlak.com')->first();
+
+            $thread = $session->threads()->create([
+                'author_contact_id' => $lead?->id,
+                'kind' => 'question',
+                'body' => 'Is the golden model snapshot refreshed automatically before each session, or do we need to request it?',
+                'status' => 'answered',
+                'answered_at' => now()->subDay(),
+                'answered_by' => $facilitator->id,
+            ]);
+
+            $thread->replies()->create([
+                'author_user_id' => $facilitator->id,
+                'is_monitor_reply' => true,
+                'body' => "It's refreshed automatically 24 hours before the session start - no action needed on your end.",
+            ]);
+        }
+
+        $this->command->info('  ✓ Seeded a survey template, a demo credential, and a discussion thread');
     }
 }

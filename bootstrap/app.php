@@ -58,6 +58,33 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
             }
 
+            // Workshop Credentials and Surveys are registered BEFORE the main
+            // Workshops block below, since that block's GET /{workshop}
+            // wildcard would otherwise swallow /partner-workshops/credentials
+            // and /partner-workshops/surveys as if they were a workshop id.
+
+            // Workshop Credentials (gated by workshops.credentials - kept
+            // separate from workshops.management since sandbox credentials
+            // are more sensitive than general workshop administration)
+            $workshopCredentialsWeb = base_path('routes/modules/workshop-credentials.php');
+
+            if (file_exists($workshopCredentialsWeb)) {
+                Route::middleware(['web', 'auth', 'module:workshops.credentials'])
+                    ->prefix('partner-workshops/credentials')
+                    ->name('workshops.credentials.')
+                    ->group($workshopCredentialsWeb);
+            }
+
+            // Workshop Surveys (gated by workshops.reports)
+            $workshopSurveysWeb = base_path('routes/modules/workshop-surveys.php');
+
+            if (file_exists($workshopSurveysWeb)) {
+                Route::middleware(['web', 'auth', 'module:workshops.reports'])
+                    ->prefix('partner-workshops/surveys')
+                    ->name('workshops.surveys.')
+                    ->group($workshopSurveysWeb);
+            }
+
             // Partner Workshops (gated by workshops.management)
             // Note: URL prefix is "partner-workshops", not "workshops" - that
             // prefix already belongs to routes/workshop-guides.php.

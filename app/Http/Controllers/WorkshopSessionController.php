@@ -28,6 +28,8 @@ class WorkshopSessionController extends Controller
             'participants.contact:id,first_name,last_name,email,partner_id',
             'participants.contact.partner:id,name',
             'monitors.user:id,name',
+            'threads' => fn ($query) => $query->where('status', '!=', 'hidden')->latest(),
+            'threads.replies',
         ]);
 
         return view('workshops.sessions.show', compact('workshop', 'session'));

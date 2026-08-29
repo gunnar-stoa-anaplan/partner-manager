@@ -101,4 +101,44 @@
         </div>
     </div>
 </div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow-0 mb-g">
+            <div class="card-header">
+                <div class="card-title"><i class="fal fa-trophy me-2"></i> Leaderboard</div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Participant</th>
+                            <th>Partner</th>
+                            <th>Sessions Completed</th>
+                            <th>Avg. Survey Score</th>
+                            <th>Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($leaderboard as $index => $entry)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $entry['contact']->full_name }}</td>
+                                <td>{{ $entry['contact']->partner?->name }}</td>
+                                <td>{{ $entry['sessions_completed'] }}</td>
+                                <td>{{ $entry['average_survey_score'] !== null ? $entry['average_survey_score'].'%' : '—' }}</td>
+                                <td class="fw-bold">{{ $entry['points'] }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">No participants yet.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

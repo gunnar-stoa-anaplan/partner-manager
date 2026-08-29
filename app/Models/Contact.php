@@ -160,6 +160,16 @@ class Contact extends Authenticatable
         return $this->hasMany(WorkshopSessionParticipant::class, 'enrolled_by_contact_id');
     }
 
+    public function workshopCredentialAssignments()
+    {
+        return $this->hasMany(WorkshopCredentialAssignment::class);
+    }
+
+    public function workshopSurveyResponses()
+    {
+        return $this->hasMany(WorkshopSurveyResponse::class);
+    }
+
     public function resourcePathEnrollments()
     {
         return $this->hasMany(ResourcePathEnrollment::class);

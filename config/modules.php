@@ -254,7 +254,22 @@ return [
                 'label' => 'Workshops',
                 'icon' => 'check-square',
                 'items' => [
-                    ['label' => 'Workshops', 'route' => 'workshops.index', 'icon' => 'check-square'],
+                    ['label' => 'Dashboard', 'route' => 'workshops.dashboard', 'icon' => 'home'],
+                    ['label' => 'All Workshops', 'route' => 'workshops.index', 'icon' => 'check-square'],
+                ],
+            ],
+            'credentials' => [
+                'label' => 'Tenant Pool',
+                'icon' => 'key',
+                'items' => [
+                    ['label' => 'Credential Pool', 'route' => 'workshops.credentials.index', 'icon' => 'key'],
+                ],
+            ],
+            'reports' => [
+                'label' => 'Reports',
+                'icon' => 'bar-chart',
+                'items' => [
+                    ['label' => 'Survey Templates', 'route' => 'workshops.surveys.index', 'icon' => 'clipboard'],
                 ],
             ],
         ],

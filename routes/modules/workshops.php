@@ -3,8 +3,10 @@
 use App\Http\Controllers\WorkshopController;
 use App\Http\Controllers\WorkshopParticipantController;
 use App\Http\Controllers\WorkshopSessionController;
+use App\Http\Controllers\WorkshopThreadController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/dashboard', [WorkshopController::class, 'dashboard'])->name('dashboard');
 Route::get('/', [WorkshopController::class, 'index'])->name('index');
 Route::get('/create', [WorkshopController::class, 'create'])->name('create');
 Route::post('/', [WorkshopController::class, 'store'])->name('store');
@@ -26,3 +28,6 @@ Route::post('/{workshop}/sessions/{session}/participants/{participant}/complete'
 Route::post('/{workshop}/sessions/{session}/participants/{participant}/uncomplete', [WorkshopParticipantController::class, 'uncomplete'])->name('sessions.participants.uncomplete');
 Route::post('/{workshop}/sessions/{session}/monitors', [WorkshopParticipantController::class, 'assignMonitor'])->name('sessions.monitors.store');
 Route::delete('/{workshop}/sessions/{session}/monitors/{monitorUser}', [WorkshopParticipantController::class, 'removeMonitor'])->name('sessions.monitors.destroy');
+
+Route::post('/{workshop}/sessions/{session}/threads/{thread}/reply', [WorkshopThreadController::class, 'reply'])->name('sessions.threads.reply');
+Route::post('/{workshop}/sessions/{session}/threads/{thread}/hide', [WorkshopThreadController::class, 'hide'])->name('sessions.threads.hide');

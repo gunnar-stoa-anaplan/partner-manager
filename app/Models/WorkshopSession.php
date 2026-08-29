@@ -55,6 +55,21 @@ class WorkshopSession extends Model
         return $this->hasMany(WorkshopSessionMonitor::class);
     }
 
+    public function credentialAssignments(): HasMany
+    {
+        return $this->hasMany(WorkshopCredentialAssignment::class);
+    }
+
+    public function threads(): HasMany
+    {
+        return $this->hasMany(WorkshopThread::class);
+    }
+
+    public function surveyResponses(): HasMany
+    {
+        return $this->hasMany(WorkshopSurveyResponse::class, 'workshop_session_id');
+    }
+
     public function contacts(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'workshop_session_participants')

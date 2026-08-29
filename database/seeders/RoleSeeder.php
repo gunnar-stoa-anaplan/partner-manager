@@ -72,6 +72,8 @@ class RoleSeeder extends Seeder
             'enablement.lab_content' => 'write',
             'enablement.lab_administration' => 'write',
             'workshops.management' => 'write',
+            'workshops.credentials' => 'write',
+            'workshops.reports' => 'write',
         ]);
 
         // Manager
@@ -139,6 +141,8 @@ class RoleSeeder extends Seeder
             'enablement.lab_content' => 'write',
             'enablement.lab_administration' => 'write',
             'workshops.management' => 'write',
+            'workshops.credentials' => 'write',
+            'workshops.reports' => 'write',
         ]);
 
         // PAM
@@ -195,12 +199,14 @@ class RoleSeeder extends Seeder
         $workshopOwner = Role::updateOrCreate(['slug' => 'workshop_owner'], [
             'display_name' => 'Workshop Owner',
             'type' => 'internal',
-            'landing_route' => 'workshops.index',
+            'landing_route' => 'workshops.dashboard',
             'sort_order' => 7,
             'description' => 'Focused role for creating, scheduling, and facilitating partner delivery workshops.',
         ]);
         $this->syncPermissions($workshopOwner, [
             'workshops.management' => 'write',
+            'workshops.credentials' => 'write',
+            'workshops.reports' => 'write',
         ]);
     }
 

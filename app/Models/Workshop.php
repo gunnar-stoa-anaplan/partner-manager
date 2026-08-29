@@ -35,4 +35,14 @@ class Workshop extends Model
     {
         return $this->hasMany(WorkshopSession::class);
     }
+
+    public function credentials(): HasMany
+    {
+        return $this->hasMany(WorkshopCredential::class);
+    }
+
+    public function surveyTemplates(): HasMany
+    {
+        return $this->hasMany(WorkshopSurveyTemplate::class);
+    }
 }

@@ -92,6 +92,42 @@
     <div class="col-lg-4">
         <div class="card shadow-0 mb-g">
             <div class="card-header">
+                <div class="card-title"><i class="fal fa-comments me-2"></i> Discussion</div>
+            </div>
+            <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                @forelse($session->threads as $thread)
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="fw-medium">{{ $thread->authorName() }}</div>
+                        <div class="text-muted fs-sm mb-2">{{ $thread->created_at->diffForHumans() }} &middot; <span class="badge bg-{{ $thread->status === 'answered' ? 'success' : 'secondary' }}">{{ ucfirst($thread->status) }}</span></div>
+                        <div>{{ $thread->body }}</div>
+
+                        @foreach($thread->replies as $reply)
+                            <div class="ms-3 mt-2 ps-2 border-start">
+                                <div class="fw-medium fs-sm">{{ $reply->authorName() }} @if($reply->is_monitor_reply)<span class="badge bg-primary">Facilitator</span>@endif</div>
+                                <div class="fs-sm">{{ $reply->body }}</div>
+                            </div>
+                        @endforeach
+
+                        <form action="{{ route('workshops.sessions.threads.reply', [$workshop, $session, $thread]) }}" method="POST" class="mt-2 d-flex gap-1">
+                            @csrf
+                            <input type="text" name="body" class="form-control form-control-sm" placeholder="Reply..." required>
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Send</button>
+                        </form>
+                        @if($thread->status !== 'hidden')
+                        <form action="{{ route('workshops.sessions.threads.hide', [$workshop, $session, $thread]) }}" method="POST" class="mt-1">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-link text-danger p-0">Hide</button>
+                        </form>
+                        @endif
+                    </div>
+                @empty
+                    <p class="text-muted mb-0">No questions posted yet.</p>
+                @endforelse
+            </div>
+        </div>
+
+        <div class="card shadow-0 mb-g">
+            <div class="card-header">
                 <div class="card-title"><i class="fal fa-user-check me-2"></i> Facilitators / Monitors</div>
             </div>
             <div class="card-body">

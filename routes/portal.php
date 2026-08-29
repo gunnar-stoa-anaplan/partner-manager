@@ -18,6 +18,8 @@ use App\Http\Controllers\Portal\PortalProjectsController;
 use App\Http\Controllers\Portal\PortalWorkspaceController;
 use App\Http\Controllers\Portal\WorkshopController as PortalWorkshopController;
 use App\Http\Controllers\Portal\WorkshopParticipationController as PortalWorkshopParticipationController;
+use App\Http\Controllers\Portal\WorkshopSurveyController as PortalWorkshopSurveyController;
+use App\Http\Controllers\Portal\WorkshopThreadController as PortalWorkshopThreadController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -109,6 +111,12 @@ Route::middleware('portal')->group(function () {
 
         Route::get('/my-workshops', [PortalWorkshopParticipationController::class, 'index'])->name('my-workshops.index');
         Route::get('/my-workshops/{session}', [PortalWorkshopParticipationController::class, 'show'])->name('my-workshops.show');
+
+        Route::post('/my-workshops/{session}/threads', [PortalWorkshopThreadController::class, 'store'])->name('my-workshops.threads.store');
+        Route::post('/my-workshops/{session}/threads/{thread}/replies', [PortalWorkshopThreadController::class, 'reply'])->name('my-workshops.threads.reply');
+
+        Route::get('/my-workshops/{session}/surveys/{template}', [PortalWorkshopSurveyController::class, 'show'])->name('my-workshops.surveys.show');
+        Route::post('/my-workshops/{session}/surveys/{template}', [PortalWorkshopSurveyController::class, 'submit'])->name('my-workshops.surveys.submit');
     });
 
     Route::middleware('portal.can:deal_registrations')->group(function () {

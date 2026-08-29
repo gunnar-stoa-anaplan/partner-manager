@@ -138,4 +138,27 @@ class WorkshopControllerTest extends TestCase
         $response->assertOk();
         $response->assertSee('50%');
     }
+
+    public function test_dashboard_renders(): void
+    {
+        Workshop::factory()->has(WorkshopSession::factory()->count(2), 'sessions')->create();
+
+        $this->actingAs($this->coe)->get(route('workshops.dashboard'))->assertOk();
+    }
+
+    public function test_credentials_index_renders(): void
+    {
+        \App\Models\WorkshopCredential::factory()->create();
+
+        $this->actingAs($this->coe)->get(route('workshops.credentials.index'))->assertOk();
+        $this->actingAs($this->coe)->get(route('workshops.credentials.create'))->assertOk();
+    }
+
+    public function test_surveys_index_renders(): void
+    {
+        \App\Models\WorkshopSurveyTemplate::factory()->create();
+
+        $this->actingAs($this->coe)->get(route('workshops.surveys.index'))->assertOk();
+        $this->actingAs($this->coe)->get(route('workshops.surveys.create'))->assertOk();
+    }
 }

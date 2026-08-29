@@ -34,8 +34,17 @@ class WorkshopParticipationController extends Controller
             403,
         );
 
-        $session->load('workshop');
+        $session->load([
+            'workshop',
+            'workshop.surveyTemplates',
+            'threads' => fn ($query) => $query->where('status', '!=', 'hidden')->latest(),
+            'threads.replies',
+        ]);
 
-        return view('portal.my-workshops.show', compact('session'));
+        $myCompletedSurveyKinds = $session->surveyResponses()
+            ->where('contact_id', $contact->id)
+            ->pluck('workshop_survey_template_id');
+
+        return view('portal.my-workshops.show', compact('session', 'myCompletedSurveyKinds'));
     }
 }
