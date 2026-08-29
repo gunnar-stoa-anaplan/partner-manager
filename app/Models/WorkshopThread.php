@@ -13,6 +13,7 @@ class WorkshopThread extends Model
 
     protected $fillable = [
         'workshop_session_id',
+        'workshop_page_id',
         'author_user_id',
         'author_contact_id',
         'anonymous',
@@ -34,6 +35,11 @@ class WorkshopThread extends Model
     public function session(): BelongsTo
     {
         return $this->belongsTo(WorkshopSession::class, 'workshop_session_id');
+    }
+
+    public function page(): BelongsTo
+    {
+        return $this->belongsTo(WorkshopPage::class, 'workshop_page_id');
     }
 
     public function authorUser(): BelongsTo

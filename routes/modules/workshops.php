@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\WorkshopController;
+use App\Http\Controllers\WorkshopPageController;
 use App\Http\Controllers\WorkshopParticipantController;
 use App\Http\Controllers\WorkshopSessionController;
 use App\Http\Controllers\WorkshopThreadController;
+use App\Http\Controllers\WorkshopToolkitAssetController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [WorkshopController::class, 'dashboard'])->name('dashboard');
@@ -31,3 +33,16 @@ Route::delete('/{workshop}/sessions/{session}/monitors/{monitorUser}', [Workshop
 
 Route::post('/{workshop}/sessions/{session}/threads/{thread}/reply', [WorkshopThreadController::class, 'reply'])->name('sessions.threads.reply');
 Route::post('/{workshop}/sessions/{session}/threads/{thread}/hide', [WorkshopThreadController::class, 'hide'])->name('sessions.threads.hide');
+
+Route::get('/{workshop}/pages', [WorkshopPageController::class, 'index'])->name('pages.index');
+Route::get('/{workshop}/pages/create', [WorkshopPageController::class, 'create'])->name('pages.create');
+Route::post('/{workshop}/pages', [WorkshopPageController::class, 'store'])->name('pages.store');
+Route::post('/{workshop}/pages/reorder', [WorkshopPageController::class, 'reorder'])->name('pages.reorder');
+Route::get('/{workshop}/pages/{page}/edit', [WorkshopPageController::class, 'edit'])->name('pages.edit');
+Route::put('/{workshop}/pages/{page}', [WorkshopPageController::class, 'update'])->name('pages.update');
+Route::delete('/{workshop}/pages/{page}', [WorkshopPageController::class, 'destroy'])->name('pages.destroy');
+
+Route::get('/{workshop}/toolkit', [WorkshopToolkitAssetController::class, 'index'])->name('toolkit.index');
+Route::post('/{workshop}/toolkit', [WorkshopToolkitAssetController::class, 'store'])->name('toolkit.store');
+Route::get('/{workshop}/toolkit/{asset}/download', [WorkshopToolkitAssetController::class, 'download'])->name('toolkit.download');
+Route::delete('/{workshop}/toolkit/{asset}', [WorkshopToolkitAssetController::class, 'destroy'])->name('toolkit.destroy');

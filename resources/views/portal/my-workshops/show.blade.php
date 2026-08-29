@@ -16,9 +16,32 @@
 
     <div class="card portal-card mb-4">
         <div class="card-body">
-            <p class="mb-0">{{ $session->workshop->short_description }}</p>
+            <p class="mb-2">{{ $session->workshop->short_description }}</p>
+            <div class="d-flex gap-2">
+                @if($session->workshop->pages->isNotEmpty())
+                    <a href="{{ route('portal.my-workshops.pages.show', [$session, $session->workshop->pages->first()]) }}" class="btn btn-sm btn-primary">Start Content</a>
+                    <a href="{{ route('portal.my-workshops.progress', $session) }}" class="btn btn-sm btn-outline-primary">My Progress</a>
+                @endif
+                @if($session->workshop->toolkitAssets->isNotEmpty())
+                    <a href="#toolkit" class="btn btn-sm btn-outline-secondary">Toolkit</a>
+                @endif
+            </div>
         </div>
     </div>
+
+    @if($session->workshop->toolkitAssets->isNotEmpty())
+    <div class="card portal-card mb-4" id="toolkit">
+        <div class="card-header"><h6 class="mb-0">Toolkit</h6></div>
+        <ul class="list-group list-group-flush">
+            @foreach($session->workshop->toolkitAssets as $asset)
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ $asset->title }}</span>
+                    <a href="{{ route('portal.my-workshops.toolkit.download', [$session, $asset]) }}" class="btn btn-sm btn-outline-primary">Download</a>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
 
     @if($session->workshop->surveyTemplates->isNotEmpty())
     <div class="card portal-card mb-4">

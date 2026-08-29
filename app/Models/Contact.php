@@ -170,6 +170,11 @@ class Contact extends Authenticatable
         return $this->hasMany(WorkshopSurveyResponse::class);
     }
 
+    public function workshopCheckAttempts()
+    {
+        return $this->hasMany(WorkshopCheckAttempt::class);
+    }
+
     public function resourcePathEnrollments()
     {
         return $this->hasMany(ResourcePathEnrollment::class);

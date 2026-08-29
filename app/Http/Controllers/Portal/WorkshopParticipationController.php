@@ -37,6 +37,8 @@ class WorkshopParticipationController extends Controller
         $session->load([
             'workshop',
             'workshop.surveyTemplates',
+            'workshop.pages',
+            'workshop.toolkitAssets',
             'threads' => fn ($query) => $query->where('status', '!=', 'hidden')->latest(),
             'threads.replies',
         ]);

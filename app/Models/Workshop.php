@@ -45,4 +45,14 @@ class Workshop extends Model
     {
         return $this->hasMany(WorkshopSurveyTemplate::class);
     }
+
+    public function pages(): HasMany
+    {
+        return $this->hasMany(WorkshopPage::class)->orderBy('sort_order');
+    }
+
+    public function toolkitAssets(): HasMany
+    {
+        return $this->hasMany(WorkshopToolkitAsset::class);
+    }
 }

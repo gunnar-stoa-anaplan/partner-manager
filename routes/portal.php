@@ -16,10 +16,12 @@ use App\Http\Controllers\Portal\PortalLoginController;
 use App\Http\Controllers\Portal\PortalPathController;
 use App\Http\Controllers\Portal\PortalProjectsController;
 use App\Http\Controllers\Portal\PortalWorkspaceController;
+use App\Http\Controllers\Portal\WorkshopContentController as PortalWorkshopContentController;
 use App\Http\Controllers\Portal\WorkshopController as PortalWorkshopController;
 use App\Http\Controllers\Portal\WorkshopParticipationController as PortalWorkshopParticipationController;
 use App\Http\Controllers\Portal\WorkshopSurveyController as PortalWorkshopSurveyController;
 use App\Http\Controllers\Portal\WorkshopThreadController as PortalWorkshopThreadController;
+use App\Http\Controllers\Portal\WorkshopToolkitController as PortalWorkshopToolkitController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -117,6 +119,13 @@ Route::middleware('portal')->group(function () {
 
         Route::get('/my-workshops/{session}/surveys/{template}', [PortalWorkshopSurveyController::class, 'show'])->name('my-workshops.surveys.show');
         Route::post('/my-workshops/{session}/surveys/{template}', [PortalWorkshopSurveyController::class, 'submit'])->name('my-workshops.surveys.submit');
+
+        Route::get('/my-workshops/{session}/progress', [PortalWorkshopContentController::class, 'progress'])->name('my-workshops.progress');
+        Route::get('/my-workshops/{session}/progress.json', [PortalWorkshopContentController::class, 'progressJson'])->name('my-workshops.progress.json');
+        Route::get('/my-workshops/{session}/pages/{page}', [PortalWorkshopContentController::class, 'show'])->name('my-workshops.pages.show');
+        Route::post('/my-workshops/{session}/pages/{page}/check', [PortalWorkshopContentController::class, 'submitCheck'])->name('my-workshops.pages.check');
+
+        Route::get('/my-workshops/{session}/toolkit/{asset}/download', [PortalWorkshopToolkitController::class, 'download'])->name('my-workshops.toolkit.download');
     });
 
     Route::middleware('portal.can:deal_registrations')->group(function () {
