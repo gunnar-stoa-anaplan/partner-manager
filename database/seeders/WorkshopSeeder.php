@@ -108,6 +108,53 @@ class WorkshopSeeder extends Seeder
         $this->seedDemoParticipation($facilitator);
         $this->seedSessionParticipants($facilitator);
         $this->seedSurveyTemplatesAndCredentials($facilitator);
+        $this->seedContentPages();
+    }
+
+    /**
+     * A couple of demo content pages for the IFP workshop, so the content
+     * delivery / progress-tracking feature has something real to show.
+     */
+    private function seedContentPages(): void
+    {
+        $ifp = Workshop::where('slug', 'ifp')->first();
+
+        if (! $ifp || $ifp->pages()->exists()) {
+            return;
+        }
+
+        $ifp->pages()->create([
+            'slug' => 'overview',
+            'title' => 'Overview',
+            'body' => "Welcome to the IFP Delivery Partner Workshop. Over this session you'll configure a golden IFP model, walk through the standard dimensionality, and generate your own working model from the framework.",
+            'sort_order' => 0,
+            'checks_json' => [
+                ['id' => 'read-overview', 'label' => "I've read the overview and I'm ready to start"],
+            ],
+        ]);
+
+        $ifp->pages()->create([
+            'slug' => 'model-generation',
+            'title' => 'Model Generation',
+            'body' => 'Use the configurator to generate your model. Walk through each of the 44 configuration questions, then trigger generation and confirm your four models were created successfully.',
+            'sort_order' => 1,
+            'checks_json' => [
+                ['id' => 'configurator-complete', 'label' => 'I completed the configurator'],
+                ['id' => 'models-generated', 'label' => 'My four models generated successfully'],
+            ],
+        ]);
+
+        $ifp->pages()->create([
+            'slug' => 'dimensionality',
+            'title' => 'Dimensionality Deep Dive',
+            'body' => 'Review the Location, Customer, and Job hierarchies in your generated model. Confirm each hierarchy loaded with the expected number of levels.',
+            'sort_order' => 2,
+            'checks_json' => [
+                ['id' => 'hierarchies-verified', 'label' => "I've verified all three hierarchies"],
+            ],
+        ]);
+
+        $this->command->info('  ✓ Seeded 3 content pages for the IFP workshop');
     }
 
     /**
