@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class WorkshopCredentialController extends Controller
 {
@@ -124,5 +125,75 @@ class WorkshopCredentialController extends Controller
         ]);
 
         return back()->with('success', 'Credential released back to the pool.');
+    }
+
+    public function extend(Request $request, WorkshopCredentialAssignment $assignment): RedirectResponse
+    {
+        $validated = $request->validate(['hold_until' => ['required', 'date', 'after_or_equal:today']]);
+
+        $assignment->update(['hold_until' => $validated['hold_until']]);
+
+        return back()->with('success', 'Hold extended to '.$assignment->hold_until->format('M j, Y').'.');
+    }
+
+    public function bulkUpload(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'workshop_id' => ['required', 'exists:workshops,id'],
+            'file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls', 'max:10240'],
+        ]);
+
+        $spreadsheet = IOFactory::load($request->file('file')->getRealPath());
+        $rows = $spreadsheet->getActiveSheet()->toArray();
+
+        if (count($rows) < 2) {
+            return back()->with('error', 'The file has no data rows.');
+        }
+
+        $headers = array_map(fn ($h) => strtolower(trim((string) $h)), array_shift($rows));
+        $created = 0;
+
+        foreach ($rows as $row) {
+            $rowData = array_combine($headers, array_pad($row, count($headers), null));
+
+            if (empty($rowData['username']) || empty($rowData['email']) || empty($rowData['password'])) {
+                continue;
+            }
+
+            WorkshopCredential::updateOrCreate(
+                ['workshop_id' => $validated['workshop_id'], 'username' => trim((string) $rowData['username'])],
+                [
+                    'email' => trim((string) $rowData['email']),
+                    'password_enc' => (string) $rowData['password'],
+                    'status' => 'available',
+                    'notes' => $rowData['notes'] ?? null,
+                ],
+            );
+            $created++;
+        }
+
+        return redirect()->route('workshops.credentials.index')->with('success', "Imported {$created} credential(s).");
+    }
+
+    public function refreshQueue(): View
+    {
+        $threshold = Carbon::now()->subDays(30);
+
+        $credentials = WorkshopCredential::with('workshop:id,name')
+            ->where('status', '!=', 'retired')
+            ->where(function ($query) use ($threshold) {
+                $query->whereNull('last_refreshed_at')->orWhere('last_refreshed_at', '<', $threshold);
+            })
+            ->orderBy('last_refreshed_at')
+            ->get();
+
+        return view('workshops.credentials.refresh-queue', compact('credentials'));
+    }
+
+    public function markRefreshed(WorkshopCredential $credential): RedirectResponse
+    {
+        $credential->update(['last_refreshed_at' => Carbon::now()]);
+
+        return back()->with('success', "{$credential->username} marked as refreshed.");
     }
 }

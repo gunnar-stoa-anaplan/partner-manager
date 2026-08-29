@@ -65,6 +65,92 @@ class WorkshopCredentialTest extends TestCase
         $this->assertTrue($credential->fresh()->isAvailable());
     }
 
+    public function test_admin_can_extend_a_credential_assignment_hold(): void
+    {
+        $session = WorkshopSession::factory()->create();
+        $credential = WorkshopCredential::factory()->create(['workshop_id' => $session->workshop_id]);
+        $contact = Contact::factory()->create();
+
+        $assignment = $credential->assignments()->create([
+            'workshop_session_id' => $session->id,
+            'contact_id' => $contact->id,
+            'assigned_at' => now(),
+            'hold_until' => now()->addDay(),
+        ]);
+
+        $newDate = now()->addWeek()->format('Y-m-d');
+        $this->actingAs($this->coe)->post(route('workshops.credentials.assignments.extend', $assignment), [
+            'hold_until' => $newDate,
+        ]);
+
+        $this->assertEquals($newDate, $assignment->fresh()->hold_until->format('Y-m-d'));
+    }
+
+    public function test_scheduled_command_releases_expired_credential_assignments(): void
+    {
+        $session = WorkshopSession::factory()->create();
+        $credential = WorkshopCredential::factory()->create(['workshop_id' => $session->workshop_id]);
+        $expired = $credential->assignments()->create([
+            'workshop_session_id' => $session->id,
+            'contact_id' => Contact::factory()->create()->id,
+            'assigned_at' => now()->subWeek(),
+            'hold_until' => now()->subDay(),
+        ]);
+        $stillHeld = $credential->assignments()->create([
+            'workshop_session_id' => $session->id,
+            'contact_id' => Contact::factory()->create()->id,
+            'assigned_at' => now(),
+            'hold_until' => now()->addWeek(),
+        ]);
+
+        $this->artisan('workshops:release-expired-credentials')->assertSuccessful();
+
+        $this->assertNotNull($expired->fresh()->released_at);
+        $this->assertEquals('session_ended', $expired->fresh()->released_reason);
+        $this->assertNull($stillHeld->fresh()->released_at);
+    }
+
+    public function test_admin_can_bulk_import_credentials_from_csv(): void
+    {
+        $workshop = Workshop::factory()->create();
+        $csv = "username,email,password,notes\nsandbox01,sandbox01@demo.com,SecretPass1,First batch\n";
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('credentials.csv', $csv);
+
+        $this->actingAs($this->coe)->post(route('workshops.credentials.bulk-upload'), [
+            'workshop_id' => $workshop->id,
+            'file' => $file,
+        ]);
+
+        $this->assertDatabaseHas('workshop_credential_pool', [
+            'workshop_id' => $workshop->id,
+            'username' => 'sandbox01',
+            'email' => 'sandbox01@demo.com',
+        ]);
+    }
+
+    public function test_refresh_queue_lists_never_and_stale_refreshed_credentials(): void
+    {
+        $fresh = WorkshopCredential::factory()->create(['last_refreshed_at' => now()]);
+        $stale = WorkshopCredential::factory()->create(['last_refreshed_at' => now()->subDays(45)]);
+        $never = WorkshopCredential::factory()->create(['last_refreshed_at' => null]);
+
+        $response = $this->actingAs($this->coe)->get(route('workshops.credentials.refresh-queue'));
+
+        $response->assertOk();
+        $response->assertSee($stale->username);
+        $response->assertSee($never->username);
+        $response->assertDontSee($fresh->username);
+    }
+
+    public function test_marking_a_credential_refreshed_updates_the_timestamp(): void
+    {
+        $credential = WorkshopCredential::factory()->create(['last_refreshed_at' => null]);
+
+        $this->actingAs($this->coe)->post(route('workshops.credentials.mark-refreshed', $credential));
+
+        $this->assertNotNull($credential->fresh()->last_refreshed_at);
+    }
+
     public function test_an_already_assigned_credential_cannot_be_double_assigned(): void
     {
         $session = WorkshopSession::factory()->create();

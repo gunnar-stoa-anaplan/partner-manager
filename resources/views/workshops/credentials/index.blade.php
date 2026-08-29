@@ -17,10 +17,31 @@
         <div class="card shadow-0 mb-g">
             <div class="card-header d-flex align-items-center">
                 <div class="card-title flex-grow-1"><i class="fal fa-key me-2"></i> Credential Pool</div>
+                <a href="{{ route('workshops.credentials.refresh-queue') }}" class="btn btn-outline-warning btn-sm me-2">Refresh Queue</a>
                 <a href="{{ route('workshops.credentials.create') }}" class="btn btn-primary btn-sm">
                     <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#plus"></use></svg>
                     Add Credential
                 </a>
+            </div>
+            <div class="card-body border-bottom">
+                <form action="{{ route('workshops.credentials.bulk-upload') }}" method="POST" enctype="multipart/form-data" class="row g-2 align-items-end">
+                    @csrf
+                    <div class="col-md-4">
+                        <label class="form-label fs-sm">Bulk import - Workshop</label>
+                        <select class="form-select form-select-sm" name="workshop_id" required>
+                            @foreach($workshops as $workshop)
+                                <option value="{{ $workshop->id }}">{{ $workshop->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fs-sm">CSV/XLSX (columns: username, email, password, notes)</label>
+                        <input type="file" class="form-control form-control-sm" name="file" accept=".csv,.xlsx,.xls" required>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-outline-primary btn-sm">Import</button>
+                    </div>
+                </form>
             </div>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover table-striped w-100">
@@ -59,6 +80,11 @@
                                 <td class="text-nowrap">
                                     <a href="{{ route('workshops.credentials.edit', $credential) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
                                     @if($active)
+                                        <form action="{{ route('workshops.credentials.assignments.extend', $active) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <input type="date" name="hold_until" value="{{ $active->hold_until?->format('Y-m-d') }}" class="form-control form-control-sm d-inline-block" style="width: auto;">
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary">Extend</button>
+                                        </form>
                                         <form action="{{ route('workshops.credentials.assignments.release', $active) }}" method="POST" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-outline-warning">Release</button>

@@ -38,17 +38,37 @@
                                 <th>Partner</th>
                                 <th>Status</th>
                                 <th>Enrolled</th>
+                                <th>Credential</th>
                                 <th>Completion</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($session->participants as $participant)
+                                @php $credentialAssignment = $activeCredentialByContact->get($participant->contact_id); @endphp
                                 <tr>
                                     <td>{{ $participant->contact->full_name }} <span class="text-muted">{{ $participant->contact->email }}</span></td>
                                     <td>{{ $participant->contact->partner?->name }}</td>
                                     <td><span class="badge bg-secondary">{{ \App\Models\WorkshopSessionParticipant::STATUSES[$participant->status] ?? $participant->status }}</span></td>
                                     <td>{{ $participant->enrolled_at?->format('M j, Y') }}</td>
+                                    <td>
+                                        @if($credentialAssignment)
+                                            <div class="fs-sm">{{ $credentialAssignment->credential->username }}</div>
+                                            <div class="text-nowrap">
+                                                <form action="{{ route('workshops.credentials.assignments.extend', $credentialAssignment) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <input type="date" name="hold_until" value="{{ $credentialAssignment->hold_until?->format('Y-m-d') }}" class="form-control form-control-sm d-inline-block" style="width: auto;">
+                                                    <button type="submit" class="btn btn-sm btn-link p-0">Extend</button>
+                                                </form>
+                                                <form action="{{ route('workshops.credentials.assignments.release', $credentialAssignment) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0">Release</button>
+                                                </form>
+                                            </div>
+                                        @else
+                                            <span class="text-muted fs-sm">None</span>
+                                        @endif
+                                    </td>
                                     <td>
                                         @if($participant->completed_at)
                                             <span class="badge bg-success">Completed {{ $participant->completed_at->format('M j') }}</span>
@@ -79,7 +99,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">No participants invited yet.</td>
+                                    <td colspan="7" class="text-center text-muted py-4">No participants invited yet.</td>
                                 </tr>
                             @endforelse
                         </tbody>

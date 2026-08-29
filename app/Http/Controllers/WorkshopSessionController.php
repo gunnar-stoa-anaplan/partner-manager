@@ -30,9 +30,12 @@ class WorkshopSessionController extends Controller
             'monitors.user:id,name',
             'threads' => fn ($query) => $query->where('status', '!=', 'hidden')->latest(),
             'threads.replies',
+            'credentialAssignments' => fn ($query) => $query->whereNull('released_at')->with('credential:id,username'),
         ]);
 
-        return view('workshops.sessions.show', compact('workshop', 'session'));
+        $activeCredentialByContact = $session->credentialAssignments->keyBy('contact_id');
+
+        return view('workshops.sessions.show', compact('workshop', 'session', 'activeCredentialByContact'));
     }
 
     public function edit(Workshop $workshop, WorkshopSession $session): View
