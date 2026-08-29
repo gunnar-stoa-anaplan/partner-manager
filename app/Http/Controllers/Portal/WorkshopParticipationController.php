@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
+use App\Models\WorkshopPresence;
+use App\Models\WorkshopReadState;
 use App\Models\WorkshopSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -46,6 +48,9 @@ class WorkshopParticipationController extends Controller
         $myCompletedSurveyKinds = $session->surveyResponses()
             ->where('contact_id', $contact->id)
             ->pluck('workshop_survey_template_id');
+
+        WorkshopPresence::heartbeat($session->id, null, null, $contact->id);
+        $session->threads->each(fn ($thread) => WorkshopReadState::markRead($thread->id, null, $contact->id));
 
         return view('portal.my-workshops.show', compact('session', 'myCompletedSurveyKinds'));
     }

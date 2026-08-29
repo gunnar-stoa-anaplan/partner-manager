@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Portal;
 use App\Http\Controllers\Controller;
 use App\Models\WorkshopSession;
 use App\Models\WorkshopThread;
+use App\Models\WorkshopUpload;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,9 +20,11 @@ class WorkshopThreadController extends Controller
         $validated = $request->validate([
             'body' => ['required', 'string', 'max:5000'],
             'anonymous' => ['nullable', 'boolean'],
+            'workshop_page_id' => ['nullable', 'exists:workshop_pages,id'],
         ]);
 
-        $session->threads()->create([
+        $thread = $session->threads()->create([
+            'workshop_page_id' => $validated['workshop_page_id'] ?? null,
             'author_contact_id' => $contact->id,
             'anonymous' => $request->boolean('anonymous'),
             'kind' => 'question',
@@ -29,7 +32,9 @@ class WorkshopThreadController extends Controller
             'status' => 'open',
         ]);
 
-        return redirect()->route('portal.my-workshops.show', $session)->with('success', 'Question posted.');
+        $this->storeUpload($request, $contact->id, threadId: $thread->id);
+
+        return redirect()->back()->with('success', 'Question posted.');
     }
 
     public function reply(Request $request, WorkshopSession $session, WorkshopThread $thread): RedirectResponse
@@ -41,12 +46,51 @@ class WorkshopThreadController extends Controller
 
         $validated = $request->validate(['body' => ['required', 'string', 'max:5000']]);
 
-        $thread->replies()->create([
+        $reply = $thread->replies()->create([
             'author_contact_id' => $contact->id,
             'body' => $validated['body'],
         ]);
 
-        return redirect()->route('portal.my-workshops.show', $session)->with('success', 'Reply posted.');
+        $this->storeUpload($request, $contact->id, replyId: $reply->id);
+
+        return redirect()->back()->with('success', 'Reply posted.');
+    }
+
+    public function react(WorkshopSession $session, WorkshopThread $thread): RedirectResponse
+    {
+        $contact = Auth::guard('portal')->user();
+        $this->authorizeParticipant($session, $contact->id);
+        abort_unless($thread->workshop_session_id === $session->id, 404);
+
+        $existing = $thread->reactions()->where('author_contact_id', $contact->id)->where('kind', 'me_too')->first();
+
+        if ($existing) {
+            $existing->delete();
+        } else {
+            $thread->reactions()->create(['author_contact_id' => $contact->id, 'kind' => 'me_too']);
+        }
+
+        return back();
+    }
+
+    private function storeUpload(Request $request, int $contactId, ?int $threadId = null, ?int $replyId = null): void
+    {
+        if (! $request->hasFile('attachment')) {
+            return;
+        }
+
+        $file = $request->file('attachment');
+        $path = $file->store('workshop-uploads', 'local');
+
+        WorkshopUpload::create([
+            'workshop_thread_id' => $threadId,
+            'workshop_reply_id' => $replyId,
+            'filename' => $file->getClientOriginalName(),
+            'stored_path' => $path,
+            'mime_type' => $file->getClientMimeType(),
+            'size_bytes' => $file->getSize(),
+            'uploaded_by_contact_id' => $contactId,
+        ]);
     }
 
     private function authorizeParticipant(WorkshopSession $session, int $contactId): void

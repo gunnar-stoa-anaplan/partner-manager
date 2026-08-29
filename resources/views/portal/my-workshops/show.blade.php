@@ -64,9 +64,10 @@
     <div class="card portal-card">
         <div class="card-header"><h6 class="mb-0">Discussion</h6></div>
         <div class="card-body">
-            <form action="{{ route('portal.my-workshops.threads.store', $session) }}" method="POST" class="mb-4">
+            <form action="{{ route('portal.my-workshops.threads.store', $session) }}" method="POST" enctype="multipart/form-data" class="mb-4">
                 @csrf
                 <textarea name="body" class="form-control mb-2" rows="2" placeholder="Ask a question..." required></textarea>
+                <input type="file" name="attachment" class="form-control form-control-sm mb-2">
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-check-label small">
                         <input type="checkbox" name="anonymous" value="1" class="form-check-input"> Post anonymously
@@ -81,17 +82,34 @@
                     <div class="text-muted small mb-2">{{ $thread->created_at->diffForHumans() }} &middot; <span class="badge bg-{{ $thread->status === 'answered' ? 'success' : 'secondary' }}">{{ ucfirst($thread->status) }}</span></div>
                     <div>{{ $thread->body }}</div>
 
+                    @foreach($thread->uploads as $upload)
+                        <div class="small"><a href="{{ route('portal.my-workshops.uploads.download', [$session, $upload]) }}">📎 {{ $upload->filename }}</a></div>
+                    @endforeach
+
+                    <form action="{{ route('portal.my-workshops.threads.react', [$session, $thread]) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-link p-0 {{ $thread->hasReactionFrom(null, auth('portal')->id()) ? 'text-primary' : 'text-muted' }}">
+                            👍 {{ $thread->reactions->where('kind', 'me_too')->count() }}
+                        </button>
+                    </form>
+
                     @foreach($thread->replies as $reply)
                         <div class="ms-3 mt-2 ps-2 border-start">
                             <div class="fw-medium small">{{ $reply->authorName() }} @if($reply->is_monitor_reply)<span class="badge bg-primary">Facilitator</span>@endif</div>
                             <div class="small">{{ $reply->body }}</div>
+                            @foreach($reply->uploads as $upload)
+                                <div class="small"><a href="{{ route('portal.my-workshops.uploads.download', [$session, $upload]) }}">📎 {{ $upload->filename }}</a></div>
+                            @endforeach
                         </div>
                     @endforeach
 
-                    <form action="{{ route('portal.my-workshops.threads.reply', [$session, $thread]) }}" method="POST" class="mt-2 d-flex gap-1">
+                    <form action="{{ route('portal.my-workshops.threads.reply', [$session, $thread]) }}" method="POST" enctype="multipart/form-data" class="mt-2">
                         @csrf
-                        <input type="text" name="body" class="form-control form-control-sm" placeholder="Reply..." required>
-                        <button type="submit" class="btn btn-sm btn-outline-primary">Send</button>
+                        <div class="d-flex gap-1 mb-1">
+                            <input type="text" name="body" class="form-control form-control-sm" placeholder="Reply..." required>
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Send</button>
+                        </div>
+                        <input type="file" name="attachment" class="form-control form-control-sm">
                     </form>
                 </div>
             @empty

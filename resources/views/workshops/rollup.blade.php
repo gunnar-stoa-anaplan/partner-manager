@@ -102,6 +102,21 @@
     </div>
 </div>
 
+<div class="row mb-g">
+    <div class="col-md-3">
+        <div class="card shadow-0 text-center"><div class="card-body"><div class="fs-32 fw-bold">{{ $discussionMetrics['total_threads'] }}</div><div class="text-muted">Total Questions</div></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-0 text-center"><div class="card-body"><div class="fs-32 fw-bold text-warning">{{ $discussionMetrics['open_threads'] }}</div><div class="text-muted">Open</div></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-0 text-center"><div class="card-body"><div class="fs-32 fw-bold text-success">{{ $discussionMetrics['answered_threads'] }}</div><div class="text-muted">Answered</div></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-0 text-center"><div class="card-body"><div class="fs-32 fw-bold">{{ $discussionMetrics['avg_response_minutes'] !== null ? $discussionMetrics['avg_response_minutes'].' min' : '—' }}</div><div class="text-muted">Avg. Response Time</div></div></div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-lg-12">
         <div class="card shadow-0 mb-g">

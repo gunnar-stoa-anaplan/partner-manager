@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Portal;
 use App\Http\Controllers\Controller;
 use App\Models\WorkshopCheckAttempt;
 use App\Models\WorkshopPage;
+use App\Models\WorkshopPresence;
 use App\Models\WorkshopSession;
+use App\Models\WorkshopThread;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,7 +30,16 @@ class WorkshopContentController extends Controller
         $previousPage = $currentIndex > 0 ? $pages->get($currentIndex - 1) : null;
         $nextPage = $pages->get($currentIndex + 1);
 
-        return view('portal.my-workshops.page', compact('session', 'page', 'pages', 'completion', 'previousPage', 'nextPage'));
+        WorkshopPresence::heartbeat($session->id, $page->id, null, $contact->id);
+
+        $pageThreads = WorkshopThread::where('workshop_session_id', $session->id)
+            ->where('workshop_page_id', $page->id)
+            ->where('status', '!=', 'hidden')
+            ->with('replies')
+            ->latest()
+            ->get();
+
+        return view('portal.my-workshops.page', compact('session', 'page', 'pages', 'completion', 'previousPage', 'nextPage', 'pageThreads'));
     }
 
     public function submitCheck(Request $request, WorkshopSession $session, WorkshopPage $page): RedirectResponse

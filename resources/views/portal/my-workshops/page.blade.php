@@ -52,7 +52,7 @@
             </div>
             @endif
 
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between mb-4">
                 @if($previousPage)
                     <a href="{{ route('portal.my-workshops.pages.show', [$session, $previousPage]) }}" class="btn btn-outline-secondary">&laquo; {{ $previousPage->title }}</a>
                 @else
@@ -61,6 +61,31 @@
                 @if($nextPage)
                     <a href="{{ route('portal.my-workshops.pages.show', [$session, $nextPage]) }}" class="btn btn-primary">{{ $nextPage->title }} &raquo;</a>
                 @endif
+            </div>
+
+            <div class="card portal-card">
+                <div class="card-header"><h6 class="mb-0">Discuss this page</h6></div>
+                <div class="card-body">
+                    <form action="{{ route('portal.my-workshops.threads.store', $session) }}" method="POST" class="mb-3">
+                        @csrf
+                        <input type="hidden" name="workshop_page_id" value="{{ $page->id }}">
+                        <textarea name="body" class="form-control form-control-sm mb-2" rows="2" placeholder="Ask about this page..." required></textarea>
+                        <button type="submit" class="btn btn-sm btn-primary">Post</button>
+                    </form>
+
+                    @forelse($pageThreads as $thread)
+                        <div class="mb-2 pb-2 border-bottom small">
+                            <span class="fw-medium">{{ $thread->authorName() }}</span> {{ $thread->body }}
+                            @foreach($thread->replies as $reply)
+                                <div class="ms-3 mt-1 ps-2 border-start">
+                                    <span class="fw-medium">{{ $reply->authorName() }}</span> {{ $reply->body }}
+                                </div>
+                            @endforeach
+                        </div>
+                    @empty
+                        <p class="text-muted small mb-0">No questions on this page yet.</p>
+                    @endforelse
+                </div>
             </div>
         </div>
     </div>

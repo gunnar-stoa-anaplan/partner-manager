@@ -57,6 +57,25 @@ class WorkshopThread extends Model
         return $this->hasMany(WorkshopReply::class, 'workshop_thread_id')->whereNull('hidden_at');
     }
 
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(WorkshopReaction::class, 'workshop_thread_id');
+    }
+
+    public function uploads(): HasMany
+    {
+        return $this->hasMany(WorkshopUpload::class, 'workshop_thread_id');
+    }
+
+    public function hasReactionFrom(?int $userId, ?int $contactId, string $kind = 'me_too'): bool
+    {
+        return $this->reactions->contains(
+            fn (WorkshopReaction $reaction) => $reaction->kind === $kind
+                && $reaction->author_user_id === $userId
+                && $reaction->author_contact_id === $contactId,
+        );
+    }
+
     public function authorName(): string
     {
         if ($this->anonymous) {

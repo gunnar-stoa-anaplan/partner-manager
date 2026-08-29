@@ -112,26 +112,61 @@
     <div class="col-lg-4">
         <div class="card shadow-0 mb-g">
             <div class="card-header">
-                <div class="card-title"><i class="fal fa-comments me-2"></i> Discussion</div>
+                <div class="card-title flex-grow-1"><i class="fal fa-comments me-2"></i> Discussion</div>
+                <span class="badge bg-info me-2">{{ $activeViewers }} active</span>
+                <a href="{{ route('workshops.sessions.feed', [$workshop, $session]) }}" class="btn btn-sm btn-outline-secondary me-1">Feed</a>
+                <a href="{{ route('workshops.monitor.show', $session) }}" class="btn btn-sm btn-outline-secondary">Monitor View</a>
             </div>
-            <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+            <div class="card-body">
+                <form action="{{ route('workshops.sessions.threads.store', [$workshop, $session]) }}" method="POST" enctype="multipart/form-data" class="mb-3">
+                    @csrf
+                    <textarea name="body" class="form-control form-control-sm mb-1" rows="2" placeholder="Post an announcement or comment..." required></textarea>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <input type="file" name="attachment" class="form-control form-control-sm" style="max-width: 200px;">
+                        <button type="submit" class="btn btn-sm btn-primary">Post</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-body border-top" style="max-height: 500px; overflow-y: auto;">
                 @forelse($session->threads as $thread)
                     <div class="mb-3 pb-3 border-bottom">
                         <div class="fw-medium">{{ $thread->authorName() }}</div>
                         <div class="text-muted fs-sm mb-2">{{ $thread->created_at->diffForHumans() }} &middot; <span class="badge bg-{{ $thread->status === 'answered' ? 'success' : 'secondary' }}">{{ ucfirst($thread->status) }}</span></div>
                         <div>{{ $thread->body }}</div>
 
+                        @foreach($thread->uploads as $upload)
+                            <div class="fs-sm"><a href="{{ route('workshops.uploads.download', $upload) }}"><i class="fal fa-paperclip me-1"></i>{{ $upload->filename }}</a></div>
+                        @endforeach
+
+                        <div class="mt-1">
+                            <form action="{{ route('workshops.sessions.threads.react', [$workshop, $session, $thread]) }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-link p-0 {{ $thread->hasReactionFrom(auth()->id(), null) ? 'text-primary' : 'text-muted' }}">
+                                    👍 {{ $thread->reactions->where('kind', 'me_too')->count() }}
+                                </button>
+                            </form>
+                        </div>
+
                         @foreach($thread->replies as $reply)
                             <div class="ms-3 mt-2 ps-2 border-start">
                                 <div class="fw-medium fs-sm">{{ $reply->authorName() }} @if($reply->is_monitor_reply)<span class="badge bg-primary">Facilitator</span>@endif</div>
                                 <div class="fs-sm">{{ $reply->body }}</div>
+                                @foreach($reply->uploads as $upload)
+                                    <div class="fs-sm"><a href="{{ route('workshops.uploads.download', $upload) }}"><i class="fal fa-paperclip me-1"></i>{{ $upload->filename }}</a></div>
+                                @endforeach
                             </div>
                         @endforeach
 
-                        <form action="{{ route('workshops.sessions.threads.reply', [$workshop, $session, $thread]) }}" method="POST" class="mt-2 d-flex gap-1">
+                        <form action="{{ route('workshops.sessions.threads.reply', [$workshop, $session, $thread]) }}" method="POST" enctype="multipart/form-data" class="mt-2">
                             @csrf
-                            <input type="text" name="body" class="form-control form-control-sm" placeholder="Reply..." required>
-                            <button type="submit" class="btn btn-sm btn-outline-primary">Send</button>
+                            <div class="d-flex gap-1 mb-1">
+                                <input type="text" name="body" class="form-control form-control-sm suggest-reply-input" placeholder="Reply..." required>
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Send</button>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <input type="file" name="attachment" class="form-control form-control-sm" style="max-width: 160px;">
+                                <button type="button" class="btn btn-sm btn-outline-info suggest-reply-btn" data-url="{{ route('workshops.sessions.threads.suggest-reply', [$workshop, $session, $thread]) }}">✨ Suggest Reply</button>
+                            </div>
                         </form>
                         @if($thread->status !== 'hidden')
                         <form action="{{ route('workshops.sessions.threads.hide', [$workshop, $session, $thread]) }}" method="POST" class="mt-1">
@@ -183,3 +218,24 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('click', function (event) {
+    var btn = event.target.closest('.suggest-reply-btn');
+    if (!btn) return;
+    var input = btn.closest('form').querySelector('.suggest-reply-input');
+    btn.disabled = true;
+    btn.textContent = 'Thinking...';
+    fetch(btn.dataset.url, { headers: { 'Accept': 'application/json' } })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            if (data.suggestion) { input.value = data.suggestion; }
+        })
+        .finally(function () {
+            btn.disabled = false;
+            btn.textContent = '✨ Suggest Reply';
+        });
+});
+</script>
+@endpush

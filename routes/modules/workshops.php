@@ -6,6 +6,7 @@ use App\Http\Controllers\WorkshopParticipantController;
 use App\Http\Controllers\WorkshopSessionController;
 use App\Http\Controllers\WorkshopThreadController;
 use App\Http\Controllers\WorkshopToolkitAssetController;
+use App\Http\Controllers\WorkshopUploadController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [WorkshopController::class, 'dashboard'])->name('dashboard');
@@ -31,8 +32,15 @@ Route::post('/{workshop}/sessions/{session}/participants/{participant}/uncomplet
 Route::post('/{workshop}/sessions/{session}/monitors', [WorkshopParticipantController::class, 'assignMonitor'])->name('sessions.monitors.store');
 Route::delete('/{workshop}/sessions/{session}/monitors/{monitorUser}', [WorkshopParticipantController::class, 'removeMonitor'])->name('sessions.monitors.destroy');
 
+Route::get('/{workshop}/sessions/{session}/feed', [WorkshopSessionController::class, 'feed'])->name('sessions.feed');
+
+Route::post('/{workshop}/sessions/{session}/threads', [WorkshopThreadController::class, 'store'])->name('sessions.threads.store');
 Route::post('/{workshop}/sessions/{session}/threads/{thread}/reply', [WorkshopThreadController::class, 'reply'])->name('sessions.threads.reply');
 Route::post('/{workshop}/sessions/{session}/threads/{thread}/hide', [WorkshopThreadController::class, 'hide'])->name('sessions.threads.hide');
+Route::post('/{workshop}/sessions/{session}/threads/{thread}/react', [WorkshopThreadController::class, 'react'])->name('sessions.threads.react');
+Route::get('/{workshop}/sessions/{session}/threads/{thread}/suggest-reply', [WorkshopThreadController::class, 'suggestReply'])->name('sessions.threads.suggest-reply');
+
+Route::get('/uploads/{upload}', [WorkshopUploadController::class, 'download'])->name('uploads.download');
 
 Route::get('/{workshop}/pages', [WorkshopPageController::class, 'index'])->name('pages.index');
 Route::get('/{workshop}/pages/create', [WorkshopPageController::class, 'create'])->name('pages.create');

@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreWorkshopSessionRequest;
 use App\Http\Requests\UpdateWorkshopSessionRequest;
 use App\Models\Workshop;
+use App\Models\WorkshopPresence;
+use App\Models\WorkshopReadState;
 use App\Models\WorkshopSession;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class WorkshopSessionController extends Controller
@@ -35,7 +38,30 @@ class WorkshopSessionController extends Controller
 
         $activeCredentialByContact = $session->credentialAssignments->keyBy('contact_id');
 
-        return view('workshops.sessions.show', compact('workshop', 'session', 'activeCredentialByContact'));
+        $userId = Auth::id();
+        WorkshopPresence::heartbeat($session->id, null, $userId, null);
+        $session->threads->each(fn ($thread) => WorkshopReadState::markRead($thread->id, $userId, null));
+        $activeViewers = WorkshopPresence::activeCountForSession($session->id);
+
+        return view('workshops.sessions.show', compact('workshop', 'session', 'activeCredentialByContact', 'activeViewers'));
+    }
+
+    public function feed(Workshop $workshop, WorkshopSession $session): View
+    {
+        $session->load([
+            'threads' => fn ($query) => $query->where('status', '!=', 'hidden')->oldest(),
+            'threads.replies',
+            'threads.page:id,title',
+        ]);
+
+        $items = $session->threads->flatMap(function ($thread) {
+            $entries = collect([['type' => 'thread', 'model' => $thread, 'at' => $thread->created_at]]);
+            $entries = $entries->concat($thread->replies->map(fn ($reply) => ['type' => 'reply', 'model' => $reply, 'thread' => $thread, 'at' => $reply->created_at]));
+
+            return $entries;
+        })->sortBy('at')->values();
+
+        return view('workshops.sessions.feed', compact('workshop', 'session', 'items'));
     }
 
     public function edit(Workshop $workshop, WorkshopSession $session): View

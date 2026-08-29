@@ -98,7 +98,21 @@ class WorkshopController extends Controller
             'sessions.participants' => fn ($query) => $query->notRemoved()->with('contact.partner:id,name'),
             'sessions.surveyResponses.contact:id,first_name,last_name,partner_id',
             'sessions.surveyResponses.contact.partner:id,name',
+            'sessions.threads',
         ]);
+
+        $allThreads = $workshop->sessions->flatMap(fn (WorkshopSession $session) => $session->threads);
+        $answeredThreads = $allThreads->whereNotNull('answered_at');
+        $avgResponseMinutes = $answeredThreads->isNotEmpty()
+            ? round($answeredThreads->avg(fn ($thread) => $thread->created_at->diffInMinutes($thread->answered_at)))
+            : null;
+
+        $discussionMetrics = [
+            'total_threads' => $allThreads->count(),
+            'open_threads' => $allThreads->where('status', 'open')->count(),
+            'answered_threads' => $answeredThreads->count(),
+            'avg_response_minutes' => $avgResponseMinutes,
+        ];
 
         $sessionStats = $workshop->sessions->map(function (WorkshopSession $session) {
             $total = $session->participants->count();
@@ -157,7 +171,7 @@ class WorkshopController extends Controller
             ->values()
             ->take(10);
 
-        return view('workshops.rollup', compact('workshop', 'sessionStats', 'partnerStats', 'totalParticipants', 'totalCompleted', 'leaderboard'));
+        return view('workshops.rollup', compact('workshop', 'sessionStats', 'partnerStats', 'totalParticipants', 'totalCompleted', 'leaderboard', 'discussionMetrics'));
     }
 
     public function update(UpdateWorkshopRequest $request, Workshop $workshop): RedirectResponse

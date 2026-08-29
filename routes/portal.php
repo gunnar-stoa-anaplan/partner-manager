@@ -22,6 +22,7 @@ use App\Http\Controllers\Portal\WorkshopParticipationController as PortalWorksho
 use App\Http\Controllers\Portal\WorkshopSurveyController as PortalWorkshopSurveyController;
 use App\Http\Controllers\Portal\WorkshopThreadController as PortalWorkshopThreadController;
 use App\Http\Controllers\Portal\WorkshopToolkitController as PortalWorkshopToolkitController;
+use App\Http\Controllers\Portal\WorkshopUploadController as PortalWorkshopUploadController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -116,6 +117,9 @@ Route::middleware('portal')->group(function () {
 
         Route::post('/my-workshops/{session}/threads', [PortalWorkshopThreadController::class, 'store'])->name('my-workshops.threads.store');
         Route::post('/my-workshops/{session}/threads/{thread}/replies', [PortalWorkshopThreadController::class, 'reply'])->name('my-workshops.threads.reply');
+        Route::post('/my-workshops/{session}/threads/{thread}/react', [PortalWorkshopThreadController::class, 'react'])->name('my-workshops.threads.react');
+
+        Route::get('/my-workshops/{session}/uploads/{upload}', [PortalWorkshopUploadController::class, 'download'])->name('my-workshops.uploads.download');
 
         Route::get('/my-workshops/{session}/surveys/{template}', [PortalWorkshopSurveyController::class, 'show'])->name('my-workshops.surveys.show');
         Route::post('/my-workshops/{session}/surveys/{template}', [PortalWorkshopSurveyController::class, 'submit'])->name('my-workshops.surveys.submit');

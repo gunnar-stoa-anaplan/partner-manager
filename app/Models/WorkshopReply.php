@@ -44,4 +44,9 @@ class WorkshopReply extends Model
     {
         return $this->authorUser?->name ?? $this->authorContact?->full_name ?? 'Unknown';
     }
+
+    public function uploads(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(WorkshopUpload::class, 'workshop_reply_id');
+    }
 }
