@@ -7,6 +7,27 @@
     <h4 class="mb-1">Your Progress</h4>
     <p class="text-muted mb-4">{{ $session->workshop->name }} &middot; {{ $session->name }}</p>
 
+    @if($credentialAssignment)
+        <div class="card portal-card mb-4 border-primary">
+            <div class="card-header"><h6 class="mb-0">Your Workshop Sandbox</h6></div>
+            <div class="card-body">
+                <p class="text-muted small mb-2">Use these credentials to log in to your Anaplan practice tenant for this workshop.</p>
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Username</dt>
+                    <dd class="col-sm-9">{{ $credentialAssignment->credential->username }}</dd>
+                    <dt class="col-sm-3">Email</dt>
+                    <dd class="col-sm-9">{{ $credentialAssignment->credential->email }}</dd>
+                    <dt class="col-sm-3">Password</dt>
+                    <dd class="col-sm-9"><code>{{ $credentialAssignment->credential->password_enc }}</code></dd>
+                    @if($credentialAssignment->hold_until)
+                        <dt class="col-sm-3">Available Until</dt>
+                        <dd class="col-sm-9">{{ $credentialAssignment->hold_until->format('M j, Y') }}</dd>
+                    @endif
+                </dl>
+            </div>
+        </div>
+    @endif
+
     <div class="row mb-4">
         <div class="col-md-6">
             <div class="card portal-card text-center">

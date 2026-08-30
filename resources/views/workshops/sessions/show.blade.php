@@ -18,8 +18,7 @@
             <div class="card-header d-flex align-items-center">
                 <div class="card-title flex-grow-1"><i class="fal fa-users me-2"></i> Participants</div>
                 <span class="badge bg-secondary">{{ \App\Models\WorkshopSession::STATUSES[$session->status] ?? $session->status }}</span>
-                <a href="{{ route('workshops.reports.leaderboard', [$workshop, $session]) }}" class="btn btn-outline-secondary btn-sm ms-2">Leaderboard</a>
-                <a href="{{ route('workshops.reports.exec-summary', [$workshop, $session]) }}" class="btn btn-outline-secondary btn-sm ms-1">Reports</a>
+                <a href="{{ route('workshops.reports.index', [$workshop, $session]) }}" class="btn btn-outline-secondary btn-sm ms-2">Reports</a>
                 <a href="{{ route('workshops.sessions.edit', [$workshop, $session]) }}" class="btn btn-outline-secondary btn-sm ms-1">Edit Session</a>
             </div>
             <div class="card-body">
@@ -170,12 +169,20 @@
                                 <button type="button" class="btn btn-sm btn-outline-info suggest-reply-btn" data-url="{{ route('workshops.sessions.threads.suggest-reply', [$workshop, $session, $thread]) }}">✨ Suggest Reply</button>
                             </div>
                         </form>
-                        @if($thread->status !== 'hidden')
-                        <form action="{{ route('workshops.sessions.threads.hide', [$workshop, $session, $thread]) }}" method="POST" class="mt-1">
-                            @csrf
-                            <button type="submit" class="btn btn-sm btn-link text-danger p-0">Hide</button>
-                        </form>
-                        @endif
+                        <div class="mt-1">
+                            @if($thread->status === 'open')
+                            <form action="{{ route('workshops.sessions.threads.answer', [$workshop, $session, $thread]) }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-link text-success p-0 me-2">Mark Answered</button>
+                            </form>
+                            @endif
+                            @if($thread->status !== 'hidden')
+                            <form action="{{ route('workshops.sessions.threads.hide', [$workshop, $session, $thread]) }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-link text-danger p-0">Hide</button>
+                            </form>
+                            @endif
+                        </div>
                     </div>
                 @empty
                     <p class="text-muted mb-0">No questions posted yet.</p>

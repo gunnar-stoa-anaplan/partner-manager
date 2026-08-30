@@ -54,4 +54,30 @@ class WorkshopParticipationController extends Controller
 
         return view('portal.my-workshops.show', compact('session', 'myCompletedSurveyKinds'));
     }
+
+    public function feed(WorkshopSession $session): View
+    {
+        $contact = Auth::guard('portal')->user();
+
+        abort_unless(
+            $session->participants()->where('contact_id', $contact->id)->where('status', '!=', 'removed')->exists(),
+            403,
+        );
+
+        $session->load([
+            'workshop',
+            'threads' => fn ($query) => $query->where('status', '!=', 'hidden')->oldest(),
+            'threads.replies',
+            'threads.page:id,title',
+        ]);
+
+        $items = $session->threads->flatMap(function ($thread) {
+            $entries = collect([['type' => 'thread', 'model' => $thread, 'at' => $thread->created_at]]);
+            $entries = $entries->concat($thread->replies->map(fn ($reply) => ['type' => 'reply', 'model' => $reply, 'thread' => $thread, 'at' => $reply->created_at]));
+
+            return $entries;
+        })->sortBy('at')->values();
+
+        return view('portal.my-workshops.feed', compact('session', 'items'));
+    }
 }

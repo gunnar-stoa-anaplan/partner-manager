@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
 use App\Models\WorkshopCheckAttempt;
+use App\Models\WorkshopCredentialAssignment;
 use App\Models\WorkshopPage;
 use App\Models\WorkshopPresence;
 use App\Models\WorkshopSession;
@@ -80,7 +81,17 @@ class WorkshopContentController extends Controller
         $totalChecks = $pageProgress->sum('total');
         $passedChecks = $pageProgress->sum('passed');
 
-        return view('portal.my-workshops.progress', compact('session', 'pageProgress', 'totalChecks', 'passedChecks'));
+        // Surface the participant's own assigned sandbox credential here so
+        // they can log in to their workshop environment without an
+        // out-of-band email chase - only ever their own assignment, scoped
+        // by contact_id + session_id.
+        $credentialAssignment = WorkshopCredentialAssignment::where('workshop_session_id', $session->id)
+            ->where('contact_id', $contact->id)
+            ->whereNull('released_at')
+            ->with('credential')
+            ->first();
+
+        return view('portal.my-workshops.progress', compact('session', 'pageProgress', 'totalChecks', 'passedChecks', 'credentialAssignment'));
     }
 
     public function progressJson(WorkshopSession $session): JsonResponse

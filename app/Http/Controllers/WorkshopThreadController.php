@@ -51,6 +51,17 @@ class WorkshopThreadController extends Controller
         return redirect()->route('workshops.sessions.show', [$workshop, $session])->with('success', 'Reply posted.');
     }
 
+    public function markAnswered(Request $request, Workshop $workshop, WorkshopSession $session, WorkshopThread $thread): RedirectResponse
+    {
+        $thread->update([
+            'status' => 'answered',
+            'answered_at' => Carbon::now(),
+            'answered_by' => $request->user()->id,
+        ]);
+
+        return redirect()->route('workshops.sessions.show', [$workshop, $session])->with('success', 'Marked answered.');
+    }
+
     public function hide(Request $request, Workshop $workshop, WorkshopSession $session, WorkshopThread $thread): RedirectResponse
     {
         $thread->update([

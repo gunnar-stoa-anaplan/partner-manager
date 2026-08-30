@@ -62,7 +62,10 @@
     @endif
 
     <div class="card portal-card">
-        <div class="card-header"><h6 class="mb-0">Discussion</h6></div>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">Discussion</h6>
+            <a href="{{ route('portal.my-workshops.feed', $session) }}" class="btn btn-sm btn-outline-secondary">Activity Feed</a>
+        </div>
         <div class="card-body">
             <form action="{{ route('portal.my-workshops.threads.store', $session) }}" method="POST" enctype="multipart/form-data" class="mb-4">
                 @csrf

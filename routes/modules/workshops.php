@@ -36,6 +36,7 @@ Route::get('/{workshop}/sessions/{session}/feed', [WorkshopSessionController::cl
 
 Route::post('/{workshop}/sessions/{session}/threads', [WorkshopThreadController::class, 'store'])->name('sessions.threads.store');
 Route::post('/{workshop}/sessions/{session}/threads/{thread}/reply', [WorkshopThreadController::class, 'reply'])->name('sessions.threads.reply');
+Route::post('/{workshop}/sessions/{session}/threads/{thread}/answer', [WorkshopThreadController::class, 'markAnswered'])->name('sessions.threads.answer');
 Route::post('/{workshop}/sessions/{session}/threads/{thread}/hide', [WorkshopThreadController::class, 'hide'])->name('sessions.threads.hide');
 Route::post('/{workshop}/sessions/{session}/threads/{thread}/react', [WorkshopThreadController::class, 'react'])->name('sessions.threads.react');
 Route::get('/{workshop}/sessions/{session}/threads/{thread}/suggest-reply', [WorkshopThreadController::class, 'suggestReply'])->name('sessions.threads.suggest-reply');

@@ -12,6 +12,14 @@ use ZipArchive;
 
 class WorkshopReportController extends Controller
 {
+    public function index(Workshop $workshop, WorkshopSession $session): View
+    {
+        $data = $this->sessionReportData($session);
+        $partners = $session->participants->pluck('contact.partner')->filter()->unique('id')->values();
+
+        return view('workshops.reports.index', [...$data, 'partners' => $partners]);
+    }
+
     public function execSummary(Workshop $workshop, WorkshopSession $session): View
     {
         $data = $this->sessionReportData($session);
@@ -100,6 +108,29 @@ class WorkshopReportController extends Controller
         $zip->close();
 
         $filename = \Illuminate\Support\Str::slug("{$workshop->slug}-{$session->slug}-{$partner->name}").'.zip';
+
+        return response()->download($zipPath, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function partnerReportsZipAll(Workshop $workshop, WorkshopSession $session): BinaryFileResponse
+    {
+        $session->load(['participants.contact.partner']);
+        $partners = $session->participants->pluck('contact.partner')->filter()->unique('id')->values();
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'workshop-reports').'.zip';
+        $zip = new ZipArchive;
+        $zip->open($zipPath, ZipArchive::CREATE);
+
+        foreach ($partners as $partner) {
+            $data = $this->sessionReportData($session, $partner->id);
+            $html = view('workshops.reports.partner-sponsor', [...$data, 'partner' => $partner])->render();
+            $filename = \Illuminate\Support\Str::slug("{$workshop->slug}-{$session->slug}-{$partner->name}").'.html';
+            $zip->addFromString($filename, $html);
+        }
+
+        $zip->close();
+
+        $filename = \Illuminate\Support\Str::slug("{$workshop->slug}-{$session->slug}-partner-reports").'.zip';
 
         return response()->download($zipPath, $filename)->deleteFileAfterSend(true);
     }

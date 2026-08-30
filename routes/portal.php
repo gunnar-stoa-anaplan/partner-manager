@@ -114,6 +114,7 @@ Route::middleware('portal')->group(function () {
 
         Route::get('/my-workshops', [PortalWorkshopParticipationController::class, 'index'])->name('my-workshops.index');
         Route::get('/my-workshops/{session}', [PortalWorkshopParticipationController::class, 'show'])->name('my-workshops.show');
+        Route::get('/my-workshops/{session}/feed', [PortalWorkshopParticipationController::class, 'feed'])->name('my-workshops.feed');
 
         Route::post('/my-workshops/{session}/threads', [PortalWorkshopThreadController::class, 'store'])->name('my-workshops.threads.store');
         Route::post('/my-workshops/{session}/threads/{thread}/replies', [PortalWorkshopThreadController::class, 'reply'])->name('my-workshops.threads.reply');

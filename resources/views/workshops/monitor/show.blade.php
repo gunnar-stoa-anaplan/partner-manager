@@ -29,6 +29,10 @@
                     <div class="mb-3 pb-3 border-bottom">
                         <div class="fw-medium">{{ $thread->authorName() }}</div>
                         <div>{{ $thread->body }}</div>
+                        <form action="{{ route('workshops.monitor.threads.answer', [$session, $thread]) }}" method="POST" class="mt-1">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-success">Mark Answered</button>
+                        </form>
                     </div>
                 @empty
                     <p class="text-muted mb-0">No open questions right now.</p>
