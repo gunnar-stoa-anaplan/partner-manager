@@ -49,6 +49,17 @@ class WorkshopSurveyTemplate extends Model
     }
 
     /**
+     * Whether this template has at least one question with a defined
+     * "correct" answer - i.e. it's a scored (pass/fail) survey rather than
+     * a plain feedback form. passing_score always has a DB default and
+     * can't be used for this check on its own.
+     */
+    public function isScored(): bool
+    {
+        return collect($this->questions_json)->contains(fn (array $q) => ! empty($q['correct']));
+    }
+
+    /**
      * Select the questions to present for one attempt: a random subset when
      * questions_per_attempt is set (otherwise all questions), with option
      * order shuffled per question when shuffle_options is enabled.

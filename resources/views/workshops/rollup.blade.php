@@ -117,11 +117,24 @@
     </div>
 </div>
 
+<style>
+    .checkpoint-dot { display: inline-block; width: 0.85rem; height: 0.85rem; border-radius: 50%; }
+    .checkpoint-dot.done { background: #15803d; }
+    .checkpoint-dot.partial { background: #d97706; }
+    .checkpoint-dot.todo { background: #dc2626; opacity: 0.35; }
+</style>
 <div class="row">
     <div class="col-lg-12">
         <div class="card shadow-0 mb-g">
-            <div class="card-header">
-                <div class="card-title"><i class="fal fa-trophy me-2"></i> Leaderboard</div>
+            <div class="card-header d-flex align-items-center">
+                <div class="card-title flex-grow-1"><i class="fal fa-trophy me-2"></i> Leaderboard</div>
+                @if(!empty($checkpoints))
+                <div class="fs-sm text-muted">
+                    <span class="checkpoint-dot done me-1"></span> Done
+                    <span class="checkpoint-dot partial ms-3 me-1"></span> In Progress
+                    <span class="checkpoint-dot todo ms-3 me-1"></span> Not Started
+                </div>
+                @endif
             </div>
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
@@ -130,6 +143,9 @@
                             <th>#</th>
                             <th>Participant</th>
                             <th>Partner</th>
+                            @foreach($checkpoints as $checkpoint)
+                                <th class="text-center" title="{{ $checkpoint['label'] }}">{{ $checkpoint['label'] }}</th>
+                            @endforeach
                             <th>Sessions Completed</th>
                             <th>Avg. Survey Score</th>
                             <th>Points</th>
@@ -141,13 +157,18 @@
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $entry['contact']->full_name }}</td>
                                 <td>{{ $entry['contact']->partner?->name }}</td>
+                                @foreach($checkpoints as $checkpoint)
+                                    <td class="text-center">
+                                        <span class="checkpoint-dot {{ $entry['statuses'][$checkpoint['key']] ?? 'todo' }}" title="{{ $checkpoint['label'] }}: {{ ucfirst(str_replace('todo', 'not started', $entry['statuses'][$checkpoint['key']] ?? 'todo')) }}"></span>
+                                    </td>
+                                @endforeach
                                 <td>{{ $entry['sessions_completed'] }}</td>
                                 <td>{{ $entry['average_survey_score'] !== null ? $entry['average_survey_score'].'%' : '—' }}</td>
                                 <td class="fw-bold">{{ $entry['points'] }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">No participants yet.</td>
+                                <td colspan="{{ 6 + count($checkpoints) }}" class="text-center text-muted py-4">No participants yet.</td>
                             </tr>
                         @endforelse
                     </tbody>

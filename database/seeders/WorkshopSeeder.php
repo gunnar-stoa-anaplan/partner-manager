@@ -7,8 +7,10 @@ use App\Models\Partner;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Workshop;
+use App\Models\WorkshopCheckAttempt;
 use App\Models\WorkshopCredential;
 use App\Models\WorkshopSessionParticipant;
+use App\Models\WorkshopSurveyResponse;
 use App\Models\WorkshopSurveyTemplate;
 use Illuminate\Database\Seeder;
 use Laravel\Pennant\Feature;
@@ -118,6 +120,7 @@ class WorkshopSeeder extends Seeder
         $this->seedSessionParticipants($facilitator, $practiceLead, $deliveryResource);
         $this->seedSurveyTemplatesAndCredentials($facilitator, $practiceLead, $deliveryResource);
         $this->seedContentPages();
+        $this->seedLeaderboardActivity();
     }
 
     /**
@@ -401,5 +404,100 @@ class WorkshopSeeder extends Seeder
         }
 
         $this->command->info('  ✓ Seeded a survey template, a demo credential, and a discussion thread');
+    }
+
+    /**
+     * A believable spread of lab-check attempts and knowledge-check
+     * submissions for the IFP workshop's June 9 session, so the leaderboard
+     * shows a real mix of done/partial/not-started instead of a blank grid.
+     * Must run after seedContentPages() (needs the real lab pages/checks).
+     */
+    private function seedLeaderboardActivity(): void
+    {
+        $ifp = Workshop::where('slug', 'ifp')->first();
+        $session = $ifp?->sessions()->where('slug', '2026-06-9')->first();
+        $knowledgeCheck = $ifp?->surveyTemplates()->where('kind', 'post')->first();
+        $labPages = $ifp?->participantPages->filter(fn ($page) => ! empty($page->checks()))->values();
+
+        if (! $session || ! $knowledgeCheck || ! $labPages || $labPages->isEmpty()) {
+            return;
+        }
+
+        if (WorkshopCheckAttempt::where('workshop_session_id', $session->id)->exists()) {
+            return;
+        }
+
+        $participants = $session->participants()->notRemoved()->orderBy('id')->get();
+        $ahead = $participants->slice(0, 5);
+        $inProgress = $participants->slice(5, 6);
+
+        foreach ($ahead as $participant) {
+            foreach ($labPages as $page) {
+                foreach ($page->checks() as $check) {
+                    WorkshopCheckAttempt::create([
+                        'contact_id' => $participant->contact_id,
+                        'workshop_session_id' => $session->id,
+                        'workshop_page_id' => $page->id,
+                        'check_id' => $check['id'],
+                        'passed' => true,
+                        'attempted_at' => now()->subDays(2),
+                    ]);
+                }
+            }
+
+            WorkshopSurveyResponse::create([
+                'workshop_survey_template_id' => $knowledgeCheck->id,
+                'workshop_session_id' => $session->id,
+                'contact_id' => $participant->contact_id,
+                'responses_json' => ['q1' => 'Module', 'q2' => ['Location', 'Customer', 'Job'], 'q3' => 'More on extensions.'],
+                'score' => 100,
+                'passed' => true,
+                'attempt_number' => 1,
+                'submitted_at' => now()->subDay(),
+            ]);
+        }
+
+        foreach ($inProgress as $index => $participant) {
+            $completedPageCount = ($index % 3) + 1;
+
+            foreach ($labPages->take($completedPageCount) as $page) {
+                foreach ($page->checks() as $check) {
+                    WorkshopCheckAttempt::create([
+                        'contact_id' => $participant->contact_id,
+                        'workshop_session_id' => $session->id,
+                        'workshop_page_id' => $page->id,
+                        'check_id' => $check['id'],
+                        'passed' => true,
+                        'attempted_at' => now()->subHours(6),
+                    ]);
+                }
+            }
+
+            // One extra page attempted but not yet passed - shows "In Progress".
+            if ($labPages->count() > $completedPageCount) {
+                $strugglingPage = $labPages[$completedPageCount];
+                WorkshopCheckAttempt::create([
+                    'contact_id' => $participant->contact_id,
+                    'workshop_session_id' => $session->id,
+                    'workshop_page_id' => $strugglingPage->id,
+                    'check_id' => $strugglingPage->checks()[0]['id'],
+                    'passed' => false,
+                    'attempted_at' => now()->subHours(3),
+                ]);
+            }
+
+            WorkshopSurveyResponse::create([
+                'workshop_survey_template_id' => $knowledgeCheck->id,
+                'workshop_session_id' => $session->id,
+                'contact_id' => $participant->contact_id,
+                'responses_json' => ['q1' => 'List', 'q2' => ['Location'], 'q3' => 'Still working through it.'],
+                'score' => 33,
+                'passed' => false,
+                'attempt_number' => 1,
+                'submitted_at' => now()->subHours(2),
+            ]);
+        }
+
+        $this->command->info("  ✓ Seeded leaderboard activity for {$ahead->count()} finished + {$inProgress->count()} in-progress participants");
     }
 }

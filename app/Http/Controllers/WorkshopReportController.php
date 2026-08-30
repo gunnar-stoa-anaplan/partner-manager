@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Partner;
 use App\Models\Workshop;
 use App\Models\WorkshopSession;
+use App\Services\WorkshopLeaderboardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -12,6 +13,8 @@ use ZipArchive;
 
 class WorkshopReportController extends Controller
 {
+    public function __construct(private WorkshopLeaderboardService $leaderboardService) {}
+
     public function index(Workshop $workshop, WorkshopSession $session): View
     {
         $data = $this->sessionReportData($session);
@@ -139,8 +142,13 @@ class WorkshopReportController extends Controller
     {
         $session->load(['participants' => fn ($q) => $q->notRemoved()->with('contact.partner:id,name'), 'surveyResponses']);
 
+        $checkpoints = $this->leaderboardService->checkpointsFor($workshop);
+        [$surveyResponses, $checkAttempts] = $this->leaderboardService->loadDataForSession($session->id);
+        $checkpointRowsByContact = collect($this->leaderboardService->rowsFor($session->participants, $checkpoints, $surveyResponses, $checkAttempts))
+            ->keyBy(fn ($row) => $row['contact']->id);
+
         $leaderboard = $session->participants
-            ->map(function ($participant) use ($session) {
+            ->map(function ($participant) use ($session, $checkpointRowsByContact) {
                 $surveyScores = $session->surveyResponses->where('contact_id', $participant->contact_id)->pluck('score');
                 $avgScore = $surveyScores->isNotEmpty() ? round($surveyScores->avg()) : null;
                 $points = ($participant->completed_at ? 100 : 0) + ($avgScore ?? 0);
@@ -150,12 +158,13 @@ class WorkshopReportController extends Controller
                     'completed' => $participant->completed_at !== null,
                     'average_survey_score' => $avgScore,
                     'points' => $points,
+                    'statuses' => $checkpointRowsByContact->get($participant->contact_id)['statuses'] ?? [],
                 ];
             })
             ->sortByDesc('points')
             ->values();
 
-        return view('workshops.sessions.leaderboard', compact('workshop', 'session', 'leaderboard'));
+        return view('workshops.sessions.leaderboard', compact('workshop', 'session', 'leaderboard', 'checkpoints'));
     }
 
     /**

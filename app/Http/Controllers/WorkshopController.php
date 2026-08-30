@@ -7,11 +7,14 @@ use App\Http\Requests\UpdateWorkshopRequest;
 use App\Models\Workshop;
 use App\Models\WorkshopSession;
 use App\Models\WorkshopSessionParticipant;
+use App\Services\WorkshopLeaderboardService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class WorkshopController extends Controller
 {
+    public function __construct(private WorkshopLeaderboardService $leaderboardService) {}
+
     public function dashboard(): View
     {
         $workshops = Workshop::withCount('sessions')->get();
@@ -146,10 +149,18 @@ class WorkshopController extends Controller
         $totalParticipants = $sessionStats->sum('total');
         $totalCompleted = $sessionStats->sum('completed');
 
-        $leaderboard = $workshop->sessions
+        $checkpoints = $this->leaderboardService->checkpointsFor($workshop);
+        [$surveyResponses, $checkAttempts] = $this->leaderboardService->loadDataForSessions($workshop->sessions->pluck('id')->all());
+
+        $participantsByContact = $workshop->sessions
             ->flatMap(fn (WorkshopSession $session) => $session->participants)
-            ->groupBy('contact_id')
-            ->map(function ($participantRows) use ($workshop) {
+            ->groupBy('contact_id');
+
+        $checkpointRowsByContact = collect($this->leaderboardService->rowsFor($participantsByContact->map->first(), $checkpoints, $surveyResponses, $checkAttempts))
+            ->keyBy(fn ($row) => $row['contact']->id);
+
+        $leaderboard = $participantsByContact
+            ->map(function ($participantRows) use ($workshop, $checkpointRowsByContact) {
                 $contact = $participantRows->first()->contact;
                 $completedCount = $participantRows->whereNotNull('completed_at')->count();
                 $surveyScores = $workshop->sessions
@@ -165,13 +176,14 @@ class WorkshopController extends Controller
                     'sessions_completed' => $completedCount,
                     'average_survey_score' => $avgScore,
                     'points' => $points,
+                    'statuses' => $checkpointRowsByContact->get($contact->id)['statuses'] ?? [],
                 ];
             })
             ->sortByDesc('points')
             ->values()
             ->take(10);
 
-        return view('workshops.rollup', compact('workshop', 'sessionStats', 'partnerStats', 'totalParticipants', 'totalCompleted', 'leaderboard', 'discussionMetrics'));
+        return view('workshops.rollup', compact('workshop', 'sessionStats', 'partnerStats', 'totalParticipants', 'totalCompleted', 'leaderboard', 'discussionMetrics', 'checkpoints'));
     }
 
     public function update(UpdateWorkshopRequest $request, Workshop $workshop): RedirectResponse
