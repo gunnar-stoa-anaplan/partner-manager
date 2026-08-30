@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Workshop;
 use App\Models\WorkshopCredential;
+use App\Models\WorkshopSessionParticipant;
 use App\Models\WorkshopSurveyTemplate;
 use Illuminate\Database\Seeder;
 
@@ -204,6 +205,14 @@ class WorkshopSeeder extends Seeder
             return;
         }
 
+        // These two demo logins must only ever appear enrolled in this one
+        // session - remove any stray enrollment left over from an earlier
+        // seed run (e.g. before the generic bulk-enrollment pool excluded
+        // them) in every other session.
+        WorkshopSessionParticipant::whereIn('contact_id', [$practiceLead->id, $deliveryResource->id])
+            ->where('workshop_session_id', '!=', $session->id)
+            ->delete();
+
         foreach ([$practiceLead, $deliveryResource] as $contact) {
             $session->participants()->updateOrCreate(
                 ['contact_id' => $contact->id],
@@ -244,6 +253,14 @@ class WorkshopSeeder extends Seeder
             return;
         }
 
+        // Alex Morgan (workshop_practice_lead) and Jordan Lee
+        // (workshop_delivery_resource) are the focused demo logins - they
+        // must only be enrolled in the one session seedDemoParticipation()
+        // deliberately puts them in, not swept into every other generic
+        // session's participant pool alongside them.
+        $reservedContactIds = Contact::whereIn('email', ['alex.morgan@moorezemlak.com', 'jordan.lee@moorezemlak.com'])
+            ->pluck('id');
+
         $enrolled = 0;
 
         foreach (Workshop::with('sessions')->get() as $workshop) {
@@ -258,6 +275,7 @@ class WorkshopSeeder extends Seeder
 
                 $contacts = Contact::whereIn('partner_id', $partners->pluck('id'))
                     ->whereNotNull('email')
+                    ->whereNotIn('id', $reservedContactIds)
                     ->orderBy('id')
                     ->limit(4)
                     ->get();
