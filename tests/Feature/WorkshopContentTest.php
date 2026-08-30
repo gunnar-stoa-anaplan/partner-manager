@@ -88,6 +88,34 @@ class WorkshopContentTest extends TestCase
         $response->assertSee('Overview Page');
     }
 
+    /**
+     * Regression test: page content is real curriculum HTML (headings,
+     * callouts, tables) and must render as markup, not as escaped text.
+     * A previous version of the portal view ran the body through
+     * nl2br(e(...)), which silently turned real HTML into literal tags.
+     */
+    public function test_page_body_html_renders_unescaped_for_participants_and_admins(): void
+    {
+        $session = WorkshopSession::factory()->create();
+        $page = WorkshopPage::factory()->create([
+            'workshop_id' => $session->workshop_id,
+            'body' => '<h2>Welcome</h2><p>Read the <strong>callout</strong> below.</p><div class="callout-tip">Tip</div>',
+        ]);
+        $contact = Contact::factory()->portalRole('workshop_delivery_resource')->create();
+        $session->participants()->create(['contact_id' => $contact->id, 'status' => 'active', 'enrolled_at' => now()]);
+
+        $portalResponse = $this->actingAs($contact, 'portal')->get(route('portal.my-workshops.pages.show', [$session, $page]));
+        $portalResponse->assertOk();
+        $portalResponse->assertSee('<h2>Welcome</h2>', false);
+        $portalResponse->assertSee('<strong>callout</strong>', false);
+        $portalResponse->assertDontSee('&lt;h2&gt;');
+
+        $adminResponse = $this->actingAs($this->coe)->get(route('workshops.pages.show', [$session->workshop, $page]));
+        $adminResponse->assertOk();
+        $adminResponse->assertSee('<h2>Welcome</h2>', false);
+        $adminResponse->assertDontSee('&lt;h2&gt;');
+    }
+
     public function test_progress_view_renders_and_reports_json(): void
     {
         $session = WorkshopSession::factory()->create();
