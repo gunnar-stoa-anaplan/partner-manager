@@ -77,6 +77,17 @@ class WorkshopContentTest extends TestCase
         $this->assertTrue($completion['complete']);
     }
 
+    public function test_internal_user_can_view_a_content_page(): void
+    {
+        $workshop = Workshop::factory()->create();
+        $page = WorkshopPage::factory()->create(['workshop_id' => $workshop->id, 'title' => 'Overview Page']);
+
+        $response = $this->actingAs($this->coe)->get(route('workshops.pages.show', [$workshop, $page]));
+
+        $response->assertOk();
+        $response->assertSee('Overview Page');
+    }
+
     public function test_progress_view_renders_and_reports_json(): void
     {
         $session = WorkshopSession::factory()->create();
