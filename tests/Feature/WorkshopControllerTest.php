@@ -161,4 +161,41 @@ class WorkshopControllerTest extends TestCase
         $this->actingAs($this->coe)->get(route('workshops.surveys.index'))->assertOk();
         $this->actingAs($this->coe)->get(route('workshops.surveys.create'))->assertOk();
     }
+
+    public function test_calendar_page_renders(): void
+    {
+        $this->actingAs($this->coe)->get(route('workshops.calendar'))->assertOk();
+    }
+
+    public function test_calendar_events_returns_sessions_in_fullcalendar_shape(): void
+    {
+        $workshop = Workshop::factory()->create(['name' => 'Calendar Test Workshop']);
+        $session = WorkshopSession::factory()->create([
+            'workshop_id' => $workshop->id,
+            'start_date' => '2027-03-10',
+            'end_date' => '2027-03-12',
+        ]);
+
+        $response = $this->actingAs($this->coe)->getJson(route('workshops.calendar.events', ['start' => '2027-03-01', 'end' => '2027-03-31']));
+
+        $response->assertOk();
+        $response->assertJsonFragment([
+            'id' => (string) $session->id,
+            'title' => 'Calendar Test Workshop — '.$session->name,
+            'start' => '2027-03-10',
+            'end' => '2027-03-13',
+        ]);
+    }
+
+    public function test_calendar_events_excludes_sessions_outside_the_requested_range(): void
+    {
+        $inRange = WorkshopSession::factory()->create(['start_date' => '2027-05-10', 'end_date' => '2027-05-12']);
+        $outOfRange = WorkshopSession::factory()->create(['start_date' => '2027-08-01', 'end_date' => '2027-08-03']);
+
+        $response = $this->actingAs($this->coe)->getJson(route('workshops.calendar.events', ['start' => '2027-05-01', 'end' => '2027-05-31']));
+
+        $response->assertOk();
+        $response->assertJsonFragment(['id' => (string) $inRange->id]);
+        $response->assertJsonMissing(['id' => (string) $outOfRange->id]);
+    }
 }

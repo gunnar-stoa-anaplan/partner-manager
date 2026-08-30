@@ -8,7 +8,10 @@ use App\Models\Workshop;
 use App\Models\WorkshopSession;
 use App\Models\WorkshopSessionParticipant;
 use App\Services\WorkshopLeaderboardService;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class WorkshopController extends Controller
@@ -54,6 +57,24 @@ class WorkshopController extends Controller
             'totalWorkshops', 'totalSessions', 'totalParticipants', 'totalCompleted',
             'completionRate', 'upcomingSessions', 'workshopSummaries',
         ));
+    }
+
+    public function calendar(): View
+    {
+        return view('workshops.calendar');
+    }
+
+    public function calendarEvents(Request $request): JsonResponse
+    {
+        $start = Carbon::parse($request->query('start', now()->startOfMonth()));
+        $end = Carbon::parse($request->query('end', now()->endOfMonth()));
+
+        $sessions = WorkshopSession::with('workshop:id,slug,name')
+            ->where('start_date', '<=', $end)
+            ->where('end_date', '>=', $start)
+            ->get();
+
+        return response()->json($sessions->map(fn (WorkshopSession $session) => $session->toCalendarArray())->values());
     }
 
     public function index(): View

@@ -10,6 +10,8 @@ use App\Http\Controllers\WorkshopUploadController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [WorkshopController::class, 'dashboard'])->name('dashboard');
+Route::get('/calendar', [WorkshopController::class, 'calendar'])->name('calendar');
+Route::get('/calendar/events', [WorkshopController::class, 'calendarEvents'])->name('calendar.events');
 Route::get('/', [WorkshopController::class, 'index'])->name('index');
 Route::get('/create', [WorkshopController::class, 'create'])->name('create');
 Route::post('/', [WorkshopController::class, 'store'])->name('store');

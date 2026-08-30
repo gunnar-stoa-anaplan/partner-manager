@@ -45,6 +45,12 @@ class WorkshopSession extends Model
      */
     const LOCK_GRACE_DAYS = 14;
 
+    /**
+     * A small deterministic palette so each workshop gets its own color on
+     * the calendar without maintaining a hardcoded map of workshop slugs.
+     */
+    private const CALENDAR_PALETTE = ['#0066cc', '#15803d', '#c2410c', '#7c3aed', '#be185d', '#0891b2'];
+
     public function workshop(): BelongsTo
     {
         return $this->belongsTo(Workshop::class);
@@ -109,5 +115,32 @@ class WorkshopSession extends Model
         }
 
         return $this->end_date->addDays(self::LOCK_GRACE_DAYS)->isPast();
+    }
+
+    public function toCalendarArray(): array
+    {
+        $workshop = $this->relationLoaded('workshop') ? $this->workshop : $this->workshop()->first();
+        $color = self::CALENDAR_PALETTE[$workshop->id % count(self::CALENDAR_PALETTE)];
+
+        return [
+            'id' => (string) $this->id,
+            'title' => $workshop->name.' — '.$this->name,
+            // FullCalendar's "end" is exclusive for all-day events, so a
+            // session running through end_date needs +1 day to render as
+            // covering that final day rather than stopping short of it.
+            'start' => $this->start_date->toDateString(),
+            'end' => $this->end_date->addDay()->toDateString(),
+            'allDay' => true,
+            'backgroundColor' => $color,
+            'borderColor' => $color,
+            'url' => route('workshops.sessions.show', [$workshop, $this]),
+            'extendedProps' => [
+                'workshop' => $workshop->name,
+                'status' => $this->status,
+                'status_label' => self::STATUSES[$this->status] ?? $this->status,
+                'notes' => $this->notes,
+                'participant_count' => $this->activeParticipants()->count(),
+            ],
+        ];
     }
 }
