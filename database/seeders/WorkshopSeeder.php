@@ -115,46 +115,39 @@ class WorkshopSeeder extends Seeder
      * A couple of demo content pages for the IFP workshop, so the content
      * delivery / progress-tracking feature has something real to show.
      */
+    /**
+     * The real IFP workshop curriculum, extracted from the
+     * ifp-delivery-workshop prototype's docs/ifp/*.html (17 pages, including
+     * the real lab-check prompts) - not placeholder text. See
+     * database/seeders/data/ifp_workshop_pages.php.
+     */
     private function seedContentPages(): void
     {
         $ifp = Workshop::where('slug', 'ifp')->first();
 
-        if (! $ifp || $ifp->pages()->exists()) {
+        if (! $ifp) {
             return;
         }
 
-        $ifp->pages()->create([
-            'slug' => 'overview',
-            'title' => 'Overview',
-            'body' => "Welcome to the IFP Delivery Partner Workshop. Over this session you'll configure a golden IFP model, walk through the standard dimensionality, and generate your own working model from the framework.",
-            'sort_order' => 0,
-            'checks_json' => [
-                ['id' => 'read-overview', 'label' => "I've read the overview and I'm ready to start"],
-            ],
-        ]);
+        // Remove the earlier placeholder pages (different slugs than the
+        // real content below) so they don't linger as orphaned duplicates.
+        $ifp->pages()->whereIn('slug', ['overview', 'model-generation', 'dimensionality'])->delete();
 
-        $ifp->pages()->create([
-            'slug' => 'model-generation',
-            'title' => 'Model Generation',
-            'body' => 'Use the configurator to generate your model. Walk through each of the 44 configuration questions, then trigger generation and confirm your four models were created successfully.',
-            'sort_order' => 1,
-            'checks_json' => [
-                ['id' => 'configurator-complete', 'label' => 'I completed the configurator'],
-                ['id' => 'models-generated', 'label' => 'My four models generated successfully'],
-            ],
-        ]);
+        $pages = require database_path('seeders/data/ifp_workshop_pages.php');
 
-        $ifp->pages()->create([
-            'slug' => 'dimensionality',
-            'title' => 'Dimensionality Deep Dive',
-            'body' => 'Review the Location, Customer, and Job hierarchies in your generated model. Confirm each hierarchy loaded with the expected number of levels.',
-            'sort_order' => 2,
-            'checks_json' => [
-                ['id' => 'hierarchies-verified', 'label' => "I've verified all three hierarchies"],
-            ],
-        ]);
+        foreach ($pages as $page) {
+            $ifp->pages()->updateOrCreate(
+                ['slug' => $page['slug']],
+                [
+                    'title' => $page['title'],
+                    'body' => $page['body'],
+                    'sort_order' => $page['sort_order'],
+                    'checks_json' => $page['checks'] ?: null,
+                ],
+            );
+        }
 
-        $this->command->info('  ✓ Seeded 3 content pages for the IFP workshop');
+        $this->command->info('  ✓ Seeded '.count($pages).' real content pages for the IFP workshop');
     }
 
     /**

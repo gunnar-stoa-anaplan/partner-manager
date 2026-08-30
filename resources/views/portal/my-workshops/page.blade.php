@@ -3,6 +3,23 @@
 @section('title', $page->title)
 
 @section('content')
+<style>
+    .workshop-content-body h2 { margin-top: 1.5rem; font-size: 1.3rem; }
+    .workshop-content-body h2:first-child { margin-top: 0; }
+    .workshop-content-body .callout-tip,
+    .workshop-content-body .callout-info { background: #eff6ff; border-left: 4px solid #0066cc; border-radius: 0 6px 6px 0; padding: 0.85rem 1.1rem; margin: 1rem 0; }
+    .workshop-content-body .callout-warning { background: #fff7ed; border-left: 4px solid #c2410c; border-radius: 0 6px 6px 0; padding: 0.85rem 1.1rem; margin: 1rem 0; }
+    .workshop-content-body .callout-label { display: block; font-weight: 600; margin-bottom: 0.35rem; }
+    .workshop-content-body .content-badge,
+    .workshop-content-body .badge-row span { display: inline-block; background: #e5e7eb; color: #374151; border-radius: 4px; padding: 0.15rem 0.6rem; font-size: 0.8rem; margin-right: 0.35rem; }
+    .workshop-content-body .table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .workshop-content-body table { width: 100%; border-collapse: collapse; }
+    .workshop-content-body th, .workshop-content-body td { border: 1px solid #e5e7eb; padding: 0.5rem; text-align: left; }
+    .workshop-content-body .lab-check { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+    .workshop-content-body .lab-check-button { display: none; }
+    .workshop-content-body .lab-check-results { display: none; }
+    .workshop-content-body code { background: #f3f4f6; padding: 0.1rem 0.35rem; border-radius: 3px; }
+</style>
 <div class="container py-4">
     <div class="row">
         <div class="col-md-3 mb-4">
@@ -29,7 +46,7 @@
             <div class="card portal-card mb-4">
                 <div class="card-body">
                     <h4>{{ $page->title }}</h4>
-                    <div class="mt-3">{!! nl2br(e($page->body)) !!}</div>
+                    <div class="mt-3 workshop-content-body">{!! $page->body !!}</div>
                 </div>
             </div>
 
