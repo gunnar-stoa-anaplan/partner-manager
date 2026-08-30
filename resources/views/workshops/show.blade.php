@@ -256,7 +256,7 @@
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between mb-2">
                             <h6 class="mb-0">Tenant pool</h6>
-                            <a href="{{ route('workshops.credentials.index') }}" class="btn btn-outline-primary btn-sm">Manage →</a>
+                            <a href="{{ route('workshops.credentials.index', $workshop) }}" class="btn btn-outline-primary btn-sm">Manage →</a>
                         </div>
                         <p class="text-muted fs-sm mb-0">Pre-provisioned Anaplan credentials handed to participants for the week of their session. Import in bulk via CSV, or add one at a time.</p>
                     </div>

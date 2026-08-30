@@ -30,8 +30,9 @@ class WorkshopCredentialTest extends TestCase
 
     public function test_credential_password_is_encrypted_at_rest(): void
     {
-        $this->actingAs($this->coe)->post(route('workshops.credentials.store'), [
-            'workshop_id' => Workshop::factory()->create()->id,
+        $workshop = Workshop::factory()->create();
+
+        $this->actingAs($this->coe)->post(route('workshops.credentials.store', $workshop), [
             'email' => 'sandbox@example.com',
             'username' => 'sandbox_user',
             'password' => 'plaintext-secret',
@@ -116,8 +117,7 @@ class WorkshopCredentialTest extends TestCase
         $csv = "username,email,password,notes\nsandbox01,sandbox01@demo.com,SecretPass1,First batch\n";
         $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('credentials.csv', $csv);
 
-        $this->actingAs($this->coe)->post(route('workshops.credentials.bulk-upload'), [
-            'workshop_id' => $workshop->id,
+        $this->actingAs($this->coe)->post(route('workshops.credentials.bulk-upload', $workshop), [
             'file' => $file,
         ]);
 

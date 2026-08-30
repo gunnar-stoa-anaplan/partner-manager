@@ -1,7 +1,7 @@
-@extends('layouts.vertical', ['pageTitle' => 'Tenant Credential Pool'])
+@extends('layouts.vertical', ['pageTitle' => $workshop->name.' - Tenant Pool'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Tenant Credential Pool', 'pageSubTitle1' => 'Workshops', 'pageSubTitle1Url' => route('workshops.dashboard'), 'pageSubText' => 'Pre-provisioned Anaplan sandbox credentials for hands-on labs'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Tenant Pool', 'pageSubTitle1' => $workshop->name, 'pageSubTitle1Url' => route('workshops.show', $workshop), 'pageSubText' => 'Pre-provisioned Anaplan sandbox credentials for hands-on labs'])
 @endsection
 
 @section('content')
@@ -18,24 +18,16 @@
             <div class="card-header d-flex align-items-center">
                 <div class="card-title flex-grow-1"><i class="fal fa-key me-2"></i> Credential Pool</div>
                 <a href="{{ route('workshops.credentials.refresh-queue') }}" class="btn btn-outline-warning btn-sm me-2">Refresh Queue</a>
-                <a href="{{ route('workshops.credentials.create') }}" class="btn btn-primary btn-sm">
+                <a href="{{ route('workshops.credentials.create', $workshop) }}" class="btn btn-primary btn-sm">
                     <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#plus"></use></svg>
                     Add Credential
                 </a>
             </div>
             <div class="card-body border-bottom">
-                <form action="{{ route('workshops.credentials.bulk-upload') }}" method="POST" enctype="multipart/form-data" class="row g-2 align-items-end">
+                <form action="{{ route('workshops.credentials.bulk-upload', $workshop) }}" method="POST" enctype="multipart/form-data" class="row g-2 align-items-end">
                     @csrf
-                    <div class="col-md-4">
-                        <label class="form-label fs-sm">Bulk import - Workshop</label>
-                        <select class="form-select form-select-sm" name="workshop_id" required>
-                            @foreach($workshops as $workshop)
-                                <option value="{{ $workshop->id }}">{{ $workshop->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-5">
-                        <label class="form-label fs-sm">CSV/XLSX (columns: username, email, password, notes)</label>
+                    <div class="col-md-9">
+                        <label class="form-label fs-sm">Bulk import - CSV/XLSX (columns: username, email, password, notes)</label>
                         <input type="file" class="form-control form-control-sm" name="file" accept=".csv,.xlsx,.xls" required>
                     </div>
                     <div class="col-md-3">
@@ -47,7 +39,6 @@
                 <table class="table table-bordered table-hover table-striped w-100">
                     <thead>
                         <tr>
-                            <th>Workshop</th>
                             <th>Username</th>
                             <th>Email</th>
                             <th>Status</th>
@@ -59,7 +50,6 @@
                         @forelse($credentials as $credential)
                             @php $active = $credential->assignments->first(); @endphp
                             <tr>
-                                <td>{{ $credential->workshop->name }}</td>
                                 <td>{{ $credential->username }}</td>
                                 <td>{{ $credential->email }}</td>
                                 <td>
@@ -96,7 +86,7 @@
                             </tr>
                             @if($credential->isAvailable())
                             <tr class="collapse" id="assign-{{ $credential->id }}">
-                                <td colspan="6" class="bg-light">
+                                <td colspan="5" class="bg-light">
                                     <form action="{{ route('workshops.credentials.assign', $credential) }}" method="POST" class="row g-2 align-items-end">
                                         @csrf
                                         <div class="col-md-4">
@@ -124,7 +114,7 @@
                             @endif
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">No credentials in the pool yet.</td>
+                                <td colspan="5" class="text-center text-muted py-4">No credentials in the pool yet.</td>
                             </tr>
                         @endforelse
                     </tbody>

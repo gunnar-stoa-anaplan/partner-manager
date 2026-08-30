@@ -1,7 +1,7 @@
 @extends('layouts.vertical', ['pageTitle' => 'Edit Credential'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Edit Credential', 'pageSubTitle1' => 'Tenant Pool', 'pageSubTitle1Url' => route('workshops.credentials.index'), 'pageSubText' => $credential->username])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Edit Credential', 'pageSubTitle1' => 'Tenant Pool', 'pageSubTitle1Url' => route('workshops.credentials.index', $credential->workshop), 'pageSubText' => $credential->username])
 @endsection
 
 @section('content')
@@ -44,7 +44,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <a href="{{ route('workshops.credentials.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    <a href="{{ route('workshops.credentials.index', $credential->workshop) }}" class="btn btn-outline-secondary">Cancel</a>
 
                     <hr class="my-4">
                 </form>

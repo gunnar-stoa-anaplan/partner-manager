@@ -18,7 +18,7 @@
                     <div class="fs-xs text-muted text-uppercase fw-medium">Tenant Pool</div>
                     <div class="fs-5">{{ $freeCredentials }} of {{ $totalCredentials }} free for this workshop</div>
                 </div>
-                <a href="{{ route('workshops.credentials.index') }}" class="btn btn-outline-secondary btn-sm">Manage pool →</a>
+                <a href="{{ route('workshops.credentials.index', $workshop) }}" class="btn btn-outline-secondary btn-sm">Manage pool →</a>
             </div>
         </div>
         @endif

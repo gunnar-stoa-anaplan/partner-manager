@@ -1,7 +1,7 @@
 @extends('layouts.vertical', ['pageTitle' => 'Credential Refresh Queue'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Refresh Queue', 'pageSubTitle1' => 'Tenant Pool', 'pageSubTitle1Url' => route('workshops.credentials.index'), 'pageSubText' => 'Credentials never refreshed, or refreshed more than 30 days ago'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Refresh Queue', 'pageSubTitle1' => 'Workshops', 'pageSubTitle1Url' => route('workshops.dashboard'), 'pageSubText' => 'Credentials never refreshed, or refreshed more than 30 days ago, across every workshop'])
 @endsection
 
 @section('content')
@@ -25,7 +25,7 @@
                     <tbody>
                         @forelse($credentials as $credential)
                             <tr>
-                                <td>{{ $credential->workshop->name }}</td>
+                                <td><a href="{{ route('workshops.credentials.index', $credential->workshop) }}">{{ $credential->workshop->name }}</a></td>
                                 <td>{{ $credential->username }}</td>
                                 <td>{{ $credential->last_refreshed_at?->format('M j, Y') ?? 'Never' }}</td>
                                 <td>

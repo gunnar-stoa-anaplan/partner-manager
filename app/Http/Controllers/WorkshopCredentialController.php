@@ -15,29 +15,24 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class WorkshopCredentialController extends Controller
 {
-    public function index(): View
+    public function index(Workshop $workshop): View
     {
-        $credentials = WorkshopCredential::with(['workshop:id,name', 'assignments' => fn ($query) => $query->whereNull('released_at')->with('contact:id,first_name,last_name,partner_id', 'contact.partner:id,name')])
-            ->orderBy('workshop_id')
+        $credentials = WorkshopCredential::where('workshop_id', $workshop->id)
+            ->with(['assignments' => fn ($query) => $query->whereNull('released_at')->with('contact:id,first_name,last_name,partner_id', 'contact.partner:id,name')])
             ->orderBy('username')
             ->get();
 
-        $workshops = Workshop::orderBy('name')->get();
-
-        return view('workshops.credentials.index', compact('credentials', 'workshops'));
+        return view('workshops.credentials.index', compact('workshop', 'credentials'));
     }
 
-    public function create(): View
+    public function create(Workshop $workshop): View
     {
-        $workshops = Workshop::orderBy('name')->get();
-
-        return view('workshops.credentials.create', compact('workshops'));
+        return view('workshops.credentials.create', compact('workshop'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, Workshop $workshop): RedirectResponse
     {
         $validated = $request->validate([
-            'workshop_id' => ['required', 'exists:workshops,id'],
             'email' => ['required', 'email', 'max:255'],
             'username' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'max:255'],
@@ -45,7 +40,7 @@ class WorkshopCredentialController extends Controller
         ]);
 
         WorkshopCredential::create([
-            'workshop_id' => $validated['workshop_id'],
+            'workshop_id' => $workshop->id,
             'email' => $validated['email'],
             'username' => $validated['username'],
             'password_enc' => $validated['password'],
@@ -53,7 +48,7 @@ class WorkshopCredentialController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        return redirect()->route('workshops.credentials.index')
+        return redirect()->route('workshops.credentials.index', $workshop)
             ->with('success', 'Credential added to the pool.');
     }
 
@@ -81,7 +76,7 @@ class WorkshopCredentialController extends Controller
             'last_refreshed_at' => $request->filled('password') ? Carbon::now() : $credential->last_refreshed_at,
         ]);
 
-        return redirect()->route('workshops.credentials.index')
+        return redirect()->route('workshops.credentials.index', $credential->workshop)
             ->with('success', 'Credential updated.');
     }
 
@@ -89,7 +84,7 @@ class WorkshopCredentialController extends Controller
     {
         $credential->update(['status' => 'retired']);
 
-        return redirect()->route('workshops.credentials.index')
+        return redirect()->route('workshops.credentials.index', $credential->workshop)
             ->with('success', 'Credential retired.');
     }
 
@@ -136,10 +131,9 @@ class WorkshopCredentialController extends Controller
         return back()->with('success', 'Hold extended to '.$assignment->hold_until->format('M j, Y').'.');
     }
 
-    public function bulkUpload(Request $request): RedirectResponse
+    public function bulkUpload(Request $request, Workshop $workshop): RedirectResponse
     {
         $validated = $request->validate([
-            'workshop_id' => ['required', 'exists:workshops,id'],
             'file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls', 'max:10240'],
         ]);
 
@@ -161,7 +155,7 @@ class WorkshopCredentialController extends Controller
             }
 
             WorkshopCredential::updateOrCreate(
-                ['workshop_id' => $validated['workshop_id'], 'username' => trim((string) $rowData['username'])],
+                ['workshop_id' => $workshop->id, 'username' => trim((string) $rowData['username'])],
                 [
                     'email' => trim((string) $rowData['email']),
                     'password_enc' => (string) $rowData['password'],
@@ -172,7 +166,7 @@ class WorkshopCredentialController extends Controller
             $created++;
         }
 
-        return redirect()->route('workshops.credentials.index')->with('success', "Imported {$created} credential(s).");
+        return redirect()->route('workshops.credentials.index', $workshop)->with('success', "Imported {$created} credential(s).");
     }
 
     public function refreshQueue(): View

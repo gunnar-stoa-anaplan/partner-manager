@@ -264,7 +264,7 @@ return [
                 'label' => 'Tenant Pool',
                 'icon' => 'key',
                 'items' => [
-                    ['label' => 'Credential Pool', 'route' => 'workshops.credentials.index', 'icon' => 'key'],
+                    ['label' => 'Refresh Queue', 'route' => 'workshops.credentials.refresh-queue', 'icon' => 'key'],
                 ],
             ],
         ],

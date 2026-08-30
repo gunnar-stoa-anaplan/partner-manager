@@ -205,10 +205,11 @@ class WorkshopControllerTest extends TestCase
 
     public function test_credentials_index_renders(): void
     {
-        \App\Models\WorkshopCredential::factory()->create();
+        $workshop = Workshop::factory()->create();
+        \App\Models\WorkshopCredential::factory()->create(['workshop_id' => $workshop->id]);
 
-        $this->actingAs($this->coe)->get(route('workshops.credentials.index'))->assertOk();
-        $this->actingAs($this->coe)->get(route('workshops.credentials.create'))->assertOk();
+        $this->actingAs($this->coe)->get(route('workshops.credentials.index', $workshop))->assertOk();
+        $this->actingAs($this->coe)->get(route('workshops.credentials.create', $workshop))->assertOk();
     }
 
     public function test_surveys_index_renders(): void
