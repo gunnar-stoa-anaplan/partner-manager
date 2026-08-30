@@ -22,6 +22,15 @@
 
                     @if(($question['type'] ?? 'single') === 'text')
                         <textarea name="responses[{{ $question['id'] }}]" class="form-control" rows="2"></textarea>
+                    @elseif(($question['type'] ?? 'single') === 'rating')
+                        <div class="d-flex gap-3">
+                            @foreach(range(1, 5) as $value)
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="responses[{{ $question['id'] }}]" value="{{ $value }}" id="{{ $question['id'] }}-{{ $value }}">
+                                    <label class="form-check-label" for="{{ $question['id'] }}-{{ $value }}">{{ $value }}</label>
+                                </div>
+                            @endforeach
+                        </div>
                     @elseif(($question['type'] ?? 'single') === 'multiple')
                         @foreach($question['options'] ?? [] as $option)
                             <div class="form-check">

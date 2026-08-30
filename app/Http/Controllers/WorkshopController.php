@@ -8,6 +8,7 @@ use App\Models\Workshop;
 use App\Models\WorkshopSession;
 use App\Models\WorkshopSessionParticipant;
 use App\Services\WorkshopLeaderboardService;
+use App\Services\WorkshopSummaryService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +17,10 @@ use Illuminate\View\View;
 
 class WorkshopController extends Controller
 {
-    public function __construct(private WorkshopLeaderboardService $leaderboardService) {}
+    public function __construct(
+        private WorkshopLeaderboardService $leaderboardService,
+        private WorkshopSummaryService $summaryService,
+    ) {}
 
     public function dashboard(): View
     {
@@ -107,7 +111,9 @@ class WorkshopController extends Controller
     {
         $workshop->load(['sessions' => fn ($query) => $query->withCount('activeParticipants')->orderBy('start_date')]);
 
-        return view('workshops.show', compact('workshop'));
+        $summary = $this->summaryService->build($workshop);
+
+        return view('workshops.show', compact('workshop', 'summary'));
     }
 
     public function edit(Workshop $workshop): View

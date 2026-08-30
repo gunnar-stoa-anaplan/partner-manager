@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class WorkshopSurveyTemplate extends Model
 {
@@ -57,6 +58,38 @@ class WorkshopSurveyTemplate extends Model
     public function isScored(): bool
     {
         return collect($this->questions_json)->contains(fn (array $q) => ! empty($q['correct']));
+    }
+
+    /**
+     * The first 1-5 rating-type question on this template, if any - used to
+     * compute the pre/post confidence average on the workshop summary.
+     */
+    public function ratingQuestion(): ?array
+    {
+        return collect($this->questions_json)->firstWhere('type', 'rating');
+    }
+
+    /**
+     * Average value of this template's rating question across a set of
+     * responses. Returns null when the template has no rating question or
+     * none of the responses answered it.
+     *
+     * @param  Collection<int, WorkshopSurveyResponse>  $responses
+     */
+    public function averageRating(Collection $responses): ?float
+    {
+        $question = $this->ratingQuestion();
+
+        if (! $question) {
+            return null;
+        }
+
+        $values = $responses
+            ->map(fn (WorkshopSurveyResponse $response) => $response->responses_json[$question['id']] ?? null)
+            ->filter(fn ($value) => is_numeric($value))
+            ->map(fn ($value) => (float) $value);
+
+        return $values->isNotEmpty() ? round($values->avg(), 2) : null;
     }
 
     /**

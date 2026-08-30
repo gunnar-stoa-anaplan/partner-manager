@@ -352,6 +352,18 @@ class WorkshopSeeder extends Seeder
         }
 
         WorkshopSurveyTemplate::updateOrCreate(
+            ['workshop_id' => $ifp->id, 'kind' => 'pre'],
+            [
+                'intro' => 'A couple of quick questions before you get started.',
+                'questions_json' => [
+                    ['id' => 'confidence', 'text' => 'How confident are you with the IFP Application Framework configuration workflow today?', 'type' => 'rating'],
+                    ['id' => 'goal', 'text' => 'What do you most want to get out of this workshop?', 'type' => 'text'],
+                ],
+                'updated_by' => $facilitator->id,
+            ],
+        );
+
+        WorkshopSurveyTemplate::updateOrCreate(
             ['workshop_id' => $ifp->id, 'kind' => 'post'],
             [
                 'intro' => 'A few quick questions to confirm what you took away from the workshop.',
@@ -359,6 +371,7 @@ class WorkshopSeeder extends Seeder
                     ['id' => 'q1', 'text' => 'Which module type holds transactional detail data in an IFP model?', 'type' => 'single', 'options' => ['Line Item', 'List', 'Module', 'Dashboard'], 'correct' => ['Module']],
                     ['id' => 'q2', 'text' => 'Which of these are part of the standard IFP dimensionality? (select all that apply)', 'type' => 'multiple', 'options' => ['Location', 'Customer', 'Job', 'Weather'], 'correct' => ['Location', 'Customer', 'Job']],
                     ['id' => 'q3', 'text' => 'What would you like covered in more depth next time?', 'type' => 'text'],
+                    ['id' => 'confidence', 'text' => 'Now that you\'ve completed the workshop, how confident are you with the IFP Application Framework configuration workflow?', 'type' => 'rating'],
                 ],
                 'passing_score' => 70,
                 'updated_by' => $facilitator->id,
@@ -416,6 +429,7 @@ class WorkshopSeeder extends Seeder
     {
         $ifp = Workshop::where('slug', 'ifp')->first();
         $session = $ifp?->sessions()->where('slug', '2026-06-9')->first();
+        $preSurvey = $ifp?->surveyTemplates()->where('kind', 'pre')->first();
         $knowledgeCheck = $ifp?->surveyTemplates()->where('kind', 'post')->first();
         $labPages = $ifp?->participantPages->filter(fn ($page) => ! empty($page->checks()))->values();
 
@@ -445,11 +459,24 @@ class WorkshopSeeder extends Seeder
                 }
             }
 
+            if ($preSurvey) {
+                WorkshopSurveyResponse::create([
+                    'workshop_survey_template_id' => $preSurvey->id,
+                    'workshop_session_id' => $session->id,
+                    'contact_id' => $participant->contact_id,
+                    'responses_json' => ['confidence' => 3, 'goal' => 'Get comfortable configuring the Application Framework end-to-end.'],
+                    'score' => 0,
+                    'passed' => false,
+                    'attempt_number' => 1,
+                    'submitted_at' => now()->subDays(3),
+                ]);
+            }
+
             WorkshopSurveyResponse::create([
                 'workshop_survey_template_id' => $knowledgeCheck->id,
                 'workshop_session_id' => $session->id,
                 'contact_id' => $participant->contact_id,
-                'responses_json' => ['q1' => 'Module', 'q2' => ['Location', 'Customer', 'Job'], 'q3' => 'More on extensions.'],
+                'responses_json' => ['q1' => 'Module', 'q2' => ['Location', 'Customer', 'Job'], 'q3' => 'More on extensions.', 'confidence' => 5],
                 'score' => 100,
                 'passed' => true,
                 'attempt_number' => 1,
@@ -486,11 +513,24 @@ class WorkshopSeeder extends Seeder
                 ]);
             }
 
+            if ($preSurvey) {
+                WorkshopSurveyResponse::create([
+                    'workshop_survey_template_id' => $preSurvey->id,
+                    'workshop_session_id' => $session->id,
+                    'contact_id' => $participant->contact_id,
+                    'responses_json' => ['confidence' => 2, 'goal' => 'Understand the extension exercises before the live session.'],
+                    'score' => 0,
+                    'passed' => false,
+                    'attempt_number' => 1,
+                    'submitted_at' => now()->subDays(3),
+                ]);
+            }
+
             WorkshopSurveyResponse::create([
                 'workshop_survey_template_id' => $knowledgeCheck->id,
                 'workshop_session_id' => $session->id,
                 'contact_id' => $participant->contact_id,
-                'responses_json' => ['q1' => 'List', 'q2' => ['Location'], 'q3' => 'Still working through it.'],
+                'responses_json' => ['q1' => 'List', 'q2' => ['Location'], 'q3' => 'Still working through it.', 'confidence' => 3],
                 'score' => 33,
                 'passed' => false,
                 'attempt_number' => 1,
