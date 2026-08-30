@@ -11,6 +11,7 @@ use App\Models\WorkshopCredential;
 use App\Models\WorkshopSessionParticipant;
 use App\Models\WorkshopSurveyTemplate;
 use Illuminate\Database\Seeder;
+use Laravel\Pennant\Feature;
 
 class WorkshopSeeder extends Seeder
 {
@@ -61,6 +62,13 @@ class WorkshopSeeder extends Seeder
      */
     public function run(): void
     {
+        // Don't rely solely on GunnarSeeder's generic app/Features/* scan to
+        // turn this on - that scan has silently missed newly-added feature
+        // classes before, leaving the whole Workshops nav hidden with no
+        // error. Seeding real workshop data with the feature still off is
+        // never correct, so activate it explicitly here too.
+        Feature::for(null)->activate('workshops');
+
         // Drop the earlier synthetic placeholder workshop, if present, now
         // that real workshops are seeded instead.
         Workshop::where('slug', 'anaplan-way-ifp')->delete();
