@@ -106,9 +106,9 @@ class WorkshopSeeder extends Seeder
 
         $this->command->info("  ✓ Seeded {$workshopCount} real workshops with {$sessionCount} sessions");
 
-        $this->seedDemoParticipation($facilitator);
-        $this->seedSessionParticipants($facilitator);
-        $this->seedSurveyTemplatesAndCredentials($facilitator);
+        [$practiceLead, $deliveryResource] = $this->seedDemoParticipation($facilitator);
+        $this->seedSessionParticipants($facilitator, $practiceLead, $deliveryResource);
+        $this->seedSurveyTemplatesAndCredentials($facilitator, $practiceLead, $deliveryResource);
         $this->seedContentPages();
     }
 
@@ -174,13 +174,26 @@ class WorkshopSeeder extends Seeder
      * roles (not the broader practice_lead/delivery_resource roles those
      * contacts might otherwise carry) so these two logins are scoped to just
      * Workshops, per the user's request to test this feature in isolation.
+     *
+     * @return array{0: ?Contact, 1: ?Contact} the practice lead and delivery
+     *                                         resource contacts used as the two focused demo logins, or [null,
+     *                                         null] if no partner has enough contacts to seed them - callers must
+     *                                         handle that case rather than assume a specific named partner exists.
      */
-    private function seedDemoParticipation(User $facilitator): void
+    private function seedDemoParticipation(User $facilitator): array
     {
-        $partner = Partner::where('name', 'Moore-Zemlak')->first() ?? Partner::first();
+        // Pick deterministically (lowest id) rather than by a specific
+        // partner name - which partner has enough contacts to qualify can
+        // shift as the partner/contact data sources change, and hardcoding
+        // a name here previously caused this to silently no-op on a fresh
+        // seed once that partner stopped existing.
+        $partner = Partner::withCount(['contacts as contacts_with_email_count' => fn ($query) => $query->whereNotNull('email')])
+            ->having('contacts_with_email_count', '>=', 2)
+            ->orderBy('id')
+            ->first();
 
         if (! $partner) {
-            return;
+            return [null, null];
         }
 
         $contacts = Contact::where('partner_id', $partner->id)
@@ -188,10 +201,6 @@ class WorkshopSeeder extends Seeder
             ->orderBy('id')
             ->limit(2)
             ->get();
-
-        if ($contacts->count() < 2) {
-            return;
-        }
 
         [$practiceLead, $deliveryResource] = $contacts;
 
@@ -218,7 +227,7 @@ class WorkshopSeeder extends Seeder
         $session = Workshop::where('slug', 'ifp')->first()?->sessions()->where('slug', '2026-06-9')->first();
 
         if (! $session) {
-            return;
+            return [$practiceLead, $deliveryResource];
         }
 
         // These two demo logins must only ever appear enrolled in this one
@@ -249,6 +258,8 @@ class WorkshopSeeder extends Seeder
         );
 
         $this->command->info("  ✓ Enrolled demo contacts from {$partner->name} into \"{$session->name}\", Ben Wilson focused on Workshops");
+
+        return [$practiceLead, $deliveryResource];
     }
 
     /**
@@ -259,9 +270,9 @@ class WorkshopSeeder extends Seeder
      * "Deloitte" note in the real data get contacts from a real Deloitte
      * partner record where one exists, for a bit of realism.
      */
-    private function seedSessionParticipants(User $facilitator): void
+    private function seedSessionParticipants(User $facilitator, ?Contact $practiceLead, ?Contact $deliveryResource): void
     {
-        $genericPartners = Partner::whereIn('name', ['Moore-Zemlak', 'PwC', 'Deloitte Consulting LLP - US (HQ)', 'KPMG US (HQ)', 'Tata Consultancy Services'])
+        $genericPartners = Partner::whereIn('name', ['PwC', 'Deloitte Consulting LLP - US (HQ)', 'KPMG US (HQ)', 'Tata Consultancy Services'])
             ->orWhere('name', 'like', 'Accenture%')
             ->get();
 
@@ -269,13 +280,11 @@ class WorkshopSeeder extends Seeder
             return;
         }
 
-        // Alex Morgan (workshop_practice_lead) and Jordan Lee
-        // (workshop_delivery_resource) are the focused demo logins - they
-        // must only be enrolled in the one session seedDemoParticipation()
-        // deliberately puts them in, not swept into every other generic
-        // session's participant pool alongside them.
-        $reservedContactIds = Contact::whereIn('email', ['alex.morgan@moorezemlak.com', 'jordan.lee@moorezemlak.com'])
-            ->pluck('id');
+        // The focused demo logins (whichever contacts seedDemoParticipation()
+        // picked as practice lead / delivery resource) must only be enrolled
+        // in the one session it deliberately puts them in, not swept into
+        // every other generic session's participant pool alongside them.
+        $reservedContactIds = collect([$practiceLead?->id, $deliveryResource?->id])->filter();
 
         $enrolled = 0;
 
@@ -323,7 +332,7 @@ class WorkshopSeeder extends Seeder
      * for the IFP workshop, plus a demo discussion thread, so the reporting
      * and Q&A features have real data to show.
      */
-    private function seedSurveyTemplatesAndCredentials(User $facilitator): void
+    private function seedSurveyTemplatesAndCredentials(User $facilitator, ?Contact $practiceLead, ?Contact $deliveryResource): void
     {
         $ifp = Workshop::where('slug', 'ifp')->first();
 
@@ -357,8 +366,6 @@ class WorkshopSeeder extends Seeder
 
         $session = $ifp->sessions()->where('slug', '2026-06-9')->first();
 
-        $deliveryResource = Contact::where('email', 'jordan.lee@moorezemlak.com')->first();
-
         if ($session && $deliveryResource && ! $credential->activeAssignment()) {
             $credential->assignments()->create([
                 'workshop_session_id' => $session->id,
@@ -369,10 +376,8 @@ class WorkshopSeeder extends Seeder
         }
 
         if ($session && $session->threads()->count() === 0) {
-            $lead = Contact::where('email', 'alex.morgan@moorezemlak.com')->first();
-
             $thread = $session->threads()->create([
-                'author_contact_id' => $lead?->id,
+                'author_contact_id' => $practiceLead?->id,
                 'kind' => 'question',
                 'body' => 'Is the golden model snapshot refreshed automatically before each session, or do we need to request it?',
                 'status' => 'answered',
