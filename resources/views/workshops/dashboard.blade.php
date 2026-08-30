@@ -41,6 +41,20 @@
 </div>
 
 <div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow-0 mb-g">
+            <div class="card-header d-flex align-items-center">
+                <div class="card-title flex-grow-1"><i class="fal fa-calendar me-2"></i> Calendar</div>
+                <a href="{{ route('workshops.calendar') }}" class="btn btn-outline-secondary btn-sm">Full screen ↗</a>
+            </div>
+            <div class="card-body">
+                <div id="workshops-dashboard-calendar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
     <div class="col-lg-8">
         <div class="card shadow-0 mb-g">
             <div class="card-header d-flex align-items-center">
@@ -101,4 +115,22 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var calendar = new FullCalendar.Calendar(document.getElementById('workshops-dashboard-calendar'), {
+        initialView: 'dayGridMonth',
+        headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,listMonth' },
+        height: 500,
+        events: {
+            url: '{{ route("workshops.calendar.events") }}',
+            method: 'GET',
+        },
+    });
+    calendar.render();
+});
+</script>
 @endsection

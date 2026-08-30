@@ -94,6 +94,37 @@ class WorkshopReportTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_surveys_report_shows_likert_comparison_and_knowledge_pass_rate(): void
+    {
+        $workshop = $this->session->workshop;
+        $pre = \App\Models\WorkshopSurveyTemplate::factory()->create([
+            'workshop_id' => $workshop->id,
+            'kind' => 'pre',
+            'questions_json' => [['id' => 'q1', 'text' => 'How comfortable are you?', 'type' => 'likert']],
+        ]);
+        $post = \App\Models\WorkshopSurveyTemplate::factory()->create([
+            'workshop_id' => $workshop->id,
+            'kind' => 'post',
+            'questions_json' => [['id' => 'q1', 'text' => 'How comfortable are you?', 'type' => 'likert']],
+        ]);
+        $knowledge = \App\Models\WorkshopSurveyTemplate::factory()->create(['workshop_id' => $workshop->id, 'kind' => 'knowledge']);
+
+        $contactA = Contact::factory()->create(['partner_id' => $this->partner->id]);
+        $contactB = Contact::factory()->create(['partner_id' => $this->partner->id]);
+        $pre->responses()->create(['workshop_session_id' => $this->session->id, 'contact_id' => $contactA->id, 'responses_json' => ['q1' => 2], 'score' => 0, 'passed' => false, 'attempt_number' => 1, 'submitted_at' => now()]);
+        $pre->responses()->create(['workshop_session_id' => $this->session->id, 'contact_id' => $contactB->id, 'responses_json' => ['q1' => 4], 'score' => 0, 'passed' => false, 'attempt_number' => 1, 'submitted_at' => now()]);
+        $post->responses()->create(['workshop_session_id' => $this->session->id, 'contact_id' => $contactA->id, 'responses_json' => ['q1' => 5], 'score' => 0, 'passed' => false, 'attempt_number' => 1, 'submitted_at' => now()]);
+        $knowledge->responses()->create(['workshop_session_id' => $this->session->id, 'contact_id' => $contactA->id, 'responses_json' => [], 'score' => 100, 'passed' => true, 'attempt_number' => 1, 'submitted_at' => now()]);
+        $knowledge->responses()->create(['workshop_session_id' => $this->session->id, 'contact_id' => $contactB->id, 'responses_json' => [], 'score' => 0, 'passed' => false, 'attempt_number' => 1, 'submitted_at' => now()]);
+
+        $response = $this->actingAs($this->coe)->get(route('workshops.reports.surveys', [$workshop, $this->session]));
+
+        $response->assertOk();
+        $response->assertSee('How comfortable are you?');
+        $response->assertSee('50%'); // knowledge check pass rate: 1 of 2
+        $response->assertSee('Very comfortable');
+    }
+
     public function test_partners_report_ranks_by_all_three_surveys_done(): void
     {
         $workshop = $this->session->workshop;

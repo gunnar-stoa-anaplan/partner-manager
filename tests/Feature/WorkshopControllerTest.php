@@ -194,6 +194,15 @@ class WorkshopControllerTest extends TestCase
         $this->actingAs($this->coe)->get(route('workshops.dashboard'))->assertOk();
     }
 
+    public function test_dashboard_embeds_the_calendar_widget(): void
+    {
+        $response = $this->actingAs($this->coe)->get(route('workshops.dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('workshops-dashboard-calendar', false);
+        $response->assertSee(route('workshops.calendar.events'), false);
+    }
+
     public function test_credentials_index_renders(): void
     {
         \App\Models\WorkshopCredential::factory()->create();

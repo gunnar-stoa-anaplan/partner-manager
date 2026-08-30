@@ -81,9 +81,9 @@
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between mb-2">
                             <h6 class="mb-0">Surveys &amp; Knowledge Check</h6>
-                            <a href="{{ route('workshops.surveys.index', $workshop) }}" class="btn btn-primary btn-sm">Open →</a>
+                            <a href="{{ route('workshops.reports.surveys', [$workshop, $session]) }}" class="btn btn-primary btn-sm">Open →</a>
                         </div>
-                        <p class="text-muted fs-sm mb-0">Pre-survey, post-survey, and knowledge check - the same templates used across every session in this workshop.</p>
+                        <p class="text-muted fs-sm mb-0">Response counts, pre→post comparison, and knowledge check results for this session.</p>
                     </div>
                 </div>
             </div>

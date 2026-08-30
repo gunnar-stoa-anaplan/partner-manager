@@ -6,6 +6,7 @@ use App\Models\Partner;
 use App\Models\Workshop;
 use App\Models\WorkshopSession;
 use App\Models\WorkshopSurveyResponse;
+use App\Models\WorkshopSurveyTemplate;
 use App\Services\WorkshopLeaderboardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
@@ -22,6 +23,105 @@ class WorkshopReportController extends Controller
         $rows = $this->partnerCompletionRows($session);
 
         return view('workshops.reports.partners', compact('workshop', 'session', 'rows'));
+    }
+
+    public function surveys(Workshop $workshop, WorkshopSession $session): View
+    {
+        $workshop->loadMissing('surveyTemplates');
+        $responses = WorkshopSurveyResponse::where('workshop_session_id', $session->id)->get();
+
+        $templates = collect(['pre', 'post', 'knowledge'])
+            ->mapWithKeys(function (string $kind) use ($workshop, $responses) {
+                $template = $workshop->surveyTemplates->firstWhere('kind', $kind);
+                $templateResponses = $template ? $responses->where('workshop_survey_template_id', $template->id) : collect();
+
+                return [$kind => [
+                    'template' => $template,
+                    'responses' => $templateResponses,
+                    'questionBreakdown' => $template ? $this->likertQuestionBreakdown($template, $templateResponses) : collect(),
+                ]];
+            });
+
+        $prePostComparison = $this->likertComparison(
+            $templates['pre']['template'],
+            $templates['post']['template'],
+            $templates['pre']['responses'],
+            $templates['post']['responses'],
+        );
+
+        $knowledgeResponses = $templates['knowledge']['responses'];
+        $knowledgePassRate = $knowledgeResponses->isNotEmpty() ? round(($knowledgeResponses->where('passed', true)->count() / $knowledgeResponses->count()) * 100, 1) : null;
+
+        return view('workshops.reports.surveys', [
+            'workshop' => $workshop,
+            'session' => $session,
+            'templates' => $templates,
+            'prePostComparison' => $prePostComparison,
+            'knowledgePassRate' => $knowledgePassRate,
+            'knowledgePassed' => $knowledgeResponses->where('passed', true)->count(),
+            'knowledgeFailed' => $knowledgeResponses->where('passed', false)->count(),
+        ]);
+    }
+
+    /**
+     * Response distribution for every likert question on a template: the
+     * average, and a count/percentage per point on the 5-point scale.
+     *
+     * @return Collection<int, array{question: array, average: ?float, distribution: array<int, array{label: string, count: int, percent: float}>}>
+     */
+    private function likertQuestionBreakdown(WorkshopSurveyTemplate $template, Collection $responses): Collection
+    {
+        return collect($template->questions_json)->where('type', 'likert')->map(function (array $question) use ($responses) {
+            $values = $responses->map(fn ($r) => $r->responses_json[$question['id']] ?? null)->filter(fn ($v) => is_numeric($v));
+
+            $distribution = collect(WorkshopSurveyTemplate::LIKERT_SCALE)->map(function (string $label, int $value) use ($values) {
+                $count = $values->filter(fn ($v) => (int) $v === $value)->count();
+
+                return [
+                    'label' => $label,
+                    'count' => $count,
+                    'percent' => $values->isNotEmpty() ? round(($count / $values->count()) * 100, 1) : 0.0,
+                ];
+            })->values()->all();
+
+            return [
+                'question' => $question,
+                'average' => $values->isNotEmpty() ? round($values->avg(), 2) : null,
+                'n' => $values->count(),
+                'distribution' => $distribution,
+            ];
+        })->values();
+    }
+
+    /**
+     * @return array<int, array{text: string, pre_avg: ?float, post_avg: ?float, delta: ?float, n_pre: int, n_post: int}>
+     */
+    private function likertComparison(?WorkshopSurveyTemplate $pre, ?WorkshopSurveyTemplate $post, Collection $preResponses, Collection $postResponses): array
+    {
+        if (! $pre || ! $post) {
+            return [];
+        }
+
+        $preQuestions = collect($pre->questions_json)->where('type', 'likert')->keyBy('id');
+        $postQuestionIds = collect($post->questions_json)->where('type', 'likert')->pluck('id');
+        $sharedIds = $preQuestions->keys()->intersect($postQuestionIds);
+
+        return $sharedIds->map(function ($questionId) use ($preQuestions, $preResponses, $postResponses) {
+            $preValues = $preResponses->map(fn ($r) => $r->responses_json[$questionId] ?? null)->filter(fn ($v) => is_numeric($v));
+            $postValues = $postResponses->map(fn ($r) => $r->responses_json[$questionId] ?? null)->filter(fn ($v) => is_numeric($v));
+
+            $preAvg = $preValues->isNotEmpty() ? round($preValues->avg(), 2) : null;
+            $postAvg = $postValues->isNotEmpty() ? round($postValues->avg(), 2) : null;
+
+            return [
+                'text' => $preQuestions[$questionId]['text'],
+                'pre_avg' => $preAvg,
+                'post_avg' => $postAvg,
+                'delta' => ($preAvg !== null && $postAvg !== null) ? round($postAvg - $preAvg, 2) : null,
+                'n_pre' => $preValues->count(),
+                'n_post' => $postValues->count(),
+            ];
+        })->values()->all();
     }
 
     private function hasAllThreeSurveys(Collection $responses, int $contactId): bool
@@ -121,26 +221,13 @@ class WorkshopReportController extends Controller
         $preTemplate = $workshop->surveyTemplates->firstWhere('kind', 'pre');
         $postTemplate = $workshop->surveyTemplates->firstWhere('kind', 'post');
 
-        if (! $preTemplate || ! $postTemplate) {
-            return null;
-        }
+        $preResponses = WorkshopSurveyResponse::where('workshop_session_id', $session->id)->where('workshop_survey_template_id', $preTemplate?->id)->get();
+        $postResponses = WorkshopSurveyResponse::where('workshop_session_id', $session->id)->where('workshop_survey_template_id', $postTemplate?->id)->get();
 
-        $preResponses = WorkshopSurveyResponse::where('workshop_session_id', $session->id)->where('workshop_survey_template_id', $preTemplate->id)->get();
-        $postResponses = WorkshopSurveyResponse::where('workshop_session_id', $session->id)->where('workshop_survey_template_id', $postTemplate->id)->get();
-
-        $questions = collect($preTemplate->questions_json)->where('type', 'likert')->keyBy('id');
-        $postQuestionIds = collect($postTemplate->questions_json)->where('type', 'likert')->pluck('id');
-
-        $best = $questions->keys()->intersect($postQuestionIds)->map(function ($questionId) use ($questions, $preResponses, $postResponses) {
-            $preValues = $preResponses->map(fn ($r) => $r->responses_json[$questionId] ?? null)->filter(fn ($v) => is_numeric($v));
-            $postValues = $postResponses->map(fn ($r) => $r->responses_json[$questionId] ?? null)->filter(fn ($v) => is_numeric($v));
-
-            if ($preValues->isEmpty() || $postValues->isEmpty()) {
-                return null;
-            }
-
-            return ['text' => $questions[$questionId]['text'], 'delta' => $postValues->avg() - $preValues->avg()];
-        })->filter()->sortByDesc('delta')->first();
+        $best = collect($this->likertComparison($preTemplate, $postTemplate, $preResponses, $postResponses))
+            ->filter(fn (array $row) => $row['delta'] !== null)
+            ->sortByDesc('delta')
+            ->first();
 
         return $best['text'] ?? null;
     }
