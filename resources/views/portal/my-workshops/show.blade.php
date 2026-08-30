@@ -67,6 +67,9 @@
             <a href="{{ route('portal.my-workshops.feed', $session) }}" class="btn btn-sm btn-outline-secondary">Activity Feed</a>
         </div>
         <div class="card-body">
+            @if($session->isLocked())
+                <div class="alert alert-secondary py-2 small mb-4"><i class="fal fa-lock me-1"></i> This session's discussion is now read-only.</div>
+            @else
             <form action="{{ route('portal.my-workshops.threads.store', $session) }}" method="POST" enctype="multipart/form-data" class="mb-4">
                 @csrf
                 <textarea name="body" class="form-control mb-2" rows="2" placeholder="Ask a question..." required></textarea>
@@ -78,6 +81,7 @@
                     <button type="submit" class="btn btn-sm btn-primary">Post</button>
                 </div>
             </form>
+            @endif
 
             @forelse($session->threads as $thread)
                 <div class="mb-3 pb-3 border-bottom">
@@ -89,12 +93,16 @@
                         <div class="small"><a href="{{ route('portal.my-workshops.uploads.download', [$session, $upload]) }}">📎 {{ $upload->filename }}</a></div>
                     @endforeach
 
+                    @if($session->isLocked())
+                        <span class="text-muted">👍 {{ $thread->reactions->where('kind', 'me_too')->count() }}</span>
+                    @else
                     <form action="{{ route('portal.my-workshops.threads.react', [$session, $thread]) }}" method="POST" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-link p-0 {{ $thread->hasReactionFrom(null, auth('portal')->id()) ? 'text-primary' : 'text-muted' }}">
                             👍 {{ $thread->reactions->where('kind', 'me_too')->count() }}
                         </button>
                     </form>
+                    @endif
 
                     @foreach($thread->replies as $reply)
                         <div class="ms-3 mt-2 ps-2 border-start">
@@ -106,6 +114,7 @@
                         </div>
                     @endforeach
 
+                    @unless($session->isLocked())
                     <form action="{{ route('portal.my-workshops.threads.reply', [$session, $thread]) }}" method="POST" enctype="multipart/form-data" class="mt-2">
                         @csrf
                         <div class="d-flex gap-1 mb-1">
@@ -114,6 +123,7 @@
                         </div>
                         <input type="file" name="attachment" class="form-control form-control-sm">
                     </form>
+                    @endunless
                 </div>
             @empty
                 <p class="text-muted mb-0">No questions posted yet - be the first to ask.</p>

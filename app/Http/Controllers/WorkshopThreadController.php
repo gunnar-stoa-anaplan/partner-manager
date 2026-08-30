@@ -16,6 +16,8 @@ class WorkshopThreadController extends Controller
 {
     public function store(Request $request, Workshop $workshop, WorkshopSession $session): RedirectResponse
     {
+        abort_if($session->isLocked(), 403);
+
         $validated = $request->validate(['body' => ['required', 'string', 'max:5000']]);
 
         $thread = $session->threads()->create([
@@ -32,6 +34,8 @@ class WorkshopThreadController extends Controller
 
     public function reply(Request $request, Workshop $workshop, WorkshopSession $session, WorkshopThread $thread): RedirectResponse
     {
+        abort_if($session->isLocked(), 403);
+
         $validated = $request->validate(['body' => ['required', 'string', 'max:5000']]);
 
         $reply = $thread->replies()->create([
@@ -53,6 +57,8 @@ class WorkshopThreadController extends Controller
 
     public function markAnswered(Request $request, Workshop $workshop, WorkshopSession $session, WorkshopThread $thread): RedirectResponse
     {
+        abort_if($session->isLocked(), 403);
+
         $thread->update([
             'status' => 'answered',
             'answered_at' => Carbon::now(),
@@ -75,6 +81,8 @@ class WorkshopThreadController extends Controller
 
     public function react(Request $request, Workshop $workshop, WorkshopSession $session, WorkshopThread $thread): RedirectResponse
     {
+        abort_if($session->isLocked(), 403);
+
         $userId = $request->user()->id;
         $existing = $thread->reactions()->where('author_user_id', $userId)->where('kind', 'me_too')->first();
 

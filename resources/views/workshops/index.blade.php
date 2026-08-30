@@ -46,6 +46,12 @@
                                     <td>
                                         <a href="{{ route('workshops.show', $workshop) }}" class="btn btn-sm btn-outline-secondary">View</a>
                                         <a href="{{ route('workshops.edit', $workshop) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                        @if($workshop->status !== 'archived')
+                                            <form action="{{ route('workshops.archive', $workshop) }}" method="POST" class="d-inline" onsubmit="return confirm('Archive this workshop?')">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-warning">Archive</button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

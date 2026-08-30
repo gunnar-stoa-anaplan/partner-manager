@@ -84,4 +84,14 @@ class WorkshopSessionController extends Controller
         return redirect()->route('workshops.show', $workshop)
             ->with('success', 'Session deleted successfully.');
     }
+
+    public function archive(Workshop $workshop, WorkshopSession $session): RedirectResponse
+    {
+        if ($session->status !== 'archived') {
+            $session->update(['status' => 'archived', 'archived_at' => now()]);
+        }
+
+        return redirect()->route('workshops.show', $workshop)
+            ->with('success', 'Session archived. Discussion is now read-only.');
+    }
 }

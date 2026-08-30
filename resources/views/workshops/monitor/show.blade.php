@@ -5,6 +5,9 @@
 @endsection
 
 @section('content')
+@if($session->isLocked())
+    <div class="alert alert-secondary py-2 fs-sm"><i class="fal fa-lock me-1"></i> This session is read-only - it's archived, or more than {{ \App\Models\WorkshopSession::LOCK_GRACE_DAYS }} days past its end date.</div>
+@endif
 <div class="row mb-g">
     <div class="col-md-3">
         <div class="card shadow-0 text-center"><div class="card-body"><div class="fs-32 fw-bold">{{ $totalParticipants }}</div><div class="text-muted">Participants</div></div></div>
@@ -29,10 +32,12 @@
                     <div class="mb-3 pb-3 border-bottom">
                         <div class="fw-medium">{{ $thread->authorName() }}</div>
                         <div>{{ $thread->body }}</div>
+                        @unless($session->isLocked())
                         <form action="{{ route('workshops.monitor.threads.answer', [$session, $thread]) }}" method="POST" class="mt-1">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-outline-success">Mark Answered</button>
                         </form>
+                        @endunless
                     </div>
                 @empty
                     <p class="text-muted mb-0">No open questions right now.</p>

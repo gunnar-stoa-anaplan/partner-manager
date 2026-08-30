@@ -5,9 +5,11 @@ namespace Tests\Feature;
 use App\Ai\Agents\WorkshopReplySuggester;
 use App\Models\Contact;
 use App\Models\User;
+use App\Models\Workshop;
 use App\Models\WorkshopPage;
 use App\Models\WorkshopPresence;
 use App\Models\WorkshopSession;
+use App\Models\WorkshopSessionMonitor;
 use App\Models\WorkshopThread;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -177,6 +179,45 @@ class WorkshopDiscussionEnhancementsTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonStructure(['suggestion']);
+    }
+
+    public function test_a_session_monitor_can_view_a_facilitator_only_page_for_their_session(): void
+    {
+        $monitorUser = User::factory()->pam()->create(); // no workshops permission at all
+        $workshop = Workshop::factory()->create();
+        $session = WorkshopSession::factory()->create(['workshop_id' => $workshop->id]);
+        WorkshopSessionMonitor::factory()->create(['workshop_session_id' => $session->id, 'user_id' => $monitorUser->id]);
+        $page = WorkshopPage::factory()->create(['workshop_id' => $workshop->id, 'audience' => 'facilitator']);
+
+        $response = $this->actingAs($monitorUser)->get(route('workshops.monitor.pages.show', [$session, $page]));
+
+        $response->assertOk();
+        $response->assertSee($page->title);
+    }
+
+    public function test_a_participant_facing_page_is_not_reachable_through_the_monitor_facilitator_route(): void
+    {
+        $monitorUser = User::factory()->pam()->create();
+        $workshop = Workshop::factory()->create();
+        $session = WorkshopSession::factory()->create(['workshop_id' => $workshop->id]);
+        WorkshopSessionMonitor::factory()->create(['workshop_session_id' => $session->id, 'user_id' => $monitorUser->id]);
+        $page = WorkshopPage::factory()->create(['workshop_id' => $workshop->id, 'audience' => 'participant']);
+
+        $response = $this->actingAs($monitorUser)->get(route('workshops.monitor.pages.show', [$session, $page]));
+
+        $response->assertNotFound();
+    }
+
+    public function test_a_facilitator_page_from_a_different_workshop_is_not_reachable_via_the_monitor_route(): void
+    {
+        $monitorUser = User::factory()->pam()->create();
+        $session = WorkshopSession::factory()->create();
+        WorkshopSessionMonitor::factory()->create(['workshop_session_id' => $session->id, 'user_id' => $monitorUser->id]);
+        $otherWorkshopPage = WorkshopPage::factory()->create(['audience' => 'facilitator']);
+
+        $response = $this->actingAs($monitorUser)->get(route('workshops.monitor.pages.show', [$session, $otherWorkshopPage]));
+
+        $response->assertNotFound();
     }
 
     public function test_rollup_report_shows_discussion_metrics(): void

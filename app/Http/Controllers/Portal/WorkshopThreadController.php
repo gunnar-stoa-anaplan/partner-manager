@@ -16,6 +16,7 @@ class WorkshopThreadController extends Controller
     {
         $contact = Auth::guard('portal')->user();
         $this->authorizeParticipant($session, $contact->id);
+        abort_if($session->isLocked(), 403);
 
         $validated = $request->validate([
             'body' => ['required', 'string', 'max:5000'],
@@ -43,6 +44,7 @@ class WorkshopThreadController extends Controller
         $this->authorizeParticipant($session, $contact->id);
 
         abort_unless($thread->workshop_session_id === $session->id, 404);
+        abort_if($session->isLocked(), 403);
 
         $validated = $request->validate(['body' => ['required', 'string', 'max:5000']]);
 
@@ -61,6 +63,7 @@ class WorkshopThreadController extends Controller
         $contact = Auth::guard('portal')->user();
         $this->authorizeParticipant($session, $contact->id);
         abort_unless($thread->workshop_session_id === $session->id, 404);
+        abort_if($session->isLocked(), 403);
 
         $existing = $thread->reactions()->where('author_contact_id', $contact->id)->where('kind', 'me_too')->first();
 

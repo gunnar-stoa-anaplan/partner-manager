@@ -19,6 +19,7 @@ class WorkshopSession extends Model
         'start_date',
         'end_date',
         'status',
+        'archived_at',
         'notes',
         'created_by',
     ];
@@ -26,6 +27,7 @@ class WorkshopSession extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'archived_at' => 'datetime',
     ];
 
     const STATUSES = [
@@ -33,7 +35,15 @@ class WorkshopSession extends Model
         'in_progress' => 'In Progress',
         'completed' => 'Completed',
         'cancelled' => 'Cancelled',
+        'archived' => 'Archived',
     ];
+
+    /**
+     * Sessions stay open for discussion this many days past their end date
+     * before automatically locking, so recent cohorts can keep posting
+     * follow-up questions without a facilitator having to take any action.
+     */
+    const LOCK_GRACE_DAYS = 14;
 
     public function workshop(): BelongsTo
     {
@@ -80,5 +90,24 @@ class WorkshopSession extends Model
     public function activeParticipants(): HasMany
     {
         return $this->participants()->where('status', '!=', 'removed');
+    }
+
+    /**
+     * A session is locked (read-only) once it's been archived, or once its
+     * end date plus the grace window has passed - lets recent cohorts keep
+     * posting follow-up questions without a facilitator taking any action,
+     * while stale cohorts retire automatically with no cron required.
+     */
+    public function isLocked(): bool
+    {
+        if ($this->status === 'archived') {
+            return true;
+        }
+
+        if (! $this->end_date) {
+            return false;
+        }
+
+        return $this->end_date->addDays(self::LOCK_GRACE_DAYS)->isPast();
     }
 }

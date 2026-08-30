@@ -83,6 +83,12 @@
                                     <td>{{ $session->active_participants_count }}</td>
                                     <td>
                                         <a href="{{ route('workshops.sessions.show', [$workshop, $session]) }}" class="btn btn-sm btn-outline-secondary">Manage</a>
+                                        @if($session->status !== 'archived')
+                                            <form action="{{ route('workshops.sessions.archive', [$workshop, $session]) }}" method="POST" class="d-inline" onsubmit="return confirm('Archive this session? Discussion will become read-only.')">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-warning">Archive</button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

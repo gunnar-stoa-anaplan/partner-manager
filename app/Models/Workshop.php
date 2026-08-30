@@ -17,8 +17,16 @@ class Workshop extends Model
         'name',
         'short_description',
         'status',
+        'archived_at',
         'created_by',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'archived_at' => 'datetime',
+        ];
+    }
 
     const STATUSES = [
         'draft' => 'Draft',

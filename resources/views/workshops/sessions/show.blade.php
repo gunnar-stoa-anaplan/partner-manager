@@ -119,6 +119,9 @@
                 <a href="{{ route('workshops.monitor.show', $session) }}" class="btn btn-sm btn-outline-secondary">Monitor View</a>
             </div>
             <div class="card-body">
+                @if($session->isLocked())
+                    <div class="alert alert-secondary py-2 fs-sm mb-0"><i class="fal fa-lock me-1"></i> This session is read-only. Archived sessions, and sessions more than {{ \App\Models\WorkshopSession::LOCK_GRACE_DAYS }} days past their end date, no longer accept new discussion.</div>
+                @else
                 <form action="{{ route('workshops.sessions.threads.store', [$workshop, $session]) }}" method="POST" enctype="multipart/form-data" class="mb-3">
                     @csrf
                     <textarea name="body" class="form-control form-control-sm mb-1" rows="2" placeholder="Post an announcement or comment..." required></textarea>
@@ -127,6 +130,7 @@
                         <button type="submit" class="btn btn-sm btn-primary">Post</button>
                     </div>
                 </form>
+                @endif
             </div>
             <div class="card-body border-top" style="max-height: 500px; overflow-y: auto;">
                 @forelse($session->threads as $thread)
@@ -140,12 +144,16 @@
                         @endforeach
 
                         <div class="mt-1">
+                            @if($session->isLocked())
+                                <span class="text-muted">👍 {{ $thread->reactions->where('kind', 'me_too')->count() }}</span>
+                            @else
                             <form action="{{ route('workshops.sessions.threads.react', [$workshop, $session, $thread]) }}" method="POST" class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-sm btn-link p-0 {{ $thread->hasReactionFrom(auth()->id(), null) ? 'text-primary' : 'text-muted' }}">
                                     👍 {{ $thread->reactions->where('kind', 'me_too')->count() }}
                                 </button>
                             </form>
+                            @endif
                         </div>
 
                         @foreach($thread->replies as $reply)
@@ -158,6 +166,7 @@
                             </div>
                         @endforeach
 
+                        @unless($session->isLocked())
                         <form action="{{ route('workshops.sessions.threads.reply', [$workshop, $session, $thread]) }}" method="POST" enctype="multipart/form-data" class="mt-2">
                             @csrf
                             <div class="d-flex gap-1 mb-1">
@@ -169,8 +178,9 @@
                                 <button type="button" class="btn btn-sm btn-outline-info suggest-reply-btn" data-url="{{ route('workshops.sessions.threads.suggest-reply', [$workshop, $session, $thread]) }}">✨ Suggest Reply</button>
                             </div>
                         </form>
+                        @endunless
                         <div class="mt-1">
-                            @if($thread->status === 'open')
+                            @if($thread->status === 'open' && ! $session->isLocked())
                             <form action="{{ route('workshops.sessions.threads.answer', [$workshop, $session, $thread]) }}" method="POST" class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-sm btn-link text-success p-0 me-2">Mark Answered</button>

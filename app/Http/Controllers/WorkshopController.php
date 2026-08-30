@@ -189,4 +189,14 @@ class WorkshopController extends Controller
         return redirect()->route('workshops.index')
             ->with('success', 'Workshop deleted successfully.');
     }
+
+    public function archive(Workshop $workshop): RedirectResponse
+    {
+        if ($workshop->status !== 'archived') {
+            $workshop->update(['status' => 'archived', 'archived_at' => now()]);
+        }
+
+        return redirect()->route('workshops.index')
+            ->with('success', 'Workshop archived.');
+    }
 }

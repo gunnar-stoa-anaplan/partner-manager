@@ -56,6 +56,7 @@ class WorkshopMonitorDashboardController extends Controller
     {
         $this->authorizeMonitor($request->user(), $session);
         abort_unless($thread->workshop_session_id === $session->id, 404);
+        abort_if($session->isLocked(), 403);
 
         $thread->update([
             'status' => 'answered',
