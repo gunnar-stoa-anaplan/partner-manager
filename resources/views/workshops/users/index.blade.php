@@ -1,7 +1,7 @@
-@extends('layouts.vertical', ['pageTitle' => 'Workshop Users'])
+@extends('layouts.vertical', ['pageTitle' => 'Participants'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Workshop Users', 'pageSubTitle1' => 'Workshops', 'pageSubTitle1Url' => route('workshops.index'), 'pageSubText' => 'Portal access for everyone who has been enrolled as a workshop participant'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Participants', 'pageSubTitle1' => 'Workshops', 'pageSubTitle1Url' => route('workshops.index'), 'pageSubText' => 'Portal access for everyone who has been enrolled as a workshop participant'])
 @endsection
 
 @section('content')
@@ -48,7 +48,7 @@
         </div>
 
         <div class="card shadow-0 mb-g">
-            <div class="card-header"><div class="card-title">Users ({{ $contacts->count() }})</div></div>
+            <div class="card-header"><div class="card-title">Participants ({{ $contacts->count() }})</div></div>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover table-striped w-100">
                     <thead>

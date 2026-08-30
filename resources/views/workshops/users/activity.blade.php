@@ -1,7 +1,7 @@
 @extends('layouts.vertical', ['pageTitle' => $contact->full_name.' - Activity'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $contact->full_name.' — Activity', 'pageSubTitle1' => 'Workshop Users', 'pageSubTitle1Url' => route('workshops.users.index'), 'pageSubText' => $contact->email])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> $contact->full_name.' — Activity', 'pageSubTitle1' => 'Participants', 'pageSubTitle1Url' => route('workshops.users.index'), 'pageSubText' => $contact->email])
 @endsection
 
 @section('content')
