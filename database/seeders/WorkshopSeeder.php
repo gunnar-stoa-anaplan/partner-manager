@@ -32,11 +32,14 @@ class WorkshopSeeder extends Seeder
             'short_description' => 'IFP 2.1 Application Framework · Model Generation · Extensions',
             'status' => 'active',
             'sessions' => [
-                ['slug' => '2026-06-9', 'name' => 'June 9, 2026 Session', 'start_date' => '2026-06-09', 'end_date' => '2026-06-12', 'status' => 'upcoming', 'notes' => null],
-                ['slug' => '2026-06-15', 'name' => 'June 15, 2026 Session', 'start_date' => '2026-06-15', 'end_date' => '2026-06-19', 'status' => 'upcoming', 'notes' => null],
-                ['slug' => 'deloitte-2026-06-15', 'name' => 'June 15, 2026 Session', 'start_date' => '2026-06-15', 'end_date' => '2026-06-19', 'status' => 'upcoming', 'notes' => 'Dedicated session for Deloitte EMEA'],
-                ['slug' => '2026-07-13', 'name' => 'June 23, 2026 Session', 'start_date' => '2026-07-13', 'end_date' => '2026-07-17', 'status' => 'upcoming', 'notes' => 'Deloitte US'],
-                ['slug' => '2026-07-07', 'name' => 'July 7, 2026 Session', 'start_date' => '2026-07-07', 'end_date' => '2026-07-10', 'status' => 'upcoming', 'notes' => 'Session coordinated by Fuvas'],
+                ['slug' => '2026-06-9', 'name' => 'June 9, 2026 Session', 'start_date' => '2026-06-09', 'end_date' => '2026-06-12', 'status' => 'completed', 'notes' => null],
+                ['slug' => '2026-06-15', 'name' => 'June 15, 2026 Session', 'start_date' => '2026-06-15', 'end_date' => '2026-06-19', 'status' => 'completed', 'notes' => null],
+                ['slug' => 'deloitte-2026-06-15', 'name' => 'June 15, 2026 Session', 'start_date' => '2026-06-15', 'end_date' => '2026-06-19', 'status' => 'completed', 'notes' => 'Dedicated session for Deloitte EMEA'],
+                ['slug' => '2026-07-13', 'name' => 'June 23, 2026 Session', 'start_date' => '2026-07-13', 'end_date' => '2026-07-17', 'status' => 'completed', 'notes' => 'Deloitte US'],
+                ['slug' => '2026-07-07', 'name' => 'July 7, 2026 Session', 'start_date' => '2026-07-07', 'end_date' => '2026-07-10', 'status' => 'completed', 'notes' => 'Session coordinated by Fuvas'],
+                ['slug' => '2026-08-25', 'name' => 'August 25, 2026 Session', 'start_date' => '2026-08-25', 'end_date' => '2026-08-28', 'status' => 'completed', 'notes' => null],
+                ['slug' => '2026-09-08', 'name' => 'September 8, 2026 Session', 'start_date' => '2026-09-08', 'end_date' => '2026-09-11', 'status' => 'upcoming', 'notes' => null],
+                ['slug' => '2026-09-22', 'name' => 'September 22, 2026 Session', 'start_date' => '2026-09-22', 'end_date' => '2026-09-25', 'status' => 'upcoming', 'notes' => 'Session coordinated by Twelve CG'],
             ],
         ],
         [
@@ -45,7 +48,9 @@ class WorkshopSeeder extends Seeder
             'short_description' => 'Hands-on, self-paced workshop for RPM delivery partners.',
             'status' => 'active',
             'sessions' => [
-                ['slug' => '2026-06-22', 'name' => 'June 22, 2026 Session', 'start_date' => '2026-06-22', 'end_date' => '2026-06-26', 'status' => 'upcoming', 'notes' => null],
+                ['slug' => '2026-06-22', 'name' => 'June 22, 2026 Session', 'start_date' => '2026-06-22', 'end_date' => '2026-06-26', 'status' => 'completed', 'notes' => null],
+                ['slug' => '2026-07-20', 'name' => 'July 20, 2026 Session', 'start_date' => '2026-07-20', 'end_date' => '2026-07-24', 'status' => 'completed', 'notes' => 'Session coordinated by Genpact'],
+                ['slug' => '2026-09-14', 'name' => 'September 14, 2026 Session', 'start_date' => '2026-09-14', 'end_date' => '2026-09-18', 'status' => 'upcoming', 'notes' => null],
             ],
         ],
         [
@@ -54,7 +59,9 @@ class WorkshopSeeder extends Seeder
             'short_description' => 'Hands-on, self-paced workshop for OWP delivery partners.',
             'status' => 'active',
             'sessions' => [
-                ['slug' => '2026-06-30', 'name' => 'June 30, 2026 Session in London', 'start_date' => '2026-06-30', 'end_date' => '2026-07-03', 'status' => 'upcoming', 'notes' => 'Anju led-session for key partners in London'],
+                ['slug' => '2026-06-30', 'name' => 'June 30, 2026 Session in London', 'start_date' => '2026-06-30', 'end_date' => '2026-07-03', 'status' => 'completed', 'notes' => 'Anju led-session for key partners in London'],
+                ['slug' => '2026-08-03', 'name' => 'August 3, 2026 Session', 'start_date' => '2026-08-03', 'end_date' => '2026-08-07', 'status' => 'completed', 'notes' => null],
+                ['slug' => '2026-09-21', 'name' => 'September 21, 2026 Session', 'start_date' => '2026-09-21', 'end_date' => '2026-09-25', 'status' => 'upcoming', 'notes' => null],
             ],
         ],
     ];
@@ -121,6 +128,7 @@ class WorkshopSeeder extends Seeder
         $this->seedSurveyTemplatesAndCredentials($facilitator, $practiceLead, $deliveryResource);
         $this->seedContentPages();
         $this->seedLeaderboardActivity();
+        $this->seedRpmAndOwpSurveyActivity($facilitator);
     }
 
     /**
@@ -586,5 +594,150 @@ class WorkshopSeeder extends Seeder
     private function likertResponses(WorkshopSurveyTemplate $template, int $value): array
     {
         return $template->likertQuestionIds()->mapWithKeys(fn (string $id) => [$id => $value])->all();
+    }
+
+    /**
+     * RPM and OWP don't have real ported curriculum (no lab pages/checks to
+     * draw on), but they do have real sessions and generically-enrolled
+     * demo participants from seedSessionParticipants() - give each a real
+     * pre/post/knowledge survey template plus response data, so their
+     * leaderboards, reports, and analytics have real numbers too instead of
+     * only IFP looking populated.
+     */
+    private function seedRpmAndOwpSurveyActivity(User $facilitator): void
+    {
+        $topicsByWorkshop = [
+            'rpm' => [
+                ['id' => 'tq', 'text' => 'Trade & Quota Configuration'],
+                ['id' => 'segmentation', 'text' => 'Segmentation Modeling'],
+                ['id' => 'capacity', 'text' => 'Capacity Planning'],
+                ['id' => 'forecasting', 'text' => 'AI-Driven Sales Forecasting'],
+            ],
+            'owp' => [
+                ['id' => 'app_config', 'text' => 'Application Configuration'],
+                ['id' => 'model_gen', 'text' => 'Model Generation & Validation'],
+                ['id' => 'reporting', 'text' => 'Reporting & Dashboards'],
+                ['id' => 'integration', 'text' => 'Integration & Data Loading'],
+            ],
+        ];
+
+        $knowledgeQuestionsByWorkshop = [
+            'rpm' => [
+                ['id' => 'kc1', 'text' => 'What is the primary purpose of the Segmentation module in RPM?', 'type' => 'single_select', 'options' => ['To set territory quotas', 'To group accounts by shared characteristics for targeted planning', 'To generate the model from scratch', 'To manage user access'], 'correct' => 'To group accounts by shared characteristics for targeted planning', 'required' => true],
+                ['id' => 'kc2', 'text' => 'Which inputs typically drive the AI-Driven Sales Forecasting engine?', 'type' => 'multi_select', 'options' => ['Historical pipeline data', 'Seasonality patterns', 'Rep tenure', 'Weather data'], 'correct' => ['Historical pipeline data', 'Seasonality patterns'], 'required' => true],
+                ['id' => 'kc3', 'text' => 'Capacity Planning in RPM is primarily used to answer which question?', 'type' => 'single_select', 'options' => ['How many reps do we need to hit the number?', 'What is our win rate?', 'Which accounts are at risk?', 'What is the average deal size?'], 'correct' => 'How many reps do we need to hit the number?', 'required' => true],
+            ],
+            'owp' => [
+                ['id' => 'kc1', 'text' => 'What does the Application Framework Configurator streamline?', 'type' => 'single_select', 'options' => ['Interview-style setup of the application', 'Manual line item creation only', 'User license management', 'Data export scheduling'], 'correct' => 'Interview-style setup of the application', 'required' => true],
+                ['id' => 'kc2', 'text' => 'Which of these are common data loading methods? (select all that apply)', 'type' => 'multi_select', 'options' => ['CSV/XLSX import', 'Anaplan Connect', 'Direct database write', 'Manual line item entry'], 'correct' => ['CSV/XLSX import', 'Anaplan Connect'], 'required' => true],
+                ['id' => 'kc3', 'text' => 'What is the recommended first step before customizing a generated model?', 'type' => 'single_select', 'options' => ['Validate the base model against requirements', 'Delete unused modules immediately', 'Rename all line items', 'Disable version control'], 'correct' => 'Validate the base model against requirements', 'required' => true],
+            ],
+        ];
+
+        foreach (['rpm', 'owp'] as $slug) {
+            $workshop = Workshop::where('slug', $slug)->first();
+
+            if (! $workshop) {
+                continue;
+            }
+
+            $topics = $topicsByWorkshop[$slug];
+
+            $preTemplate = WorkshopSurveyTemplate::updateOrCreate(
+                ['workshop_id' => $workshop->id, 'kind' => 'pre'],
+                [
+                    'intro' => "A couple of quick questions before you get started with the {$workshop->name}.",
+                    'questions_json' => [
+                        ...array_map(fn (array $topic) => ['id' => $topic['id'], 'text' => "How confident are you with {$topic['text']} today?", 'type' => 'likert', 'required' => true], $topics),
+                        ['id' => 'goal', 'text' => 'What do you most want to get out of this workshop?', 'type' => 'text', 'required' => false],
+                    ],
+                    'updated_by' => $facilitator->id,
+                ],
+            );
+
+            $postTemplate = WorkshopSurveyTemplate::updateOrCreate(
+                ['workshop_id' => $workshop->id, 'kind' => 'post'],
+                [
+                    'intro' => "Now that you've completed the workshop, revisit the same topics.",
+                    'questions_json' => [
+                        ...array_map(fn (array $topic) => ['id' => $topic['id'], 'text' => "How confident are you with {$topic['text']} today?", 'type' => 'likert', 'required' => true], $topics),
+                        ['id' => 'next_topic', 'text' => 'What would you like covered in more depth next time?', 'type' => 'text', 'required' => false],
+                    ],
+                    'updated_by' => $facilitator->id,
+                ],
+            );
+
+            $knowledgeTemplate = WorkshopSurveyTemplate::updateOrCreate(
+                ['workshop_id' => $workshop->id, 'kind' => 'knowledge'],
+                [
+                    'intro' => 'A short knowledge check to confirm what you took away from the workshop.',
+                    'questions_json' => $knowledgeQuestionsByWorkshop[$slug],
+                    'passing_score' => 70,
+                    'updated_by' => $facilitator->id,
+                ],
+            );
+
+            foreach ($workshop->sessions()->where('status', 'completed')->get() as $session) {
+                if (WorkshopSurveyResponse::where('workshop_session_id', $session->id)->exists()) {
+                    continue;
+                }
+
+                $participants = $session->participants()->notRemoved()->orderBy('id')->get();
+
+                foreach ($participants as $index => $participant) {
+                    // A believable spread: most finish strong, one struggles.
+                    $struggling = $index === $participants->count() - 1 && $participants->count() > 1;
+                    $preValue = $struggling ? 2 : 3;
+                    $postValue = $struggling ? 3 : 5;
+
+                    WorkshopSurveyResponse::create([
+                        'workshop_survey_template_id' => $preTemplate->id,
+                        'workshop_session_id' => $session->id,
+                        'contact_id' => $participant->contact_id,
+                        'responses_json' => $this->likertResponses($preTemplate, $preValue) + ['goal' => 'Get comfortable with the core workflow end-to-end.'],
+                        'score' => 0,
+                        'passed' => false,
+                        'attempt_number' => 1,
+                        'submitted_at' => $session->start_date->copy()->subDay(),
+                    ]);
+
+                    WorkshopSurveyResponse::create([
+                        'workshop_survey_template_id' => $postTemplate->id,
+                        'workshop_session_id' => $session->id,
+                        'contact_id' => $participant->contact_id,
+                        'responses_json' => $this->likertResponses($postTemplate, $postValue) + ['next_topic' => 'More hands-on time with real data.'],
+                        'score' => 0,
+                        'passed' => false,
+                        'attempt_number' => 1,
+                        'submitted_at' => $session->end_date,
+                    ]);
+
+                    $knowledgeQuestions = collect($knowledgeTemplate->questions_json);
+                    $knowledgeResponses = $struggling
+                        ? $knowledgeQuestions->mapWithKeys(fn (array $q) => [$q['id'] => is_array($q['correct'] ?? null) ? [$q['options'][0]] : $q['options'][0]])
+                        : $knowledgeQuestions->mapWithKeys(fn (array $q) => [$q['id'] => $q['correct']]);
+                    $result = $knowledgeTemplate->score($knowledgeResponses->all());
+
+                    WorkshopSurveyResponse::create([
+                        'workshop_survey_template_id' => $knowledgeTemplate->id,
+                        'workshop_session_id' => $session->id,
+                        'contact_id' => $participant->contact_id,
+                        'responses_json' => $knowledgeResponses->all(),
+                        'score' => $result['score'],
+                        'passed' => $result['passed'],
+                        'attempt_number' => 1,
+                        'submitted_at' => $session->end_date,
+                    ]);
+
+                    if ($struggling) {
+                        $participant->update(['completed_at' => null]);
+                    } else {
+                        $participant->update(['completed_at' => $session->end_date, 'completed_by' => $facilitator->id]);
+                    }
+                }
+            }
+
+            $this->command->info("  ✓ Seeded survey templates and response activity for {$workshop->name}");
+        }
     }
 }
