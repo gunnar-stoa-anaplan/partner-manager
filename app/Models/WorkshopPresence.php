@@ -28,6 +28,11 @@ class WorkshopPresence extends Model
         return $this->belongsTo(WorkshopSession::class, 'workshop_session_id');
     }
 
+    public function page(): BelongsTo
+    {
+        return $this->belongsTo(WorkshopPage::class, 'workshop_page_id');
+    }
+
     /**
      * Record (or refresh) presence for whichever guard is authenticated.
      */

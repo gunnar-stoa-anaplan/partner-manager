@@ -257,6 +257,7 @@ return [
                     ['label' => 'Dashboard', 'route' => 'workshops.dashboard', 'icon' => 'home'],
                     ['label' => 'All Workshops', 'route' => 'workshops.index', 'icon' => 'check-square'],
                     ['label' => 'Calendar', 'route' => 'workshops.calendar', 'icon' => 'calendar'],
+                    ['label' => 'Users', 'route' => 'workshops.users.index', 'icon' => 'users'],
                 ],
             ],
             'credentials' => [

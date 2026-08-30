@@ -85,6 +85,18 @@ return Application::configure(basePath: dirname(__DIR__))
                     ->group($workshopSurveysWeb);
             }
 
+            // Workshop Users (gated by workshops.management) - portal
+            // Contacts who've been enrolled as workshop participants, and
+            // granting/managing their portal access.
+            $workshopUsersWeb = base_path('routes/modules/workshop-users.php');
+
+            if (file_exists($workshopUsersWeb)) {
+                Route::middleware(['web', 'auth', 'module:workshops.management'])
+                    ->prefix('partner-workshops/users')
+                    ->name('workshops.users.')
+                    ->group($workshopUsersWeb);
+            }
+
             // Workshop Reports (gated by workshops.reports)
             $workshopReportsWeb = base_path('routes/modules/workshop-reports.php');
 
