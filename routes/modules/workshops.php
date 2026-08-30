@@ -29,10 +29,12 @@ Route::put('/{workshop}/sessions/{session}', [WorkshopSessionController::class, 
 Route::delete('/{workshop}/sessions/{session}', [WorkshopSessionController::class, 'destroy'])->name('sessions.destroy');
 Route::post('/{workshop}/sessions/{session}/archive', [WorkshopSessionController::class, 'archive'])->name('sessions.archive');
 
+Route::get('/{workshop}/sessions/{session}/participants', [WorkshopParticipantController::class, 'index'])->name('sessions.participants.index');
 Route::post('/{workshop}/sessions/{session}/participants', [WorkshopParticipantController::class, 'invite'])->name('sessions.participants.invite');
 Route::delete('/{workshop}/sessions/{session}/participants/{participant}', [WorkshopParticipantController::class, 'remove'])->name('sessions.participants.remove');
 Route::post('/{workshop}/sessions/{session}/participants/{participant}/complete', [WorkshopParticipantController::class, 'complete'])->name('sessions.participants.complete');
 Route::post('/{workshop}/sessions/{session}/participants/{participant}/uncomplete', [WorkshopParticipantController::class, 'uncomplete'])->name('sessions.participants.uncomplete');
+Route::post('/{workshop}/sessions/{session}/participants/contacts/{contact}/reset-password', [WorkshopParticipantController::class, 'resetPassword'])->name('sessions.participants.reset-password');
 Route::post('/{workshop}/sessions/{session}/monitors', [WorkshopParticipantController::class, 'assignMonitor'])->name('sessions.monitors.store');
 Route::delete('/{workshop}/sessions/{session}/monitors/{monitorUser}', [WorkshopParticipantController::class, 'removeMonitor'])->name('sessions.monitors.destroy');
 

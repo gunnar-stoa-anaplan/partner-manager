@@ -12,40 +12,49 @@ class WorkshopLeaderboardService
 {
     /**
      * Ordered checkpoints for a workshop's leaderboard: pre-workshop survey,
-     * one column per content page that has "check my work" prompts (labs),
-     * then the post-workshop survey - labeled "Knowledge Check" when it's
-     * scored (has a passing_score), since that's what it functionally is.
+     * one column per individual lab check (not per page - a page can bundle
+     * several "check my work" prompts and each is its own pass/fail signal),
+     * post-workshop survey, then the knowledge check.
      *
-     * @return array<int, array{key: string, label: string, type: 'survey'|'lab', template_id?: int, page_id?: int}>
+     * @return array<int, array{key: string, label: string, type: 'survey'|'lab', template_id?: int, page_id?: int, check_id?: string}>
      */
     public function checkpointsFor(Workshop $workshop): array
     {
         $checkpoints = [];
 
         $preSurvey = $workshop->surveyTemplates->firstWhere('kind', 'pre');
-        if ($preSurvey) {
+        if ($preSurvey && ! empty($preSurvey->questions_json)) {
             $checkpoints[] = ['key' => 'survey_pre', 'label' => 'Pre-Workshop Survey', 'type' => 'survey', 'template_id' => $preSurvey->id];
         }
 
         foreach ($workshop->participantPages as $page) {
-            $checkCount = count($page->checks());
-            if ($checkCount > 0) {
-                $checkpoints[] = ['key' => 'lab_'.$page->id, 'label' => $page->title, 'type' => 'lab', 'page_id' => $page->id, 'total_checks' => $checkCount];
+            foreach ($page->checks() as $check) {
+                $checkpoints[] = [
+                    'key' => 'lab_'.$page->id.'_'.$check['id'],
+                    'label' => $this->shortCheckLabel($check['id']),
+                    'type' => 'lab',
+                    'page_id' => $page->id,
+                    'check_id' => $check['id'],
+                ];
             }
         }
 
         $postSurvey = $workshop->surveyTemplates->firstWhere('kind', 'post');
-        if ($postSurvey) {
-            $label = $postSurvey->isScored() ? 'Knowledge Check' : 'Post-Workshop Survey';
-            $checkpoints[] = ['key' => 'survey_post', 'label' => $label, 'type' => 'survey', 'template_id' => $postSurvey->id];
+        if ($postSurvey && ! empty($postSurvey->questions_json)) {
+            $checkpoints[] = ['key' => 'survey_post', 'label' => 'Post-Workshop Survey', 'type' => 'survey', 'template_id' => $postSurvey->id];
+        }
+
+        $knowledgeCheck = $workshop->surveyTemplates->firstWhere('kind', 'knowledge');
+        if ($knowledgeCheck && ! empty($knowledgeCheck->questions_json)) {
+            $checkpoints[] = ['key' => 'survey_knowledge', 'label' => 'Knowledge Check', 'type' => 'survey', 'template_id' => $knowledgeCheck->id];
         }
 
         return $checkpoints;
     }
 
     /**
-     * Per-participant status ('done' | 'partial' | 'todo') for every
-     * checkpoint, keyed by checkpoint key. $surveyResponses and
+     * Per-participant status ('done' | 'partial' | 'failed' | 'todo') for
+     * every checkpoint, keyed by checkpoint key. $surveyResponses and
      * $checkAttempts should already be scoped to the session(s) being
      * evaluated and loaded once by the caller to avoid N+1 queries.
      *
@@ -78,40 +87,65 @@ class WorkshopLeaderboardService
      */
     private function surveyStatus(array $checkpoint, Collection $contactResponses): string
     {
-        $response = $contactResponses->firstWhere('workshop_survey_template_id', $checkpoint['template_id']);
+        $attempts = $contactResponses->where('workshop_survey_template_id', $checkpoint['template_id']);
 
-        if (! $response) {
+        if ($attempts->isEmpty()) {
             return 'todo';
         }
 
+        $latest = $attempts->sortByDesc('attempt_number')->first();
+        $template = $latest->template;
+
         // A plain (unscored) survey has no pass/fail concept - submitting it
-        // is the whole checkpoint. A scored one (knowledge check) needs a
-        // passing result to count as fully done.
-        if ($response->template?->isScored()) {
-            return $response->passed ? 'done' : 'partial';
+        // is the whole checkpoint.
+        if (! $template?->isScored()) {
+            return 'done';
         }
 
-        return 'done';
+        if ($attempts->where('passed', true)->isNotEmpty()) {
+            return 'done';
+        }
+
+        // Still has attempts left (or unlimited) - in progress, not failed yet.
+        if (! $template->max_attempts || $latest->attempt_number < $template->max_attempts) {
+            return 'partial';
+        }
+
+        return 'failed';
     }
 
     /**
+     * A single lab check is inherently binary once attempted - it either
+     * has a passing attempt or it doesn't, so unlike a multi-attempt survey
+     * there's no separate "in progress" state here.
+     *
      * @param  array<string, mixed>  $checkpoint
      */
     private function labStatus(array $checkpoint, Collection $contactAttempts): string
     {
-        $pageAttempts = $contactAttempts->where('workshop_page_id', $checkpoint['page_id']);
+        $attempts = $contactAttempts
+            ->where('workshop_page_id', $checkpoint['page_id'])
+            ->where('check_id', $checkpoint['check_id']);
 
-        if ($pageAttempts->isEmpty()) {
+        if ($attempts->isEmpty()) {
             return 'todo';
         }
 
-        $passedCheckIds = $pageAttempts->where('passed', true)->pluck('check_id')->unique();
+        return $attempts->where('passed', true)->isNotEmpty() ? 'done' : 'failed';
+    }
 
-        if ($passedCheckIds->isEmpty()) {
-            return 'partial';
+    /**
+     * Derive a short column-header label from a check id like
+     * "ex1-step2-dimensions" -> "EX1: DIMENSIONS", since the checks only
+     * carry a long instructional prompt, not a leaderboard-ready label.
+     */
+    private function shortCheckLabel(string $checkId): string
+    {
+        if (preg_match('/^ex(\d+)-step\d+-(.+)$/', $checkId, $matches)) {
+            return 'EX'.$matches[1].': '.strtoupper(str_replace(['-', '_'], ' ', $matches[2]));
         }
 
-        return $passedCheckIds->count() >= $checkpoint['total_checks'] ? 'done' : 'partial';
+        return strtoupper(str_replace(['-', '_'], ' ', $checkId));
     }
 
     /**

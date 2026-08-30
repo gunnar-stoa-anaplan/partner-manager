@@ -43,12 +43,12 @@ class WorkshopSummaryServiceTest extends TestCase
         $pre = WorkshopSurveyTemplate::factory()->create([
             'workshop_id' => $workshop->id,
             'kind' => 'pre',
-            'questions_json' => [['id' => 'confidence', 'text' => 'Rate yourself', 'type' => 'rating']],
+            'questions_json' => [['id' => 'confidence', 'text' => 'Rate yourself', 'type' => 'likert']],
         ]);
         $post = WorkshopSurveyTemplate::factory()->create([
             'workshop_id' => $workshop->id,
             'kind' => 'post',
-            'questions_json' => [['id' => 'confidence', 'text' => 'Rate yourself', 'type' => 'rating']],
+            'questions_json' => [['id' => 'confidence', 'text' => 'Rate yourself', 'type' => 'likert']],
         ]);
 
         $contactA = Contact::factory()->create();

@@ -10,19 +10,18 @@ use Illuminate\Support\Carbon;
 class WorkshopInviteService
 {
     /**
-     * Split a free-text block of emails (one per line, or comma-separated) into
-     * a de-duplicated list of lowercase email addresses.
+     * Pull email addresses out of a free-text block, one per line (or
+     * comma/semicolon-separated) - accepts a plain address, "Name
+     * <user@domain>", or '"Name" <user@domain>". Only the address itself is
+     * extracted, so surrounding names/quotes/brackets are simply ignored.
      *
      * @return array<int, string>
      */
     public function parseEmailList(string $raw): array
     {
-        $emails = preg_split('/[\s,;]+/', trim($raw)) ?: [];
+        preg_match_all('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', $raw, $matches);
 
-        $emails = array_filter(array_map(
-            fn (string $email) => strtolower(trim($email)),
-            $emails,
-        ));
+        $emails = array_map('strtolower', $matches[0]);
 
         return array_values(array_unique($emails));
     }

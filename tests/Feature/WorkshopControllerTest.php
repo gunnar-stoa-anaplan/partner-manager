@@ -122,6 +122,54 @@ class WorkshopControllerTest extends TestCase
         $this->assertNull($participant->fresh()->completed_at);
     }
 
+    public function test_participants_page_renders_grouped_by_partner_with_tenant_pool_banner(): void
+    {
+        $workshop = Workshop::factory()->create();
+        $session = WorkshopSession::factory()->create(['workshop_id' => $workshop->id]);
+        \App\Models\WorkshopCredential::factory()->create(['workshop_id' => $workshop->id, 'status' => 'available']);
+        $partner = Partner::factory()->create(['name' => 'Acme Corp']);
+        $contact = Contact::factory()->create(['partner_id' => $partner->id]);
+        $session->participants()->create(['contact_id' => $contact->id, 'status' => 'active', 'enrolled_at' => now()]);
+
+        $response = $this->actingAs($this->coe)->get(route('workshops.sessions.participants.index', [$workshop, $session]));
+
+        $response->assertOk();
+        $response->assertSee('Acme Corp');
+        $response->assertSee($contact->email);
+        $response->assertSee('1 of 1 free');
+    }
+
+    public function test_reset_password_generates_a_new_password_for_an_enrolled_contact(): void
+    {
+        $session = WorkshopSession::factory()->create();
+        $contact = Contact::factory()->create(['portal_access' => true, 'password' => 'original']);
+        $session->participants()->create(['contact_id' => $contact->id, 'status' => 'active', 'enrolled_at' => now()]);
+        $originalHash = $contact->password;
+
+        $response = $this->actingAs($this->coe)->post(
+            route('workshops.sessions.participants.reset-password', [$session->workshop, $session, $contact]),
+        );
+
+        $response->assertRedirect(route('workshops.sessions.participants.index', [$session->workshop, $session]));
+        $this->assertNotSame($originalHash, $contact->fresh()->password);
+    }
+
+    public function test_invite_supports_name_and_bracket_email_format(): void
+    {
+        $session = WorkshopSession::factory()->create();
+        $contact = Contact::factory()->create();
+
+        $this->actingAs($this->coe)->post(
+            route('workshops.sessions.participants.invite', [$session->workshop, $session]),
+            ['emails' => "Jane Doe <{$contact->email}>"],
+        );
+
+        $this->assertDatabaseHas('workshop_session_participants', [
+            'workshop_session_id' => $session->id,
+            'contact_id' => $contact->id,
+        ]);
+    }
+
     public function test_rollup_report_computes_completion_stats(): void
     {
         $workshop = Workshop::factory()->create();
@@ -156,10 +204,10 @@ class WorkshopControllerTest extends TestCase
 
     public function test_surveys_index_renders(): void
     {
-        \App\Models\WorkshopSurveyTemplate::factory()->create();
+        $workshop = \App\Models\Workshop::factory()->create();
+        \App\Models\WorkshopSurveyTemplate::factory()->create(['workshop_id' => $workshop->id, 'kind' => 'pre']);
 
-        $this->actingAs($this->coe)->get(route('workshops.surveys.index'))->assertOk();
-        $this->actingAs($this->coe)->get(route('workshops.surveys.create'))->assertOk();
+        $this->actingAs($this->coe)->get(route('workshops.surveys.index', $workshop))->assertOk();
     }
 
     public function test_calendar_page_renders(): void

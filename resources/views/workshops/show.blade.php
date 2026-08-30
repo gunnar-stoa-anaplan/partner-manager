@@ -234,7 +234,7 @@
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between mb-2">
                             <h6 class="mb-0">Survey templates</h6>
-                            <a href="{{ route('workshops.surveys.index') }}" class="btn btn-outline-primary btn-sm">Manage →</a>
+                            <a href="{{ route('workshops.surveys.index', $workshop) }}" class="btn btn-outline-primary btn-sm">Manage →</a>
                         </div>
                         <p class="text-muted fs-sm mb-0">Define the pre-workshop, post-workshop, and knowledge-check surveys participants take from inside the workshop site. Same template applies across every session.</p>
                     </div>

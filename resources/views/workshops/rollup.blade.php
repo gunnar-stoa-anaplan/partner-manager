@@ -121,7 +121,8 @@
     .checkpoint-dot { display: inline-block; width: 0.85rem; height: 0.85rem; border-radius: 50%; }
     .checkpoint-dot.done { background: #15803d; }
     .checkpoint-dot.partial { background: #d97706; }
-    .checkpoint-dot.todo { background: #dc2626; opacity: 0.35; }
+    .checkpoint-dot.todo { background: #cbd5e1; }
+    .checkpoint-dot.failed { background: #dc2626; }
 </style>
 <div class="row">
     <div class="col-lg-12">
@@ -133,6 +134,7 @@
                     <span class="checkpoint-dot done me-1"></span> Done
                     <span class="checkpoint-dot partial ms-3 me-1"></span> In Progress
                     <span class="checkpoint-dot todo ms-3 me-1"></span> Not Started
+                    <span class="checkpoint-dot failed ms-3 me-1"></span> Failed
                 </div>
                 @endif
             </div>

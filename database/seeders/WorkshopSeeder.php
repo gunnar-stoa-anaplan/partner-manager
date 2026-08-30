@@ -351,13 +351,24 @@ class WorkshopSeeder extends Seeder
             return;
         }
 
+        $likertTopics = [
+            ['id' => 'anaplan_way', 'text' => 'Anaplan Way Methodology'],
+            ['id' => 'alm', 'text' => 'Application Lifecycle Management (ALM)'],
+            ['id' => 'app_config', 'text' => 'Anaplan Application Configuration'],
+            ['id' => 'ifp_app', 'text' => 'Integrated Financial Planning (IFP) Application'],
+            ['id' => 'extensions', 'text' => 'Extensions to IFP'],
+            ['id' => 'ado', 'text' => 'Anaplan Data Orchestrator (ADO)'],
+        ];
+
         WorkshopSurveyTemplate::updateOrCreate(
             ['workshop_id' => $ifp->id, 'kind' => 'pre'],
             [
-                'intro' => 'A couple of quick questions before you get started.',
+                'intro' => "Take a few minutes before the workshop starts to share your background and where you're starting from. Your answers help us calibrate the live discussions and the wrap-up retrospective.",
                 'questions_json' => [
-                    ['id' => 'confidence', 'text' => 'How confident are you with the IFP Application Framework configuration workflow today?', 'type' => 'rating'],
-                    ['id' => 'goal', 'text' => 'What do you most want to get out of this workshop?', 'type' => 'text'],
+                    ['id' => 'background', 'text' => 'Your background and role (select all that apply)', 'type' => 'multi_select', 'options' => ['Certified Solution Architect', 'Certified Model Builder', 'Certified Master Anaplanner', 'Program Architect', 'Practice Lead', 'Project Manager'], 'required' => false],
+                    ['id' => 'experience', 'text' => 'Your project experience', 'type' => 'single_select', 'options' => ['No Projects (yet)', '2 to 5 Projects', 'More than 5 Projects'], 'required' => true],
+                    ...array_map(fn (array $topic) => ['id' => $topic['id'], 'text' => $topic['text'], 'type' => 'likert', 'required' => true], $likertTopics),
+                    ['id' => 'goal', 'text' => 'Add one or two things you hope to learn from the course', 'type' => 'text', 'required' => false],
                 ],
                 'updated_by' => $facilitator->id,
             ],
@@ -366,12 +377,26 @@ class WorkshopSeeder extends Seeder
         WorkshopSurveyTemplate::updateOrCreate(
             ['workshop_id' => $ifp->id, 'kind' => 'post'],
             [
-                'intro' => 'A few quick questions to confirm what you took away from the workshop.',
+                'intro' => "Now that you've completed the workshop, revisit the same topics - this is what lets us measure how much ground you covered.",
                 'questions_json' => [
-                    ['id' => 'q1', 'text' => 'Which module type holds transactional detail data in an IFP model?', 'type' => 'single', 'options' => ['Line Item', 'List', 'Module', 'Dashboard'], 'correct' => ['Module']],
-                    ['id' => 'q2', 'text' => 'Which of these are part of the standard IFP dimensionality? (select all that apply)', 'type' => 'multiple', 'options' => ['Location', 'Customer', 'Job', 'Weather'], 'correct' => ['Location', 'Customer', 'Job']],
-                    ['id' => 'q3', 'text' => 'What would you like covered in more depth next time?', 'type' => 'text'],
-                    ['id' => 'confidence', 'text' => 'Now that you\'ve completed the workshop, how confident are you with the IFP Application Framework configuration workflow?', 'type' => 'rating'],
+                    ...array_map(fn (array $topic) => ['id' => $topic['id'], 'text' => $topic['text'], 'type' => 'likert', 'required' => true], $likertTopics),
+                    ['id' => 'delivered_lab', 'text' => 'Which lab did you find most valuable?', 'type' => 'single_select', 'options' => ['Exercise 1: OpEx and Headcount Planning', 'Exercise 2: Insurance - 3-Statement Planning', 'Exercise 3: Nuclear Plant - OpEx and Headcount with WBS', 'Extension Exercise 1', 'Extension Exercise 2'], 'required' => false],
+                    ['id' => 'next_topic', 'text' => 'What would you like covered in more depth next time?', 'type' => 'text', 'required' => false],
+                ],
+                'updated_by' => $facilitator->id,
+            ],
+        );
+
+        WorkshopSurveyTemplate::updateOrCreate(
+            ['workshop_id' => $ifp->id, 'kind' => 'knowledge'],
+            [
+                'intro' => 'A short knowledge check to confirm what you took away from the workshop.',
+                'questions_json' => [
+                    ['id' => 'kc1', 'text' => 'Which module type holds transactional detail data in an IFP model?', 'type' => 'single_select', 'options' => ['Line Item', 'List', 'Module', 'Dashboard'], 'correct' => 'Module', 'required' => true],
+                    ['id' => 'kc2', 'text' => 'Which of these are part of the standard IFP dimensionality? (select all that apply)', 'type' => 'multi_select', 'options' => ['Location', 'Customer', 'Job', 'Weather'], 'correct' => ['Location', 'Customer', 'Job'], 'required' => true],
+                    ['id' => 'kc3', 'text' => 'What is a key feature of the Anaplan Application Framework for IFPv2 configuration?', 'type' => 'single_select', 'options' => ['A rigid, one-time build process for stability.', 'A simplified, interview-style configuration process.', 'A command-line interface for advanced users.'], 'correct' => 'A simplified, interview-style configuration process.', 'required' => true],
+                    ['id' => 'kc4', 'text' => 'When working with hierarchies in the Application Framework, what is the recommended approach?', 'type' => 'single_select', 'options' => ['Overview', 'Hierarchies', 'Models', 'Configurations'], 'correct' => 'Configurations', 'required' => true],
+                    ['id' => 'kc5', 'text' => 'What is the overarching goal of the IFPv2 Implementation Workshop?', 'type' => 'single_select', 'options' => ['To teach attendees advanced formula writing and model building techniques.', 'To provide a deep dive into the financial theories behind integrated planning.', 'To enable partners to successfully configure, generate, and implement the IFPv2 application for customers.'], 'correct' => 'To enable partners to successfully configure, generate, and implement the IFPv2 application for customers.', 'required' => true],
                 ],
                 'passing_score' => 70,
                 'updated_by' => $facilitator->id,
@@ -430,7 +455,8 @@ class WorkshopSeeder extends Seeder
         $ifp = Workshop::where('slug', 'ifp')->first();
         $session = $ifp?->sessions()->where('slug', '2026-06-9')->first();
         $preSurvey = $ifp?->surveyTemplates()->where('kind', 'pre')->first();
-        $knowledgeCheck = $ifp?->surveyTemplates()->where('kind', 'post')->first();
+        $postSurvey = $ifp?->surveyTemplates()->where('kind', 'post')->first();
+        $knowledgeCheck = $ifp?->surveyTemplates()->where('kind', 'knowledge')->first();
         $labPages = $ifp?->participantPages->filter(fn ($page) => ! empty($page->checks()))->values();
 
         if (! $session || ! $knowledgeCheck || ! $labPages || $labPages->isEmpty()) {
@@ -464,7 +490,7 @@ class WorkshopSeeder extends Seeder
                     'workshop_survey_template_id' => $preSurvey->id,
                     'workshop_session_id' => $session->id,
                     'contact_id' => $participant->contact_id,
-                    'responses_json' => ['confidence' => 3, 'goal' => 'Get comfortable configuring the Application Framework end-to-end.'],
+                    'responses_json' => $this->likertResponses($preSurvey, 3) + ['background' => ['Certified Model Builder'], 'experience' => '2 to 5 Projects', 'goal' => 'Get comfortable configuring the Application Framework end-to-end.'],
                     'score' => 0,
                     'passed' => false,
                     'attempt_number' => 1,
@@ -472,11 +498,24 @@ class WorkshopSeeder extends Seeder
                 ]);
             }
 
+            if ($postSurvey) {
+                WorkshopSurveyResponse::create([
+                    'workshop_survey_template_id' => $postSurvey->id,
+                    'workshop_session_id' => $session->id,
+                    'contact_id' => $participant->contact_id,
+                    'responses_json' => $this->likertResponses($postSurvey, 5) + ['delivered_lab' => 'Exercise 1: OpEx and Headcount Planning', 'next_topic' => 'More on extensions.'],
+                    'score' => 0,
+                    'passed' => false,
+                    'attempt_number' => 1,
+                    'submitted_at' => now()->subDay(),
+                ]);
+            }
+
             WorkshopSurveyResponse::create([
                 'workshop_survey_template_id' => $knowledgeCheck->id,
                 'workshop_session_id' => $session->id,
                 'contact_id' => $participant->contact_id,
-                'responses_json' => ['q1' => 'Module', 'q2' => ['Location', 'Customer', 'Job'], 'q3' => 'More on extensions.', 'confidence' => 5],
+                'responses_json' => ['kc1' => 'Module', 'kc2' => ['Location', 'Customer', 'Job'], 'kc3' => 'A simplified, interview-style configuration process.', 'kc4' => 'Configurations', 'kc5' => 'To enable partners to successfully configure, generate, and implement the IFPv2 application for customers.'],
                 'score' => 100,
                 'passed' => true,
                 'attempt_number' => 1,
@@ -518,7 +557,7 @@ class WorkshopSeeder extends Seeder
                     'workshop_survey_template_id' => $preSurvey->id,
                     'workshop_session_id' => $session->id,
                     'contact_id' => $participant->contact_id,
-                    'responses_json' => ['confidence' => 2, 'goal' => 'Understand the extension exercises before the live session.'],
+                    'responses_json' => $this->likertResponses($preSurvey, 2) + ['background' => ['Project Manager'], 'experience' => 'No Projects (yet)', 'goal' => 'Understand the extension exercises before the live session.'],
                     'score' => 0,
                     'passed' => false,
                     'attempt_number' => 1,
@@ -530,7 +569,7 @@ class WorkshopSeeder extends Seeder
                 'workshop_survey_template_id' => $knowledgeCheck->id,
                 'workshop_session_id' => $session->id,
                 'contact_id' => $participant->contact_id,
-                'responses_json' => ['q1' => 'List', 'q2' => ['Location'], 'q3' => 'Still working through it.', 'confidence' => 3],
+                'responses_json' => ['kc1' => 'List', 'kc2' => ['Location'], 'kc3' => 'A rigid, one-time build process for stability.'],
                 'score' => 33,
                 'passed' => false,
                 'attempt_number' => 1,
@@ -539,5 +578,13 @@ class WorkshopSeeder extends Seeder
         }
 
         $this->command->info("  ✓ Seeded leaderboard activity for {$ahead->count()} finished + {$inProgress->count()} in-progress participants");
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function likertResponses(WorkshopSurveyTemplate $template, int $value): array
+    {
+        return $template->likertQuestionIds()->mapWithKeys(fn (string $id) => [$id => $value])->all();
     }
 }

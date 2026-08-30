@@ -57,7 +57,7 @@ class WorkshopArchiveAndLockTest extends TestCase
 
         $response = $this->actingAs($this->coe)->post(route('workshops.sessions.archive', [$session->workshop, $session]));
 
-        $response->assertRedirect(route('workshops.show', $session->workshop));
+        $response->assertRedirect(route('workshops.sessions.show', [$session->workshop, $session]));
         $session->refresh();
         $this->assertSame('archived', $session->status);
         $this->assertNotNull($session->archived_at);

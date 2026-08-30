@@ -28,12 +28,13 @@ class WorkshopSummaryService
 
         $preTemplate = $workshop->surveyTemplates->firstWhere('kind', 'pre');
         $postTemplate = $workshop->surveyTemplates->firstWhere('kind', 'post');
+        $knowledgeTemplate = $workshop->surveyTemplates->firstWhere('kind', 'knowledge');
 
         $responses = $sessions->isNotEmpty()
             ? WorkshopSurveyResponse::whereIn('workshop_session_id', $sessions->pluck('id'))->get()
             : collect();
 
-        $perSession = $sessions->map(function (WorkshopSession $session) use ($responses, $preTemplate, $postTemplate) {
+        $perSession = $sessions->map(function (WorkshopSession $session) use ($responses, $preTemplate, $postTemplate, $knowledgeTemplate) {
             $sessionResponses = $responses->where('workshop_session_id', $session->id);
 
             return [
@@ -41,7 +42,7 @@ class WorkshopSummaryService
                 'participants' => $session->participants->count(),
                 'pre_avg' => $preTemplate?->averageRating($sessionResponses->where('workshop_survey_template_id', $preTemplate->id)),
                 'post_avg' => $postTemplate?->averageRating($sessionResponses->where('workshop_survey_template_id', $postTemplate->id)),
-                'kc_pass_rate' => $this->knowledgeCheckPassRate($sessionResponses, $postTemplate),
+                'kc_pass_rate' => $this->knowledgeCheckPassRate($sessionResponses, $knowledgeTemplate),
             ];
         });
 
@@ -69,13 +70,13 @@ class WorkshopSummaryService
         ];
     }
 
-    private function knowledgeCheckPassRate(Collection $sessionResponses, ?WorkshopSurveyTemplate $postTemplate): ?float
+    private function knowledgeCheckPassRate(Collection $sessionResponses, ?WorkshopSurveyTemplate $knowledgeTemplate): ?float
     {
-        if (! $postTemplate || ! $postTemplate->isScored()) {
+        if (! $knowledgeTemplate) {
             return null;
         }
 
-        $attempts = $sessionResponses->where('workshop_survey_template_id', $postTemplate->id);
+        $attempts = $sessionResponses->where('workshop_survey_template_id', $knowledgeTemplate->id);
 
         if ($attempts->isEmpty()) {
             return null;

@@ -140,7 +140,7 @@ class WorkshopReportController extends Controller
 
     public function sessionLeaderboard(Workshop $workshop, WorkshopSession $session): View
     {
-        $session->load(['participants' => fn ($q) => $q->notRemoved()->with('contact.partner:id,name'), 'surveyResponses']);
+        $session->load(['participants' => fn ($q) => $q->notRemoved()->with('contact.partner:id,name')]);
 
         $checkpoints = $this->leaderboardService->checkpointsFor($workshop);
         [$surveyResponses, $checkAttempts] = $this->leaderboardService->loadDataForSession($session->id);
@@ -148,20 +148,14 @@ class WorkshopReportController extends Controller
             ->keyBy(fn ($row) => $row['contact']->id);
 
         $leaderboard = $session->participants
-            ->map(function ($participant) use ($session, $checkpointRowsByContact) {
-                $surveyScores = $session->surveyResponses->where('contact_id', $participant->contact_id)->pluck('score');
-                $avgScore = $surveyScores->isNotEmpty() ? round($surveyScores->avg()) : null;
-                $points = ($participant->completed_at ? 100 : 0) + ($avgScore ?? 0);
-
-                return [
-                    'contact' => $participant->contact,
-                    'completed' => $participant->completed_at !== null,
-                    'average_survey_score' => $avgScore,
-                    'points' => $points,
-                    'statuses' => $checkpointRowsByContact->get($participant->contact_id)['statuses'] ?? [],
-                ];
-            })
-            ->sortByDesc('points')
+            ->map(fn ($participant) => [
+                'contact' => $participant->contact,
+                'statuses' => $checkpointRowsByContact->get($participant->contact_id)['statuses'] ?? [],
+            ])
+            ->sortBy([
+                fn ($row) => $row['contact']->partner?->name ?? 'zzz',
+                fn ($row) => $row['contact']->full_name,
+            ])
             ->values();
 
         return view('workshops.sessions.leaderboard', compact('workshop', 'session', 'leaderboard', 'checkpoints'));

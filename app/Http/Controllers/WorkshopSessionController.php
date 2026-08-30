@@ -28,22 +28,18 @@ class WorkshopSessionController extends Controller
     public function show(Workshop $workshop, WorkshopSession $session): View
     {
         $session->load([
-            'participants.contact:id,first_name,last_name,email,partner_id',
-            'participants.contact.partner:id,name',
             'monitors.user:id,name',
             'threads' => fn ($query) => $query->where('status', '!=', 'hidden')->latest(),
             'threads.replies',
-            'credentialAssignments' => fn ($query) => $query->whereNull('released_at')->with('credential:id,username'),
         ]);
-
-        $activeCredentialByContact = $session->credentialAssignments->keyBy('contact_id');
+        $session->loadCount(['activeParticipants']);
 
         $userId = Auth::id();
         WorkshopPresence::heartbeat($session->id, null, $userId, null);
         $session->threads->each(fn ($thread) => WorkshopReadState::markRead($thread->id, $userId, null));
         $activeViewers = WorkshopPresence::activeCountForSession($session->id);
 
-        return view('workshops.sessions.show', compact('workshop', 'session', 'activeCredentialByContact', 'activeViewers'));
+        return view('workshops.sessions.show', compact('workshop', 'session', 'activeViewers'));
     }
 
     public function feed(Workshop $workshop, WorkshopSession $session): View
@@ -91,7 +87,7 @@ class WorkshopSessionController extends Controller
             $session->update(['status' => 'archived', 'archived_at' => now()]);
         }
 
-        return redirect()->route('workshops.show', $workshop)
+        return redirect()->route('workshops.sessions.show', [$workshop, $session])
             ->with('success', 'Session archived. Discussion is now read-only.');
     }
 }
