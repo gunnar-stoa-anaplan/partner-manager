@@ -113,14 +113,12 @@ class WorkshopSeeder extends Seeder
     }
 
     /**
-     * A couple of demo content pages for the IFP workshop, so the content
-     * delivery / progress-tracking feature has something real to show.
-     */
-    /**
      * The real IFP workshop curriculum, extracted from the
-     * ifp-delivery-workshop prototype's docs/ifp/*.html (17 pages, including
-     * the real lab-check prompts) - not placeholder text. See
-     * database/seeders/data/ifp_workshop_pages.php.
+     * ifp-delivery-workshop prototype's docs/*.html - not placeholder text.
+     * Participant pages (17, including the real lab-check prompts) come from
+     * database/seeders/data/ifp_workshop_pages.php; facilitator-only pages
+     * (Run-of-Show, Launch Toolkit) come from
+     * database/seeders/data/ifp_workshop_facilitator_pages.php.
      */
     private function seedContentPages(): void
     {
@@ -140,6 +138,7 @@ class WorkshopSeeder extends Seeder
             $ifp->pages()->updateOrCreate(
                 ['slug' => $page['slug']],
                 [
+                    'audience' => 'participant',
                     'title' => $page['title'],
                     'body' => $page['body'],
                     'sort_order' => $page['sort_order'],
@@ -149,6 +148,23 @@ class WorkshopSeeder extends Seeder
         }
 
         $this->command->info('  ✓ Seeded '.count($pages).' real content pages for the IFP workshop');
+
+        $facilitatorPages = require database_path('seeders/data/ifp_workshop_facilitator_pages.php');
+
+        foreach ($facilitatorPages as $page) {
+            $ifp->pages()->updateOrCreate(
+                ['slug' => $page['slug']],
+                [
+                    'audience' => 'facilitator',
+                    'title' => $page['title'],
+                    'body' => $page['body'],
+                    'sort_order' => $page['sort_order'],
+                    'checks_json' => $page['checks'] ?: null,
+                ],
+            );
+        }
+
+        $this->command->info('  ✓ Seeded '.count($facilitatorPages).' facilitator-only content pages for the IFP workshop');
     }
 
     /**

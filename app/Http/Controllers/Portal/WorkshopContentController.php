@@ -22,9 +22,9 @@ class WorkshopContentController extends Controller
     {
         $contact = Auth::guard('portal')->user();
         $this->authorizeParticipant($session, $contact->id);
-        abort_unless($page->workshop_id === $session->workshop_id, 404);
+        abort_unless($page->workshop_id === $session->workshop_id && $page->audience === 'participant', 404);
 
-        $pages = $session->workshop->pages;
+        $pages = $session->workshop->participantPages;
         $completion = $page->completionFor($contact->id, $session->id);
 
         $currentIndex = $pages->search(fn (WorkshopPage $p) => $p->id === $page->id);
@@ -47,7 +47,7 @@ class WorkshopContentController extends Controller
     {
         $contact = Auth::guard('portal')->user();
         $this->authorizeParticipant($session, $contact->id);
-        abort_unless($page->workshop_id === $session->workshop_id, 404);
+        abort_unless($page->workshop_id === $session->workshop_id && $page->audience === 'participant', 404);
 
         $validated = $request->validate([
             'check_id' => ['required', 'string'],
@@ -72,7 +72,7 @@ class WorkshopContentController extends Controller
         $contact = Auth::guard('portal')->user();
         $this->authorizeParticipant($session, $contact->id);
 
-        $pages = $session->workshop->pages;
+        $pages = $session->workshop->participantPages;
         $pageProgress = $pages->map(fn (WorkshopPage $page) => [
             'page' => $page,
             ...$page->completionFor($contact->id, $session->id),
@@ -99,7 +99,7 @@ class WorkshopContentController extends Controller
         $contact = Auth::guard('portal')->user();
         $this->authorizeParticipant($session, $contact->id);
 
-        $pages = $session->workshop->pages;
+        $pages = $session->workshop->participantPages;
         $pageProgress = $pages->map(fn (WorkshopPage $page) => [
             'page_slug' => $page->slug,
             'title' => $page->title,

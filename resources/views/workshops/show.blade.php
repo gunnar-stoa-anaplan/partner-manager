@@ -95,6 +95,21 @@
                 </div>
             </div>
         </div>
+
+        @if($workshop->facilitatorPages->isNotEmpty())
+        <div class="card shadow-0 mb-g border-warning">
+            <div class="card-header bg-warning bg-opacity-10">
+                <div class="card-title"><i class="fal fa-clipboard-list me-2"></i> Facilitator Guide <span class="badge bg-warning text-dark ms-1">Internal Only</span></div>
+            </div>
+            <ul class="list-group list-group-flush">
+                @foreach($workshop->facilitatorPages as $page)
+                    <li class="list-group-item">
+                        <a href="{{ route('workshops.pages.show', [$workshop, $page]) }}">{{ $page->title }}</a>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
     </div>
 </div>
 @endsection

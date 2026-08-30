@@ -6,6 +6,7 @@ use App\Models\Workshop;
 use App\Models\WorkshopPage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class WorkshopPageController extends Controller
@@ -15,6 +16,11 @@ class WorkshopPageController extends Controller
         $pages = $workshop->pages;
 
         return view('workshops.pages.index', compact('workshop', 'pages'));
+    }
+
+    public function show(Workshop $workshop, WorkshopPage $page): View
+    {
+        return view('workshops.pages.show', compact('workshop', 'page'));
     }
 
     public function create(Workshop $workshop): View
@@ -72,6 +78,7 @@ class WorkshopPageController extends Controller
         $validated = $request->validate([
             'slug' => ['required', 'string', 'max:255', 'alpha_dash'],
             'title' => ['required', 'string', 'max:255'],
+            'audience' => ['required', Rule::in(array_keys(WorkshopPage::AUDIENCES))],
             'body' => ['required', 'string'],
             'checks_json' => ['nullable', 'json'],
         ]);

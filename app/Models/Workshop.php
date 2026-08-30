@@ -51,6 +51,21 @@ class Workshop extends Model
         return $this->hasMany(WorkshopPage::class)->orderBy('sort_order');
     }
 
+    /**
+     * Pages a partner participant is allowed to see - excludes
+     * facilitator-only reference material (run-of-show scripts, launch
+     * toolkits) that should never reach the portal.
+     */
+    public function participantPages(): HasMany
+    {
+        return $this->pages()->participantFacing();
+    }
+
+    public function facilitatorPages(): HasMany
+    {
+        return $this->pages()->facilitatorOnly();
+    }
+
     public function toolkitAssets(): HasMany
     {
         return $this->hasMany(WorkshopToolkitAsset::class);

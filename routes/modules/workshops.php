@@ -48,6 +48,7 @@ Route::get('/{workshop}/pages/create', [WorkshopPageController::class, 'create']
 Route::post('/{workshop}/pages', [WorkshopPageController::class, 'store'])->name('pages.store');
 Route::post('/{workshop}/pages/reorder', [WorkshopPageController::class, 'reorder'])->name('pages.reorder');
 Route::get('/{workshop}/pages/{page}/edit', [WorkshopPageController::class, 'edit'])->name('pages.edit');
+Route::get('/{workshop}/pages/{page}', [WorkshopPageController::class, 'show'])->name('pages.show');
 Route::put('/{workshop}/pages/{page}', [WorkshopPageController::class, 'update'])->name('pages.update');
 Route::delete('/{workshop}/pages/{page}', [WorkshopPageController::class, 'destroy'])->name('pages.destroy');
 

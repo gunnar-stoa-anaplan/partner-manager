@@ -18,8 +18,8 @@
         <div class="card-body">
             <p class="mb-2">{{ $session->workshop->short_description }}</p>
             <div class="d-flex gap-2">
-                @if($session->workshop->pages->isNotEmpty())
-                    <a href="{{ route('portal.my-workshops.pages.show', [$session, $session->workshop->pages->first()]) }}" class="btn btn-sm btn-primary">Start Content</a>
+                @if($session->workshop->participantPages->isNotEmpty())
+                    <a href="{{ route('portal.my-workshops.pages.show', [$session, $session->workshop->participantPages->first()]) }}" class="btn btn-sm btn-primary">Start Content</a>
                     <a href="{{ route('portal.my-workshops.progress', $session) }}" class="btn btn-sm btn-outline-primary">My Progress</a>
                 @endif
                 @if($session->workshop->toolkitAssets->isNotEmpty())

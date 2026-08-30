@@ -27,6 +27,7 @@
                             <th>#</th>
                             <th>Title</th>
                             <th>Slug</th>
+                            <th>Audience</th>
                             <th>Checks</th>
                             <th>Actions</th>
                         </tr>
@@ -35,8 +36,15 @@
                         @forelse($pages as $page)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $page->title }}</td>
+                                <td><a href="{{ route('workshops.pages.show', [$workshop, $page]) }}">{{ $page->title }}</a></td>
                                 <td><code>{{ $page->slug }}</code></td>
+                                <td>
+                                    @if($page->audience === 'facilitator')
+                                        <span class="badge bg-warning text-dark">Facilitator Only</span>
+                                    @else
+                                        <span class="badge bg-secondary">Participant</span>
+                                    @endif
+                                </td>
                                 <td>{{ count($page->checks()) }}</td>
                                 <td>
                                     <a href="{{ route('workshops.pages.edit', [$workshop, $page]) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
@@ -49,7 +57,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-4">No content pages yet - add the first page to build the curriculum.</td>
+                                <td colspan="6" class="text-center text-muted py-4">No content pages yet - add the first page to build the curriculum.</td>
                             </tr>
                         @endforelse
                     </tbody>

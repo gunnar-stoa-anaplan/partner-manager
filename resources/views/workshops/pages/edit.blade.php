@@ -24,6 +24,15 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Audience <span class="text-danger">*</span></label>
+                        <select class="form-select" name="audience" required>
+                            @foreach(\App\Models\WorkshopPage::AUDIENCES as $value => $label)
+                                <option value="{{ $value }}" @selected(old('audience', $page->audience) === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Body (Markdown/HTML) <span class="text-danger">*</span></label>
                         <textarea class="form-control" name="body" rows="12" required>{{ old('body', $page->body) }}</textarea>
                     </div>

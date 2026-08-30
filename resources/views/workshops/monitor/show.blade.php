@@ -41,6 +41,19 @@
         </div>
     </div>
     <div class="col-lg-4">
+        @if($facilitatorPages->isNotEmpty())
+        <div class="card shadow-0 mb-g border-warning">
+            <div class="card-header bg-warning bg-opacity-10"><div class="card-title"><i class="fal fa-clipboard-list me-2"></i> Facilitator Guide</div></div>
+            <ul class="list-group list-group-flush">
+                @foreach($facilitatorPages as $page)
+                    <li class="list-group-item">
+                        <a href="{{ route('workshops.monitor.pages.show', [$session, $page]) }}">{{ $page->title }}</a>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+
         <div class="card shadow-0 mb-g">
             <div class="card-header"><div class="card-title"><i class="fal fa-users me-2"></i> Participants</div></div>
             <ul class="list-group list-group-flush">

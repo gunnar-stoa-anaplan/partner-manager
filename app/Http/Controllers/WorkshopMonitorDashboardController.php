@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\WorkshopPage;
 use App\Models\WorkshopPresence;
 use App\Models\WorkshopSession;
 use App\Models\WorkshopThread;
@@ -34,10 +35,21 @@ class WorkshopMonitorDashboardController extends Controller
         $totalParticipants = $session->participants->count();
         $completedParticipants = $session->participants->whereNotNull('completed_at')->count();
         $activeNow = WorkshopPresence::activeCountForSession($session->id);
+        $facilitatorPages = $session->workshop->facilitatorPages;
 
         return view('workshops.monitor.show', compact(
-            'session', 'openThreadsCount', 'totalParticipants', 'completedParticipants', 'activeNow',
+            'session', 'openThreadsCount', 'totalParticipants', 'completedParticipants', 'activeNow', 'facilitatorPages',
         ));
+    }
+
+    public function showFacilitatorPage(Request $request, WorkshopSession $session, WorkshopPage $page): View
+    {
+        $this->authorizeMonitor($request->user(), $session);
+        abort_unless($page->workshop_id === $session->workshop_id && $page->audience === 'facilitator', 404);
+
+        $workshop = $session->workshop;
+
+        return view('workshops.monitor.page', compact('session', 'workshop', 'page'));
     }
 
     public function markAnswered(Request $request, WorkshopSession $session, WorkshopThread $thread): RedirectResponse

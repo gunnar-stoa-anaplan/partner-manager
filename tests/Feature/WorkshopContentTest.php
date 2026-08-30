@@ -39,6 +39,7 @@ class WorkshopContentTest extends TestCase
         $response = $this->actingAs($this->coe)->post(route('workshops.pages.store', $workshop), [
             'slug' => 'overview',
             'title' => 'Overview',
+            'audience' => 'participant',
             'body' => 'Welcome to the workshop.',
             'checks_json' => json_encode([['id' => 'check-1', 'label' => 'Read the overview']]),
         ]);

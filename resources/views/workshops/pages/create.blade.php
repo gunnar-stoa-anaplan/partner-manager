@@ -23,6 +23,16 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Audience <span class="text-danger">*</span></label>
+                        <select class="form-select" name="audience" required>
+                            @foreach(\App\Models\WorkshopPage::AUDIENCES as $value => $label)
+                                <option value="{{ $value }}" @selected(old('audience', 'participant') === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">"Facilitator Only" pages never appear in the participant portal - use them for run-of-show scripts, launch checklists, and internal reference.</div>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Body (Markdown/HTML) <span class="text-danger">*</span></label>
                         <textarea class="form-control" name="body" rows="12" required>{{ old('body') }}</textarea>
                     </div>

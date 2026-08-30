@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,11 +14,17 @@ class WorkshopPage extends Model
 
     protected $fillable = [
         'workshop_id',
+        'audience',
         'slug',
         'title',
         'body',
         'sort_order',
         'checks_json',
+    ];
+
+    const AUDIENCES = [
+        'participant' => 'Participant',
+        'facilitator' => 'Facilitator Only',
     ];
 
     protected $casts = [
@@ -27,6 +34,16 @@ class WorkshopPage extends Model
     public function workshop(): BelongsTo
     {
         return $this->belongsTo(Workshop::class);
+    }
+
+    public function scopeParticipantFacing(Builder $query): Builder
+    {
+        return $query->where('audience', 'participant');
+    }
+
+    public function scopeFacilitatorOnly(Builder $query): Builder
+    {
+        return $query->where('audience', 'facilitator');
     }
 
     public function checkAttempts(): HasMany

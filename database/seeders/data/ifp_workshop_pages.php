@@ -11,14 +11,13 @@ return [
       <div style="background:#eff6ff;border-left:4px solid #0066cc;border-radius:0 6px 6px 0;padding:0.85rem 1.1rem;margin:1rem 0;">
         <strong style="display:block;color:#1e3a5f;font-size:1rem;">📋 Step 1 — Take the pre-workshop survey</strong>
         <p style="margin:0.35rem 0 0.6rem 0;color:#374151;">Two minutes. Helps us calibrate the wrap-up conversation around where you started.</p>
-        <a href="https://anaplan-workshops.com/w/ifp/survey/pre" style="display:inline-block;background:#0066cc;color:white;text-decoration:none;padding:0.5rem 0.9rem;border-radius:4px;font-weight:600;font-size:0.9rem;">Take pre-workshop survey →</a>
+        <span style="display:inline-block;background:#0066cc;color:white;padding:0.5rem 0.9rem;border-radius:4px;font-weight:600;font-size:0.9rem;">Find it in the "Surveys" panel of this workshop →</span>
       </div>
 
       <div class="callout-tip">
-        <span class="callout-label">💬 You\'re Not Alone — Join the Workshop Slack</span>
-        <p>Our IFP product experts staff a dedicated Slack channel for workshop participants. Drop in any time during the workshop week — ask questions, share what you\'re stuck on, see what other participants are asking.</p>
-        <p><strong>Slack channel:</strong> <a href="https://anaplan.enterprise.slack.com/archives/C0B96145RKJ" target="_blank">#ext-delivery-workshop-ifp-anaplan</a></p>
-        <p><strong>No Slack access?</strong> Send your question by email to <a href="mailto:ext-delivery-workshop-aaaausokasy5ajaxtrn2rw433u@anaplan.org.slack.com">ext-delivery-workshop-aaaausokasy5ajaxtrn2rw433u@anaplan.org.slack.com</a> — it posts directly into the channel and an expert will respond there.</p>
+        <span class="callout-label">💬 You\'re Not Alone — Use the Discussion Panel</span>
+        <p>Our IFP product experts monitor the Discussion panel on your workshop page. Drop in any time during the workshop week — ask questions, share what you\'re stuck on, see what other participants are asking.</p>
+        <p>Post your question directly from the <strong>Discussion</strong> section below your workshop content — an expert will reply there.</p>
       </div>
 
       <h2>What You\'ll Learn</h2>
@@ -2441,8 +2440,8 @@ return [
         <strong style="display:block;color:#1e3a5f;font-size:1rem;">📋 Two final steps — before you sign off</strong>
         <p style="margin:0.35rem 0 0.6rem 0;color:#374151;">Help us learn what worked and what didn\'t, and lock in your completion.</p>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-          <a href="https://anaplan-workshops.com/w/ifp/survey/post" style="display:inline-block;background:#0066cc;color:white;text-decoration:none;padding:0.5rem 0.9rem;border-radius:4px;font-weight:600;font-size:0.9rem;">Take post-workshop survey →</a>
-          <a href="https://anaplan-workshops.com/w/ifp/survey/knowledge" style="display:inline-block;background:#15803d;color:white;text-decoration:none;padding:0.5rem 0.9rem;border-radius:4px;font-weight:600;font-size:0.9rem;">Take knowledge check →</a>
+          <span style="display:inline-block;background:#0066cc;color:white;padding:0.5rem 0.9rem;border-radius:4px;font-weight:600;font-size:0.9rem;">Find the post-workshop survey in the "Surveys" panel →</span>
+          <span style="display:inline-block;background:#15803d;color:white;padding:0.5rem 0.9rem;border-radius:4px;font-weight:600;font-size:0.9rem;">Find the knowledge check in the "Surveys" panel →</span>
         </div>
       </div>
 
@@ -2471,8 +2470,8 @@ return [
       <p>If you haven\'t already, please take 5 minutes to complete the <strong>post-workshop survey</strong>. We use the responses directly to cut what didn\'t add value and reinforce what did — your feedback is the most direct way to shape what the next cohort sees.</p>
 
       <div class="callout-tip">
-        <span class="callout-label">💬 The Slack Channel Stays Open</span>
-        <p>The workshop is over but our IFP product experts are still in <a href="https://anaplan.enterprise.slack.com/archives/C0B96145RKJ" target="_blank" rel="noopener">#ext-delivery-workshop-ifp-anaplan</a>. Drop in any time with follow-up questions, or when you hit something on a real engagement and want a second opinion.</p>
+        <span class="callout-label">💬 The Discussion Panel Stays Open</span>
+        <p>The workshop is over but our IFP product experts still monitor the Discussion panel on your workshop page. Drop in any time with follow-up questions, or when you hit something on a real engagement and want a second opinion.</p>
       </div>
 
       <p style="text-align:center;font-style:italic;margin-top:2.5rem;color:#6b7280;">Until next time. Thanks again.</p>',
