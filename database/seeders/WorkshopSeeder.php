@@ -318,7 +318,7 @@ class WorkshopSeeder extends Seeder
             ],
         );
 
-        WorkshopCredential::updateOrCreate(
+        $credential = WorkshopCredential::updateOrCreate(
             ['workshop_id' => $ifp->id, 'username' => 'ifp-sandbox-01'],
             [
                 'email' => 'ifp-sandbox-01@anaplan-demo.com',
@@ -329,6 +329,17 @@ class WorkshopSeeder extends Seeder
         );
 
         $session = $ifp->sessions()->where('slug', '2026-06-9')->first();
+
+        $deliveryResource = Contact::where('email', 'jordan.lee@moorezemlak.com')->first();
+
+        if ($session && $deliveryResource && ! $credential->activeAssignment()) {
+            $credential->assignments()->create([
+                'workshop_session_id' => $session->id,
+                'contact_id' => $deliveryResource->id,
+                'assigned_at' => now()->subDays(2),
+                'hold_until' => $session->end_date->addDay(),
+            ]);
+        }
 
         if ($session && $session->threads()->count() === 0) {
             $lead = Contact::where('email', 'alex.morgan@moorezemlak.com')->first();
