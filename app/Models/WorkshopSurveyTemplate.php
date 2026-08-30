@@ -32,6 +32,27 @@ class WorkshopSurveyTemplate extends Model
     const KINDS = [
         'pre' => 'Pre-Workshop',
         'post' => 'Post-Workshop',
+        'knowledge' => 'Knowledge Check',
+    ];
+
+    /**
+     * Fixed 5-point comfort scale for "likert" questions - value 5 is the
+     * most comfortable/confident end, so a post-workshop average higher
+     * than the pre-workshop one reads as a positive delta.
+     */
+    const LIKERT_SCALE = [
+        5 => 'Very comfortable',
+        4 => 'Somewhat comfortable',
+        3 => 'Neither comfortable nor uncomfortable',
+        2 => 'Somewhat uncomfortable',
+        1 => 'Very uncomfortable',
+    ];
+
+    const QUESTION_TYPES = [
+        'single_select' => 'Single-select',
+        'multi_select' => 'Multi-select',
+        'likert' => 'Likert (5-point)',
+        'text' => 'Free text',
     ];
 
     public function workshop(): BelongsTo
@@ -61,31 +82,32 @@ class WorkshopSurveyTemplate extends Model
     }
 
     /**
-     * The first 1-5 rating-type question on this template, if any - used to
-     * compute the pre/post confidence average on the workshop summary.
+     * IDs of every 1-5 likert-type question on this template.
      */
-    public function ratingQuestion(): ?array
+    public function likertQuestionIds(): Collection
     {
-        return collect($this->questions_json)->firstWhere('type', 'rating');
+        return collect($this->questions_json)->where('type', 'likert')->pluck('id');
     }
 
     /**
-     * Average value of this template's rating question across a set of
-     * responses. Returns null when the template has no rating question or
-     * none of the responses answered it.
+     * Overall comfort/confidence average across every likert question and
+     * every response - a template can ask about several topics (e.g. one
+     * likert per workshop module), so this isn't just one question's
+     * average. Returns null when the template has no likert questions or
+     * none of the responses answered any of them.
      *
      * @param  Collection<int, WorkshopSurveyResponse>  $responses
      */
     public function averageRating(Collection $responses): ?float
     {
-        $question = $this->ratingQuestion();
+        $questionIds = $this->likertQuestionIds();
 
-        if (! $question) {
+        if ($questionIds->isEmpty()) {
             return null;
         }
 
         $values = $responses
-            ->map(fn (WorkshopSurveyResponse $response) => $response->responses_json[$question['id']] ?? null)
+            ->flatMap(fn (WorkshopSurveyResponse $response) => $questionIds->map(fn ($id) => $response->responses_json[$id] ?? null))
             ->filter(fn ($value) => is_numeric($value))
             ->map(fn ($value) => (float) $value);
 

@@ -1,7 +1,7 @@
-@extends('layouts.vertical', ['pageTitle' => 'Survey Templates'])
+@extends('layouts.vertical', ['pageTitle' => $workshop->name.' - Survey Templates'])
 
 @section('page-title')
-    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Survey Templates', 'pageSubTitle1' => 'Workshops', 'pageSubTitle1Url' => route('workshops.dashboard'), 'pageSubText' => 'Pre/post knowledge checks per workshop'])
+    @include('layouts.partials/app-pagetitle', ['pageTitle'=> 'Survey Templates', 'pageSubTitle1' => $workshop->name, 'pageSubTitle1Url' => route('workshops.show', $workshop), 'pageSubText' => 'One template per kind - every session in this workshop uses the same set, so results are measured consistently.'])
 @endsection
 
 @section('content')
@@ -12,41 +12,39 @@
         @endif
 
         <div class="card shadow-0 mb-g">
-            <div class="card-header d-flex align-items-center">
-                <div class="card-title flex-grow-1"><i class="fal fa-clipboard me-2"></i> Survey Templates</div>
-                <a href="{{ route('workshops.surveys.create') }}" class="btn btn-primary btn-sm">
-                    <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#plus"></use></svg>
-                    New Template
-                </a>
-            </div>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover table-striped w-100">
                     <thead>
                         <tr>
-                            <th>Workshop</th>
                             <th>Kind</th>
-                            <th>Passing Score</th>
+                            <th>Status</th>
+                            <th>Questions</th>
                             <th>Responses</th>
+                            <th>Updated</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($templates as $template)
+                        @foreach($templates as $template)
                             <tr>
-                                <td>{{ $template->workshop->name }}</td>
-                                <td>{{ \App\Models\WorkshopSurveyTemplate::KINDS[$template->kind] ?? $template->kind }}</td>
-                                <td>{{ $template->passing_score }}%</td>
-                                <td>{{ $template->responses_count }}</td>
+                                <td class="fw-medium">{{ \App\Models\WorkshopSurveyTemplate::KINDS[$template->kind] ?? $template->kind }}</td>
                                 <td>
+                                    @if(!empty($template->questions_json))
+                                        <span class="badge bg-primary bg-opacity-25 text-primary">Active</span>
+                                    @else
+                                        <span class="badge bg-light text-dark">Empty</span>
+                                    @endif
+                                </td>
+                                <td>{{ count($template->questions_json ?? []) }}</td>
+                                <td>{{ $template->responses_count }}</td>
+                                <td class="text-muted fs-sm">{{ $template->updated_at?->format('Y-m-d H:i:s') }}</td>
+                                <td class="text-nowrap">
                                     <a href="{{ route('workshops.surveys.edit', $template) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    <a href="{{ route('workshops.surveys.preview', $template) }}" class="btn btn-sm btn-outline-secondary" target="_blank">Preview ↗</a>
                                     <a href="{{ route('workshops.surveys.results', $template) }}" class="btn btn-sm btn-outline-primary">Results</a>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">No survey templates yet.</td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>

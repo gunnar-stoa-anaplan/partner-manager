@@ -34,8 +34,8 @@ class WorkshopSurveyTest extends TestCase
         $template = WorkshopSurveyTemplate::factory()->create([
             'passing_score' => 50,
             'questions_json' => [
-                ['id' => 'q1', 'text' => 'Single', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']],
-                ['id' => 'q2', 'text' => 'Multiple', 'type' => 'multiple', 'options' => ['A', 'B', 'C'], 'correct' => ['A', 'C']],
+                ['id' => 'q1', 'text' => 'Single', 'type' => 'single_select', 'options' => ['A', 'B'], 'correct' => ['A']],
+                ['id' => 'q2', 'text' => 'Multiple', 'type' => 'multi_select', 'options' => ['A', 'B', 'C'], 'correct' => ['A', 'C']],
                 ['id' => 'q3', 'text' => 'Open text - not scored', 'type' => 'text'],
             ],
         ]);
@@ -50,19 +50,16 @@ class WorkshopSurveyTest extends TestCase
         $this->assertFalse($failing['passed']);
     }
 
-    public function test_internal_user_can_create_a_survey_template(): void
+    public function test_visiting_the_index_auto_provisions_all_three_kinds(): void
     {
         $workshop = Workshop::factory()->create();
 
-        $response = $this->actingAs($this->coe)->post(route('workshops.surveys.store'), [
-            'workshop_id' => $workshop->id,
-            'kind' => 'post',
-            'passing_score' => 70,
-            'questions_json' => json_encode([['id' => 'q1', 'text' => 'Q', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']]]),
-        ]);
+        $response = $this->actingAs($this->coe)->get(route('workshops.surveys.index', $workshop));
 
-        $response->assertRedirect(route('workshops.surveys.index'));
+        $response->assertOk();
+        $this->assertDatabaseHas('workshop_survey_templates', ['workshop_id' => $workshop->id, 'kind' => 'pre']);
         $this->assertDatabaseHas('workshop_survey_templates', ['workshop_id' => $workshop->id, 'kind' => 'post']);
+        $this->assertDatabaseHas('workshop_survey_templates', ['workshop_id' => $workshop->id, 'kind' => 'knowledge']);
     }
 
     public function test_portal_participant_can_submit_a_survey_and_gets_scored(): void
@@ -71,7 +68,7 @@ class WorkshopSurveyTest extends TestCase
         $template = WorkshopSurveyTemplate::factory()->create([
             'workshop_id' => $session->workshop_id,
             'passing_score' => 50,
-            'questions_json' => [['id' => 'q1', 'text' => 'Q', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']]],
+            'questions_json' => [['id' => 'q1', 'text' => 'Q', 'type' => 'single_select', 'options' => ['A', 'B'], 'correct' => ['A']]],
         ]);
         $contact = Contact::factory()->portalRole('workshop_delivery_resource')->create();
         $session->participants()->create(['contact_id' => $contact->id, 'status' => 'active', 'enrolled_at' => now()]);
@@ -96,8 +93,8 @@ class WorkshopSurveyTest extends TestCase
         $template = WorkshopSurveyTemplate::factory()->create([
             'workshop_id' => $session->workshop_id,
             'questions_json' => [
-                ['id' => 'q1', 'text' => 'Single choice', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']],
-                ['id' => 'q2', 'text' => 'Multiple choice', 'type' => 'multiple', 'options' => ['A', 'B'], 'correct' => ['A', 'B']],
+                ['id' => 'q1', 'text' => 'Single choice', 'type' => 'single_select', 'options' => ['A', 'B'], 'correct' => ['A']],
+                ['id' => 'q2', 'text' => 'Multiple choice', 'type' => 'multi_select', 'options' => ['A', 'B'], 'correct' => ['A', 'B']],
                 ['id' => 'q3', 'text' => 'Open text', 'type' => 'text'],
             ],
         ]);
@@ -114,8 +111,8 @@ class WorkshopSurveyTest extends TestCase
             'passing_score' => 100,
             'questions_per_attempt' => 1,
             'questions_json' => [
-                ['id' => 'q1', 'text' => 'Q1', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']],
-                ['id' => 'q2', 'text' => 'Q2', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']],
+                ['id' => 'q1', 'text' => 'Q1', 'type' => 'single_select', 'options' => ['A', 'B'], 'correct' => ['A']],
+                ['id' => 'q2', 'text' => 'Q2', 'type' => 'single_select', 'options' => ['A', 'B'], 'correct' => ['A']],
             ],
         ]);
 
@@ -137,7 +134,7 @@ class WorkshopSurveyTest extends TestCase
         $template = WorkshopSurveyTemplate::factory()->create([
             'workshop_id' => $session->workshop_id,
             'passing_score' => 50,
-            'questions_json' => [['id' => 'q1', 'text' => 'Q', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']]],
+            'questions_json' => [['id' => 'q1', 'text' => 'Q', 'type' => 'single_select', 'options' => ['A', 'B'], 'correct' => ['A']]],
         ]);
         $contact = Contact::factory()->create();
 
@@ -189,12 +186,12 @@ class WorkshopSurveyTest extends TestCase
         $pre = WorkshopSurveyTemplate::factory()->create([
             'workshop_id' => $workshop->id,
             'kind' => 'pre',
-            'questions_json' => [['id' => 'q1', 'text' => 'Shared question', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']]],
+            'questions_json' => [['id' => 'q1', 'text' => 'Shared question', 'type' => 'single_select', 'options' => ['A', 'B'], 'correct' => ['A']]],
         ]);
         $post = WorkshopSurveyTemplate::factory()->create([
             'workshop_id' => $workshop->id,
             'kind' => 'post',
-            'questions_json' => [['id' => 'q1', 'text' => 'Shared question', 'type' => 'single', 'options' => ['A', 'B'], 'correct' => ['A']]],
+            'questions_json' => [['id' => 'q1', 'text' => 'Shared question', 'type' => 'single_select', 'options' => ['A', 'B'], 'correct' => ['A']]],
         ]);
         $session = WorkshopSession::factory()->create(['workshop_id' => $workshop->id]);
 

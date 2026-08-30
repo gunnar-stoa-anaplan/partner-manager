@@ -11,61 +11,41 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class WorkshopSurveyController extends Controller
 {
-    public function index(): View
+    /**
+     * Every workshop gets exactly one template per kind, so all of its
+     * sessions are measured the same way - auto-provision any kind that
+     * doesn't exist yet rather than requiring a separate "create" step.
+     */
+    public function index(Workshop $workshop): View
     {
-        $templates = WorkshopSurveyTemplate::with('workshop:id,name')
+        foreach (array_keys(WorkshopSurveyTemplate::KINDS) as $kind) {
+            WorkshopSurveyTemplate::firstOrCreate(
+                ['workshop_id' => $workshop->id, 'kind' => $kind],
+                ['questions_json' => [], 'passing_score' => 70],
+            );
+        }
+
+        $templates = $workshop->surveyTemplates()
             ->withCount('responses')
-            ->orderBy('workshop_id')
-            ->get();
+            ->get()
+            ->sortBy(fn (WorkshopSurveyTemplate $t) => array_search($t->kind, array_keys(WorkshopSurveyTemplate::KINDS)));
 
-        $workshops = Workshop::orderBy('name')->get();
-
-        return view('workshops.surveys.index', compact('templates', 'workshops'));
-    }
-
-    public function create(): View
-    {
-        $workshops = Workshop::orderBy('name')->get();
-
-        return view('workshops.surveys.create', compact('workshops'));
-    }
-
-    public function store(Request $request): RedirectResponse
-    {
-        $validated = $this->validateTemplate($request);
-
-        WorkshopSurveyTemplate::updateOrCreate(
-            ['workshop_id' => $validated['workshop_id'], 'kind' => $validated['kind']],
-            [
-                'intro' => $validated['intro'] ?? null,
-                'questions_json' => $validated['questions_json'],
-                'passing_score' => $validated['passing_score'],
-                'max_attempts' => $validated['max_attempts'] ?? null,
-                'questions_per_attempt' => $validated['questions_per_attempt'] ?? null,
-                'shuffle_options' => $request->boolean('shuffle_options'),
-                'updated_by' => $request->user()->id,
-            ],
-        );
-
-        return redirect()->route('workshops.surveys.index')->with('success', 'Survey template saved.');
+        return view('workshops.surveys.index', compact('workshop', 'templates'));
     }
 
     public function edit(WorkshopSurveyTemplate $survey): View
     {
-        $sessions = $survey->workshop->sessions;
-
-        return view('workshops.surveys.edit', ['template' => $survey, 'sessions' => $sessions]);
+        return view('workshops.surveys.edit', ['template' => $survey]);
     }
 
     public function update(Request $request, WorkshopSurveyTemplate $survey): RedirectResponse
     {
-        $validated = $this->validateTemplate($request, updating: true);
+        $validated = $this->validateTemplate($request);
 
         $survey->update([
             'intro' => $validated['intro'] ?? null,
@@ -77,7 +57,51 @@ class WorkshopSurveyController extends Controller
             'updated_by' => $request->user()->id,
         ]);
 
-        return redirect()->route('workshops.surveys.index')->with('success', 'Survey template updated.');
+        return redirect()->route('workshops.surveys.edit', $survey)->with('success', 'Survey template saved.');
+    }
+
+    /**
+     * Bulk-append questions from a pasted JSON array to the existing pool -
+     * a separate small form from the main builder, so it never risks
+     * clobbering in-progress edits to the questions above it.
+     */
+    public function importQuestions(Request $request, WorkshopSurveyTemplate $survey): RedirectResponse
+    {
+        $validated = $request->validate(['questions_json' => ['required', 'json']]);
+        $incoming = json_decode($validated['questions_json'], true);
+
+        if (! is_array($incoming) || empty($incoming)) {
+            return back()->with('error', 'Paste a non-empty JSON array of question objects.');
+        }
+
+        $existing = $survey->questions_json ?? [];
+        $usedIds = collect($existing)->pluck('id')->filter()->all();
+
+        foreach ($incoming as $question) {
+            if (empty($question['id'])) {
+                $question['id'] = 'q'.(count($usedIds) + 1).'-'.Str::random(4);
+            }
+            $usedIds[] = $question['id'];
+            $existing[] = $question;
+        }
+
+        $survey->update(['questions_json' => $existing]);
+
+        return redirect()->route('workshops.surveys.edit', $survey)
+            ->with('success', count($incoming).' question(s) appended - '.count($existing).' total in the pool.');
+    }
+
+    public function preview(WorkshopSurveyTemplate $survey): View
+    {
+        return view('workshops.surveys.preview', ['template' => $survey, 'questions' => $survey->questionsForAttempt()]);
+    }
+
+    public function destroy(WorkshopSurveyTemplate $survey): RedirectResponse
+    {
+        $workshop = $survey->workshop;
+        $survey->delete();
+
+        return redirect()->route('workshops.surveys.index', $workshop)->with('success', 'Survey template deleted.');
     }
 
     public function results(WorkshopSurveyTemplate $survey): View
@@ -190,6 +214,10 @@ class WorkshopSurveyController extends Controller
      */
     private function prePostComparison(WorkshopSurveyTemplate $survey): array
     {
+        if (! in_array($survey->kind, ['pre', 'post'], true)) {
+            return [];
+        }
+
         $other = WorkshopSurveyTemplate::where('workshop_id', $survey->workshop_id)
             ->where('kind', $survey->kind === 'pre' ? 'post' : 'pre')
             ->first();
@@ -245,22 +273,16 @@ class WorkshopSurveyController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function validateTemplate(Request $request, bool $updating = false): array
+    private function validateTemplate(Request $request): array
     {
-        $rules = [
+        $validated = $request->validate([
             'intro' => ['nullable', 'string', 'max:2000'],
             'questions_json' => ['required', 'json'],
             'passing_score' => ['required', 'integer', 'min:0', 'max:100'],
             'max_attempts' => ['nullable', 'integer', 'min:1'],
             'questions_per_attempt' => ['nullable', 'integer', 'min:1'],
-        ];
+        ]);
 
-        if (! $updating) {
-            $rules['workshop_id'] = ['required', 'exists:workshops,id'];
-            $rules['kind'] = ['required', Rule::in(array_keys(WorkshopSurveyTemplate::KINDS))];
-        }
-
-        $validated = $request->validate($rules);
         $validated['questions_json'] = json_decode($validated['questions_json'], true);
 
         return $validated;

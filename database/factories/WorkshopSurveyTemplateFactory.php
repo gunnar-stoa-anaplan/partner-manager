@@ -23,7 +23,7 @@ class WorkshopSurveyTemplateFactory extends Factory
             'kind' => 'post',
             'intro' => fake()->sentence(),
             'questions_json' => [
-                ['id' => 'q1', 'text' => fake()->sentence().'?', 'type' => 'single', 'options' => ['A', 'B', 'C'], 'correct' => ['A']],
+                ['id' => 'q1', 'text' => fake()->sentence().'?', 'type' => 'single_select', 'options' => ['A', 'B', 'C'], 'correct' => ['A']],
             ],
             'passing_score' => 70,
         ];

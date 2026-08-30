@@ -267,13 +267,6 @@ return [
                     ['label' => 'Credential Pool', 'route' => 'workshops.credentials.index', 'icon' => 'key'],
                 ],
             ],
-            'reports' => [
-                'label' => 'Reports',
-                'icon' => 'bar-chart',
-                'items' => [
-                    ['label' => 'Survey Templates', 'route' => 'workshops.surveys.index', 'icon' => 'clipboard'],
-                ],
-            ],
         ],
     ],
 

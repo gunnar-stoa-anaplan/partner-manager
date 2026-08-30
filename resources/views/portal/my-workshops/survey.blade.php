@@ -16,38 +16,7 @@
 
         @foreach($questions as $question)
             <input type="hidden" name="presented_ids[]" value="{{ $question['id'] }}">
-            <div class="card portal-card mb-3">
-                <div class="card-body">
-                    <p class="fw-medium">{{ $question['text'] }}</p>
-
-                    @if(($question['type'] ?? 'single') === 'text')
-                        <textarea name="responses[{{ $question['id'] }}]" class="form-control" rows="2"></textarea>
-                    @elseif(($question['type'] ?? 'single') === 'rating')
-                        <div class="d-flex gap-3">
-                            @foreach(range(1, 5) as $value)
-                                <div class="form-check">
-                                    <input type="radio" class="form-check-input" name="responses[{{ $question['id'] }}]" value="{{ $value }}" id="{{ $question['id'] }}-{{ $value }}">
-                                    <label class="form-check-label" for="{{ $question['id'] }}-{{ $value }}">{{ $value }}</label>
-                                </div>
-                            @endforeach
-                        </div>
-                    @elseif(($question['type'] ?? 'single') === 'multiple')
-                        @foreach($question['options'] ?? [] as $option)
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="responses[{{ $question['id'] }}][]" value="{{ $option }}" id="{{ $question['id'] }}-{{ $loop->index }}">
-                                <label class="form-check-label" for="{{ $question['id'] }}-{{ $loop->index }}">{{ $option }}</label>
-                            </div>
-                        @endforeach
-                    @else
-                        @foreach($question['options'] ?? [] as $option)
-                            <div class="form-check">
-                                <input type="radio" class="form-check-input" name="responses[{{ $question['id'] }}]" value="{{ $option }}" id="{{ $question['id'] }}-{{ $loop->index }}">
-                                <label class="form-check-label" for="{{ $question['id'] }}-{{ $loop->index }}">{{ $option }}</label>
-                            </div>
-                        @endforeach
-                    @endif
-                </div>
-            </div>
+            @include('workshops.surveys.partials.question-fields', ['question' => $question, 'index' => $loop->iteration, 'disabled' => false])
         @endforeach
 
         <button type="submit" class="btn btn-primary">Submit Survey</button>
