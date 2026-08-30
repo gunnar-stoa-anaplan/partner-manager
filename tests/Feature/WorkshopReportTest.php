@@ -54,7 +54,7 @@ class WorkshopReportTest extends TestCase
         $response = $this->actingAs($this->coe)->get(route('workshops.reports.slack', [$this->session->workshop, $this->session]));
 
         $response->assertOk();
-        $response->assertSee('invited', false);
+        $response->assertSee('just wrapped', false);
     }
 
     public function test_json_export_returns_expected_structure(): void
@@ -92,5 +92,60 @@ class WorkshopReportTest extends TestCase
         $response = $this->actingAs($this->coe)->get(route('workshops.reports.leaderboard', [$this->session->workshop, $this->session]));
 
         $response->assertOk();
+    }
+
+    public function test_partners_report_ranks_by_all_three_surveys_done(): void
+    {
+        $workshop = $this->session->workshop;
+        $pre = \App\Models\WorkshopSurveyTemplate::factory()->create(['workshop_id' => $workshop->id, 'kind' => 'pre']);
+        $post = \App\Models\WorkshopSurveyTemplate::factory()->create(['workshop_id' => $workshop->id, 'kind' => 'post']);
+        $knowledge = \App\Models\WorkshopSurveyTemplate::factory()->create(['workshop_id' => $workshop->id, 'kind' => 'knowledge']);
+
+        $fullyDonePartner = Partner::factory()->create();
+        $fullyDoneContact = Contact::factory()->create(['partner_id' => $fullyDonePartner->id]);
+        $this->session->participants()->create(['contact_id' => $fullyDoneContact->id, 'status' => 'active', 'enrolled_at' => now()]);
+        foreach ([$pre, $post, $knowledge] as $template) {
+            $template->responses()->create([
+                'workshop_session_id' => $this->session->id,
+                'contact_id' => $fullyDoneContact->id,
+                'responses_json' => [],
+                'score' => 0,
+                'passed' => false,
+                'attempt_number' => 1,
+                'submitted_at' => now(),
+            ]);
+        }
+
+        // $this->partner already has one participant from setUp() with zero
+        // survey responses, so it lands at 0% - a natural "not started" row.
+        $response = $this->actingAs($this->coe)->get(route('workshops.reports.partners', [$workshop, $this->session]));
+
+        $response->assertOk();
+        $response->assertSeeInOrder([$fullyDonePartner->name, '100%', $this->partner->name, '0%']);
+    }
+
+    public function test_index_shows_all_three_done_rate_and_pre_post_delta(): void
+    {
+        $workshop = $this->session->workshop;
+        $pre = \App\Models\WorkshopSurveyTemplate::factory()->create([
+            'workshop_id' => $workshop->id,
+            'kind' => 'pre',
+            'questions_json' => [['id' => 'q1', 'text' => 'Comfort', 'type' => 'likert']],
+        ]);
+        $post = \App\Models\WorkshopSurveyTemplate::factory()->create([
+            'workshop_id' => $workshop->id,
+            'kind' => 'post',
+            'questions_json' => [['id' => 'q1', 'text' => 'Comfort', 'type' => 'likert']],
+        ]);
+
+        $contact = Contact::factory()->create(['partner_id' => $this->partner->id]);
+        $this->session->participants()->create(['contact_id' => $contact->id, 'status' => 'active', 'enrolled_at' => now()]);
+        $pre->responses()->create(['workshop_session_id' => $this->session->id, 'contact_id' => $contact->id, 'responses_json' => ['q1' => 2], 'score' => 0, 'passed' => false, 'attempt_number' => 1, 'submitted_at' => now()]);
+        $post->responses()->create(['workshop_session_id' => $this->session->id, 'contact_id' => $contact->id, 'responses_json' => ['q1' => 5], 'score' => 0, 'passed' => false, 'attempt_number' => 1, 'submitted_at' => now()]);
+
+        $response = $this->actingAs($this->coe)->get(route('workshops.reports.index', [$workshop, $this->session]));
+
+        $response->assertOk();
+        $response->assertSee('+3');
     }
 }

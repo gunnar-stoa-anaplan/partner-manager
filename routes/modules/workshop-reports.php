@@ -8,6 +8,7 @@ Route::get('/{workshop}/sessions/{session}/leaderboard', [WorkshopReportControll
 Route::get('/{workshop}/sessions/{session}/exec-summary', [WorkshopReportController::class, 'execSummary'])->name('exec-summary');
 Route::get('/{workshop}/sessions/{session}/slack', [WorkshopReportController::class, 'slackPost'])->name('slack');
 Route::get('/{workshop}/sessions/{session}/export.json', [WorkshopReportController::class, 'exportJson'])->name('export-json');
+Route::get('/{workshop}/sessions/{session}/partners', [WorkshopReportController::class, 'partners'])->name('partners');
 Route::get('/{workshop}/sessions/{session}/partners-zip', [WorkshopReportController::class, 'partnerReportsZipAll'])->name('partners-zip');
 Route::get('/{workshop}/sessions/{session}/partner/{partner}', [WorkshopReportController::class, 'partnerReport'])->name('partner');
 Route::get('/{workshop}/sessions/{session}/partner/{partner}/zip', [WorkshopReportController::class, 'partnerReportZip'])->name('partner-zip');

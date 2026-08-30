@@ -124,7 +124,7 @@ class WorkshopGapClosureTest extends TestCase
         $response->assertOk();
         $response->assertSee('Executive Summary');
         $response->assertSee('Leaderboard');
-        $response->assertSee('Slack Post');
+        $response->assertSee('Slack Celebration Post');
     }
 
     public function test_all_partner_reports_can_be_downloaded_as_one_zip(): void
