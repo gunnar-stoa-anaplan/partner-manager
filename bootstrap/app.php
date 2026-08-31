@@ -75,14 +75,42 @@ return Application::configure(basePath: dirname(__DIR__))
                     ->group($workshopCredentialsWeb);
             }
 
-            // Workshop Surveys (gated by workshops.reports)
+            // Workshop Surveys (gated by workshops.content - editing the
+            // question set is content administration, kept separate from
+            // workshops.reports which only governs viewing/managing responses)
             $workshopSurveysWeb = base_path('routes/modules/workshop-surveys.php');
 
             if (file_exists($workshopSurveysWeb)) {
-                Route::middleware(['web', 'auth', 'module:workshops.reports'])
+                Route::middleware(['web', 'auth', 'module:workshops.content'])
                     ->prefix('partner-workshops/surveys')
                     ->name('workshops.surveys.')
                     ->group($workshopSurveysWeb);
+            }
+
+            // Workshop Survey Results (gated by workshops.reports - viewing
+            // results and managing bulk-imported responses, distinct from
+            // editing the underlying question set)
+            $workshopSurveyResultsWeb = base_path('routes/modules/workshop-survey-results.php');
+
+            if (file_exists($workshopSurveyResultsWeb)) {
+                Route::middleware(['web', 'auth', 'module:workshops.reports'])
+                    ->prefix('partner-workshops/surveys')
+                    ->name('workshops.surveys.')
+                    ->group($workshopSurveyResultsWeb);
+            }
+
+            // Workshop Content (gated by workshops.content - pages, the
+            // draft/review/publish queue, and the participant content-flag
+            // queue. Editing/publishing workshop content is content
+            // administration, kept separate from workshops.management which
+            // governs session/participant/monitor operations)
+            $workshopContentWeb = base_path('routes/modules/workshop-content.php');
+
+            if (file_exists($workshopContentWeb)) {
+                Route::middleware(['web', 'auth', 'module:workshops.content'])
+                    ->prefix('partner-workshops')
+                    ->name('workshops.')
+                    ->group($workshopContentWeb);
             }
 
             // Workshop Analytics (gated by workshops.reports)

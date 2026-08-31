@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateWorkshopRequest;
 use App\Models\Workshop;
 use App\Models\WorkshopSession;
 use App\Models\WorkshopSessionParticipant;
+use App\Models\WorkshopThread;
 use App\Services\WorkshopLeaderboardService;
 use App\Services\WorkshopSummaryService;
 use Carbon\Carbon;
@@ -112,8 +113,13 @@ class WorkshopController extends Controller
         $workshop->load(['sessions' => fn ($query) => $query->withCount('activeParticipants')->orderBy('start_date')]);
 
         $summary = $this->summaryService->build($workshop);
+        $pendingReviewCount = $workshop->pendingPages()->count() + $workshop->pendingSurveyTemplates()->count();
+        $openContentFlagsCount = WorkshopThread::whereHas('session', fn ($query) => $query->where('workshop_id', $workshop->id))
+            ->where('kind', 'content_flag')
+            ->where('status', 'open')
+            ->count();
 
-        return view('workshops.show', compact('workshop', 'summary'));
+        return view('workshops.show', compact('workshop', 'summary', 'pendingReviewCount', 'openContentFlagsCount'));
     }
 
     public function edit(Workshop $workshop): View
@@ -211,6 +217,36 @@ class WorkshopController extends Controller
             ->take(10);
 
         return view('workshops.rollup', compact('workshop', 'sessionStats', 'partnerStats', 'totalParticipants', 'totalCompleted', 'leaderboard', 'discussionMetrics', 'checkpoints'));
+    }
+
+    /**
+     * Every draft page/template revision awaiting review for this workshop,
+     * in one place - a PM asking "what's open right now" shouldn't have to
+     * check pages and surveys separately.
+     */
+    public function reviewQueue(Workshop $workshop): View
+    {
+        $pendingPages = $workshop->pendingPages()->with('parentPage')->get();
+        $pendingSurveyTemplates = $workshop->pendingSurveyTemplates()->with('parentTemplate')->get();
+
+        return view('workshops.review-queue', compact('workshop', 'pendingPages', 'pendingSurveyTemplates'));
+    }
+
+    /**
+     * Participant-reported content issues, aggregated across every session
+     * of this workshop - flags are about workshop-wide content, not one
+     * session's live chat, so they need a view the session-scoped thread
+     * list doesn't provide.
+     */
+    public function contentFlags(Workshop $workshop): View
+    {
+        $flags = WorkshopThread::whereHas('session', fn ($query) => $query->where('workshop_id', $workshop->id))
+            ->where('kind', 'content_flag')
+            ->with(['page', 'session:id,name', 'authorContact:id,first_name,last_name', 'replies'])
+            ->latest()
+            ->get();
+
+        return view('workshops.content-flags', compact('workshop', 'flags'));
     }
 
     public function update(UpdateWorkshopRequest $request, Workshop $workshop): RedirectResponse

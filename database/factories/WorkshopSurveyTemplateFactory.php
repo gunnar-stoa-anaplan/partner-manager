@@ -26,6 +26,7 @@ class WorkshopSurveyTemplateFactory extends Factory
                 ['id' => 'q1', 'text' => fake()->sentence().'?', 'type' => 'single_select', 'options' => ['A', 'B', 'C'], 'correct' => ['A']],
             ],
             'passing_score' => 70,
+            'published_at' => now(),
         ];
     }
 }

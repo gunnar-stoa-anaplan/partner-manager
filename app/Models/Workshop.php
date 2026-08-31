@@ -49,14 +49,61 @@ class Workshop extends Model
         return $this->hasMany(WorkshopCredential::class);
     }
 
+    /**
+     * The live, published template per kind - excludes historical versions
+     * superseded by a later edit and drafts still awaiting review, so every
+     * existing consumer (leaderboard, analytics, reports) automatically
+     * only ever sees the current question set.
+     */
     public function surveyTemplates(): HasMany
+    {
+        return $this->hasMany(WorkshopSurveyTemplate::class)->whereNull('superseded_at')->whereNotNull('published_at');
+    }
+
+    /**
+     * Every version ever created for this workshop's templates, current and
+     * historical alike - for an admin-facing version history view.
+     */
+    public function allSurveyTemplateVersions(): HasMany
     {
         return $this->hasMany(WorkshopSurveyTemplate::class);
     }
 
+    /**
+     * Draft template revisions awaiting review/publish - the "open PRs" for
+     * this workshop's survey content.
+     */
+    public function pendingSurveyTemplates(): HasMany
+    {
+        return $this->hasMany(WorkshopSurveyTemplate::class)->whereNull('published_at')->whereNull('rejected_at');
+    }
+
+    /**
+     * The live, published page per slug - excludes historical versions
+     * superseded by a later edit and drafts still awaiting review, so every
+     * existing consumer automatically only ever sees the current content.
+     */
     public function pages(): HasMany
     {
+        return $this->hasMany(WorkshopPage::class)->whereNull('superseded_at')->whereNotNull('published_at')->orderBy('sort_order');
+    }
+
+    /**
+     * Every version ever created for this workshop's pages, current and
+     * historical alike - for an admin-facing version history view.
+     */
+    public function allPageVersions(): HasMany
+    {
         return $this->hasMany(WorkshopPage::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Draft page revisions (or brand-new unpublished pages) awaiting
+     * review/publish - the "open PRs" for this workshop's content.
+     */
+    public function pendingPages(): HasMany
+    {
+        return $this->hasMany(WorkshopPage::class)->whereNull('published_at')->whereNull('rejected_at')->orderBy('created_at');
     }
 
     /**

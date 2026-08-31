@@ -111,6 +111,13 @@ class ActivationPathSeeder extends Seeder
             }
         }
 
+        // Workshops has no activation path of its own (it's a standalone
+        // feature, not part of the guided-training rollout), so the purge
+        // above wipes the flag WorkshopSeeder already turned on. Re-activate
+        // it here since this seeder runs last and is the final word on
+        // Pennant state.
+        Feature::for(null)->activate('workshops');
+
         $this->command->info('Seeded '.count($paths).' activation paths with per-user assignments.');
     }
 

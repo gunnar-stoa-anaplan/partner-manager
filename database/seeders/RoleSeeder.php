@@ -73,6 +73,7 @@ class RoleSeeder extends Seeder
             'enablement.lab_administration' => 'write',
             'workshops.management' => 'write',
             'workshops.credentials' => 'write',
+            'workshops.content' => 'write',
             'workshops.reports' => 'write',
         ]);
 
@@ -142,6 +143,7 @@ class RoleSeeder extends Seeder
             'enablement.lab_administration' => 'write',
             'workshops.management' => 'write',
             'workshops.credentials' => 'write',
+            'workshops.content' => 'write',
             'workshops.reports' => 'write',
         ]);
 
@@ -194,19 +196,43 @@ class RoleSeeder extends Seeder
             'integration_hub.api_tokens' => 'write',
         ]);
 
-        // Workshop Owner - focused role for testing the Workshops feature in
-        // isolation, without the rest of the app's nav. Mirrors journey_owner.
-        $workshopOwner = Role::updateOrCreate(['slug' => 'workshop_owner'], [
-            'display_name' => 'Workshop Owner',
+        // Workshop Administrator - focused role for testing the Workshops
+        // feature's content-ownership side in isolation, without the rest of
+        // the app's nav. Mirrors journey_owner. Owns workshop content, survey
+        // /knowledge-check questions, and the tenant credential pool -
+        // renamed from workshop_owner now that session_administrator exists
+        // as a separate, narrower role.
+        $workshopAdministrator = Role::updateOrCreate(['slug' => 'workshop_administrator'], [
+            'display_name' => 'Workshop Administrator',
             'type' => 'internal',
             'landing_route' => 'workshops.dashboard',
             'sort_order' => 7,
-            'description' => 'Focused role for creating, scheduling, and facilitating partner delivery workshops.',
+            'description' => 'Focused role for owning workshop content, survey/knowledge-check questions, and the tenant credential pool.',
         ]);
-        $this->syncPermissions($workshopOwner, [
+        $this->syncPermissions($workshopAdministrator, [
             'workshops.management' => 'write',
             'workshops.credentials' => 'write',
+            'workshops.content' => 'write',
             'workshops.reports' => 'write',
+        ]);
+
+        // Session Administrator - focused role for testing the Workshops
+        // feature's day-to-day operations side in isolation. Schedules
+        // sessions, invites partners, and distributes reports, but has no
+        // edit rights over survey/knowledge-check content or the tenant
+        // credential pool - that stays with workshop_administrator.
+        $sessionAdministrator = Role::updateOrCreate(['slug' => 'session_administrator'], [
+            'display_name' => 'Session Administrator',
+            'type' => 'internal',
+            'landing_route' => 'workshops.dashboard',
+            'sort_order' => 8,
+            'description' => 'Focused role for scheduling sessions, inviting partners, and distributing workshop reports.',
+        ]);
+        $this->syncPermissions($sessionAdministrator, [
+            'workshops.management' => 'write',
+            'workshops.reports' => 'write',
+            'workshops.credentials' => 'read',
+            'workshops.content' => 'read',
         ]);
     }
 

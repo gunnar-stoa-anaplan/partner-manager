@@ -22,20 +22,29 @@ class WorkshopThreadController extends Controller
             'body' => ['required', 'string', 'max:5000'],
             'anonymous' => ['nullable', 'boolean'],
             'workshop_page_id' => ['nullable', 'exists:workshop_pages,id'],
+            'kind' => ['nullable', 'in:question,content_flag'],
         ]);
+
+        $kind = $validated['kind'] ?? 'question';
+
+        if ($kind === 'content_flag') {
+            abort_unless(! empty($validated['workshop_page_id']), 422, 'A content flag must reference the page it was reported from.');
+        }
 
         $thread = $session->threads()->create([
             'workshop_page_id' => $validated['workshop_page_id'] ?? null,
             'author_contact_id' => $contact->id,
             'anonymous' => $request->boolean('anonymous'),
-            'kind' => 'question',
+            'kind' => $kind,
             'body' => $validated['body'],
             'status' => 'open',
         ]);
 
         $this->storeUpload($request, $contact->id, threadId: $thread->id);
 
-        return redirect()->back()->with('success', 'Question posted.');
+        $message = $kind === 'content_flag' ? 'Thanks - we\'ve flagged this for review.' : 'Question posted.';
+
+        return redirect()->back()->with('success', $message);
     }
 
     public function reply(Request $request, WorkshopSession $session, WorkshopThread $thread): RedirectResponse

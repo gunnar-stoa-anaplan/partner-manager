@@ -15,6 +15,14 @@ class WorkshopSurveyTemplate extends Model
     protected $fillable = [
         'workshop_id',
         'kind',
+        'version',
+        'parent_survey_template_id',
+        'superseded_at',
+        'published_at',
+        'published_by',
+        'rejected_at',
+        'rejected_by',
+        'rejection_reason',
         'intro',
         'questions_json',
         'passing_score',
@@ -27,6 +35,9 @@ class WorkshopSurveyTemplate extends Model
     protected $casts = [
         'questions_json' => 'array',
         'shuffle_options' => 'boolean',
+        'superseded_at' => 'datetime',
+        'published_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     const KINDS = [
@@ -68,6 +79,61 @@ class WorkshopSurveyTemplate extends Model
     public function responses(): HasMany
     {
         return $this->hasMany(WorkshopSurveyResponse::class, 'workshop_survey_template_id');
+    }
+
+    public function parentTemplate(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_survey_template_id');
+    }
+
+    public function childVersions(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_survey_template_id');
+    }
+
+    public function publishedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'published_by');
+    }
+
+    public function rejectedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
+    }
+
+    public function reviewComments(): HasMany
+    {
+        return $this->hasMany(WorkshopContentReviewComment::class, 'workshop_survey_template_id');
+    }
+
+    /**
+     * Whether this is the live version sessions attach to, as opposed to a
+     * frozen historical version kept only so past responses still resolve
+     * to the exact questions they were asked.
+     */
+    public function isCurrent(): bool
+    {
+        return $this->superseded_at === null;
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->published_at !== null;
+    }
+
+    /**
+     * A draft is a proposed revision (or a brand-new template) that hasn't
+     * been published live yet and hasn't been rejected either - it's still
+     * "open," in PR terms.
+     */
+    public function isDraft(): bool
+    {
+        return $this->published_at === null && $this->rejected_at === null;
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->rejected_at !== null;
     }
 
     /**

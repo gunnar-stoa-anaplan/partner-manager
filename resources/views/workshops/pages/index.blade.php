@@ -14,6 +14,9 @@
         <div class="card shadow-0 mb-g">
             <div class="card-header d-flex align-items-center">
                 <div class="card-title flex-grow-1"><i class="fal fa-file-alt me-2"></i> Content Pages</div>
+                @if($pendingCount > 0)
+                    <a href="{{ route('workshops.review-queue', $workshop) }}" class="btn btn-outline-warning btn-sm me-2">{{ $pendingCount }} pending review</a>
+                @endif
                 <a href="{{ route('workshops.toolkit.index', $workshop) }}" class="btn btn-outline-secondary btn-sm me-2">Toolkit Assets</a>
                 <a href="{{ route('workshops.pages.create', $workshop) }}" class="btn btn-primary btn-sm">
                     <svg class="sa-icon sa-icon-sm me-1"><use href="/icons/sprite.svg#plus"></use></svg>
@@ -37,7 +40,12 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td><a href="{{ route('workshops.pages.show', [$workshop, $page]) }}">{{ $page->title }}</a></td>
-                                <td><code>{{ $page->slug }}</code></td>
+                                <td>
+                                    <code>{{ $page->slug }}</code>
+                                    @if($page->version > 1)
+                                        <span class="badge bg-light text-dark ms-1">v{{ $page->version }}</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($page->audience === 'facilitator')
                                         <span class="badge bg-warning text-dark">Facilitator Only</span>
@@ -48,6 +56,7 @@
                                 <td>{{ count($page->checks()) }}</td>
                                 <td>
                                     <a href="{{ route('workshops.pages.edit', [$workshop, $page]) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    <a href="{{ route('workshops.pages.history', [$workshop, $page]) }}" class="btn btn-sm btn-outline-secondary">History</a>
                                     <form action="{{ route('workshops.pages.destroy', [$workshop, $page]) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this page?')">
                                         @csrf
                                         @method('DELETE')

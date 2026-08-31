@@ -238,10 +238,17 @@ class WorkshopSeeder extends Seeder
             'password' => $deliveryResource->password ?? 'password',
         ]);
 
-        // Ben Wilson tests the internal side, focused on Workshops only.
-        $workshopOwnerRole = Role::where('slug', 'workshop_owner')->first();
+        // Ben Wilson tests the internal side, focused on Workshops content
+        // ownership only. Rick Palmer tests the day-to-day session
+        // operations side - scheduling, inviting, and reporting - without
+        // content/tenant-pool edit rights.
+        $workshopAdministratorRole = Role::where('slug', 'workshop_administrator')->first();
         $benWilson = User::where('email', 'ben.wilson@example.com')->first();
-        $benWilson?->update(['role_id' => $workshopOwnerRole->id]);
+        $benWilson?->update(['role_id' => $workshopAdministratorRole->id]);
+
+        $sessionAdministratorRole = Role::where('slug', 'session_administrator')->first();
+        $rickPalmer = User::where('email', 'rick.palmer@example.com')->first();
+        $rickPalmer?->update(['role_id' => $sessionAdministratorRole->id]);
 
         $session = Workshop::where('slug', 'ifp')->first()?->sessions()->where('slug', '2026-06-9')->first();
 
@@ -269,14 +276,14 @@ class WorkshopSeeder extends Seeder
         }
 
         $session->monitors()->updateOrCreate(
-            ['user_id' => $benWilson?->id ?? $facilitator->id],
+            ['user_id' => $rickPalmer?->id ?? $facilitator->id],
             [
                 'assigned_at' => now()->subDays(3),
                 'assigned_by' => $facilitator->id,
             ],
         );
 
-        $this->command->info("  ✓ Enrolled demo contacts from {$partner->name} into \"{$session->name}\", Ben Wilson focused on Workshops");
+        $this->command->info("  ✓ Enrolled demo contacts from {$partner->name} into \"{$session->name}\", Ben Wilson focused on workshop content, Rick Palmer on session operations");
 
         return [$practiceLead, $deliveryResource];
     }

@@ -45,8 +45,35 @@
 
             <div class="card portal-card mb-4">
                 <div class="card-body">
-                    <h4>{{ $page->title }}</h4>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h4>{{ $page->title }}</h4>
+                        <button type="button" class="btn btn-sm btn-outline-secondary flex-shrink-0 ms-2" data-bs-toggle="modal" data-bs-target="#reportIssueModal">Report an issue</button>
+                    </div>
                     <div class="mt-3 workshop-content-body">{!! $page->body !!}</div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="reportIssueModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="{{ route('portal.my-workshops.threads.store', $session) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="workshop_page_id" value="{{ $page->id }}">
+                            <input type="hidden" name="kind" value="content_flag">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Report an issue with this page</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <label class="form-label">What's wrong? (e.g. a stale screenshot, outdated instructions)</label>
+                                <textarea name="body" class="form-control" rows="4" required></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 

@@ -7,6 +7,7 @@ use App\Models\Workshop;
 use App\Models\WorkshopSession;
 use App\Models\WorkshopSurveyResponse;
 use App\Models\WorkshopSurveyTemplate;
+use App\Services\WorkshopContentDiffService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -16,6 +17,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class WorkshopSurveyController extends Controller
 {
+    public function __construct(private WorkshopContentDiffService $diffService) {}
+
     /**
      * Every workshop gets exactly one template per kind, so all of its
      * sessions are measured the same way - auto-provision any kind that
@@ -24,9 +27,9 @@ class WorkshopSurveyController extends Controller
     public function index(Workshop $workshop): View
     {
         foreach (array_keys(WorkshopSurveyTemplate::KINDS) as $kind) {
-            WorkshopSurveyTemplate::firstOrCreate(
-                ['workshop_id' => $workshop->id, 'kind' => $kind],
-                ['questions_json' => [], 'passing_score' => 70],
+            $workshop->surveyTemplates()->firstOrCreate(
+                ['kind' => $kind],
+                ['questions_json' => [], 'passing_score' => 70, 'published_at' => now(), 'published_by' => auth()->id()],
             );
         }
 
@@ -35,7 +38,9 @@ class WorkshopSurveyController extends Controller
             ->get()
             ->sortBy(fn (WorkshopSurveyTemplate $t) => array_search($t->kind, array_keys(WorkshopSurveyTemplate::KINDS)));
 
-        return view('workshops.surveys.index', compact('workshop', 'templates'));
+        $pendingCount = $workshop->pendingSurveyTemplates()->count();
+
+        return view('workshops.surveys.index', compact('workshop', 'templates', 'pendingCount'));
     }
 
     public function edit(WorkshopSurveyTemplate $survey): View
@@ -47,7 +52,7 @@ class WorkshopSurveyController extends Controller
     {
         $validated = $this->validateTemplate($request);
 
-        $survey->update([
+        $attributes = [
             'intro' => $validated['intro'] ?? null,
             'questions_json' => $validated['questions_json'],
             'passing_score' => $validated['passing_score'],
@@ -55,9 +60,134 @@ class WorkshopSurveyController extends Controller
             'questions_per_attempt' => $validated['questions_per_attempt'] ?? null,
             'shuffle_options' => $request->boolean('shuffle_options'),
             'updated_by' => $request->user()->id,
+        ];
+
+        $current = $this->applyContentEdit($survey, $attributes);
+
+        if ($current->is($survey)) {
+            return redirect()->route('workshops.surveys.edit', $current)->with('success', 'Survey template saved.');
+        }
+
+        return redirect()->route('workshops.surveys.diff', $current)
+            ->with('success', "Saved as a draft (version {$current->version}) - review the diff and publish it to make it live. The current live version is untouched until then.");
+    }
+
+    /**
+     * Editing content that's already live and published creates a new
+     * DRAFT version instead of mutating the live one in place, so
+     * historical scoring/comparisons never retroactively change underneath
+     * completed sessions and the change goes through review before anyone
+     * but staff sees it. A template that's never been published yet (still
+     * being authored, or an earlier draft that was itself never published)
+     * can be edited freely in place - there's nothing live to protect.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    private function applyContentEdit(WorkshopSurveyTemplate $survey, array $attributes): WorkshopSurveyTemplate
+    {
+        if (! $survey->isPublished()) {
+            $survey->update($attributes);
+
+            return $survey;
+        }
+
+        $newVersion = $survey->replicate(['created_at', 'updated_at']);
+        $newVersion->fill($attributes);
+        $newVersion->version = $survey->version + 1;
+        $newVersion->parent_survey_template_id = $survey->id;
+        $newVersion->superseded_at = null;
+        $newVersion->published_at = null;
+        $newVersion->published_by = null;
+        $newVersion->rejected_at = null;
+        $newVersion->rejected_by = null;
+        $newVersion->rejection_reason = null;
+        $newVersion->save();
+
+        return $newVersion;
+    }
+
+    /**
+     * Makes a draft the live version: supersedes whatever was previously
+     * live for the same kind (if anything), and marks this row published.
+     */
+    public function publish(WorkshopSurveyTemplate $survey): RedirectResponse
+    {
+        abort_if($survey->isPublished(), 422, 'This template is already live.');
+        abort_if($survey->isRejected(), 422, 'A rejected draft cannot be published - create a new edit instead.');
+
+        $liveSibling = $survey->workshop->allSurveyTemplateVersions()
+            ->where('kind', $survey->kind)
+            ->whereNotNull('published_at')
+            ->whereNull('superseded_at')
+            ->where('id', '!=', $survey->id)
+            ->first();
+
+        $liveSibling?->update(['superseded_at' => now()]);
+
+        $survey->update(['published_at' => now(), 'published_by' => auth()->id()]);
+
+        return redirect()->route('workshops.surveys.index', $survey->workshop)->with('success', 'Survey template is now live.');
+    }
+
+    public function reject(Request $request, WorkshopSurveyTemplate $survey): RedirectResponse
+    {
+        abort_if($survey->isPublished(), 422, 'This template is already live and cannot be rejected.');
+
+        $validated = $request->validate(['rejection_reason' => ['nullable', 'string', 'max:2000']]);
+
+        $survey->update([
+            'rejected_at' => now(),
+            'rejected_by' => auth()->id(),
+            'rejection_reason' => $validated['rejection_reason'] ?? null,
         ]);
 
-        return redirect()->route('workshops.surveys.edit', $survey)->with('success', 'Survey template saved.');
+        return redirect()->route('workshops.review-queue', $survey->workshop)->with('success', 'Draft template rejected.');
+    }
+
+    /**
+     * Side-by-side review of a draft against the template it would
+     * replace - a text diff of the intro and a semantic diff of the
+     * questions.
+     */
+    public function diff(WorkshopSurveyTemplate $survey): View
+    {
+        $workshop = $survey->workshop;
+        $before = $survey->parentTemplate;
+
+        $introDiff = $this->diffService->diffText($before?->intro, $survey->intro);
+        $questionsDiff = $this->diffService->diffKeyedArray($before?->questions_json ?? [], $survey->questions_json ?? []);
+
+        $comments = $survey->reviewComments()->with('author:id,name')->latest()->get();
+
+        return view('workshops.surveys.diff', compact('workshop', 'survey', 'before', 'introDiff', 'questionsDiff', 'comments'));
+    }
+
+    public function comment(Request $request, WorkshopSurveyTemplate $survey): RedirectResponse
+    {
+        $validated = $request->validate(['body' => ['required', 'string', 'max:2000']]);
+
+        $survey->reviewComments()->create([
+            'body' => $validated['body'],
+            'author_user_id' => $request->user()->id,
+        ]);
+
+        return redirect()->route('workshops.surveys.diff', $survey)->with('success', 'Comment added.');
+    }
+
+    /**
+     * Every version of this template's kind, newest first, for an admin
+     * reviewing what changed and when.
+     */
+    public function history(WorkshopSurveyTemplate $survey): View
+    {
+        $versions = $survey->workshop->allSurveyTemplateVersions()
+            ->where('kind', $survey->kind)
+            ->withCount('responses')
+            ->with('updatedByUser:id,name')
+            ->orderByDesc('version')
+            ->get();
+
+        return view('workshops.surveys.history', ['template' => $survey, 'versions' => $versions]);
     }
 
     /**
@@ -85,10 +215,15 @@ class WorkshopSurveyController extends Controller
             $existing[] = $question;
         }
 
-        $survey->update(['questions_json' => $existing]);
+        $current = $this->applyContentEdit($survey, ['questions_json' => $existing]);
 
-        return redirect()->route('workshops.surveys.edit', $survey)
-            ->with('success', count($incoming).' question(s) appended - '.count($existing).' total in the pool.');
+        if ($current->is($survey)) {
+            return redirect()->route('workshops.surveys.edit', $current)
+                ->with('success', count($incoming).' question(s) appended - '.count($existing).' total in the pool.');
+        }
+
+        return redirect()->route('workshops.surveys.diff', $current)
+            ->with('success', count($incoming).' question(s) appended as a draft (version '.$current->version.') - review and publish to go live.');
     }
 
     public function preview(WorkshopSurveyTemplate $survey): View
@@ -220,6 +355,8 @@ class WorkshopSurveyController extends Controller
 
         $other = WorkshopSurveyTemplate::where('workshop_id', $survey->workshop_id)
             ->where('kind', $survey->kind === 'pre' ? 'post' : 'pre')
+            ->whereNull('superseded_at')
+            ->whereNotNull('published_at')
             ->first();
 
         if (! $other) {

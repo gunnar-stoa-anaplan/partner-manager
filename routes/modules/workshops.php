@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\WorkshopController;
-use App\Http\Controllers\WorkshopPageController;
 use App\Http\Controllers\WorkshopParticipantController;
 use App\Http\Controllers\WorkshopSessionController;
 use App\Http\Controllers\WorkshopThreadController;
@@ -49,14 +48,11 @@ Route::get('/{workshop}/sessions/{session}/threads/{thread}/suggest-reply', [Wor
 
 Route::get('/uploads/{upload}', [WorkshopUploadController::class, 'download'])->name('uploads.download');
 
-Route::get('/{workshop}/pages', [WorkshopPageController::class, 'index'])->name('pages.index');
-Route::get('/{workshop}/pages/create', [WorkshopPageController::class, 'create'])->name('pages.create');
-Route::post('/{workshop}/pages', [WorkshopPageController::class, 'store'])->name('pages.store');
-Route::post('/{workshop}/pages/reorder', [WorkshopPageController::class, 'reorder'])->name('pages.reorder');
-Route::get('/{workshop}/pages/{page}/edit', [WorkshopPageController::class, 'edit'])->name('pages.edit');
-Route::get('/{workshop}/pages/{page}', [WorkshopPageController::class, 'show'])->name('pages.show');
-Route::put('/{workshop}/pages/{page}', [WorkshopPageController::class, 'update'])->name('pages.update');
-Route::delete('/{workshop}/pages/{page}', [WorkshopPageController::class, 'destroy'])->name('pages.destroy');
+// Content pages (WorkshopPageController) and the review queue / content
+// flags queue live in routes/modules/workshop-content.php instead, gated
+// by module:workshops.content - editing workshop content is a content-
+// administration action, kept separate from session/participant/monitor
+// operations which is what this file is gated for.
 
 Route::get('/{workshop}/toolkit', [WorkshopToolkitAssetController::class, 'index'])->name('toolkit.index');
 Route::post('/{workshop}/toolkit', [WorkshopToolkitAssetController::class, 'store'])->name('toolkit.store');

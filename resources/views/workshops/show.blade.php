@@ -272,6 +272,28 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-6 col-xl-4">
+                <div class="card shadow-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between mb-2">
+                            <h6 class="mb-0">Review Queue @if($pendingReviewCount > 0)<span class="badge bg-warning text-dark ms-1">{{ $pendingReviewCount }}</span>@endif</h6>
+                            <a href="{{ route('workshops.review-queue', $workshop) }}" class="btn btn-outline-primary btn-sm">Review →</a>
+                        </div>
+                        <p class="text-muted fs-sm mb-0">Draft page and survey revisions awaiting review before they go live - the PR queue for this workshop's content.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-4">
+                <div class="card shadow-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between mb-2">
+                            <h6 class="mb-0">Content Flags @if($openContentFlagsCount > 0)<span class="badge bg-danger ms-1">{{ $openContentFlagsCount }}</span>@endif</h6>
+                            <a href="{{ route('workshops.content-flags', $workshop) }}" class="btn btn-outline-primary btn-sm">View →</a>
+                        </div>
+                        <p class="text-muted fs-sm mb-0">Inaccuracies participants have flagged on this workshop's content, across every session.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         @if($workshop->facilitatorPages->isNotEmpty())

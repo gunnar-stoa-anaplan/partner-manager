@@ -12,6 +12,12 @@
         @endif
 
         <div class="card shadow-0 mb-g">
+            @if($pendingCount > 0)
+                <div class="card-header d-flex align-items-center">
+                    <div class="card-title flex-grow-1"></div>
+                    <a href="{{ route('workshops.review-queue', $workshop) }}" class="btn btn-outline-warning btn-sm">{{ $pendingCount }} pending review</a>
+                </div>
+            @endif
             <div class="table-responsive">
                 <table class="table table-bordered table-hover table-striped w-100">
                     <thead>
@@ -27,7 +33,12 @@
                     <tbody>
                         @foreach($templates as $template)
                             <tr>
-                                <td class="fw-medium">{{ \App\Models\WorkshopSurveyTemplate::KINDS[$template->kind] ?? $template->kind }}</td>
+                                <td class="fw-medium">
+                                    {{ \App\Models\WorkshopSurveyTemplate::KINDS[$template->kind] ?? $template->kind }}
+                                    @if($template->version > 1)
+                                        <span class="badge bg-light text-dark ms-1">v{{ $template->version }}</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if(!empty($template->questions_json))
                                         <span class="badge bg-primary bg-opacity-25 text-primary">Active</span>
@@ -42,6 +53,7 @@
                                     <a href="{{ route('workshops.surveys.edit', $template) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
                                     <a href="{{ route('workshops.surveys.preview', $template) }}" class="btn btn-sm btn-outline-secondary" target="_blank">Preview ↗</a>
                                     <a href="{{ route('workshops.surveys.results', $template) }}" class="btn btn-sm btn-outline-primary">Results</a>
+                                    <a href="{{ route('workshops.surveys.history', $template) }}" class="btn btn-sm btn-outline-secondary">History</a>
                                 </td>
                             </tr>
                         @endforeach

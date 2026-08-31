@@ -162,8 +162,9 @@
     @endif
     @endcan
 
-    {{-- Journeys (visible to admins and assigned PSMs) --}}
-    @if(Route::has('journeys.index'))
+    {{-- Journeys (visible to admins and assigned PSMs; hidden for the
+         focused Workshops-only testing roles) --}}
+    @if(Route::has('journeys.index') && ! in_array(auth()->user()->role?->slug, ['workshop_administrator', 'session_administrator'], true))
     <li>
         <a href="{{ route('journeys.index') }}" title="Journeys" data-filter-tags="journeys">
             <svg class="sa-icon">
@@ -174,7 +175,8 @@
     </li>
     @endif
 
-    {{-- User Profile (always visible) --}}
+    {{-- User Profile (hidden for the focused Workshops-only testing roles) --}}
+    @if(! in_array(auth()->user()->role?->slug, ['workshop_administrator', 'session_administrator'], true))
     <li>
         <a href="{{ route('profile.edit') }}" title="Profile" data-filter-tags="profile settings">
             <svg class="sa-icon">
@@ -183,6 +185,7 @@
             <span class="nav-link-text">Profile</span>
         </a>
     </li>
+    @endif
 
     @endauth
 </ul>

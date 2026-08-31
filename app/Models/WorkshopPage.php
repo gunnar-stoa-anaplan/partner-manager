@@ -16,6 +16,14 @@ class WorkshopPage extends Model
         'workshop_id',
         'audience',
         'slug',
+        'version',
+        'parent_workshop_page_id',
+        'superseded_at',
+        'published_at',
+        'published_by',
+        'rejected_at',
+        'rejected_by',
+        'rejection_reason',
         'title',
         'body',
         'sort_order',
@@ -29,11 +37,69 @@ class WorkshopPage extends Model
 
     protected $casts = [
         'checks_json' => 'array',
+        'superseded_at' => 'datetime',
+        'published_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     public function workshop(): BelongsTo
     {
         return $this->belongsTo(Workshop::class);
+    }
+
+    public function parentPage(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_workshop_page_id');
+    }
+
+    public function childVersions(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_workshop_page_id');
+    }
+
+    public function publishedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'published_by');
+    }
+
+    public function rejectedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
+    }
+
+    public function reviewComments(): HasMany
+    {
+        return $this->hasMany(WorkshopContentReviewComment::class, 'workshop_page_id');
+    }
+
+    /**
+     * Whether this is the live version sessions attach to, as opposed to a
+     * frozen historical version kept only so past check attempts/threads
+     * still resolve to the exact content shown at the time.
+     */
+    public function isCurrent(): bool
+    {
+        return $this->superseded_at === null;
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->published_at !== null;
+    }
+
+    /**
+     * A draft is a proposed revision (or a brand-new page) that hasn't been
+     * published live yet and hasn't been rejected either - it's still
+     * "open," in PR terms.
+     */
+    public function isDraft(): bool
+    {
+        return $this->published_at === null && $this->rejected_at === null;
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->rejected_at !== null;
     }
 
     public function scopeParticipantFacing(Builder $query): Builder

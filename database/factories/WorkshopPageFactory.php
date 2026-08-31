@@ -25,6 +25,7 @@ class WorkshopPageFactory extends Factory
             'body' => fake()->paragraphs(3, true),
             'sort_order' => 0,
             'checks_json' => [['id' => 'check-1', 'label' => 'Completed the exercise']],
+            'published_at' => now(),
         ];
     }
 }
