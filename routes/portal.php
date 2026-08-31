@@ -115,8 +115,13 @@ Route::middleware('portal')->group(function () {
         Route::get('/workshops-rollup', [PortalWorkshopController::class, 'rollup'])->name('workshops.rollup');
 
         Route::get('/my-workshops', [PortalWorkshopParticipationController::class, 'index'])->name('my-workshops.index');
+        // /browse must be registered before the bare /{session} wildcard
+        // below, or the wildcard would swallow it as a session id.
+        Route::get('/my-workshops/browse', [PortalWorkshopParticipationController::class, 'browse'])->name('my-workshops.browse');
         Route::get('/my-workshops/{session}', [PortalWorkshopParticipationController::class, 'show'])->name('my-workshops.show');
         Route::get('/my-workshops/{session}/feed', [PortalWorkshopParticipationController::class, 'feed'])->name('my-workshops.feed');
+        Route::post('/my-workshops/{session}/register', [PortalWorkshopParticipationController::class, 'register'])->name('my-workshops.register');
+        Route::post('/my-workshops/{session}/self-register', [PortalWorkshopParticipationController::class, 'selfRegister'])->name('my-workshops.self-register');
 
         Route::post('/my-workshops/{session}/threads', [PortalWorkshopThreadController::class, 'store'])->name('my-workshops.threads.store');
         Route::post('/my-workshops/{session}/threads/{thread}/replies', [PortalWorkshopThreadController::class, 'reply'])->name('my-workshops.threads.reply');
