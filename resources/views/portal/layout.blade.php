@@ -124,7 +124,10 @@
                     </li>
                     @endif
 
-                    {{-- All roles --}}
+                    {{-- All roles, except the focused Workshops-only test
+                         personas (workshop_practice_lead/workshop_delivery_resource),
+                         which are meant to see Dashboard + Workshops only --}}
+                    @unless(in_array($portalUser->role?->slug, ['workshop_practice_lead', 'workshop_delivery_resource'], true))
                     <li class="nav-item">
                         <a href="{{ route('portal.enablement.index') }}"
                            class="nav-link-portal {{ request()->routeIs('portal.enablement.*') ? 'active' : '' }}">Enablement</a>
@@ -141,6 +144,7 @@
                         <a href="{{ route('portal.workspaces.index') }}"
                            class="nav-link-portal {{ request()->routeIs('portal.workspaces.*') ? 'active' : '' }}">Workspaces</a>
                     </li>
+                    @endunless
                 </ul>
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ $portalUser->role?->display_name ?? '' }}</span>
