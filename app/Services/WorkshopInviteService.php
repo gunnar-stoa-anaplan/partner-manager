@@ -38,7 +38,7 @@ class WorkshopInviteService
      * able to enroll a contact from a different partner by guessing their email.
      *
      * @param  array<int, string>  $emails
-     * @return array{invited: array<int, Contact>, already_enrolled: array<int, Contact>, unmatched: array<int, string>}
+     * @return array{invited: array<int, Contact>, already_enrolled: array<int, Contact>, unmatched: array<int, string>, capacity_warning: ?string}
      */
     public function inviteToSession(
         WorkshopSession $session,
@@ -92,6 +92,30 @@ class WorkshopInviteService
             'invited' => $invited,
             'already_enrolled' => $alreadyEnrolled,
             'unmatched' => $unmatched,
+            'capacity_warning' => $this->capacityWarning($session, count($invited)),
         ];
+    }
+
+    /**
+     * Tenant assignment is a separate manual step from invitation (see
+     * WorkshopCredentialController::assign), so this doesn't block the
+     * invite outright - it just flags when a bulk invite would enroll more
+     * people than the workshop's tenant pool can currently seat, so the
+     * admin isn't surprised later when some participants have no sandbox
+     * to work in.
+     */
+    private function capacityWarning(WorkshopSession $session, int $newlyInvited): ?string
+    {
+        if ($newlyInvited === 0) {
+            return null;
+        }
+
+        $available = $session->workshop->credentials->filter(fn ($credential) => $credential->isAvailable())->count();
+
+        if ($newlyInvited > $available) {
+            return "Only {$available} tenant(s) available in the pool for {$newlyInvited} newly invited participant(s) - add more credentials before the session starts.";
+        }
+
+        return null;
     }
 }

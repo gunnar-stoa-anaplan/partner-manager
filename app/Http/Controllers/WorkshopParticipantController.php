@@ -52,6 +52,10 @@ class WorkshopParticipantController extends Controller
             count($result['unmatched']),
         );
 
+        if ($result['capacity_warning']) {
+            $message .= ' '.$result['capacity_warning'];
+        }
+
         return redirect()->route('workshops.sessions.participants.index', [$workshop, $session])
             ->with('success', $message);
     }

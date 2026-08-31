@@ -191,6 +191,7 @@
                                     <td><span class="badge bg-secondary">{{ \App\Models\WorkshopSession::STATUSES[$session->status] ?? $session->status }}</span></td>
                                     <td class="text-nowrap">
                                         <a href="{{ route('workshops.sessions.show', [$workshop, $session]) }}" class="btn btn-sm btn-outline-secondary">Open</a>
+                                        <a href="{{ route('workshops.sessions.clone', [$workshop, $session]) }}" class="btn btn-sm btn-outline-secondary">Clone</a>
                                         @if($session->status !== 'archived')
                                             <form action="{{ route('workshops.sessions.archive', [$workshop, $session]) }}" method="POST" class="d-inline" onsubmit="return confirm('Archive this session? Discussion will become read-only.')">
                                                 @csrf

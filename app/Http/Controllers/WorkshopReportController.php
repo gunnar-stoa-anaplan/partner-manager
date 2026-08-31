@@ -9,6 +9,7 @@ use App\Models\WorkshopSurveyResponse;
 use App\Models\WorkshopSurveyTemplate;
 use App\Services\WorkshopLeaderboardService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -310,7 +311,7 @@ class WorkshopReportController extends Controller
         return response()->download($zipPath, $filename)->deleteFileAfterSend(true);
     }
 
-    public function sessionLeaderboard(Workshop $workshop, WorkshopSession $session): View
+    public function sessionLeaderboard(Request $request, Workshop $workshop, WorkshopSession $session): View
     {
         $session->load(['participants' => fn ($q) => $q->notRemoved()->with('contact.partner:id,name')]);
 
@@ -330,7 +331,13 @@ class WorkshopReportController extends Controller
             ])
             ->values();
 
-        return view('workshops.sessions.leaderboard', compact('workshop', 'session', 'leaderboard', 'checkpoints'));
+        $atRiskCount = $leaderboard->filter(fn (array $row) => in_array('failed', $row['statuses'], true))->count();
+
+        if ($request->boolean('at_risk')) {
+            $leaderboard = $leaderboard->filter(fn (array $row) => in_array('failed', $row['statuses'], true))->values();
+        }
+
+        return view('workshops.sessions.leaderboard', compact('workshop', 'session', 'leaderboard', 'checkpoints', 'atRiskCount'));
     }
 
     /**

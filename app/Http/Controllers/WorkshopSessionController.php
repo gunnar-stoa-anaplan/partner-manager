@@ -25,6 +25,18 @@ class WorkshopSessionController extends Controller
             ->with('success', 'Session created successfully.');
     }
 
+    /**
+     * A pre-filled version of the "new session" form, carrying over the
+     * source session's name and notes - the admin still supplies a fresh
+     * slug/start_date/end_date, since WorkshopSession has no
+     * recurrence/cadence fields to copy automatically. Submits to the same
+     * store() action as any other new session.
+     */
+    public function clone(Workshop $workshop, WorkshopSession $session): View
+    {
+        return view('workshops.sessions.clone', compact('workshop', 'session'));
+    }
+
     public function show(Workshop $workshop, WorkshopSession $session): View
     {
         $session->load([

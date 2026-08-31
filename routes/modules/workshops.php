@@ -24,6 +24,7 @@ Route::post('/{workshop}/archive', [WorkshopController::class, 'archive'])->name
 Route::post('/{workshop}/sessions', [WorkshopSessionController::class, 'store'])->name('sessions.store');
 Route::get('/{workshop}/sessions/{session}', [WorkshopSessionController::class, 'show'])->name('sessions.show');
 Route::get('/{workshop}/sessions/{session}/edit', [WorkshopSessionController::class, 'edit'])->name('sessions.edit');
+Route::get('/{workshop}/sessions/{session}/clone', [WorkshopSessionController::class, 'clone'])->name('sessions.clone');
 Route::put('/{workshop}/sessions/{session}', [WorkshopSessionController::class, 'update'])->name('sessions.update');
 Route::delete('/{workshop}/sessions/{session}', [WorkshopSessionController::class, 'destroy'])->name('sessions.destroy');
 Route::post('/{workshop}/sessions/{session}/archive', [WorkshopSessionController::class, 'archive'])->name('sessions.archive');

@@ -25,6 +25,11 @@
             </div>
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted fs-sm" id="leaderboardRefreshNote">Auto-refreshes every 30 seconds.</span>
+                @if(request()->boolean('at_risk'))
+                    <a href="{{ route('workshops.reports.leaderboard', [$workshop, $session]) }}" class="btn btn-outline-secondary btn-sm">Show everyone</a>
+                @else
+                    <a href="{{ route('workshops.reports.leaderboard', [$workshop, $session, 'at_risk' => 1]) }}" class="btn btn-outline-danger btn-sm">At risk only ({{ $atRiskCount }})</a>
+                @endif
                 <button type="button" class="btn btn-outline-secondary btn-sm" onclick="location.reload()">↻ Refresh now</button>
             </div>
         </div>
