@@ -111,6 +111,8 @@ Route::middleware('portal')->group(function () {
         Route::get('/workshops', [PortalWorkshopController::class, 'index'])->name('workshops.index');
         Route::get('/workshops/{session}', [PortalWorkshopController::class, 'show'])->name('workshops.show');
         Route::post('/workshops/{session}/invite', [PortalWorkshopController::class, 'invite'])->name('workshops.invite');
+        Route::get('/workshops/{session}/progress', [PortalWorkshopController::class, 'progress'])->name('workshops.progress');
+        Route::get('/workshops-rollup', [PortalWorkshopController::class, 'rollup'])->name('workshops.rollup');
 
         Route::get('/my-workshops', [PortalWorkshopParticipationController::class, 'index'])->name('my-workshops.index');
         Route::get('/my-workshops/{session}', [PortalWorkshopParticipationController::class, 'show'])->name('my-workshops.show');

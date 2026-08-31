@@ -32,8 +32,9 @@
     </div>
 
     <div class="card portal-card">
-        <div class="card-header">
-            <h6 class="mb-0">Your team's progress</h6>
+        <div class="card-header d-flex align-items-center">
+            <h6 class="mb-0 flex-grow-1">Your team's progress</h6>
+            <a href="{{ route('portal.workshops.progress', $session) }}" class="btn btn-sm btn-outline-primary">Detailed progress →</a>
         </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
