@@ -7,6 +7,11 @@
 @section('content')
 <div class="row">
     <div class="col-lg-12">
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item"><a class="nav-link" href="{{ route('workshops.analytics.workshops', request()->only('workshop_id')) }}">Workshops</a></li>
+            <li class="nav-item"><a class="nav-link active" href="{{ route('workshops.analytics.sessions', request()->only('workshop_id')) }}">Sessions</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('workshops.analytics.participation', request()->only('workshop_id')) }}">Participation</a></li>
+        </ul>
         <div class="card shadow-0 mb-g">
             <div class="card-header">
                 <form method="GET" class="row g-2 align-items-end">

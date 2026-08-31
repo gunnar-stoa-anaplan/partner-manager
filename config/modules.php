@@ -255,18 +255,10 @@ return [
                 'icon' => 'check-square',
                 'items' => [
                     ['label' => 'Dashboard', 'route' => 'workshops.dashboard', 'icon' => 'home'],
+                    ['label' => 'Analytics', 'route' => 'workshops.analytics.workshops', 'icon' => 'bar-chart'],
                     ['label' => 'All Workshops', 'route' => 'workshops.index', 'icon' => 'check-square'],
                     ['label' => 'Participants', 'route' => 'workshops.users.index', 'icon' => 'users'],
                     ['label' => 'Tenant Refresh Queue', 'route' => 'workshops.credentials.refresh-queue', 'icon' => 'key'],
-                ],
-            ],
-            'analytics' => [
-                'label' => 'Analytics',
-                'icon' => 'bar-chart',
-                'items' => [
-                    ['label' => 'Workshops', 'route' => 'workshops.analytics.workshops', 'icon' => 'bar-chart'],
-                    ['label' => 'Sessions', 'route' => 'workshops.analytics.sessions', 'icon' => 'bar-chart'],
-                    ['label' => 'Participation', 'route' => 'workshops.analytics.participation', 'icon' => 'bar-chart'],
                 ],
             ],
         ],
