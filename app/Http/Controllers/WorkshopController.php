@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWorkshopRequest;
 use App\Http\Requests\UpdateWorkshopRequest;
+use App\Models\AuditLog;
 use App\Models\Workshop;
+use App\Models\WorkshopCredential;
+use App\Models\WorkshopPage;
 use App\Models\WorkshopSession;
 use App\Models\WorkshopSessionParticipant;
+use App\Models\WorkshopSurveyTemplate;
 use App\Models\WorkshopThread;
 use App\Services\WorkshopLeaderboardService;
 use App\Services\WorkshopSummaryService;
@@ -247,6 +251,30 @@ class WorkshopController extends Controller
             ->get();
 
         return view('workshops.content-flags', compact('workshop', 'flags'));
+    }
+
+    /**
+     * Every audited change to this workshop's pages, survey templates, and
+     * tenant credential pool, newest first - a real change log, distinct
+     * from the misleadingly-named admin.activation.log (which is just
+     * Pennant feature-flag state).
+     */
+    public function auditLog(Workshop $workshop): View
+    {
+        $pageIds = $workshop->allPageVersions()->pluck('id');
+        $templateIds = $workshop->allSurveyTemplateVersions()->pluck('id');
+        $credentialIds = $workshop->credentials()->pluck('id');
+
+        $entries = AuditLog::where(function ($query) use ($pageIds, $templateIds, $credentialIds) {
+            $query->where(fn ($q) => $q->where('auditable_type', WorkshopPage::class)->whereIn('auditable_id', $pageIds))
+                ->orWhere(fn ($q) => $q->where('auditable_type', WorkshopSurveyTemplate::class)->whereIn('auditable_id', $templateIds))
+                ->orWhere(fn ($q) => $q->where('auditable_type', WorkshopCredential::class)->whereIn('auditable_id', $credentialIds));
+        })
+            ->with('user:id,name')
+            ->latest()
+            ->paginate(50);
+
+        return view('workshops.audit-log', compact('workshop', 'entries'));
     }
 
     public function update(UpdateWorkshopRequest $request, Workshop $workshop): RedirectResponse

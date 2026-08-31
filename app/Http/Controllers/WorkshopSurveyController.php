@@ -39,8 +39,9 @@ class WorkshopSurveyController extends Controller
             ->sortBy(fn (WorkshopSurveyTemplate $t) => array_search($t->kind, array_keys(WorkshopSurveyTemplate::KINDS)));
 
         $pendingCount = $workshop->pendingSurveyTemplates()->count();
+        $otherWorkshops = Workshop::where('id', '!=', $workshop->id)->orderBy('name')->get(['id', 'name']);
 
-        return view('workshops.surveys.index', compact('workshop', 'templates', 'pendingCount'));
+        return view('workshops.surveys.index', compact('workshop', 'templates', 'pendingCount', 'otherWorkshops'));
     }
 
     public function edit(WorkshopSurveyTemplate $survey): View
@@ -172,6 +173,48 @@ class WorkshopSurveyController extends Controller
         ]);
 
         return redirect()->route('workshops.surveys.diff', $survey)->with('success', 'Comment added.');
+    }
+
+    /**
+     * Copies this template's questions into a different workshop - a field-
+     * by-field copy (mirroring BlueprintController::duplicate()) rather
+     * than a version clone, since it crosses parent records. If the target
+     * workshop already has a live template for this kind, the copy lands as
+     * a draft that goes through the same review/publish gate as any other
+     * edit; if the target has nothing yet, it publishes immediately.
+     */
+    public function cloneInto(Request $request, WorkshopSurveyTemplate $survey): RedirectResponse
+    {
+        $validated = $request->validate(['target_workshop_id' => ['required', 'exists:workshops,id']]);
+        $targetWorkshop = Workshop::findOrFail($validated['target_workshop_id']);
+
+        abort_if((int) $targetWorkshop->id === (int) $survey->workshop_id, 422, 'Choose a different workshop to clone into.');
+
+        $existingLive = $targetWorkshop->surveyTemplates()->where('kind', $survey->kind)->first();
+
+        $clone = WorkshopSurveyTemplate::create([
+            'workshop_id' => $targetWorkshop->id,
+            'kind' => $survey->kind,
+            'version' => $existingLive ? $existingLive->version + 1 : 1,
+            'parent_survey_template_id' => $existingLive?->id,
+            'intro' => $survey->intro,
+            'questions_json' => $survey->questions_json,
+            'passing_score' => $survey->passing_score,
+            'max_attempts' => $survey->max_attempts,
+            'questions_per_attempt' => $survey->questions_per_attempt,
+            'shuffle_options' => $survey->shuffle_options,
+            'updated_by' => $request->user()->id,
+            'published_at' => $existingLive ? null : now(),
+            'published_by' => $existingLive ? null : $request->user()->id,
+        ]);
+
+        if (! $existingLive) {
+            return redirect()->route('workshops.surveys.edit', $clone)
+                ->with('success', "Cloned into {$targetWorkshop->name} and published - it had no {$survey->kind} template yet.");
+        }
+
+        return redirect()->route('workshops.surveys.diff', $clone)
+            ->with('success', "Cloned into {$targetWorkshop->name} as a draft - review and publish it there to make it live.");
     }
 
     /**

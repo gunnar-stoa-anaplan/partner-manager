@@ -34,6 +34,12 @@ class WorkshopCredential extends Model
         'retired' => 'Retired',
     ];
 
+    /**
+     * Fields the audit trail (WorkshopContentAuditObserver) must never
+     * record, even encrypted - the sandbox password.
+     */
+    const AUDIT_EXCLUDED = ['password_enc'];
+
     public function workshop(): BelongsTo
     {
         return $this->belongsTo(Workshop::class);

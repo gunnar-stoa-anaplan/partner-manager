@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/{workshop}/review', [WorkshopController::class, 'reviewQueue'])->name('review-queue');
 Route::get('/{workshop}/content-flags', [WorkshopController::class, 'contentFlags'])->name('content-flags');
+Route::get('/{workshop}/audit-log', [WorkshopController::class, 'auditLog'])->name('audit-log');
 
 Route::get('/{workshop}/pages', [WorkshopPageController::class, 'index'])->name('pages.index');
 Route::get('/{workshop}/pages/create', [WorkshopPageController::class, 'create'])->name('pages.create');

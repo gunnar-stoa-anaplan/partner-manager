@@ -54,8 +54,40 @@
                                     <a href="{{ route('workshops.surveys.preview', $template) }}" class="btn btn-sm btn-outline-secondary" target="_blank">Preview ↗</a>
                                     <a href="{{ route('workshops.surveys.results', $template) }}" class="btn btn-sm btn-outline-primary">Results</a>
                                     <a href="{{ route('workshops.surveys.history', $template) }}" class="btn btn-sm btn-outline-secondary">History</a>
+                                    @if($otherWorkshops->isNotEmpty())
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#cloneModal{{ $template->id }}">Clone to…</button>
+                                    @endif
                                 </td>
                             </tr>
+
+                            @if($otherWorkshops->isNotEmpty())
+                            <div class="modal fade" id="cloneModal{{ $template->id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form action="{{ route('workshops.surveys.clone-into', $template) }}" method="POST">
+                                            @csrf
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Clone {{ \App\Models\WorkshopSurveyTemplate::KINDS[$template->kind] ?? $template->kind }} template</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <label class="form-label">Target workshop</label>
+                                                <select name="target_workshop_id" class="form-select" required>
+                                                    @foreach($otherWorkshops as $option)
+                                                        <option value="{{ $option->id }}">{{ $option->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <p class="text-muted fs-sm mt-2 mb-0">If the target workshop already has a {{ strtolower(\App\Models\WorkshopSurveyTemplate::KINDS[$template->kind] ?? $template->kind) }} template, this lands as a draft for review there rather than replacing it outright.</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">Clone</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>

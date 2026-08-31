@@ -5,6 +5,10 @@ namespace App\Providers;
 use App\Contracts\ChatServiceInterface;
 use App\Models\AppSetting;
 use App\Models\User;
+use App\Models\WorkshopCredential;
+use App\Models\WorkshopPage;
+use App\Models\WorkshopSurveyTemplate;
+use App\Observers\WorkshopContentAuditObserver;
 use App\Services\SimulatedChatService;
 use App\Services\ZoomApiService;
 use Dedoc\Scramble\Scramble;
@@ -63,6 +67,10 @@ class AppServiceProvider extends ServiceProvider
                 SecurityScheme::http('bearer')
             );
         });
+
+        WorkshopPage::observe(WorkshopContentAuditObserver::class);
+        WorkshopSurveyTemplate::observe(WorkshopContentAuditObserver::class);
+        WorkshopCredential::observe(WorkshopContentAuditObserver::class);
 
         View::composer('layouts.partials.generated-navigation', function ($view) {
             $navSettings = AppSetting::where('key', 'like', 'nav_visible_%')

@@ -13,4 +13,5 @@ Route::get('/{survey}/diff', [WorkshopSurveyController::class, 'diff'])->name('d
 Route::post('/{survey}/publish', [WorkshopSurveyController::class, 'publish'])->name('publish');
 Route::post('/{survey}/reject', [WorkshopSurveyController::class, 'reject'])->name('reject');
 Route::post('/{survey}/comments', [WorkshopSurveyController::class, 'comment'])->name('comments');
+Route::post('/{survey}/clone-into', [WorkshopSurveyController::class, 'cloneInto'])->name('clone-into');
 Route::post('/{survey}/import-questions', [WorkshopSurveyController::class, 'importQuestions'])->name('import-questions');
