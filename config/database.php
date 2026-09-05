@@ -111,6 +111,22 @@ return [
             'sslmode' => 'prefer',
         ],
 
+        // Partner Success analytical warehouse (audited snapshot schema `wh`).
+        // Read-only reader; the dashboard module queries this connection.
+        'warehouse' => [
+            'driver' => 'pgsql',
+            'host' => env('WAREHOUSE_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('WAREHOUSE_DB_PORT', '5432'),
+            'database' => env('WAREHOUSE_DB_DATABASE', 'enablement'),
+            'username' => env('WAREHOUSE_DB_USERNAME', 'enablement'),
+            'password' => env('WAREHOUSE_DB_PASSWORD', 'enablement'),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'wh,public',
+            'sslmode' => 'prefer',
+        ],
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DB_URL'),

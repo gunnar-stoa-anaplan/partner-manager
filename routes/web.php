@@ -940,3 +940,18 @@ Route::get('/home', fn () => redirect()->route('welcome'))->name('home');
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+/*
+|--------------------------------------------------------------------------
+| Partner Success dashboard (audited, warehouse-backed)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->prefix('partner-success')->name('partner-success.')->group(function () {
+    Route::get('/', [App\Http\Controllers\PartnerSuccessController::class, 'index'])->name('index');
+    Route::get('/api/metrics', [App\Http\Controllers\PartnerSuccessController::class, 'apiMetrics'])->name('api.metrics');
+    Route::get('/api/partners', [App\Http\Controllers\PartnerSuccessController::class, 'apiPartners'])->name('api.partners');
+    Route::get('/api/drill/{name}', [App\Http\Controllers\PartnerSuccessController::class, 'apiDrill'])->name('api.drill');
+    Route::get('/api/trend/{name}', [App\Http\Controllers\PartnerSuccessController::class, 'apiTrend'])->name('api.trend');
+    Route::get('/api/breakdown/{key}', [App\Http\Controllers\PartnerSuccessController::class, 'apiBreakdown'])->name('api.breakdown');
+    Route::get('/api/drill-breakdown/{key}', [App\Http\Controllers\PartnerSuccessController::class, 'apiDrillBreakdown'])->name('api.drill_bk');
+});

@@ -15,6 +15,16 @@
     </li>
 
     @auth
+    {{-- Partner Success dashboard (audited, warehouse-backed) --}}
+    <li>
+        <a href="{{ route('partner-success.index') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#bar-chart-2"></use>
+            </svg>
+            <span class="nav-link-text">Partner Success</span>
+        </a>
+    </li>
+
     {{-- My Training (shown if pending activation paths exist) --}}
     @php
         $pendingTrainingCount = auth()->user()->activationPaths()
