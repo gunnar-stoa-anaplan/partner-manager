@@ -15,15 +15,20 @@
     </li>
 
     @auth
-    {{-- Partner Success dashboard (audited, warehouse-backed) --}}
+    {{-- PSM Engagement — audited, warehouse-backed dashboards (GEO + partner
+         filter drives Pipeline / Delivery / Capability / Enablement / Catalog) --}}
     <li>
         <a href="{{ route('partner-success.index') }}">
             <svg class="sa-icon">
                 <use href="/icons/sprite.svg#bar-chart-2"></use>
             </svg>
-            <span class="nav-link-text">Partner Success</span>
+            <span class="nav-link-text">PSM Engagement</span>
         </a>
     </li>
+
+    {{-- Everything below is hidden for dashboard-only users (Welcome + Partner
+         Success are the only nav they get). --}}
+    @unless(auth()->user()?->isDashboardOnly())
 
     {{-- My Training (shown if pending activation paths exist) --}}
     @php
@@ -197,5 +202,6 @@
     </li>
     @endif
 
+    @endunless
     @endauth
 </ul>

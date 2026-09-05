@@ -162,6 +162,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Dashboard-only users see just the Welcome screen and the Partner Success
+     * dashboards — nothing else in the app (nav hidden + routes blocked by the
+     * RestrictDashboardOnly middleware).
+     */
+    public function isDashboardOnly(): bool
+    {
+        return $this->role?->slug === 'dashboard_viewer';
+    }
+
+    /**
      * Check if this user's role bypasses all permission checks.
      */
     public function bypassesPermissions(): bool

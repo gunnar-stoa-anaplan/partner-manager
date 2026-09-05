@@ -8,8 +8,8 @@
     <span class="ps-sum" id="ps-sum"></span>
   </div>
   <div class="ps-tabs" id="ps-tabs"></div>
-  <h1 class="ps-h1">All partners</h1>
-  <div class="ps-sub">Every number is computed from the audited warehouse and drills to source. GEO and PARTNER filters re-run everything.</div>
+  <h1 class="ps-h1">PSM Engagement</h1>
+  <div class="ps-sub">Showing <b id="ps-scope">all partners</b> — every number is computed from the audited warehouse and drills to source. The GEO and PARTNER filters above re-run everything.</div>
   <div id="ps-cards" class="ps-cards"></div>
   <div id="ps-charts" class="ps-charts"></div>
   <div class="ps-hint">Click any number, bar, or segment → its source rows, the SQL behind it, and the weekly history.</div>
@@ -101,6 +101,8 @@ async function psRefresh(first){
  }
  const g=k=>PS_METRICS.find(m=>m.name===k)||{};
  document.getElementById('ps-sum').innerHTML=`<b>${psNum(g('total_opps').count||0)}</b> opps · <span class=o>${psCur(g('open_pipe').acv)}</span> open · <b>${psCur(g('closed_won').acv)}</b> won`;
+ const scopeEl=document.getElementById('ps-scope');
+ if(scopeEl) scopeEl.textContent=(PS_PARTNER||'all partners')+(PS_GEO?(' · '+PS_GEO):'');
  psSelect(PS_TAB);
 }
 function psSelect(s){
