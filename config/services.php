@@ -75,4 +75,11 @@ return [
         'host_email' => env('ZOOM_HOST_EMAIL'),
     ],
 
+    // GitHub-sourced workshop content (App\Services\Workshops\GithubWorkshopContentService)
+    'github' => [
+        'token' => env('GITHUB_TOKEN'),
+        'workshop_content_repo' => env('WORKSHOP_CONTENT_REPO'),   // e.g. "org/workshops"
+        'workshop_content_base' => env('WORKSHOP_CONTENT_BASE', 'workshops'),
+    ],
+
 ];
