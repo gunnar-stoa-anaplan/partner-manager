@@ -26,7 +26,7 @@ return new class extends Migration
             $table->dropForeign(['contact_id']);
         });
 
-        DB::statement('ALTER TABLE workshop_survey_responses MODIFY contact_id BIGINT UNSIGNED NULL');
+        \App\Support\DatabasePortability::makeColumnNullable('workshop_survey_responses', 'contact_id', 'BIGINT UNSIGNED');
 
         Schema::table('workshop_survey_responses', function (Blueprint $table) {
             $table->foreign('contact_id')->references('id')->on('contacts')->nullOnDelete();

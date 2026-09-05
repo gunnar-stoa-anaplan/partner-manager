@@ -10,11 +10,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE blueprints MODIFY COLUMN category ENUM('application', 'product', 'delivery') NOT NULL");
+        \App\Support\DatabasePortability::modifyEnum('blueprints', 'category', ['application', 'product', 'delivery']);
     }
 
     public function down(): void
     {
-        DB::statement("ALTER TABLE blueprints MODIFY COLUMN category ENUM('application', 'product') NOT NULL");
+        \App\Support\DatabasePortability::modifyEnum('blueprints', 'category', ['application', 'product']);
     }
 };

@@ -10,7 +10,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE workshop_survey_templates MODIFY kind ENUM('pre', 'post', 'knowledge') NOT NULL");
+        \App\Support\DatabasePortability::modifyEnum('workshop_survey_templates', 'kind', ['pre', 'post', 'knowledge']);
     }
 
     /**
@@ -18,6 +18,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE workshop_survey_templates MODIFY kind ENUM('pre', 'post') NOT NULL");
+        \App\Support\DatabasePortability::modifyEnum('workshop_survey_templates', 'kind', ['pre', 'post']);
     }
 };

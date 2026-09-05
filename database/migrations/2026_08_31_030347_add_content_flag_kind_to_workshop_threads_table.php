@@ -10,7 +10,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE workshop_threads MODIFY kind ENUM('question', 'comment', 'content_flag') NOT NULL DEFAULT 'question'");
+        \App\Support\DatabasePortability::modifyEnum('workshop_threads', 'kind', ['question', 'comment', 'content_flag'], true, 'question');
     }
 
     /**
@@ -19,6 +19,6 @@ return new class extends Migration
     public function down(): void
     {
         DB::statement("UPDATE workshop_threads SET kind = 'question' WHERE kind = 'content_flag'");
-        DB::statement("ALTER TABLE workshop_threads MODIFY kind ENUM('question', 'comment') NOT NULL DEFAULT 'question'");
+        \App\Support\DatabasePortability::modifyEnum('workshop_threads', 'kind', ['question', 'comment'], true, 'question');
     }
 };

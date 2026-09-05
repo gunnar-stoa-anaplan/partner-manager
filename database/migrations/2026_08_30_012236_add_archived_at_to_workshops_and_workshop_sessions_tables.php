@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('archived_at')->nullable()->after('status');
         });
 
-        DB::statement("ALTER TABLE workshop_sessions MODIFY status ENUM('upcoming', 'in_progress', 'completed', 'cancelled', 'archived') NOT NULL DEFAULT 'upcoming'");
+        \App\Support\DatabasePortability::modifyEnum('workshop_sessions', 'status', ['upcoming', 'in_progress', 'completed', 'cancelled', 'archived'], true, 'upcoming');
     }
 
     /**
@@ -28,7 +28,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE workshop_sessions MODIFY status ENUM('upcoming', 'in_progress', 'completed', 'cancelled') NOT NULL DEFAULT 'upcoming'");
+        \App\Support\DatabasePortability::modifyEnum('workshop_sessions', 'status', ['upcoming', 'in_progress', 'completed', 'cancelled'], true, 'upcoming');
 
         Schema::table('workshops', function (Blueprint $table) {
             $table->dropColumn('archived_at');

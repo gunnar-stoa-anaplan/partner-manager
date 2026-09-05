@@ -93,6 +93,76 @@ class DatabasePortability
         };
     }
 
+    /**
+     * Set the allowed values of an "enum" column, cross-database.
+     * MySQL uses a native ENUM; PostgreSQL uses a CHECK constraint on a text
+     * column (which is how Laravel's ->enum() already stores it on pgsql).
+     *
+     * @param  string[]  $values
+     */
+    public static function modifyEnum(
+        string $table,
+        string $column,
+        array $values,
+        bool $notNull = true,
+        ?string $default = null,
+        ?string $connection = null
+    ): void {
+        $driver = self::getDriver($connection);
+        $db = DB::connection($connection);
+        $quote = static fn (string $v): string => "'".str_replace("'", "''", $v)."'";
+        $list = implode(', ', array_map($quote, $values));
+
+        if ($driver === 'mysql' || $driver === 'mariadb') {
+            $sql = "ALTER TABLE {$table} MODIFY COLUMN {$column} ENUM({$list})";
+            $sql .= $notNull ? ' NOT NULL' : ' NULL';
+            if ($default !== null) {
+                $sql .= ' DEFAULT '.$quote($default);
+            }
+            $db->statement($sql);
+
+            return;
+        }
+
+        if ($driver === 'pgsql') {
+            $check = "{$table}_{$column}_check";
+            $db->statement("ALTER TABLE {$table} DROP CONSTRAINT IF EXISTS {$check}");
+            $db->statement("ALTER TABLE {$table} ADD CONSTRAINT {$check} CHECK ({$column} IN ({$list}))");
+            if ($default !== null) {
+                $db->statement("ALTER TABLE {$table} ALTER COLUMN {$column} SET DEFAULT ".$quote($default));
+            }
+            $db->statement("ALTER TABLE {$table} ALTER COLUMN {$column} ".($notNull ? 'SET' : 'DROP').' NOT NULL');
+
+            return;
+        }
+        // sqlite: enum is plain text with no constraint — nothing to enforce.
+    }
+
+    /**
+     * Make an existing column nullable, cross-database.
+     * `$mysqlType` is the full MySQL column type (e.g. 'BIGINT UNSIGNED').
+     */
+    public static function makeColumnNullable(
+        string $table,
+        string $column,
+        string $mysqlType,
+        ?string $connection = null
+    ): void {
+        $driver = self::getDriver($connection);
+        $db = DB::connection($connection);
+
+        if ($driver === 'mysql' || $driver === 'mariadb') {
+            $db->statement("ALTER TABLE {$table} MODIFY {$column} {$mysqlType} NULL");
+
+            return;
+        }
+
+        if ($driver === 'pgsql') {
+            $db->statement("ALTER TABLE {$table} ALTER COLUMN {$column} DROP NOT NULL");
+        }
+        // sqlite: column nullability changes require a table rebuild — skipped.
+    }
+
     private static function getDriver(?string $connection = null): string
     {
         return DB::connection($connection)->getDriverName();

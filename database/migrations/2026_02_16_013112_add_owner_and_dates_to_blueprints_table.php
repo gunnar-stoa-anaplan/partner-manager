@@ -21,7 +21,7 @@ return new class extends Migration
         });
 
         // Alter status enum to include 'submitted'
-        DB::statement("ALTER TABLE blueprints MODIFY COLUMN status ENUM('draft','submitted','published','archived') NOT NULL DEFAULT 'draft'");
+        \App\Support\DatabasePortability::modifyEnum('blueprints', 'status', ['draft', 'submitted', 'published', 'archived'], true, 'draft');
     }
 
     /**
@@ -31,7 +31,7 @@ return new class extends Migration
     {
         // Revert status enum
         DB::statement("UPDATE blueprints SET status = 'draft' WHERE status = 'submitted'");
-        DB::statement("ALTER TABLE blueprints MODIFY COLUMN status ENUM('draft','published','archived') NOT NULL DEFAULT 'draft'");
+        \App\Support\DatabasePortability::modifyEnum('blueprints', 'status', ['draft', 'published', 'archived'], true, 'draft');
 
         Schema::table('blueprints', function (Blueprint $table) {
             $table->dropForeign(['owner_id']);
