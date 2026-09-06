@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.vertical', ['pageTitle' => 'PSM Engagement'])
 
 @section('content')
 <div id="ps-dash">
