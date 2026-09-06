@@ -53,3 +53,6 @@ junk
 architecture.md
 storage/seeder_debug.json
 workspace_activity_report*.csv
+
+# Local DB engine backup of .env (contains secrets)
+.env.mysql-backup-*
