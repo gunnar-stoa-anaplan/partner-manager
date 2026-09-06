@@ -73,9 +73,18 @@ class InternalMetricsController extends Controller
     private function activeConnectionCount(): int
     {
         try {
-            $result = DB::select("SHOW STATUS LIKE 'Threads_connected'");
+            $driver = DB::connection()->getDriverName();
 
-            return (int) ($result[0]->Value ?? 0);
+            if ($driver === 'pgsql') {
+                return (int) (DB::selectOne('SELECT count(*) AS c FROM pg_stat_activity')->c ?? 0);
+            }
+            if ($driver === 'mysql' || $driver === 'mariadb') {
+                $result = DB::select("SHOW STATUS LIKE 'Threads_connected'");
+
+                return (int) ($result[0]->Value ?? 0);
+            }
+
+            return 0;
         } catch (\Throwable) {
             return -1;
         }

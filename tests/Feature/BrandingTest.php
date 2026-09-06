@@ -381,6 +381,10 @@ class BrandingTest extends TestCase
 
     public function test_no_theme_css_injected_when_not_set(): void
     {
+        // The app now ships a default brand theme (partner-success), so the
+        // "not set" state must be created explicitly to exercise this branch.
+        AppSetting::set('branding_theme', '');
+
         $response = $this->actingAs($this->admin)->get(route('admin.branding'));
 
         $response->assertOk();

@@ -155,24 +155,63 @@ class SystemStatusService
      */
     public function getDatabaseMetrics(): ?array
     {
+        $driver = DB::connection()->getDriverName();
+
         try {
-            $status = collect(DB::select("SHOW GLOBAL STATUS WHERE Variable_name IN (
-                'Uptime', 'Threads_connected', 'Questions', 'Slow_queries'
-            )"))->pluck('Value', 'Variable_name');
+            if ($driver === 'pgsql') {
+                return $this->postgresMetrics();
+            }
+            if ($driver === 'mysql' || $driver === 'mariadb') {
+                return $this->mysqlMetrics();
+            }
 
-            $variables = collect(DB::select("SHOW GLOBAL VARIABLES WHERE Variable_name IN (
-                'max_connections'
-            )"))->pluck('Value', 'Variable_name');
-
-            return [
-                'uptime_days' => round((int) ($status['Uptime'] ?? 0) / 86400, 1),
-                'threads_connected' => (int) ($status['Threads_connected'] ?? 0),
-                'total_queries' => (int) ($status['Questions'] ?? 0),
-                'slow_queries' => (int) ($status['Slow_queries'] ?? 0),
-                'max_connections' => (int) ($variables['max_connections'] ?? 0),
-            ];
+            return null; // sqlite / other — no server metrics
         } catch (\Throwable) {
             return null;
         }
+    }
+
+    /**
+     * @return array{uptime_days: float, threads_connected: int, total_queries: int, slow_queries: int, max_connections: int}
+     */
+    private function mysqlMetrics(): array
+    {
+        $status = collect(DB::select("SHOW GLOBAL STATUS WHERE Variable_name IN (
+            'Uptime', 'Threads_connected', 'Questions', 'Slow_queries'
+        )"))->pluck('Value', 'Variable_name');
+
+        $variables = collect(DB::select("SHOW GLOBAL VARIABLES WHERE Variable_name IN (
+            'max_connections'
+        )"))->pluck('Value', 'Variable_name');
+
+        return [
+            'uptime_days' => round((int) ($status['Uptime'] ?? 0) / 86400, 1),
+            'threads_connected' => (int) ($status['Threads_connected'] ?? 0),
+            'total_queries' => (int) ($status['Questions'] ?? 0),
+            'slow_queries' => (int) ($status['Slow_queries'] ?? 0),
+            'max_connections' => (int) ($variables['max_connections'] ?? 0),
+        ];
+    }
+
+    /**
+     * Postgres equivalents of the MySQL server metrics (slow-query count needs
+     * pg_stat_statements, so it is reported as 0).
+     *
+     * @return array{uptime_days: float, threads_connected: int, total_queries: int, slow_queries: int, max_connections: int}
+     */
+    private function postgresMetrics(): array
+    {
+        $uptime = (float) (DB::selectOne('SELECT extract(epoch FROM (now() - pg_postmaster_start_time())) AS s')->s ?? 0);
+        $conns = (int) (DB::selectOne('SELECT count(*) AS c FROM pg_stat_activity')->c ?? 0);
+        $maxConn = (int) (DB::selectOne("SELECT setting AS v FROM pg_settings WHERE name='max_connections'")->v ?? 0);
+        $xacts = (int) (DB::selectOne('SELECT COALESCE(sum(xact_commit + xact_rollback),0) AS q FROM pg_stat_database')->q ?? 0);
+
+        return [
+            'uptime_days' => round($uptime / 86400, 1),
+            'threads_connected' => $conns,
+            'total_queries' => $xacts,
+            'slow_queries' => 0,
+            'max_connections' => $maxConn,
+        ];
     }
 }
