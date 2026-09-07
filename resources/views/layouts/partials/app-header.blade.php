@@ -2,8 +2,8 @@
     <!-- Collapse icon -->
     <div class="d-flex flex-grow-1 w-100 me-auto align-items-center">
 
-        <!-- App logo — mobile only; on desktop the sidebar carries the brand -->
-        <span class="d-lg-none">@include('layouts.partials/app-logo')</span>
+        <!-- App logo / brand (fills the corner above the sidebar) -->
+        @include('layouts.partials/app-logo', ['brand' => true])
 
         <button class="mobile-menu-icon me-2 d-flex d-sm-flex d-md-flex d-lg-none flex-shrink-0"
                 data-action="toggle-swap" data-toggleclass="app-mobile-menu-open" aria-label="Toggle Mobile Menu">

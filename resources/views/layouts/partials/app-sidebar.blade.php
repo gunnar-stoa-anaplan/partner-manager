@@ -1,6 +1,5 @@
 <aside class="app-sidebar d-flex flex-column">
 
-    @include('layouts.partials/app-logo', ['brand' => true])
 
     @include('layouts.partials/app-menu-filter')
 
