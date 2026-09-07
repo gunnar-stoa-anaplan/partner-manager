@@ -361,3 +361,29 @@ stack — not an admin-panel framework. Full spec in **INSIGHT_KIT.md**.
 - **Sequencing:** the drill must enforce row-level visibility, so it depends on
   the row-level authorization layer (§3). Build that first or alongside; do not
   ship a drill that ignores visibility.
+
+---
+
+## 13. Target operating model — the three pillars
+
+The intent and flow of who uses the app and the data everyone generates is
+documented in **OPERATING_MODEL.md**. The platform's design rests on three
+pillars, which are being built together because they depend on each other:
+
+1. **Multi-role + teams/functions.** People carry one *or more* roles (a manager
+   who is also a PSM; a partner who both sells and delivers), and both internal
+   users and partner contacts belong to **teams/functions** (Sales, Marketing,
+   Service, Implementation) — the axis that makes "partners as an extension of the
+   team" real. Implemented additively: `role_user` / `role_contact` pivots
+   (single-role columns kept as the *primary* role for landing/back-compat) with
+   permission resolution as the **union across roles**; `teams` + polymorphic
+   memberships. See §3.
+2. **Row-level visibility.** A shared data fabric needs per-actor scoping — a
+   partner sees only their company; a PSM their book; a manager their team's books;
+   CoE program-wide — via `VisibilityContext` + Policies + `ScopedToActor`. See §3.
+3. **Explainable metric layer (Insight Kit).** Every number traces to the partner
+   activity that produced it — `MetricSource`/`MetricRegistry` + shared components
+   + a visibility-enforcing drill. See §12.
+
+These are the same three needs the operating model implies; treat them as one
+target, not three features.
