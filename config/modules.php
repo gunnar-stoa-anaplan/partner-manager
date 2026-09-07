@@ -264,6 +264,23 @@ return [
         ],
     ],
 
+    'partner_success' => [
+        'name' => 'PSM Engagement',
+        'description' => 'Audited, warehouse-backed partner success dashboards — pipeline, delivery, capability, enablement, and catalog, filtered by GEO and partner.',
+        'icon' => 'bar-chart-2',
+        'group' => 'engagement',
+        'enabled' => env('MODULE_PARTNER_SUCCESS', true),
+        'sections' => [
+            'engagement' => [
+                'label' => 'PSM Engagement',
+                'icon' => 'bar-chart-2',
+                'items' => [
+                    ['label' => 'Dashboard', 'route' => 'partner-success.index', 'icon' => 'bar-chart-2'],
+                ],
+            ],
+        ],
+    ],
+
     'launch_programs' => [
         'name' => 'Launch Programs',
         'description' => 'Launch programs, milestones, action plans, task board, project health, and partner nominations.',

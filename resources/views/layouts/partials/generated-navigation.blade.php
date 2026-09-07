@@ -15,8 +15,11 @@
     </li>
 
     @auth
-    {{-- PSM Engagement — audited, warehouse-backed dashboards (GEO + partner
-         filter drives Pipeline / Delivery / Capability / Enablement / Catalog) --}}
+    {{-- PSM Engagement & Workshops for dashboard-only users. Normal users get
+         these through the permission-gated module nav below (partner_success /
+         workshops modules), so only render these extra entries for the
+         restricted dashboard_viewer role. --}}
+    @if(auth()->user()?->isDashboardOnly() && Route::has('partner-success.index'))
     <li>
         <a href="{{ route('partner-success.index') }}">
             <svg class="sa-icon">
@@ -25,9 +28,8 @@
             <span class="nav-link-text">PSM Engagement</span>
         </a>
     </li>
+    @endif
 
-    {{-- Workshops for dashboard-only users (normal users get it via the module
-         nav below, so only render this extra entry for the restricted role). --}}
     @if(auth()->user()?->isDashboardOnly() && Route::has('workshops.dashboard'))
     <li>
         <a href="{{ route('workshops.dashboard') }}">
@@ -42,24 +44,6 @@
     {{-- Everything below is hidden for dashboard-only users (Welcome + Partner
          Success + Workshops are the only nav they get). --}}
     @unless(auth()->user()?->isDashboardOnly())
-
-    {{-- My Training (shown if pending activation paths exist) --}}
-    @php
-        $pendingTrainingCount = auth()->user()->activationPaths()
-            ->wherePivotNull('completed_at')
-            ->count();
-    @endphp
-    @if($pendingTrainingCount > 0)
-    <li>
-        <a href="{{ route('training.index') }}">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#book-open"></use>
-            </svg>
-            <span class="nav-link-text">My Training</span>
-            <span class="badge bg-warning text-dark rounded-pill ms-1">{{ $pendingTrainingCount }}</span>
-        </a>
-    </li>
-    @endif
 
     {{-- Dynamic Module Navigation — rendered from config/modules.php sections --}}
     @foreach($navSections as $section)
@@ -190,9 +174,10 @@
     @endif
     @endcan
 
-    {{-- Journeys (visible to admins and assigned PSMs; hidden for the
-         focused Workshops-only testing roles) --}}
-    @if(Route::has('journeys.index') && ! in_array(auth()->user()->role?->slug, ['workshop_administrator', 'session_administrator'], true))
+    {{-- Journeys — partner journeys, gated by partner_management permission so a
+         role with no module access doesn't see it; hidden for the focused
+         Workshops-only testing roles. --}}
+    @if(Route::has('journeys.index') && auth()->user()?->hasModulePermission('partner_management') && ! in_array(auth()->user()->role?->slug, ['workshop_administrator', 'session_administrator'], true))
     <li>
         <a href="{{ route('journeys.index') }}" title="Journeys" data-filter-tags="journeys">
             <svg class="sa-icon">
@@ -203,17 +188,9 @@
     </li>
     @endif
 
-    {{-- User Profile (hidden for the focused Workshops-only testing roles) --}}
-    @if(! in_array(auth()->user()->role?->slug, ['workshop_administrator', 'session_administrator'], true))
-    <li>
-        <a href="{{ route('profile.edit') }}" title="Profile" data-filter-tags="profile settings">
-            <svg class="sa-icon">
-                <use href="/icons/sprite.svg#user"></use>
-            </svg>
-            <span class="nav-link-text">Profile</span>
-        </a>
-    </li>
-    @endif
+    {{-- Profile lives in the top-right avatar menu (User Profile + Logout), so it
+         is intentionally not repeated in the sidebar — the sidebar shows only
+         Welcome plus the modules a role has been granted. --}}
 
     @endunless
     @endauth

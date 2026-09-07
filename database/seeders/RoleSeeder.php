@@ -119,6 +119,7 @@ class RoleSeeder extends Seeder
             'description' => 'Day-to-day partner management, task execution, and field enablement.',
         ]);
         $this->syncPermissions($psm, [
+            'partner_success.engagement' => 'read',
             'launch_programs.action_plans' => 'write',
             'partner_management.analytics' => 'read',
             'enablement.blueprints' => 'write',
@@ -245,10 +246,10 @@ class RoleSeeder extends Seeder
             'sort_order' => 9,
             'description' => 'Sees the Welcome screen, the Partner Success dashboards, and Workshops (read-only).',
         ]);
-        // Read-only Workshops access; the PSM Engagement dashboards are open to
-        // any authenticated user. Route confinement is enforced by
-        // RedirectRestrictedRoles.
+        // Read-only access to the PSM Engagement dashboards and Workshops.
+        // Route confinement is additionally enforced by RedirectRestrictedRoles.
         $this->syncPermissions($dashboardViewer, [
+            'partner_success.engagement' => 'read',
             'workshops.management' => 'read',
             'workshops.reports' => 'read',
         ]);

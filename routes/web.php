@@ -946,7 +946,7 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 | Partner Success dashboard (audited, warehouse-backed)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->prefix('partner-success')->name('partner-success.')->group(function () {
+Route::middleware(['auth', 'module:partner_success.engagement'])->prefix('partner-success')->name('partner-success.')->group(function () {
     Route::get('/', [App\Http\Controllers\PartnerSuccessController::class, 'index'])->name('index');
     Route::get('/api/metrics', [App\Http\Controllers\PartnerSuccessController::class, 'apiMetrics'])->name('api.metrics');
     Route::get('/api/partners', [App\Http\Controllers\PartnerSuccessController::class, 'apiPartners'])->name('api.partners');
