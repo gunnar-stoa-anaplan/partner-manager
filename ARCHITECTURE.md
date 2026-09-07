@@ -6,6 +6,14 @@ security-review pack.
 
 _Last deep pass: 2026-09-06 (Laravel 12, PHP 8.2+)._
 
+> **Foundational model — read §11 first.** This is a **single-tenant, white-label
+> product**: each paying client gets its **own** Laravel instance + own Postgres,
+> deployed on their infra or hosted by us on AWS. It is _not_ a shared
+> multi-tenant deployment. Within each instance, users are **internal**
+> (employees) or **external** (partners, clients, prospects), each with distinct
+> CRUD rights and **row-level** data visibility. See §3 (authorization) and §11
+> (tenancy/commercial model).
+
 ---
 
 ## 1. Stack at a glance
@@ -58,8 +66,40 @@ instead of raw MySQL-only SQL.
 - **Auth:** email + password via `laravel/ui` (Bootstrap scaffolding).
   ⚠ **No MFA/2FA and no SSO.** Seeder sets every user's password to `password`
   (dev only — must not exist in prod).
-- **Two audiences:** internal **users** (`users.role_id → roles`) and external
-  **portal contacts** (guarded separately by `PortalAuth`/`PortalRole`/`PortalCan`).
+- **Two guards / four audience types:** internal **users** (`users.role_id → roles`)
+  and external **portal contacts** (guard `portal`, gated by
+  `PortalAuth`/`PortalRole`/`PortalCan`). Business audience taxonomy:
+  - **Internal — employees** of the client operating the instance (full-ish CRUD
+    per role: admin, coe, manager, psm, pam, workshop/session admins…).
+  - **External — partners** (portal roles: partner_admin, delivery_lead,
+    engagement_manager, practice_lead, marketing, sales) — CRUD limited to their
+    own partner's records.
+  - **External — clients** and **prospects** — read-mostly, scoped to what's been
+    shared with them.
+  Each type has a distinct CRUD profile; **row-level visibility is a hard
+  requirement** ("users see only data they're allowed to view").
+
+### Data visibility (row-level) — requirement + current state
+
+**Requirement:** every query that returns partner/opportunity/person/workshop
+data must be constrained to the rows the current user is entitled to, by
+audience type and ownership/assignment. This is separate from module access
+(can you open Pipeline) — it is which *rows* you get once you're in.
+
+**Current state (gap):** authorization is mostly **module-level** middleware
+plus **ad-hoc** `where('user_id', …)` in ~49 controllers. There are **no Laravel
+Policies** (`app/Policies` does not exist). Some models already register
+**global scopes** (`Partner`, `Blueprint`, `Lab`, `LaunchProgram`,
+`EnablementEvent`, `EnablementRegistration`, `WorkshopGuide`) — the right
+foundation, but coverage is partial. ⚠ The PSM Engagement dashboard is behind
+plain `auth`, so any internal user currently sees **all** partners.
+
+**Target design:** a consistent **visibility layer** — model global scopes (or a
+`Visible`/`ScopedToUser` trait) that filter by owner/assignment/partner and by
+audience, backed by **Laravel Policies** for per-model CRUD authorization
+(`viewAny/view/create/update/delete`), enforced in controllers via
+`authorize()`/`Gate`. Prefer first-party Policies + query scopes over bespoke
+per-controller checks. (See §8 audit.)
 - **Custom RBAC (not spatie/permission):**
   - `roles` (slug, display_name, type, landing_route, `bypass_permissions`).
   - `role_permissions` (`role_id`, `module_slug`, `access_level` = read|write).
@@ -182,7 +222,10 @@ already does.** Current state and recommendations:
 | **Full-text search** | Custom (KB is pgvector; global search is bespoke) | KB is appropriately pgvector; for entity search consider **Laravel Scout** (DB/Meilisearch driver) if it grows |
 | **Realtime** | `BROADCAST=log` (none) | **Laravel Reverb** (websockets) if you want live dashboards / Zoom chat / notifications |
 | **Mail** | `MAIL_MAILER=log` | Configure a real mailer (SES/Postmark/etc.) before any user-facing email |
-| **Authorization** | Middleware + custom checks, no Policies | Fine, but **Laravel Policies/Gates** would make per-model authorization testable and centralized |
+| **Row-level authorization** | Ad-hoc `where('user_id')` in ~49 controllers, partial global scopes, **no Policies** | Adopt **Laravel Policies/Gates** + a shared model **visibility scope/trait** — centralized, testable, closes the "sees all partners" gap. *Core requirement (§3).* |
+| **Multi-tenancy** | None (single instance per client) | **Do NOT** add stancl/tenancy or spatie/multitenancy — the model is single-tenant-per-instance (§11). Isolation is physical, not row-based-by-tenant. |
+| **Licensing / entitlement** | `LicenseStatusService` (custom) | Sign the per-instance license as a **JWT** (firebase/php-jwt already installed), validate at boot, drive **Pennant** flags/edition from it |
+| **Fleet deploy / upgrades** | Sail (dev only) | Ship a production Docker image + IaC (Terraform/ECS or Forge/Envoyer) to deploy & migrate N instances repeatably (§11) |
 | **Excel/Office/PDF** | maatwebsite/excel, phpoffice, pdfparser | ✅ Already using libraries — good |
 | **API docs** | Scramble | ✅ Good |
 
@@ -194,9 +237,15 @@ installed** — dead config; remove or install intentionally.
 ## 9. Known risks / gaps (security-review inputs)
 
 - Seeded default password (`password`) for all users — dev only.
-- **PSM Engagement dashboard is behind plain `auth`** — any authenticated
-  internal user sees all partners' pipeline/ACV/Salesforce links. Decide if it
-  should be scoped per-PSM.
+- **Row-level visibility is not systematically enforced** — no Policies, partial
+  global scopes, ad-hoc controller scoping. This is the top functional-security
+  gap given internal/external audiences (§3). The PSM Engagement dashboard is the
+  clearest instance: behind plain `auth`, so any authenticated internal user sees
+  **all** partners' pipeline/ACV/Salesforce links.
+- **Per-instance isolation depends on deployment discipline** — because tenancy
+  is physical (one DB/instance per client, §11), a misconfigured shared DB or
+  leaked cross-instance credential would break the core promise. Each instance
+  must have its own DB, secrets, backups, and license.
 - **PII** (partner people: names, emails, countries) + commercially sensitive
   ACV/account data in app DB, warehouse, and KB. Classify + minimize exposure.
 - Secrets (Salesforce, Zoom, GitHub, Anaplan, DB) in `.env` — move to a secrets
@@ -219,3 +268,59 @@ installed** — dead config; remove or install intentionally.
   Claude Code.
 - Tests: PHPUnit, `RefreshDatabase` against a `testing` DB (Pulse/Telescope
   disabled in test env). Run on Postgres.
+
+---
+
+## 11. Tenancy, deployment & commercial model
+
+**The product is sold as a single-tenant, white-label platform.** Each paying
+client gets a **dedicated instance** — its own Laravel app + its own PostgreSQL
+database — deployed one of two ways:
+
+1. **Client-hosted** — deployed onto the client's own infrastructure (they own
+   the DB and data residency).
+2. **We-host (for a fee)** — deployed onto our AWS as an isolated per-client
+   stack.
+
+**This is _not_ shared multi-tenancy.** There is no `tenant_id` discriminator and
+no shared database across clients. Tenant isolation is **physical** (separate DB
++ separate app instance), which is the strongest form of data separation and a
+selling point for security-conscious buyers.
+
+### What this model requires the app to support
+
+- **White-label per instance** — colors, logos, app name, custom CSS are
+  `AppSetting`-driven and admin-editable (the branding area). This is the
+  per-client theming mechanism; it must stay fully data-driven (no hard-coded
+  brand). ✅ Exists.
+- **Config by environment only (12-factor)** — every instance differs only by
+  `.env` / DB / secrets. Integration credentials (Salesforce, Zoom, GitHub,
+  Anaplan) are per-instance and configured in-app or via env — never shared
+  across clients.
+- **Licensing / entitlement control plane** — each instance carries a license
+  that defines the paid edition, enabled modules, seat/usage limits, and expiry.
+  Recommendation: issue a **signed JWT license** (firebase/php-jwt is installed),
+  validate it at boot in `LicenseStatusService`, and drive **Pennant** flags +
+  `ModuleRegistry` from it — so entitlement, not code branches, gates features.
+- **Fleet release engineering** — the hard part of instanced SaaS is operating
+  _N_ instances: a versioned production **Docker image**, **IaC** (Terraform/ECS,
+  or Laravel Forge + Envoyer) to provision and update stacks, automated
+  **migrations on deploy**, per-instance **backups**, and a rollout plan so an
+  upgrade can be applied fleet-wide. Sail is dev-only and not a deploy target.
+- **Per-instance observability & backups** — Pulse (installed) per instance;
+  centralized log shipping optional. Client-hosted instances may be opaque to us
+  by design — decide the support/telemetry contract (a privacy-respecting
+  "phone-home" for version/license only, if any).
+
+### Within-instance isolation (still required)
+
+Physical tenancy separates *clients* from each other. **Inside** one instance
+you still have internal employees + external partners/clients/prospects who must
+only see their own data — that is the row-level authorization work in §3, and it
+is independent of the deployment model.
+
+### Explicit non-goals
+
+- No multi-tenant database, no tenancy package (stancl/tenancy,
+  spatie/laravel-multitenancy). Adding one would fight the chosen model.
+- No cross-client data access or shared identity — each instance is an island.
