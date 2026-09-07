@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class PartnerGoal extends Model
 {
+    use \App\Models\Concerns\ScopedToActor;
+
     protected $fillable = [
         'partner_id',
         'fiscal_year',

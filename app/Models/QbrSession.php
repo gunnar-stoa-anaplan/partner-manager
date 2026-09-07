@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class QbrSession extends Model
 {
+    use \App\Models\Concerns\ScopedToActor;
+
     protected $fillable = [
         'partner_id', 'fiscal_quarter', 'status', 'scheduled_date',
         'completed_date', 'partner_event_id', 'prepared_by',

@@ -10,6 +10,7 @@ class PsmObjective extends Model
 {
     /** @use HasFactory<\Database\Factories\PsmObjectiveFactory> */
     use HasFactory;
+    use \App\Models\Concerns\ScopedToActor;
 
     protected $fillable = [
         'user_id',

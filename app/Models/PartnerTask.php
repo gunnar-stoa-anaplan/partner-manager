@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PartnerTask extends Model
 {
     use HasFactory;
+    use \App\Models\Concerns\ScopedToActor;
 
     protected $fillable = [
         'partner_id', 'task_template_id', 'title', 'description',

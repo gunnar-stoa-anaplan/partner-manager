@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class PartnerAlert extends Model
 {
+    use \App\Models\Concerns\ScopedToActor;
+
     protected $fillable = [
         'partner_id', 'type', 'severity', 'title', 'description',
         'recommended_action', 'data', 'status', 'acknowledged_by',

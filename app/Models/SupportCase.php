@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SupportCase extends Model
 {
+    use \App\Models\Concerns\ScopedToActor;
+
     protected $table = 'cases';
 
     protected $fillable = [

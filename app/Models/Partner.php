@@ -12,6 +12,13 @@ class Partner extends Model
 {
     use HasFactory, ScopedToActor;
 
+    /** Partner's own id IS the partner id for visibility scoping. */
+    public function visibilityPartnerColumn(): string
+    {
+        return 'id';
+    }
+
+
     protected $fillable = [
         'salesforce_id',
         'name',

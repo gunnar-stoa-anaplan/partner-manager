@@ -9,6 +9,8 @@ use Illuminate\Support\Collection;
 
 class Signal extends Model
 {
+    use \App\Models\Concerns\ScopedToActor;
+
     protected $fillable = [
         'partner_id',
         'channel',

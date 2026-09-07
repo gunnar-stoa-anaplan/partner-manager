@@ -30,10 +30,12 @@ trait ScopedToActor
     }
 
     /**
-     * The column that holds the partner id for visibility scoping.
+     * The column that holds the partner id for visibility scoping. Defaults to
+     * `partner_id` (the common case for partner-owned models); the Partner model
+     * itself overrides this to `id`.
      */
     public function visibilityPartnerColumn(): string
     {
-        return 'id';
+        return 'partner_id';
     }
 }

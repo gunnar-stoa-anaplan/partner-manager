@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Certification extends Model
 {
+    use \App\Models\Concerns\ScopedToActor;
+
     protected $fillable = [
         'contact_id', 'partner_id', 'type', 'product_area', 'level',
         'status', 'issued_date', 'expiry_date', 'exam_score', 'version',
