@@ -1,12 +1,11 @@
-@extends('layouts.vertical', ['pageTitle' => 'PSM Engagement (Insight Kit)'])
+@extends('layouts.vertical', [
+    'pageTitle' => 'PSM Engagement',
+    'pageSubTitle1' => 'Insights',
+    'pageSubText' => 'Audited, warehouse-backed engagement metrics — every number drills to its source; GEO and partner filters re-run everything, scoped to what you can see.',
+])
 
 @section('content')
 <div class="container-fluid py-3">
-    <div class="d-flex align-items-baseline justify-content-between mb-2">
-        <h4 class="fw-700 mb-0">PSM Engagement</h4>
-        <span class="fs-sm text-muted">Insight Kit reference — every number drills to its audited source; filters and scope re-run everything.</span>
-    </div>
-
     {{-- Filter bar: publishes geo/partner to window.Insights, scoped to visible partners --}}
     <x-insight.filter-bar :partnersUrl="url('partner-success/api/partners')" />
 

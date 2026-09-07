@@ -24,7 +24,14 @@
         <div class="app-content">
             <div class="content-wrapper">
 
-                @yield('page-title')
+                {{-- Standard page title + breadcrumb. Views may override with
+                     @section('page-title'); otherwise any view that passes
+                     $pageTitle gets the standard breadcrumb automatically. --}}
+                @hasSection('page-title')
+                    @yield('page-title')
+                @else
+                    @includeWhen(!empty($pageTitle), 'layouts.partials.app-pagetitle')
+                @endif
 
                 <div class="main-content {{$extraClass ?? ''}}">
 
