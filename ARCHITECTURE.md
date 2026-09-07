@@ -225,7 +225,7 @@ already does.** Current state and recommendations:
 
 | Area | Today | Recommendation |
 |------|-------|----------------|
-| **Dashboard charts** | PSM Engagement uses hand-rolled inline SVG bars/donuts | **Use ApexCharts** (already installed) — consistent with the rest of the app, interactivity for free. *Follow-up to refactor.* |
+| **Dashboard charts / UX consistency** | PSM Engagement uses hand-rolled inline SVG bars/donuts; no shared UI components exist (`resources/views/components` is empty), so every view is bespoke | Build the **Insight Kit** (INSIGHT_KIT.md, §12): shared Blade components over the installed **ApexCharts**, plus a `MetricSource` contract so the audit-drill works everywhere. Filament was piloted and rejected (see §12). |
 | **Feature flags** | Custom Activation + ModuleRegistry, **and** Pennant installed | Consolidate on **Pennant** as the flag primitive; keep the training/activation layer on top of it rather than a parallel system |
 | **Audit logging** | Custom `audit_logs` + observer | Consider **owen-it/laravel-auditing** or **spatie/activitylog** for model-level audit trails (less custom code, standard format) |
 | **RBAC** | Custom roles/`role_permissions` | Works well and is tailored; migrating to **spatie/laravel-permission** is optional (only if you want its ecosystem). Not urgent. |
@@ -336,3 +336,28 @@ is independent of the deployment model.
 - No multi-tenant database, no tenancy package (stancl/tenancy,
   spatie/laravel-multitenancy). Adding one would fight the chosen model.
 - No cross-client data access or shared identity — each instance is an island.
+
+---
+
+## 12. Presentation layer & the audit-drill (Insight Kit)
+
+**Decision (2026-09):** standardize UX and the "explain any number" audit-drill
+via a lightweight **Insight Kit** on the existing Blade + Alpine + ApexCharts
+stack — not an admin-panel framework. Full spec in **INSIGHT_KIT.md**.
+
+- **Problem:** there is no shared UI component layer (`resources/views/components`
+  is empty), so every view hand-builds its cards/charts/tables, and the
+  value→source-rows+SQL+provenance drill is wired only into PSM Engagement's
+  `MetricService`. Nothing is consistent because nothing is shared.
+- **Filament v4 was piloted and rejected** for this app: it force-downgrades
+  Livewire v4→v3, adds ~30 packages and a second chart library (Chart.js), and
+  duplicates the custom nav/RBAC platform — while the audit-drill still has to be
+  custom. It reused the app's web session cleanly, but the collisions outweigh it.
+- **Chosen:** shared Blade components (`resources/views/components/insight/*`) over
+  the installed ApexCharts, a `MetricSource` contract + `MetricRegistry` (the
+  warehouse `MetricService` becomes the first adapter), and one
+  `GET /insights/{metric}/…` endpoint + one Alpine behavior driving a single
+  `<x-insight.drill-panel>`.
+- **Sequencing:** the drill must enforce row-level visibility, so it depends on
+  the row-level authorization layer (§3). Build that first or alongside; do not
+  ship a drill that ignores visibility.
