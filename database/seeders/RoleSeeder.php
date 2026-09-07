@@ -238,14 +238,20 @@ class RoleSeeder extends Seeder
         // Dashboard Viewer - Welcome screen + the Partner Success dashboards
         // only. No module permissions; confinement is enforced by
         // RedirectRestrictedRoles (route access) and the nav @unless(isDashboardOnly()).
-        Role::updateOrCreate(['slug' => 'dashboard_viewer'], [
+        $dashboardViewer = Role::updateOrCreate(['slug' => 'dashboard_viewer'], [
             'display_name' => 'Dashboard Viewer',
             'type' => 'internal',
             'landing_route' => 'partner-success.index',
             'sort_order' => 9,
-            'description' => 'Sees only the Welcome screen and the Partner Success dashboards.',
+            'description' => 'Sees the Welcome screen, the Partner Success dashboards, and Workshops (read-only).',
         ]);
-        // intentionally no syncPermissions() — no module access.
+        // Read-only Workshops access; the PSM Engagement dashboards are open to
+        // any authenticated user. Route confinement is enforced by
+        // RedirectRestrictedRoles.
+        $this->syncPermissions($dashboardViewer, [
+            'workshops.management' => 'read',
+            'workshops.reports' => 'read',
+        ]);
     }
 
     private function seedPortalRoles(): void

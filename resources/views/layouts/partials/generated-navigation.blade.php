@@ -26,8 +26,21 @@
         </a>
     </li>
 
+    {{-- Workshops for dashboard-only users (normal users get it via the module
+         nav below, so only render this extra entry for the restricted role). --}}
+    @if(auth()->user()?->isDashboardOnly() && Route::has('workshops.dashboard'))
+    <li>
+        <a href="{{ route('workshops.dashboard') }}">
+            <svg class="sa-icon">
+                <use href="/icons/sprite.svg#check-square"></use>
+            </svg>
+            <span class="nav-link-text">Workshops</span>
+        </a>
+    </li>
+    @endif
+
     {{-- Everything below is hidden for dashboard-only users (Welcome + Partner
-         Success are the only nav they get). --}}
+         Success + Workshops are the only nav they get). --}}
     @unless(auth()->user()?->isDashboardOnly())
 
     {{-- My Training (shown if pending activation paths exist) --}}

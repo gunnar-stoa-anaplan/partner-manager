@@ -30,9 +30,9 @@ class RedirectRestrictedRoles
             'prefixes' => ['strategy', 'activation', 'logout', 'impersonate', 'welcome', 'livewire', '_boost', 'plan/paths', 'admin/paths', 'admin/task-templates', 'act/path-reviews', 'launch-programs', 'knowledge-base', 'branding', 'ai-agents', 'partner-goals', 'admin/goal-templates', 'blueprint', 'my-blueprints', 'enablement-events', 'enablement-calendar', 'enablement-dashboard', 'enablement-sessions', 'enablement-registrations', 'program-dashboard', 'reporting-hierarchy', 'users', 'partners', 'partner-assignments', 'directory-sync', 'partner-workshops'],
             'landing' => 'strategy.dashboard',
         ],
-        // Dashboard-only: Welcome screen + the Partner Success dashboards, nothing else.
+        // Dashboard-only: Welcome, the Partner Success dashboards, and Workshops.
         'dashboard_viewer' => [
-            'prefixes' => ['partner-success', 'welcome', 'logout', 'impersonate', 'livewire', '_boost'],
+            'prefixes' => ['partner-success', 'partner-workshops', 'welcome', 'logout', 'impersonate', 'livewire', '_boost'],
             'landing' => 'partner-success.index',
         ],
     ];
