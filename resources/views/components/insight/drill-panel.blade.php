@@ -47,11 +47,36 @@
         const prov = (d.provenance || []).map(p => (p.source_file || '') + ' @ ' + (p.snapshot_date || '')).join(' · ');
         document.getElementById('insight-drill-provenance').textContent = prov ? ('Provenance: ' + prov) : '';
 
+        // Build the table via DOM + textContent (never innerHTML) — warehouse
+        // rows (account/use_case/partner) originate from external imports and
+        // must not be able to inject markup into an internal user's browser.
         const cols = d.columns || (d.rows && d.rows[0] ? Object.keys(d.rows[0]) : []);
-        document.getElementById('insight-drill-head').innerHTML = '<tr>' + cols.map(c => '<th>' + c + '</th>').join('') + '</tr>';
-        document.getElementById('insight-drill-body').innerHTML = (d.rows || []).slice(0, 500).map(r =>
-            '<tr>' + cols.map(c => '<td>' + (r[c] ?? '') + '</td>').join('') + '</tr>'
-        ).join('') || '<tr><td class="text-muted">No rows.</td></tr>';
+        const head = document.getElementById('insight-drill-head');
+        const body = document.getElementById('insight-drill-body');
+        head.replaceChildren();
+        body.replaceChildren();
+
+        const htr = document.createElement('tr');
+        cols.forEach(c => { const th = document.createElement('th'); th.textContent = c; htr.appendChild(th); });
+        head.appendChild(htr);
+
+        const rows = (d.rows || []).slice(0, 500);
+        if (!rows.length) {
+            const tr = document.createElement('tr'), td = document.createElement('td');
+            td.className = 'text-muted'; td.colSpan = cols.length || 1; td.textContent = 'No rows.';
+            tr.appendChild(td); body.appendChild(tr);
+            return;
+        }
+        rows.forEach(r => {
+            const tr = document.createElement('tr');
+            cols.forEach(c => {
+                const td = document.createElement('td');
+                const v = r[c];
+                td.textContent = (v === null || v === undefined) ? '' : String(v);
+                tr.appendChild(td);
+            });
+            body.appendChild(tr);
+        });
     };
 })();
 </script>
