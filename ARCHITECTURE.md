@@ -368,7 +368,10 @@ stack — not an admin-panel framework. Full spec in **INSIGHT_KIT.md**.
 
 The intent and flow of who uses the app and the data everyone generates is
 documented in **OPERATING_MODEL.md**. The platform's design rests on three
-pillars, which are being built together because they depend on each other:
+pillars. Foundations + a reference implementation of each are **built** (on
+`feature/target-operating-model`); rolling the patterns across all models/views
+is the remaining follow-on. A companion **security overview** for infosec review
+is in SECURITY_OVERVIEW.md.
 
 1. **Multi-role + teams/functions.** People carry one *or more* roles (a manager
    who is also a PSM; a partner who both sells and delivers), and both internal
