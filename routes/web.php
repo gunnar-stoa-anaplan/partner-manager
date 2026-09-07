@@ -946,7 +946,18 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 | Partner Success dashboard (audited, warehouse-backed)
 |--------------------------------------------------------------------------
 */
+// Insight Kit — uniform metric endpoint (value/drill/trend/breakdown). Every
+// response is row-level-visibility scoped via VisibilityContext.
+Route::middleware(['auth'])->prefix('insights')->name('insights.')->group(function () {
+    Route::get('metrics', [\App\Http\Controllers\InsightController::class, 'meta'])->name('meta');
+    Route::get('{metric}/value', [\App\Http\Controllers\InsightController::class, 'value'])->name('value');
+    Route::get('{metric}/drill', [\App\Http\Controllers\InsightController::class, 'drill'])->name('drill');
+    Route::get('{metric}/trend', [\App\Http\Controllers\InsightController::class, 'trend'])->name('trend');
+    Route::get('{metric}/breakdown', [\App\Http\Controllers\InsightController::class, 'breakdown'])->name('breakdown');
+});
+
 Route::middleware(['auth', 'module:partner_success.engagement'])->prefix('partner-success')->name('partner-success.')->group(function () {
+    Route::get('kit', [\App\Http\Controllers\PartnerSuccessController::class, 'kit'])->name('kit');
     Route::get('/', [App\Http\Controllers\PartnerSuccessController::class, 'index'])->name('index');
     Route::get('/api/metrics', [App\Http\Controllers\PartnerSuccessController::class, 'apiMetrics'])->name('api.metrics');
     Route::get('/api/partners', [App\Http\Controllers\PartnerSuccessController::class, 'apiPartners'])->name('api.partners');

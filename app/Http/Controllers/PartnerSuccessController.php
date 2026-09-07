@@ -31,6 +31,25 @@ class PartnerSuccessController extends Controller
         return view('partner-success.dashboard');
     }
 
+    /**
+     * Reference view of PSM Engagement built on the Insight Kit — stat-cards +
+     * chart + drill-panel, all fed by the visibility-scoped MetricRegistry.
+     * Proves the kit against a real view without disturbing the legacy dashboard.
+     */
+    public function kit(\App\Insights\MetricRegistry $registry)
+    {
+        $filter = new \App\Insights\MetricFilter(allowedPartners: $this->visiblePartnerNames);
+
+        $pipeline = [];
+        foreach ($registry->all() as $source) {
+            if (strtolower((string) $source->meta()->section) === 'pipeline') {
+                $pipeline[] = ['meta' => $source->meta(), 'value' => $source->value($filter)];
+            }
+        }
+
+        return view('partner-success.kit', compact('pipeline'));
+    }
+
     public function apiMetrics(Request $request)
     {
         return response()->json($this->metrics->metrics($request->query('geo'), $request->query('partner')));
