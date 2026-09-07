@@ -50,7 +50,6 @@ app/Services/test_append.txt
 # Misc
 returndata.txt
 junk
-architecture.md
 storage/seeder_debug.json
 workspace_activity_report*.csv
 
