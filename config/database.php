@@ -113,17 +113,19 @@ return [
 
         // Partner Success analytical warehouse (audited snapshot schema `wh`).
         // Read-only reader; the dashboard module queries this connection.
+        // Consolidated into the app Postgres: same instance as the default
+        // connection, isolated to the `wh` schema via search_path.
         'warehouse' => [
             'driver' => 'pgsql',
             'host' => env('WAREHOUSE_DB_HOST', env('DB_HOST', '127.0.0.1')),
             'port' => env('WAREHOUSE_DB_PORT', '5432'),
-            'database' => env('WAREHOUSE_DB_DATABASE', 'enablement'),
-            'username' => env('WAREHOUSE_DB_USERNAME', 'enablement'),
-            'password' => env('WAREHOUSE_DB_PASSWORD', 'enablement'),
+            'database' => env('WAREHOUSE_DB_DATABASE', env('DB_DATABASE', 'partner_manager')),
+            'username' => env('WAREHOUSE_DB_USERNAME', env('DB_USERNAME', 'sail')),
+            'password' => env('WAREHOUSE_DB_PASSWORD', env('DB_PASSWORD', '')),
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => 'wh,public',
+            'search_path' => 'wh',
             'sslmode' => 'prefer',
         ],
 

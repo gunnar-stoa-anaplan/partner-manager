@@ -22,7 +22,7 @@ _Last deep pass: 2026-09-06 (Laravel 12, PHP 8.2+)._
 |-------|-----------|
 | Framework | Laravel 12 (PHP ^8.2), Sail/Docker for local dev |
 | App database | **PostgreSQL** (migrated from MySQL; `DB_CONNECTION=pgsql`) |
-| Analytics warehouse | **PostgreSQL** schema `wh` — audited weekly snapshots (Partner Success / PSM Engagement) |
+| Analytics warehouse | **PostgreSQL** schema `wh` inside the app DB — audited weekly snapshots (Partner Success / PSM Engagement) |
 | Knowledge base | **PostgreSQL + pgvector** (`knowledge_base` connection) for RAG/embeddings |
 | Queue / Cache / Session | **database** driver (all three) on Postgres |
 | Mail / Broadcast | `log` (⚠ no real provider configured) |
@@ -39,16 +39,28 @@ Scale: ~157 models, ~177 controllers, ~102 services, 183 migrations, 12 enums,
 
 ## 2. Data stores
 
+All three databases below live in the **same Postgres instance** (the
+`pgvector/pgvector:pg17` container in the app's compose stack) — one instance to
+deploy, back up, and ship per client instance (§11). There is no external DB
+container.
+
 1. **App DB (pgsql, `partner_manager`)** — all transactional data: users, roles,
    permissions, partners, opportunities, workshops, blueprints, activation,
    signals, etc. Session/cache/queue tables live here too.
-2. **Warehouse (`warehouse` connection → schema `wh`)** — append-only weekly
-   snapshots for the Partner Success / PSM Engagement dashboards. Every row
-   carries `snapshot_date`, `load_run_id`, `source_file`, `source_id`
-   (provenance). Metric definitions live in `wh.metric_definition`; the
-   dashboard derives every number from that catalog. Fed by the Python ingest
-   pipeline in the separate `partner-enablement-db` repo (zip of weekly CSVs).
-   **Read-only from the app.**
+2. **Warehouse (`warehouse` connection → `partner_manager` DB, schema `wh`)** —
+   append-only weekly snapshots for the Partner Success / PSM Engagement
+   dashboards. Same database as the app, isolated to the `wh` schema via
+   `search_path=wh`; a separate read connection so it stays logically distinct.
+   Every row carries `snapshot_date`, `load_run_id`, `source_file`, `source_id`
+   (provenance). Metric definitions live in `wh.metric_definition`; the dashboard
+   derives every number from that catalog. **Read-only from the app.**
+   _History:_ this was formerly a standalone `enablement-db` Postgres container
+   fed by the Python ingest pipeline in the separate `partner-enablement-db` repo
+   (zip of weekly CSVs); the `wh` schema was consolidated into `partner_manager`
+   and that container retired (2026-09). ⚠ **Follow-up:** the weekly ingest still
+   targets the retired warehouse's `wh`/`staging`/`public` layers — repoint it at
+   `partner_manager.wh` (and migrate/recreate its `staging`/`public` working
+   layers) before the next load, or the dashboard data will go stale.
 3. **Knowledge base (`knowledge_base` connection, pgvector)** — `knowledge_documents`,
    `knowledge_chunks` (vector embeddings) for semantic search / RAG. Vector columns
    use Laravel 12's **native** schema support (`$table->vector(..., dimensions:)`
