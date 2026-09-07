@@ -384,6 +384,17 @@ is in SECURITY_OVERVIEW.md.
 2. **Row-level visibility.** A shared data fabric needs per-actor scoping — a
    partner sees only their company; a PSM their book; a manager their team's books;
    CoE program-wide — via `VisibilityContext` + Policies + `ScopedToActor`. See §3.
+   Applied to the core direct partner-data models (Partner, Opportunity, Project,
+   Lead, DealRegistration, Funding, Resource, PartnerTask, PartnerEvent,
+   PsmObjective, PartnerGoal, Certification, QbrSession, SupportCase, Signal,
+   PartnerAlert, ContactInteraction). Derived/aggregate/join models (snapshots,
+   `*_stage_history`, `*_enrollment`, scorecards, health snapshots) are a
+   deliberate per-model follow-on — blanket scoping risks hiding rows in trends
+   and manager rollups.
+
+The standard page **breadcrumb** (`app-pagetitle`: title / parent links / italic
+subtitle) now renders on every view automatically from `$pageTitle` (layout
+auto-include; `@section('page-title')` still overrides).
 3. **Explainable metric layer (Insight Kit).** Every number traces to the partner
    activity that produced it — `MetricSource`/`MetricRegistry` + shared components
    + a visibility-enforcing drill. See §12.
