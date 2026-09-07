@@ -78,7 +78,8 @@ class PortalImpersonationTest extends TestCase
             route('partners.tab', [$otherPartner->id, 'portal-users'])
         );
 
-        $response->assertForbidden();
+        // Row-level visibility: another PSM's partner is invisible → 404.
+        $response->assertNotFound();
     }
 
     // ─── Toggle Access ────────────────────────────────────────────

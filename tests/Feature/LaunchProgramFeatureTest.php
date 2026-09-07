@@ -385,7 +385,8 @@ class LaunchProgramFeatureTest extends TestCase
             'launchProgram' => $program,
         ]));
 
-        $response->assertForbidden();
+        // Row-level visibility: another PSM's partner is invisible → 404.
+        $response->assertNotFound();
     }
 
     public function test_admin_can_nominate_any_partner(): void
@@ -480,7 +481,8 @@ class LaunchProgramFeatureTest extends TestCase
             'tab' => 'launch-programs',
         ]));
 
-        $response->assertForbidden();
+        // Row-level visibility: another PSM's partner is invisible → 404.
+        $response->assertNotFound();
     }
 
     public function test_tab_shows_enrolled_and_available_programs(): void

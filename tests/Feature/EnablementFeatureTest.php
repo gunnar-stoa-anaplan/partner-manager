@@ -839,7 +839,8 @@ class EnablementFeatureTest extends TestCase
             'partner_id' => $otherPartner->id,
         ]);
 
-        $response->assertForbidden();
+        // Row-level visibility: another PSM's partner is invisible → 404.
+        $response->assertNotFound();
     }
 
     public function test_cannot_register_partner_for_draft_event(): void
@@ -931,7 +932,8 @@ class EnablementFeatureTest extends TestCase
             'partner_id' => $otherPartner->id,
         ]);
 
-        $response->assertForbidden();
+        // Row-level visibility: another PSM's partner is invisible → 404.
+        $response->assertNotFound();
     }
 
     // ─── API: Contact Nomination ─────────────────────────────────
@@ -1207,7 +1209,8 @@ class EnablementFeatureTest extends TestCase
             'end' => now()->addMonth()->toDateString(),
         ]));
 
-        $response->assertForbidden();
+        // Row-level visibility: another PSM's partner is invisible → 404.
+        $response->assertNotFound();
     }
 
     // ─── Partner Enablement Tab ──────────────────────────────────
@@ -1251,7 +1254,8 @@ class EnablementFeatureTest extends TestCase
             'tab' => 'enablement',
         ]));
 
-        $response->assertForbidden();
+        // Row-level visibility: another PSM's partner is invisible → 404.
+        $response->assertNotFound();
     }
 
     // ─── PSM Enablement Calendar View ────────────────────────────
@@ -1288,7 +1292,8 @@ class EnablementFeatureTest extends TestCase
 
         $response = $this->actingAs($this->psm)->get(route('partners.enablement', $otherPartner->id));
 
-        $response->assertForbidden();
+        // Row-level visibility: another PSM's partner is invisible → 404.
+        $response->assertNotFound();
     }
 
     public function test_admin_can_view_any_partner_enablement_page(): void

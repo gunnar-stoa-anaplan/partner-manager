@@ -28,6 +28,11 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(ChatServiceInterface::class, SimulatedChatService::class);
 
+        // Row-level visibility resolver — singleton so partner-scope lookups run
+        // once per request and both the Policies and the ScopedToActor global
+        // scope share the same resolution.
+        $this->app->singleton(\App\Support\VisibilityContext::class);
+
         $this->app->singleton(ZoomApiService::class, function () {
             return new ZoomApiService(
                 accountId: config('services.zoom.account_id') ?? '',

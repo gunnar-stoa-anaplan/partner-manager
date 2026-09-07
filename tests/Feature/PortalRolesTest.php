@@ -363,6 +363,7 @@ class PortalRolesTest extends TestCase
             ['file' => $file]
         );
 
-        $response->assertForbidden();
+        // Row-level visibility: another PSM's partner is invisible → 404.
+        $response->assertNotFound();
     }
 }

@@ -3,17 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Services\PartnerSuccess\MetricService;
+use App\Support\VisibilityContext;
 use Illuminate\Http\Request;
 
 /**
  * Partner Success dashboard — audited, warehouse-backed. Every number drills to
  * its source rows + SQL + weekly history; GEO / PARTNER filters re-run all of it.
+ * Row-level visibility: non-admin actors only ever see their own partners, so
+ * "all partners" means "all of MY partners".
  */
 class PartnerSuccessController extends Controller
 {
-    public function __construct(private readonly MetricService $metrics)
-    {
+    public function __construct(
+        private readonly MetricService $metrics,
+        VisibilityContext $visibility,
+    ) {
+        // Constrain every metric/drill to the partners this actor may see.
+        $this->metrics->restrictTo($visibility->visiblePartnerNames());
+        $this->visiblePartnerNames = $visibility->visiblePartnerNames();
     }
+
+    /** @var array<string>|null */
+    private ?array $visiblePartnerNames;
 
     public function index()
     {
@@ -27,7 +38,15 @@ class PartnerSuccessController extends Controller
 
     public function apiPartners()
     {
-        return response()->json($this->metrics->partners());
+        $partners = $this->metrics->partners();
+
+        // Restrict the picker to partners this actor may see.
+        if ($this->visiblePartnerNames !== null) {
+            $allowed = array_flip($this->visiblePartnerNames);
+            $partners = array_values(array_filter($partners, fn ($p) => isset($allowed[$p])));
+        }
+
+        return response()->json($partners);
     }
 
     public function apiDrill(Request $request, string $name)

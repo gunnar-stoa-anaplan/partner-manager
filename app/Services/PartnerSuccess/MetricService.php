@@ -71,6 +71,22 @@ class MetricService
     }
 
     /** filter clauses (+ bound params + human-readable shown clause) for a base */
+    /**
+     * Row-level visibility: when set to an array, every query is additionally
+     * constrained to these partner names ("all" means "all MY partners"); null
+     * means unrestricted (admins / bypass). Set from VisibilityContext.
+     *
+     * @var array<string>|null
+     */
+    private ?array $allowedPartners = null;
+
+    public function restrictTo(?array $partnerNames): static
+    {
+        $this->allowedPartners = $partnerNames;
+
+        return $this;
+    }
+
     private function filt(string $base, ?string $geo, ?string $partner): array
     {
         $clauses = [];
@@ -93,6 +109,24 @@ class MetricService
                 $clauses[] = 'partner = ?';
                 $params[] = $partner;
                 $shown[] = "partner = '{$pe}'";
+            }
+        }
+
+        // Row-level visibility: constrain to the actor's allowed partners.
+        if ($this->allowedPartners !== null && $b['partner']) {
+            if ($this->allowedPartners === []) {
+                $clauses[] = '1 = 0';
+                $shown[] = 'visibility: none';
+            } else {
+                $ph = implode(',', array_fill(0, count($this->allowedPartners), '?'));
+                if ($b['partner'] === 'opp') {
+                    $clauses[] = "(partner IN ($ph) OR implementer IN ($ph))";
+                    $params = array_merge($params, $this->allowedPartners, $this->allowedPartners);
+                } else {
+                    $clauses[] = "partner IN ($ph)";
+                    $params = array_merge($params, $this->allowedPartners);
+                }
+                $shown[] = 'visibility: '.count($this->allowedPartners).' partner(s)';
             }
         }
 
