@@ -4,8 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 
 class Contact extends Authenticatable
 {
@@ -84,6 +87,47 @@ class Contact extends Authenticatable
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'portal_role_id');
+    }
+
+    /**
+     * All portal roles this contact holds (multi-role). `portal_role_id` remains
+     * the primary role; portal access checks union across every role.
+     */
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'role_contact')->withTimestamps();
+    }
+
+    /**
+     * Teams / functions this contact belongs to — the same teams internal users
+     * join, so partners plug into Sales / Marketing / Service / Implementation.
+     */
+    public function teams(): MorphToMany
+    {
+        return $this->morphToMany(Team::class, 'member', 'team_members')
+            ->withPivot('role_in_team')->withTimestamps();
+    }
+
+    /**
+     * Primary portal role plus every pivot role, de-duplicated.
+     */
+    public function allRoles(): Collection
+    {
+        $roles = collect($this->relationLoaded('roles') ? $this->roles : $this->roles()->get());
+
+        if ($this->portal_role_id && ! $roles->contains('id', $this->portal_role_id) && $this->role) {
+            $roles->push($this->role);
+        }
+
+        return $roles->unique('id')->values();
+    }
+
+    /**
+     * Whether any of the contact's portal roles grants the given portal ability.
+     */
+    public function hasPortalPermission(string $moduleSlug): bool
+    {
+        return $this->allRoles()->contains(fn (Role $r) => $r->hasPermission($moduleSlug));
     }
 
     public function projects()

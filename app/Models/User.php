@@ -11,8 +11,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -118,6 +120,49 @@ class User extends Authenticatable
     }
 
     /**
+     * All roles this user holds (multi-role). `role_id` remains the "primary"
+     * role for landing/back-compat; permission checks union across every role.
+     */
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'role_user')->withTimestamps();
+    }
+
+    /**
+     * Teams / functions this user belongs to (Sales, Marketing, Service,
+     * Implementation, …) — the same teams partner contacts can join.
+     */
+    public function teams(): MorphToMany
+    {
+        return $this->morphToMany(Team::class, 'member', 'team_members')
+            ->withPivot('role_in_team')
+            ->withTimestamps();
+    }
+
+    /**
+     * Primary role plus every pivot role, de-duplicated. The basis for all
+     * permission resolution so a multi-role user gets the union of access.
+     */
+    public function allRoles(): Collection
+    {
+        if ($this->allRolesCache !== null) {
+            return $this->allRolesCache;
+        }
+
+        $roles = $this->relationLoaded('roles') ? $this->roles : $this->roles()->get();
+        $roles = collect($roles);
+
+        if ($this->role_id && ! $roles->contains('id', $this->role_id) && $this->role) {
+            $roles->push($this->role);
+        }
+
+        return $this->allRolesCache = $roles->unique('id')->values();
+    }
+
+    /** @var Collection|null */
+    protected $allRolesCache = null;
+
+    /**
      * The user's direct manager.
      */
     public function manager(): BelongsTo
@@ -138,7 +183,7 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return in_array($this->role?->slug, ['admin', 'super_admin']);
+        return $this->allRoles()->contains(fn (Role $r) => in_array($r->slug, ['admin', 'super_admin'], true));
     }
 
     /**
@@ -158,7 +203,7 @@ class User extends Authenticatable
      */
     public function isPsm(): bool
     {
-        return $this->role?->slug === 'psm';
+        return $this->allRoles()->contains(fn (Role $r) => $r->slug === 'psm');
     }
 
     /**
@@ -176,7 +221,7 @@ class User extends Authenticatable
      */
     public function bypassesPermissions(): bool
     {
-        return $this->role?->bypass_permissions ?? false;
+        return $this->allRoles()->contains(fn (Role $r) => (bool) $r->bypass_permissions);
     }
 
     /**
@@ -184,7 +229,7 @@ class User extends Authenticatable
      */
     public function hasModulePermission(string $moduleSlug): bool
     {
-        return $this->role?->hasPermission($moduleSlug) ?? false;
+        return $this->allRoles()->contains(fn (Role $r) => $r->hasPermission($moduleSlug));
     }
 
     /**
@@ -200,7 +245,7 @@ class User extends Authenticatable
      */
     public function canWriteModule(string $moduleSlug): bool
     {
-        return $this->role?->hasWritePermission($moduleSlug) ?? false;
+        return $this->allRoles()->contains(fn (Role $r) => $r->hasWritePermission($moduleSlug));
     }
 
     /**
