@@ -59,7 +59,8 @@
                             <span class="fs-lg text-truncate text-truncate-lg d-block fw-500">{{ $feature['name'] }}</span>
                             <span class="d-block text-truncate text-truncate-lg text-muted">
                                 <code class="small">{{ $feature['slug'] }}</code>
-                                <span class="badge ms-2 {{ $feature['effective'] ? 'bg-success' : 'bg-secondary' }}">
+                                <span class="badge ms-2 js-flag-badge {{ $feature['effective'] ? 'bg-success' : 'bg-secondary' }}"
+                                      data-slug="{{ $feature['slug'] }}">
                                     {{ $feature['effective'] ? 'Active' : 'Inactive' }}
                                 </span>
                             </span>
@@ -267,6 +268,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     s.textContent = active ? 'Active' : 'Inactive';
                     s.classList.toggle('text-success', active);
                     s.classList.toggle('text-danger', !active);
+                });
+                // Name badge = instance-effective state (env AND Pennant); env is on
+                // for any togglable module, so it tracks the Pennant flag here.
+                document.querySelectorAll('.js-flag-badge[data-slug="' + sel + '"]').forEach(function (b) {
+                    b.textContent = active ? 'Active' : 'Inactive';
+                    b.classList.toggle('bg-success', active);
+                    b.classList.toggle('bg-secondary', !active);
                 });
             } catch (e) {
                 alert('Could not update the feature flag. Please try again.');

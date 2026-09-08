@@ -37,7 +37,10 @@ class FeatureActivationController extends Controller
                 'icon' => $definition['icon'],
                 'env_enabled' => $definition['enabled'] ?? false,
                 'pennant_active' => Feature::for(null)->active($slug),
-                'effective' => $registry->isEnabled($slug),
+                // Instance-level state (env flag AND Pennant), bypass-independent —
+                // NOT isEnabled(), which resolves per-user and would always read
+                // "active" for a bypass admin regardless of the Pennant flag.
+                'effective' => $registry->isFeatureActive($slug),
                 'training_mode' => $definition['training_mode'] ?? 'none',
             ];
         }
