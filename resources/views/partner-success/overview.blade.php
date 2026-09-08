@@ -52,7 +52,7 @@
             <svg class="sa-icon sa-icon-sm text-muted"><use href="/icons/sprite.svg#chevron-down"></use></svg>
         </div>
 
-        <div id="ps-scope" class="collapse show">
+        <div id="ps-scope" class="collapse @unless($focus ?? false) show @endunless">
             <div class="card-body">
                 @foreach($dimDefs as $key => $label)
                     @if(! empty($options[$key]))

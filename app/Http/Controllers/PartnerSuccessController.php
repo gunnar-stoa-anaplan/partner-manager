@@ -37,7 +37,7 @@ class PartnerSuccessController extends Controller
      * every KPI drillable to source, visibility-scoped. Uses the shared
      * SmartAdmin design language so it matches Workshops and the rest of the app.
      */
-    public function index()
+    public function index(?string $section = null)
     {
         $order = ['Pipeline', 'Delivery', 'Capability', 'Enablement', 'Catalog'];
         $svc = $this->metrics();
@@ -48,8 +48,8 @@ class PartnerSuccessController extends Controller
         uksort($sections, fn ($a, $b) => (array_search($a, $order) === false ? 99 : array_search($a, $order))
             <=> (array_search($b, $order) === false ? 99 : array_search($b, $order)));
 
-        // Optional single-section focus (submenu deep-link, e.g. ?section=pipeline).
-        $focus = ucfirst(strtolower((string) request()->query('section')));
+        // Optional single-section focus (submenu, distinct path e.g. /partner-success/pipeline).
+        $focus = ucfirst(strtolower((string) $section));
         $pageTitle = 'PSM Engagement';
         if ($focus && isset($sections[$focus])) {
             $sections = [$focus => $sections[$focus]];

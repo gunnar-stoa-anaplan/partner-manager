@@ -967,6 +967,11 @@ Route::middleware(['auth', 'module:partner_success.engagement'])->prefix('partne
     Route::get('legacy', [\App\Http\Controllers\PartnerSuccessController::class, 'legacy'])->name('legacy');
     Route::get('business-plans', [\App\Http\Controllers\PartnerSuccessController::class, 'businessPlans'])->name('business-plans');
     Route::get('readiness', [\App\Http\Controllers\PartnerSuccessController::class, 'readiness'])->name('readiness');
+    // Focused single-section views — distinct paths so the sidebar highlights the active submenu.
+    Route::get('pipeline', [\App\Http\Controllers\PartnerSuccessController::class, 'index'])->defaults('section', 'pipeline')->name('pipeline');
+    Route::get('capability', [\App\Http\Controllers\PartnerSuccessController::class, 'index'])->defaults('section', 'capability')->name('capability');
+    Route::get('enablement', [\App\Http\Controllers\PartnerSuccessController::class, 'index'])->defaults('section', 'enablement')->name('enablement');
+    Route::get('delivery', [\App\Http\Controllers\PartnerSuccessController::class, 'index'])->defaults('section', 'delivery')->name('delivery');
     Route::get('/', [App\Http\Controllers\PartnerSuccessController::class, 'index'])->name('index');
     Route::get('/api/metrics', [App\Http\Controllers\PartnerSuccessController::class, 'apiMetrics'])->name('api.metrics');
     Route::get('/api/partners', [App\Http\Controllers\PartnerSuccessController::class, 'apiPartners'])->name('api.partners');
