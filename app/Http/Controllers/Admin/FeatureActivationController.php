@@ -13,6 +13,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\ActivationService;
 use App\Services\ModuleRegistry;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -49,17 +50,24 @@ class FeatureActivationController extends Controller
     /**
      * Toggle a feature flag on or off via Pennant.
      */
-    public function toggle(Request $request): RedirectResponse
+    public function toggle(Request $request): RedirectResponse|JsonResponse
     {
         $request->validate([
             'slug' => ['required', 'string'],
             'active' => ['required', 'boolean'],
         ]);
 
-        if ($request->boolean('active')) {
-            Feature::for(null)->activate($request->input('slug'));
+        $slug = $request->input('slug');
+        $active = $request->boolean('active');
+
+        if ($active) {
+            Feature::for(null)->activate($slug);
         } else {
-            Feature::for(null)->deactivate($request->input('slug'));
+            Feature::for(null)->deactivate($slug);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['slug' => $slug, 'active' => $active]);
         }
 
         return back()->with('success', 'Feature flag updated.');

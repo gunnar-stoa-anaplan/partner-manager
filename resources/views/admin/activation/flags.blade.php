@@ -87,21 +87,21 @@
                             </div>
                             <div class="d-flex justify-content-between">
                                 <span class="text-muted">Pennant Flag</span>
-                                <span class="{{ $feature['pennant_active'] ? 'text-success' : 'text-danger' }}">
+                                <span class="js-flag-status {{ $feature['pennant_active'] ? 'text-success' : 'text-danger' }}"
+                                      data-slug="{{ $feature['slug'] }}">
                                     {{ $feature['pennant_active'] ? 'Active' : 'Inactive' }}
                                 </span>
                             </div>
                         </div>
 
                         @if($feature['env_enabled'])
-                        <form method="POST" action="{{ route('admin.activation.toggle') }}" class="mb-2">
-                            @csrf
-                            <input type="hidden" name="slug" value="{{ $feature['slug'] }}">
-                            <input type="hidden" name="active" value="{{ $feature['pennant_active'] ? '0' : '1' }}">
-                            <button type="submit" class="btn btn-sm w-100 {{ $feature['pennant_active'] ? 'btn-outline-danger' : 'btn-outline-success' }}">
-                                {{ $feature['pennant_active'] ? 'Deactivate' : 'Activate' }}
-                            </button>
-                        </form>
+                        {{-- AJAX toggle — activates/deactivates via Pennant with no page refresh --}}
+                        <button type="button"
+                                class="btn btn-sm w-100 mb-2 js-flag-toggle {{ $feature['pennant_active'] ? 'btn-outline-danger' : 'btn-outline-success' }}"
+                                data-slug="{{ $feature['slug'] }}"
+                                data-active="{{ $feature['pennant_active'] ? '1' : '0' }}">
+                            {{ $feature['pennant_active'] ? 'Deactivate' : 'Activate' }}
+                        </button>
                         @if($feature['effective'])
                         <form method="POST" action="{{ route('admin.activation.training-mode') }}">
                             @csrf
@@ -234,5 +234,47 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+</script>
+
+<script>
+// Feature-flag toggle without a page refresh.
+(function () {
+    const CSRF = @js(csrf_token());
+    const URL  = @js(route('admin.activation.toggle'));
+
+    document.querySelectorAll('.js-flag-toggle').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+            const slug = btn.dataset.slug;
+            const newActive = btn.dataset.active === '1' ? 0 : 1;
+            btn.disabled = true;
+            try {
+                const res = await fetch(URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
+                    body: JSON.stringify({ slug: slug, active: newActive }),
+                });
+                if (!res.ok) throw new Error('toggle failed');
+                const data = await res.json();
+                const active = !!data.active;
+
+                btn.dataset.active = active ? '1' : '0';
+                btn.textContent = active ? 'Deactivate' : 'Activate';
+                btn.classList.toggle('btn-outline-danger', active);
+                btn.classList.toggle('btn-outline-success', !active);
+
+                const sel = (window.CSS && CSS.escape) ? CSS.escape(slug) : slug;
+                document.querySelectorAll('.js-flag-status[data-slug="' + sel + '"]').forEach(function (s) {
+                    s.textContent = active ? 'Active' : 'Inactive';
+                    s.classList.toggle('text-success', active);
+                    s.classList.toggle('text-danger', !active);
+                });
+            } catch (e) {
+                alert('Could not update the feature flag. Please try again.');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    });
+})();
 </script>
 @endsection
