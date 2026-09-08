@@ -31,52 +31,44 @@
 @section('content')
 <div class="container-fluid py-3">
 
-    {{-- Pinned, collapsible scope panel. Session-backed: one selection applies
-         to every metric / chart / drill on all PSM Engagement tabs. --}}
+    {{-- Pinned, collapsible scope panel — toggle pills, applied instantly (no
+         submit). Session-backed: one selection scopes every metric / chart /
+         drill across all PSM Engagement tabs. --}}
+    <style>
+        .insight-pill { cursor: pointer; font-weight: 400; background: var(--bs-body-bg); color: var(--bs-body-color); border-color: var(--bs-border-color) !important; }
+        .insight-pill:hover { border-color: var(--bs-primary) !important; }
+        .insight-pill.is-active { background: var(--bs-primary); color: #fff; border-color: var(--bs-primary) !important; }
+    </style>
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-header d-flex align-items-center justify-content-between" role="button"
-             data-bs-toggle="collapse" data-bs-target="#ps-scope" aria-expanded="{{ $activeCount ? 'false' : 'true' }}">
+             data-bs-toggle="collapse" data-bs-target="#ps-scope">
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 <span class="fw-600 me-1">
                     <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#filter"></use></svg>
                     Filters
                 </span>
-                @if($activeCount)
-                    @foreach($dimDefs as $key => $label)
-                        @foreach($active[$key] ?? [] as $v)
-                            <span class="badge bg-body-secondary text-body border fw-normal">{{ $label }}: {{ $v }}</span>
-                        @endforeach
-                    @endforeach
-                @else
-                    <span class="text-muted fs-sm fst-italic">Showing all your data — no filters applied</span>
-                @endif
+                <span id="ps-active-chips" class="d-flex align-items-center gap-1 flex-wrap"></span>
             </div>
             <svg class="sa-icon sa-icon-sm text-muted"><use href="/icons/sprite.svg#chevron-down"></use></svg>
         </div>
 
-        <div id="ps-scope" class="collapse @if(! $activeCount) show @endif">
+        <div id="ps-scope" class="collapse show">
             <div class="card-body">
-                <form method="POST" action="{{ route('partner-success.filters.set') }}">
-                    @csrf
-                    <div class="row g-3">
-                        @foreach($dimDefs as $key => $label)
-                            <div class="col-md-4">
-                                <label class="form-label fw-500 fs-sm">{{ $label }}</label>
-                                <select name="{{ $key }}[]" class="form-select form-select-sm" multiple size="5">
-                                    @foreach($options[$key] ?? [] as $opt)
-                                        <option value="{{ $opt }}" @selected(in_array($opt, $active[$key] ?? []))>{{ $opt }}</option>
-                                    @endforeach
-                                </select>
+                @foreach($dimDefs as $key => $label)
+                    @if(! empty($options[$key]))
+                        <div class="mb-3">
+                            <div class="fw-500 fs-sm text-muted mb-1">{{ $label }}</div>
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach($options[$key] as $opt)
+                                    <button type="button"
+                                            class="insight-pill badge rounded-pill border {{ in_array($opt, $active[$key] ?? []) ? 'is-active' : '' }}"
+                                            data-dim="{{ $key }}" data-value="{{ $opt }}">{{ $opt }}</button>
+                                @endforeach
                             </div>
-                        @endforeach
-                    </div>
-                    <div class="mt-3 d-flex gap-2">
-                        <button type="submit" class="btn btn-primary btn-sm">Apply filters</button>
-                        <button type="submit" class="btn btn-outline-secondary btn-sm"
-                                formaction="{{ route('partner-success.filters.clear') }}">Clear all</button>
-                        <span class="text-muted fs-xs align-self-center ms-2">Hold Ctrl/Cmd to select more than one.</span>
-                    </div>
-                </form>
+                        </div>
+                    @endif
+                @endforeach
+                <button type="button" id="ps-clear" class="btn btn-outline-secondary btn-sm mt-1">Clear all</button>
             </div>
         </div>
     </div>
@@ -112,7 +104,7 @@
                                 : (($m['acv'] ?? null) !== null ? '$'.number_format($m['acv'] / 1_000_000, 1).'M ACV' : null);
                         @endphp
                         <div class="col-6 col-md-4 col-xl-3">
-                            <x-insight.stat-card :title="$m['title']" :value="$primary" :sub="$sub" :metric="$m['name']" />
+                            <x-insight.stat-card :title="$m['title']" :value="$primary" :sub="$sub" :metric="$m['name']" :unit="$m['unit'] ?? null" />
                         </div>
                     @endforeach
                 </div>
@@ -136,10 +128,88 @@
 <x-insight.drill-panel />
 
 <script>
-    // ApexCharts renders at 0 width inside hidden tab panes; when a tab is shown,
-    // trigger the shared redraw so its charts size correctly.
-    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(btn => {
-        btn.addEventListener('shown.bs.tab', () => window.dispatchEvent(new CustomEvent('insights:filters-changed')));
+(function () {
+    const CSRF = @js(csrf_token());
+    const SET = @js(route('partner-success.filters.set'));
+    const CLEAR = @js(route('partner-success.filters.clear'));
+    const METRICS = @js(url('partner-success/api/metrics'));
+    const DIM_LABELS = @js($dimDefs);
+
+    function collect() {
+        const dims = {};
+        document.querySelectorAll('.insight-pill.is-active').forEach(p => {
+            (dims[p.dataset.dim] = dims[p.dataset.dim] || []).push(p.dataset.value);
+        });
+        return dims;
+    }
+
+    function renderChips(dims) {
+        const el = document.getElementById('ps-active-chips');
+        if (!el) return;
+        const parts = [];
+        Object.keys(DIM_LABELS).forEach(k => (dims[k] || []).forEach(v => {
+            const chip = document.createElement('span');
+            chip.className = 'badge bg-body-secondary text-body border fw-normal';
+            chip.textContent = DIM_LABELS[k] + ': ' + v;
+            parts.push(chip);
+        }));
+        el.replaceChildren();
+        if (parts.length) { parts.forEach(c => el.appendChild(c)); }
+        else {
+            const s = document.createElement('span');
+            s.className = 'text-muted fs-sm fst-italic';
+            s.textContent = 'Showing all your data — no filters applied';
+            el.appendChild(s);
+        }
+    }
+
+    async function refreshCards() {
+        let metrics = [];
+        try { metrics = await (await fetch(METRICS, { headers: { Accept: 'application/json' } })).json(); } catch (e) { return; }
+        const by = {}; metrics.forEach(m => by[m.name] = m);
+        document.querySelectorAll('.insight-stat-card[data-metric]').forEach(card => {
+            const m = by[card.dataset.metric]; if (!m) return;
+            const money = card.dataset.unit === 'currency';
+            const val = money ? '$' + ((m.acv || 0) / 1e6).toFixed(1) + 'M' : Number(m.count).toLocaleString();
+            const sub = money ? Number(m.count).toLocaleString() + ' opps' : (m.acv != null ? '$' + (m.acv / 1e6).toFixed(1) + 'M ACV' : '');
+            const v = card.querySelector('.insight-stat-value'), s = card.querySelector('.insight-stat-sub');
+            if (v) v.textContent = val; if (s) s.textContent = sub;
+        });
+    }
+
+    async function persist(url, dims) {
+        await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': CSRF },
+            body: JSON.stringify(dims),
+        });
+        window.dispatchEvent(new CustomEvent('insights:filters-changed')); // charts re-fetch
+        refreshCards();
+    }
+
+    let timer;
+    function schedule() {
+        const dims = collect();
+        renderChips(dims);
+        clearTimeout(timer);
+        timer = setTimeout(() => persist(SET, dims), 250);
+    }
+
+    document.querySelectorAll('.insight-pill').forEach(p =>
+        p.addEventListener('click', () => { p.classList.toggle('is-active'); schedule(); }));
+
+    const clearBtn = document.getElementById('ps-clear');
+    if (clearBtn) clearBtn.addEventListener('click', () => {
+        document.querySelectorAll('.insight-pill.is-active').forEach(p => p.classList.remove('is-active'));
+        renderChips({});
+        persist(CLEAR, {});
     });
+
+    renderChips(collect());
+
+    // ApexCharts sizes at 0 in hidden tab panes; redraw when a tab is shown.
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(btn =>
+        btn.addEventListener('shown.bs.tab', () => window.dispatchEvent(new CustomEvent('insights:filters-changed'))));
+})();
 </script>
 @endsection

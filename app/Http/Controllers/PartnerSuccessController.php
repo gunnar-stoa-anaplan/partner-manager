@@ -91,13 +91,21 @@ class PartnerSuccessController extends Controller
     {
         PsmEngagementFilters::put($request->only(PsmEngagementFilters::DIMENSIONS));
 
+        if ($request->wantsJson()) {
+            return response()->json(['active' => PsmEngagementFilters::get()]);
+        }
+
         return redirect()->route('partner-success.index');
     }
 
     /** Clear the pinned-panel scope. */
-    public function clearFilters()
+    public function clearFilters(Request $request)
     {
         PsmEngagementFilters::clear();
+
+        if ($request->wantsJson()) {
+            return response()->json(['active' => PsmEngagementFilters::get()]);
+        }
 
         return redirect()->route('partner-success.index');
     }
