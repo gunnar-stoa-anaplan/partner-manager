@@ -17,6 +17,43 @@ class MetricService
 
     private const PI = '(partner IS NOT NULL OR implementer IS NOT NULL)';
 
+    /**
+     * Fixed product catalog for the Sales — opportunities by product matrix:
+     * line of business => ordered [product name, column code]. This is the
+     * single source of truth for the product columns (always shown, even with
+     * no activity in scope), each product's LOB, and its short column label.
+     * The warehouse only carries de-duplicated capability/group arrays per deal,
+     * so a product's LOB can't be inferred from the data — this map defines it.
+     * A few catalog products (ADO, MFP) are not yet in the warehouse feed and
+     * simply render empty until they appear.
+     */
+    private const SALES_CATALOG = [
+        'Platform' => [
+            ['Core Platform', 'CORE'], ['Polaris', 'POLARIS'], ['Anaplan Data Orchestrator', 'ADO'],
+        ],
+        'SCM' => [
+            ['Demand Planning', 'DP'], ['Statistical Forecasting', 'SF'], ['Supply Planning', 'SP'],
+            ['Inventory Planning', 'IP'], ['Production Planning', 'PP'], ['Rough Cut Capacity', 'RCC'],
+            ['Integrated Business Planning', 'IBP'], ['Commercial Supply (Biotech)', 'CSP'],
+            ['Allocation & Replenishment', 'A&R'], ['Merchandise Financial Planning', 'MFP'],
+        ],
+        'FIN' => [
+            ['Integrated Financial Planning', 'IFP'], ['Financial Consolidation (FCR)', 'FCR'],
+            ['Profitability Analysis', 'PROF'], ['Project Cost Planning', 'PJC'],
+            ['Subscription Revenue', 'SUBR'], ['Consensus Margin', 'CMGN'],
+        ],
+        'WFP' => [
+            ['Workforce Planning', 'WFP'], ['Contact Center', 'CCP'], ['Project Resource', 'PJR'],
+        ],
+        'RPM' => [
+            ['Territory & Quota', 'T&Q'], ['Sales Forecasting', 'SFC'],
+            ['Segmentation', 'SEG'], ['Trade Promotion Mgmt', 'TPM'],
+        ],
+        'AI' => [
+            ['Forecaster', 'FCAST'], ['CoModeler', 'COMOD'],
+        ],
+    ];
+
     /** base table config: current view, full table, geo/partner support, drill columns */
     private const BASES = [
         'opportunity' => [
@@ -355,6 +392,86 @@ class MetricService
             FROM wh.opportunity_current {$ow}
             GROUP BY 1 ORDER BY open_v DESC", $op);
 
+        // Pipeline demand per line of business (capability group) — the rows of
+        // the "People committed by line of business" matrix.
+        $groups = $db->select("
+            SELECT grp,
+              count(*) FILTER (WHERE stage < 5)::int AS open_n,
+              coalesce(sum(acv) FILTER (WHERE stage < 5),0)::bigint AS open_v,
+              count(*) FILTER (WHERE stage = 5)::int AS won_n,
+              coalesce(sum(acv) FILTER (WHERE stage = 5),0)::bigint AS won_v
+            FROM wh.opportunity_current o, unnest(o.cap_groups) grp
+            {$ow}
+            GROUP BY grp ORDER BY open_v DESC", $op);
+
+        // Product (capability) coverage — the SALES capability matrix, each
+        // product tagged with the group it most often sells under.
+        $caps = $db->select("
+            SELECT cap,
+              count(*) FILTER (WHERE stage < 5)::int AS open_n,
+              coalesce(sum(acv) FILTER (WHERE stage < 5),0)::bigint AS open_v,
+              count(*) FILTER (WHERE stage = 5)::int AS won_n,
+              coalesce(sum(acv) FILTER (WHERE stage = 5),0)::bigint AS won_v
+            FROM wh.opportunity_current o, unnest(o.capabilities) cap
+            {$ow}
+            GROUP BY cap ORDER BY open_v DESC", $op);
+        // Product => line of business / column code, from the fixed catalog.
+        $capLob = [];
+        $capAbbr = [];
+        foreach (self::SALES_CATALOG as $lobKey => $prods) {
+            foreach ($prods as [$name, $code]) {
+                $capLob[$name] = $lobKey;
+                $capAbbr[$name] = $code;
+            }
+        }
+
+        // Sales — opportunities by product: a sales-stage × product matrix. Row
+        // totals ($ sold / opps / accounts) count each deal once; product cells
+        // count a deal in every product it spans, so columns sum higher.
+        $stageAgg = $db->select("
+            SELECT stage, coalesce(max(stage_label),'')::text AS label,
+              coalesce(sum(acv),0)::bigint AS v, count(*)::int AS n, count(DISTINCT account)::int AS a
+            FROM wh.opportunity_current {$ow}
+            GROUP BY stage ORDER BY stage", $op);
+        $cellAgg = $db->select("
+            SELECT stage, cap, coalesce(sum(acv),0)::bigint AS v, count(*)::int AS n
+            FROM wh.opportunity_current o, unnest(o.capabilities) cap
+            {$ow}
+            GROUP BY stage, cap", $op);
+        $grandAccounts = (int) ($db->selectOne(
+            "SELECT count(DISTINCT account)::int AS a FROM wh.opportunity_current {$ow}", $op)->a ?? 0);
+
+        // Cell values + column totals, keyed by product name.
+        $colTotal = [];
+        $cellMap = [];
+        foreach ($cellAgg as $c) {
+            $cellMap[(int) $c->stage][$c->cap] = ['v' => (int) $c->v, 'n' => (int) $c->n];
+            $colTotal[$c->cap] = ($colTotal[$c->cap] ?? ['v' => 0, 'n' => 0]);
+            $colTotal[$c->cap]['v'] += (int) $c->v;
+            $colTotal[$c->cap]['n'] += (int) $c->n;
+        }
+        // Columns come from the fixed catalog — every product in every LOB is
+        // always shown (empty cells render as "—"), in catalog order.
+        $matrixGroups = [];
+        foreach (self::SALES_CATALOG as $lobKey => $prods) {
+            $matrixGroups[] = [
+                'lob' => $lobKey,
+                'products' => array_map(fn ($p) => ['cap' => $p[0], 'abbr' => $p[1]], $prods),
+            ];
+        }
+        $matrixStages = [];
+        $grandSold = 0;
+        $grandOpps = 0;
+        foreach ($stageAgg as $s) {
+            $grandSold += (int) $s->v;
+            $grandOpps += (int) $s->n;
+            $matrixStages[] = [
+                'label' => $s->label ?: (string) $s->stage,
+                'sold' => (int) $s->v, 'opps' => (int) $s->n, 'accounts' => (int) $s->a,
+                'cells' => $cellMap[(int) $s->stage] ?? [],
+            ];
+        }
+
         [$rc, $rp] = $this->filt('person', null, null);
         $rw = $rc ? ('WHERE '.implode(' AND ', $rc)) : '';
         $roles = [];
@@ -379,6 +496,258 @@ class MetricService
                 'won_n' => (int) $x->won_n, 'won_v' => (int) $x->won_v,
             ], $lob),
             'roles' => $roles,
+            'groups' => array_map(fn ($x) => [
+                'lob' => $x->grp, 'open_n' => (int) $x->open_n, 'open_v' => (int) $x->open_v,
+                'won_n' => (int) $x->won_n, 'won_v' => (int) $x->won_v,
+            ], $groups),
+            'caps' => array_map(fn ($x) => [
+                'cap' => $x->cap, 'group' => $capLob[$x->cap] ?? '—',
+                'open_n' => (int) $x->open_n, 'open_v' => (int) $x->open_v,
+                'won_n' => (int) $x->won_n, 'won_v' => (int) $x->won_v,
+            ], $caps),
+            'matrix' => [
+                'groups' => $matrixGroups,
+                'stages' => $matrixStages,
+                'total' => [
+                    'sold' => $grandSold, 'opps' => $grandOpps, 'accounts' => $grandAccounts,
+                    'cells' => $colTotal,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Pipeline Overview — six distribution charts plus the account × product
+     * matrix. All scoped by the same filt() (row-level visibility + pinned
+     * filters). Money charts sum $ACV; Top products counts opportunities.
+     *
+     * @return array<string, mixed>
+     */
+    public function pipeline(): array
+    {
+        $db = $this->db();
+        [$oc, $op] = $this->filt('opportunity', null, null);
+        $ow = $oc ? ('WHERE '.implode(' AND ', $oc)) : '';
+
+        $capLob = [];
+        foreach (self::SALES_CATALOG as $lobKey => $prods) {
+            foreach ($prods as [$name, $code]) {
+                $capLob[$name] = $lobKey;
+            }
+        }
+        $platform = array_map(fn ($p) => $p[0], self::SALES_CATALOG['Platform']);
+        $platformArr = "ARRAY['".implode("','", array_map(fn ($n) => str_replace("'", "''", $n), $platform))."']::text[]";
+
+        // Distribution by sales stage ($ACV), ordered by stage.
+        $byStage = $db->select("
+            SELECT stage_label AS k, coalesce(sum(acv),0)::bigint AS v
+            FROM wh.opportunity_current {$ow}
+            GROUP BY stage, stage_label ORDER BY stage", $op);
+
+        // By line of business + by region ($ACV).
+        $byLob = $db->select("
+            SELECT coalesce(lob,'(unspecified)') AS k, coalesce(sum(acv),0)::bigint AS v
+            FROM wh.opportunity_current {$ow} GROUP BY 1 ORDER BY v DESC", $op);
+        $byGeo = $db->select("
+            SELECT coalesce(geo,'(unspecified)') AS k, coalesce(sum(acv),0)::bigint AS v
+            FROM wh.opportunity_current {$ow} GROUP BY 1 ORDER BY v DESC", $op);
+
+        // Top products by opportunity count, plus deals with no product tagged.
+        $topProducts = $db->select("
+            SELECT cap AS k, count(*)::int AS v
+            FROM wh.opportunity_current o, unnest(o.capabilities) cap
+            {$ow}
+            GROUP BY cap ORDER BY v DESC LIMIT 10", $op);
+        $noProduct = (int) ($db->selectOne("
+            SELECT count(*)::int AS n FROM wh.opportunity_current
+            ".($ow ? $ow.' AND' : 'WHERE')." coalesce(array_length(capabilities,1),0) = 0", $op)->n ?? 0);
+
+        // AI engagement + Apps-vs-Core ($ACV, each deal counted once).
+        $ai = $db->selectOne("
+            SELECT
+              coalesce(sum(acv) FILTER (WHERE ncaps = 0),0)::bigint AS unassigned,
+              coalesce(sum(acv) FILTER (WHERE ncaps > 0 AND is_ai),0)::bigint AS engaged,
+              coalesce(sum(acv) FILTER (WHERE ncaps > 0 AND NOT coalesce(is_ai,false)),0)::bigint AS no_ai
+            FROM (SELECT acv, is_ai, coalesce(array_length(capabilities,1),0) AS ncaps
+                  FROM wh.opportunity_current {$ow}) s", $op);
+        $appsCore = $db->selectOne("
+            SELECT
+              coalesce(sum(acv) FILTER (WHERE ncaps = 0),0)::bigint AS unassigned,
+              coalesce(sum(acv) FILTER (WHERE ncaps > 0 AND napps > 0),0)::bigint AS apps,
+              coalesce(sum(acv) FILTER (WHERE ncaps > 0 AND napps = 0),0)::bigint AS core
+            FROM (
+              SELECT acv, coalesce(array_length(capabilities,1),0) AS ncaps,
+                coalesce(array_length(ARRAY(SELECT unnest(capabilities) EXCEPT SELECT unnest({$platformArr})),1),0) AS napps
+              FROM wh.opportunity_current {$ow}) s", $op);
+
+        // Account × product matrix — top deals by $ACV in scope.
+        $rows = $db->select("
+            SELECT account, use_case, partner, implementer, stage_label, coalesce(acv,0)::bigint AS acv,
+              coalesce(capabilities, ARRAY[]::text[]) AS capabilities
+            FROM wh.opportunity_current {$ow}
+            ORDER BY acv DESC NULLS LAST LIMIT 300", $op);
+
+        $matrixGroups = [];
+        foreach (self::SALES_CATALOG as $lobKey => $prods) {
+            $matrixGroups[] = [
+                'lob' => $lobKey,
+                'products' => array_map(fn ($p) => ['cap' => $p[0], 'abbr' => $p[1]], $prods),
+            ];
+        }
+        $matrixRows = array_map(function ($r) {
+            $caps = is_array($r->capabilities) ? $r->capabilities
+                : array_filter(explode(',', trim((string) $r->capabilities, '{}')));
+            return [
+                'account' => $r->account, 'opportunity' => $r->use_case,
+                'partner' => $r->partner, 'implementer' => $r->implementer,
+                'stage' => $r->stage_label, 'acv' => (int) $r->acv,
+                'caps' => array_fill_keys(array_map(fn ($c) => trim($c, '"'), $caps), true),
+            ];
+        }, $rows);
+
+        // Products present anywhere in the scoped pipeline (drives "hide empty
+        // columns" across all deals, not just the 300 shown in the matrix).
+        $activeCaps = array_map(fn ($r) => $r->cap, $db->select("
+            SELECT DISTINCT cap FROM wh.opportunity_current o, unnest(o.capabilities) cap {$ow}", $op));
+
+        return [
+            'activeCaps' => $activeCaps,
+            'byStage' => array_map(fn ($r) => ['k' => $r->k, 'v' => (int) $r->v], $byStage),
+            'byLob' => array_map(fn ($r) => ['k' => $r->k, 'v' => (int) $r->v], $byLob),
+            'byGeo' => array_map(fn ($r) => ['k' => $r->k, 'v' => (int) $r->v], $byGeo),
+            'topProducts' => array_merge(
+                array_map(fn ($r) => ['k' => $r->k, 'v' => (int) $r->v, 'lob' => $capLob[$r->k] ?? '—'], $topProducts),
+                $noProduct > 0 ? [['k' => 'No product', 'v' => $noProduct, 'lob' => '—']] : []
+            ),
+            'ai' => ['engaged' => (int) $ai->engaged, 'no_ai' => (int) $ai->no_ai, 'unassigned' => (int) $ai->unassigned],
+            'appsCore' => ['apps' => (int) $appsCore->apps, 'core' => (int) $appsCore->core, 'unassigned' => (int) $appsCore->unassigned],
+            'matrix' => ['groups' => $matrixGroups, 'rows' => $matrixRows],
+        ];
+    }
+
+    /**
+     * Readiness plan — Partner × path. For every partner and every app/foundation
+     * path: Baseline (people certified now), Target (people the plan requires =
+     * coverage-per-deal × demand deals) and Gap (Target − Baseline). Computed for
+     * all three roles so the Role/Show toggles are instant client-side.
+     *
+     * topic = the certification name in person_current.certified[]; products = the
+     * capabilities that create demand for the path.  planNeed = certified people
+     * required per demanding deal, by role (GTM, PreSales, Delivery).
+     */
+    private const PLAN_NEED = [1, 1, 2];
+
+    private const PLAN_PATHS = [
+        ['abbr' => 'ADO', 'label' => 'ADO', 'foundational' => true, 'topic' => 'ADO', 'products' => ['Anaplan Data Orchestrator']],
+        ['abbr' => 'Polaris', 'label' => 'L2 Polaris MB', 'foundational' => true, 'topic' => 'Polaris', 'products' => ['Polaris']],
+        ['abbr' => 'TAWA', 'label' => 'Anaplan Way for Applications', 'foundational' => true, 'topic' => 'The Anaplan Way for Applications', 'products' => ['Core Platform']],
+        ['abbr' => 'IFP', 'label' => 'IFP', 'foundational' => false, 'topic' => 'IFP', 'products' => ['Integrated Financial Planning']],
+        ['abbr' => 'FCR', 'label' => 'FCR', 'foundational' => false, 'topic' => 'FCR', 'products' => ['Financial Consolidation (FCR)']],
+        ['abbr' => 'IP', 'label' => 'Inventory Planning', 'foundational' => false, 'topic' => 'I&D', 'products' => ['Inventory Planning']],
+        ['abbr' => 'DP', 'label' => 'Demand Planning', 'foundational' => false, 'topic' => 'I&D', 'products' => ['Demand Planning']],
+        ['abbr' => 'OWP', 'label' => 'OWP', 'foundational' => false, 'topic' => 'OWP', 'products' => ['Workforce Planning']],
+        ['abbr' => 'MFP', 'label' => 'MFP', 'foundational' => false, 'topic' => 'MFP', 'products' => ['Merchandise Financial Planning']],
+        ['abbr' => 'PF', 'label' => 'Platform Foundations', 'foundational' => false, 'topic' => 'The Anaplan Way for Applications', 'products' => ['Core Platform']],
+        ['abbr' => 'AI', 'label' => 'AI Foundations', 'foundational' => false, 'topic' => 'AI (other)', 'products' => ['CoModeler', 'Forecaster', 'Statistical Forecasting']],
+        ['abbr' => 'T&Q', 'label' => 'Territory & Quota', 'foundational' => false, 'topic' => 'SPM', 'products' => ['Territory & Quota']],
+        ['abbr' => 'Seg', 'label' => 'Segmentation and Scoring', 'foundational' => false, 'topic' => 'SPM', 'products' => ['Segmentation']],
+        ['abbr' => 'GTM CP', 'label' => 'GTM Capacity Planning', 'foundational' => false, 'topic' => 'SPM', 'products' => []],
+    ];
+
+    /** @return array<string, mixed> */
+    public function readinessPlan(): array
+    {
+        $db = $this->db();
+        [$rc, $rp] = $this->filt('person', null, null);
+        $rw = $rc ? ('WHERE '.implode(' AND ', $rc)) : '';
+        $people = $db->select("SELECT partner, roles, certified FROM wh.person_current {$rw}", $rp);
+
+        [$oc, $op] = $this->filt('opportunity', null, null);
+        $ow = $oc ? ('WHERE '.implode(' AND ', $oc)) : '';
+        $deals = $db->select("
+            SELECT partner, implementer, stage, coalesce(capabilities, ARRAY[]::text[]) AS capabilities
+            FROM wh.opportunity_current {$ow}", $op);
+
+        $toArr = fn ($v) => is_array($v) ? $v
+            : array_map(fn ($x) => trim($x, '"'), array_filter(explode(',', trim((string) $v, '{}'))));
+        $roleIdx = ['GTM' => 0, 'PreSales' => 1, 'Delivery' => 2];
+
+        // Baseline: people certified now, per partner / topic / role.
+        $base = []; // [partner][topic][r]
+        foreach ($people as $p) {
+            $partner = $p->partner;
+            if (! $partner) {
+                continue;
+            }
+            $roles = $toArr($p->roles);
+            $certs = $toArr($p->certified);
+            foreach ($roles as $role) {
+                if (! isset($roleIdx[$role])) {
+                    continue;
+                }
+                $ri = $roleIdx[$role];
+                foreach ($certs as $c) {
+                    $base[$partner][$c][$ri] = ($base[$partner][$c][$ri] ?? 0) + 1;
+                }
+            }
+        }
+
+        // Demand: distinct deals per partner / role that touch a path's products.
+        $demand = []; // [partner][r] = list of capability arrays
+        foreach ($deals as $d) {
+            $caps = $toArr($d->capabilities);
+            $stage = (int) $d->stage;
+            // GTM / PreSales — open deals attributed to the selling partner.
+            if ($stage < 5 && $d->partner) {
+                $demand[$d->partner][0][] = $caps;
+                $demand[$d->partner][1][] = $caps;
+            }
+            // Delivery — all stages, attributed to the implementer (else seller).
+            $owner = $d->implementer ?: $d->partner;
+            if ($owner) {
+                $demand[$owner][2][] = $caps;
+            }
+        }
+
+        $partners = array_values(array_unique(array_merge(array_keys($base), array_keys($demand))));
+        $paths = self::PLAN_PATHS;
+
+        $rows = [];
+        foreach ($partners as $partner) {
+            $cells = [];
+            foreach ($paths as $path) {
+                $b = [0, 0, 0];
+                $req = [0, 0, 0];
+                for ($ri = 0; $ri < 3; $ri++) {
+                    $b[$ri] = $base[$partner][$path['topic']][$ri] ?? 0;
+                    $prod = $path['products'];
+                    if ($prod) {
+                        $n = 0;
+                        foreach (($demand[$partner][$ri] ?? []) as $caps) {
+                            if (array_intersect($prod, $caps)) {
+                                $n++;
+                            }
+                        }
+                        $req[$ri] = self::PLAN_NEED[$ri] * $n;
+                    }
+                }
+                $cells[] = ['base' => $b, 'req' => $req];
+            }
+            $rows[] = ['partner' => $partner, 'cells' => $cells];
+        }
+
+        // Sort by Delivery target (req[2]) desc, like the source.
+        usort($rows, function ($a, $b) {
+            $sa = array_sum(array_map(fn ($c) => $c['req'][2], $a['cells']));
+            $sb = array_sum(array_map(fn ($c) => $c['req'][2], $b['cells']));
+            return $sb <=> $sa ?: strcmp($a['partner'], $b['partner']);
+        });
+
+        return [
+            'paths' => array_map(fn ($p) => ['abbr' => $p['abbr'], 'label' => $p['label'], 'foundational' => $p['foundational']], $paths),
+            'rows' => $rows,
+            'roles' => ['GTM', 'PreSales', 'Delivery'],
+            'planNeed' => self::PLAN_NEED,
         ];
     }
 

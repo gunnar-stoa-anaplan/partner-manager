@@ -92,23 +92,40 @@ class PartnerSuccessController extends Controller
             $scopedIds = $visibleIds; // null = all partners
         }
 
-        $commits = PartnerPlanCommit::query()
+        $allCommits = PartnerPlanCommit::query()
             ->when($scopedIds !== null, fn ($q) => $q->whereIn('partner_id', $scopedIds))
-            ->get()->groupBy('role')->map(fn ($g) => (int) $g->sum('committed'));
+            ->get();
 
+        // Practice-wide role commits (lob = '') drive the role coverage tiles.
+        $commits = $allCommits->where('lob', '')->groupBy('role')->map(fn ($g) => (int) $g->sum('committed'));
         foreach ($plan['roles'] as $role => &$r) {
             $r['committed'] = $commits[$role] ?? 0;
             $r['to_assign'] = max(0, $r['committed'] - $r['certified']);
         }
         unset($r);
 
+        // Per-LOB commits (lob <> '') drive the "People committed by line of
+        // business" matrix: $lobCommits[lob][role] = committed across scope.
+        $lobCommits = [];
+        foreach ($allCommits->where('lob', '!=', '') as $c) {
+            $lobCommits[$c->lob][$c->role] = ($lobCommits[$c->lob][$c->role] ?? 0) + (int) $c->committed;
+        }
+
         // Commit is editable only when exactly one partner is in scope (unambiguous).
         $editablePartner = (is_array($scopedIds) && count($scopedIds) === 1)
             ? Partner::query()->withoutGlobalScopes()->find($scopedIds[0])
             : null;
-        $editableCommits = $editablePartner
-            ? PartnerPlanCommit::where('partner_id', $editablePartner->id)->pluck('committed', 'role')->all()
-            : [];
+        $editableCommits = [];
+        $editableLobCommits = [];
+        if ($editablePartner) {
+            foreach (PartnerPlanCommit::where('partner_id', $editablePartner->id)->get() as $c) {
+                if ($c->lob === '') {
+                    $editableCommits[$c->role] = (int) $c->committed;
+                } else {
+                    $editableLobCommits[$c->lob][$c->role] = (int) $c->committed;
+                }
+            }
+        }
 
         $options = $svc->filterOptions();
         $options['partners'] = $visibleIds !== null
@@ -117,14 +134,19 @@ class PartnerSuccessController extends Controller
         sort($options['partners']);
         $active = PsmEngagementFilters::get();
 
-        return view('partner-success.business-plan', compact('plan', 'options', 'active', 'editablePartner', 'editableCommits'));
+        return view('partner-success.business-plan', compact('plan', 'options', 'active', 'editablePartner', 'editableCommits', 'lobCommits', 'editableLobCommits'));
     }
 
-    /** Set a per-partner Business Plan headcount commit (single-partner scope). */
+    /**
+     * Set a Business Plan headcount commit (single-partner scope). An empty lob
+     * is the practice-wide commit (role tiles); a populated lob is a per-line-of-
+     * business commit (the People-committed-by-line-of-business matrix).
+     */
     public function setCommit(Request $request)
     {
         $data = $request->validate([
             'partner_id' => 'required|integer',
+            'lob' => 'nullable|string|max:32',
             'role' => 'required|string|in:GTM,PreSales,Delivery',
             'committed' => 'required|integer|min:0',
         ]);
@@ -134,20 +156,49 @@ class PartnerSuccessController extends Controller
         abort_if($visibleIds !== null && ! in_array((int) $data['partner_id'], $visibleIds, true), 404);
 
         PartnerPlanCommit::updateOrCreate(
-            ['partner_id' => $data['partner_id'], 'role' => $data['role']],
+            ['partner_id' => $data['partner_id'], 'lob' => $data['lob'] ?? '', 'role' => $data['role']],
             ['committed' => $data['committed']],
         );
 
         return back();
     }
 
-    /** PSM Engagement → Readiness Plan (scaffold — to be built out). */
+    /**
+     * PSM Engagement → Pipeline Overview. Six distribution charts plus the
+     * account × product matrix, scoped to the actor's partners and the pinned
+     * filters.
+     */
+    public function pipeline()
+    {
+        $svc = $this->metrics();
+        $pipe = $svc->pipeline();
+
+        $options = $svc->filterOptions();
+        $visible = $this->visibility->visiblePartnerNames();
+        $options['partners'] = $visible ?? $svc->partners();
+        sort($options['partners']);
+        $active = PsmEngagementFilters::get();
+
+        return view('partner-success.pipeline', compact('pipe', 'options', 'active'));
+    }
+
+    /**
+     * PSM Engagement → Readiness Plan. Partner × path matrix with a
+     * Baseline / Target / Gap lens and a role switch. Scoped to the actor's
+     * partners and the pinned filters.
+     */
     public function readiness()
     {
-        return view('partner-success.placeholder', [
-            'pageTitle' => 'Readiness Plan',
-            'blurb' => 'Partner readiness — the plan to get each partner to delivery-ready across capability and enablement. Coming soon.',
-        ]);
+        $svc = $this->metrics();
+        $plan = $svc->readinessPlan();
+
+        $options = $svc->filterOptions();
+        $visible = $this->visibility->visiblePartnerNames();
+        $options['partners'] = $visible ?? $svc->partners();
+        sort($options['partners']);
+        $active = PsmEngagementFilters::get();
+
+        return view('partner-success.readiness', compact('plan', 'options', 'active'));
     }
 
     /** Persist the pinned-panel scope to the session (applies to all PSM Engagement views). */

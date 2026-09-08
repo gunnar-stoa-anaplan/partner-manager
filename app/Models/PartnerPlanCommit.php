@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PartnerPlanCommit extends Model
 {
-    protected $fillable = ['partner_id', 'role', 'committed'];
+    protected $fillable = ['partner_id', 'lob', 'role', 'committed'];
 
     protected $casts = ['committed' => 'integer'];
 
