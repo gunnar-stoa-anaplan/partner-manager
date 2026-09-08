@@ -6,6 +6,7 @@ use App\Models\Contact;
 use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Resolves what the current actor is allowed to SEE, spanning both guards
@@ -96,8 +97,9 @@ class VisibilityContext
         }
         $this->resolvedKey = $key;
 
-        // No actor (console, queue, system) or unrestricted internal → see all.
-        if ($a === null || ($a instanceof User && ($a->bypassesPermissions() || $a->isAdmin()))) {
+        // Unrestricted (see ALL partners): no actor (console/queue/system),
+        // bypass roles, admins, and CoE (program-wide by policy).
+        if ($a === null || ($a instanceof User && ($a->bypassesPermissions() || $a->isAdmin() || $this->seesAllPartners($a)))) {
             $this->partnerIds = null;
             $this->partnerNames = null;
 
@@ -107,13 +109,15 @@ class VisibilityContext
         if ($a instanceof Contact) {
             $ids = $a->partner_id ? [$a->partner_id] : [];
         } else {
-            // Internal non-admin: the partners they are associated with —
-            // direct ownership (partner.user_id) UNIONed with the canonical
-            // PSM/PAM assignments in the user_partner pivot (assignedPartners()).
-            // withoutGlobalScopes avoids recursing into this same scope.
+            // Internal non-admin: partners associated with this user AND everyone
+            // in their reporting hierarchy — direct ownership (partner.user_id)
+            // UNIONed with PSM/PAM assignments (user_partner pivot), for the
+            // manager plus all of their (recursive) direct reports.
+            $userIds = array_merge([$a->id], $this->descendantUserIds($a->id));
+
             $owned = Partner::query()->withoutGlobalScopes()
-                ->where('user_id', $a->id)->pluck('id');
-            $assigned = $a->assignedPartners()->withoutGlobalScopes()->pluck('partners.id');
+                ->whereIn('user_id', $userIds)->pluck('id');
+            $assigned = DB::table('user_partner')->whereIn('user_id', $userIds)->pluck('partner_id');
 
             $ids = $owned->merge($assigned)->unique()->values()->all();
         }
@@ -122,5 +126,39 @@ class VisibilityContext
         $this->partnerNames = $ids
             ? Partner::query()->withoutGlobalScopes()->whereIn('id', $ids)->pluck('name')->all()
             : [];
+    }
+
+    /**
+     * Roles that get program-wide partner visibility (see every partner).
+     */
+    private function seesAllPartners(User $user): bool
+    {
+        return $user->allRoles()->contains(fn ($r) => in_array($r->slug, ['coe'], true));
+    }
+
+    /**
+     * All user ids in the reporting hierarchy below $rootId (direct reports,
+     * their reports, and so on). Excludes the root. Cycle-safe.
+     *
+     * @return array<int>
+     */
+    private function descendantUserIds(int $rootId): array
+    {
+        $all = [];
+        $frontier = [$rootId];
+
+        while ($frontier) {
+            $children = User::whereIn('manager_id', $frontier)->pluck('id')->all();
+            $children = array_values(array_diff($children, $all, [$rootId]));
+
+            if (! $children) {
+                break;
+            }
+
+            $all = array_merge($all, $children);
+            $frontier = $children;
+        }
+
+        return $all;
     }
 }
