@@ -630,6 +630,7 @@ return [
                 'items' => [
                     ['label' => 'Admin Dashboard', 'route' => 'admin.dashboard', 'icon' => 'monitor'],
                     ['label' => 'Configuration', 'route' => 'configuration.index', 'icon' => 'settings'],
+                    ['label' => 'User Management', 'route' => 'users.index', 'icon' => 'users'],
                     ['label' => 'Roles & Permissions', 'route' => 'admin.roles.index', 'icon' => 'shield'],
                     ['label' => 'System Status', 'route' => 'admin.system-status', 'icon' => 'server'],
                     ['label' => 'Notification Templates', 'route' => 'admin.notification-templates.index', 'icon' => 'bell'],
