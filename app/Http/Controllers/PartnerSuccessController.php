@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Partner;
+use App\Models\PartnerPlanCommit;
 use App\Services\PartnerSuccess\MetricService;
 use App\Support\PsmEngagementFilters;
 use App\Support\VisibilityContext;
@@ -68,13 +70,75 @@ class PartnerSuccessController extends Controller
         return view('partner-success.overview', compact('sections', 'options', 'active', 'focus', 'pageTitle'));
     }
 
-    /** PSM Engagement → Business Plans (scaffold — to be built out). */
+    /**
+     * PSM Engagement → Business Plans. Revenue attribution + delivery + revenue
+     * by line of business + certified-vs-committed headcount by role. Honors the
+     * pinned scope filters and shows only the user's partners.
+     */
     public function businessPlans()
     {
-        return view('partner-success.placeholder', [
-            'pageTitle' => 'Business Plans',
-            'blurb' => 'Partner business plans — goals, initiatives, and the joint plan for each of your partners. Coming soon.',
+        $svc = $this->metrics();
+        $plan = $svc->businessPlan();
+
+        // Which partners are in the effective scope (for the headcount commit).
+        $visibleIds = $this->visibility->visiblePartnerIds(); // null = all (admin/CoE)
+        $sessionPartners = PsmEngagementFilters::get()['partners'] ?? [];
+        if ($sessionPartners) {
+            $scopedIds = Partner::query()->withoutGlobalScopes()
+                ->whereIn('name', $sessionPartners)
+                ->when($visibleIds !== null, fn ($q) => $q->whereIn('id', $visibleIds))
+                ->pluck('id')->all();
+        } else {
+            $scopedIds = $visibleIds; // null = all partners
+        }
+
+        $commits = PartnerPlanCommit::query()
+            ->when($scopedIds !== null, fn ($q) => $q->whereIn('partner_id', $scopedIds))
+            ->get()->groupBy('role')->map(fn ($g) => (int) $g->sum('committed'));
+
+        foreach ($plan['roles'] as $role => &$r) {
+            $r['committed'] = $commits[$role] ?? 0;
+            $r['to_assign'] = max(0, $r['committed'] - $r['certified']);
+        }
+        unset($r);
+
+        // Commit is editable only when exactly one partner is in scope (unambiguous).
+        $editablePartner = (is_array($scopedIds) && count($scopedIds) === 1)
+            ? Partner::query()->withoutGlobalScopes()->find($scopedIds[0])
+            : null;
+        $editableCommits = $editablePartner
+            ? PartnerPlanCommit::where('partner_id', $editablePartner->id)->pluck('committed', 'role')->all()
+            : [];
+
+        $options = $svc->filterOptions();
+        $options['partners'] = $visibleIds !== null
+            ? ($this->visibility->visiblePartnerNames() ?? [])
+            : $svc->partners();
+        sort($options['partners']);
+        $active = PsmEngagementFilters::get();
+
+        return view('partner-success.business-plan', compact('plan', 'options', 'active', 'editablePartner', 'editableCommits'));
+    }
+
+    /** Set a per-partner Business Plan headcount commit (single-partner scope). */
+    public function setCommit(Request $request)
+    {
+        $data = $request->validate([
+            'partner_id' => 'required|integer',
+            'role' => 'required|string|in:GTM,PreSales,Delivery',
+            'committed' => 'required|integer|min:0',
         ]);
+
+        // Only allow committing for a partner the actor can see.
+        $visibleIds = $this->visibility->visiblePartnerIds();
+        abort_if($visibleIds !== null && ! in_array((int) $data['partner_id'], $visibleIds, true), 404);
+
+        PartnerPlanCommit::updateOrCreate(
+            ['partner_id' => $data['partner_id'], 'role' => $data['role']],
+            ['committed' => $data['committed']],
+        );
+
+        return back();
     }
 
     /** PSM Engagement → Readiness Plan (scaffold — to be built out). */

@@ -961,6 +961,7 @@ Route::middleware(['auth'])->prefix('insights')->name('insights.')->group(functi
 Route::middleware(['auth'])->prefix('partner-success')->name('partner-success.')->group(function () {
     Route::post('filters', [\App\Http\Controllers\PartnerSuccessController::class, 'setFilters'])->name('filters.set');
     Route::post('filters/clear', [\App\Http\Controllers\PartnerSuccessController::class, 'clearFilters'])->name('filters.clear');
+    Route::post('plan-commit', [\App\Http\Controllers\PartnerSuccessController::class, 'setCommit'])->name('plan-commit');
 });
 
 Route::middleware(['auth', 'module:partner_success.engagement'])->prefix('partner-success')->name('partner-success.')->group(function () {

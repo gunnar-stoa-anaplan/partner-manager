@@ -315,6 +315,73 @@ class MetricService
         ];
     }
 
+    /**
+     * Business Plan aggregation — revenue attribution, delivery, revenue-by-LOB,
+     * and certified headcount by role. Scoped by the same filt() as everything
+     * else (row-level visibility + the pinned scope filters).
+     *
+     * @return array<string, mixed>
+     */
+    public function businessPlan(): array
+    {
+        $db = $this->db();
+
+        [$oc, $op] = $this->filt('opportunity', null, null);
+        $ow = 'WHERE '.implode(' AND ', array_merge([self::PI], $oc));
+        $o = $db->selectOne("
+            SELECT
+              count(*) FILTER (WHERE stage < 5 AND partner IS NOT NULL AND partner <> 'nan')::int AS src_n,
+              coalesce(sum(acv) FILTER (WHERE stage < 5 AND partner IS NOT NULL AND partner <> 'nan'),0)::bigint AS src_v,
+              count(*) FILTER (WHERE stage < 5 AND (partner IS NULL OR partner = 'nan') AND implementer IS NOT NULL AND implementer <> 'nan')::int AS inf_n,
+              coalesce(sum(acv) FILTER (WHERE stage < 5 AND (partner IS NULL OR partner = 'nan') AND implementer IS NOT NULL AND implementer <> 'nan'),0)::bigint AS inf_v,
+              count(*) FILTER (WHERE stage = 5)::int AS won_n,
+              coalesce(sum(acv) FILTER (WHERE stage = 5),0)::bigint AS won_v
+            FROM wh.opportunity_current {$ow}", $op);
+
+        [$pc, $pp] = $this->filt('project', null, null);
+        $pw = $pc ? ('WHERE '.implode(' AND ', $pc)) : '';
+        $p = $db->selectOne("
+            SELECT
+              count(*) FILTER (WHERE go_live IS NOT NULL AND go_live <= now())::int AS delivered,
+              count(*) FILTER (WHERE go_live IS NULL OR go_live > now())::int AS in_progress
+            FROM wh.project_current {$pw}", $pp);
+
+        $lob = $db->select("
+            SELECT coalesce(lob,'(unspecified)') AS lob,
+              count(*) FILTER (WHERE stage < 5)::int AS open_n,
+              coalesce(sum(acv) FILTER (WHERE stage < 5),0)::bigint AS open_v,
+              count(*) FILTER (WHERE stage = 5)::int AS won_n,
+              coalesce(sum(acv) FILTER (WHERE stage = 5),0)::bigint AS won_v
+            FROM wh.opportunity_current {$ow}
+            GROUP BY 1 ORDER BY open_v DESC", $op);
+
+        [$rc, $rp] = $this->filt('person', null, null);
+        $rw = $rc ? ('WHERE '.implode(' AND ', $rc)) : '';
+        $roles = [];
+        foreach (['GTM', 'PreSales', 'Delivery'] as $role) {
+            $r = $db->selectOne("
+                SELECT
+                  count(*) FILTER (WHERE ? = ANY(roles))::int AS total,
+                  count(*) FILTER (WHERE ? = ANY(roles) AND coalesce(array_length(certified,1),0) > 0)::int AS certified
+                FROM wh.person_current {$rw}", array_merge([$role, $role], $rp));
+            $roles[$role] = ['total' => (int) $r->total, 'certified' => (int) $r->certified];
+        }
+
+        return [
+            'sourced' => ['n' => (int) $o->src_n, 'v' => (int) $o->src_v],
+            'influenced' => ['n' => (int) $o->inf_n, 'v' => (int) $o->inf_v],
+            'pipeline' => ['n' => (int) $o->src_n + (int) $o->inf_n, 'v' => (int) $o->src_v + (int) $o->inf_v],
+            'won' => ['n' => (int) $o->won_n, 'v' => (int) $o->won_v],
+            'delivered' => (int) $p->delivered,
+            'in_progress' => (int) $p->in_progress,
+            'lob' => array_map(fn ($x) => [
+                'lob' => $x->lob, 'open_n' => (int) $x->open_n, 'open_v' => (int) $x->open_v,
+                'won_n' => (int) $x->won_n, 'won_v' => (int) $x->won_v,
+            ], $lob),
+            'roles' => $roles,
+        ];
+    }
+
     public function breakdown(string $key, ?string $geo = null, ?string $partner = null): array
     {
         $cfg = self::BK[$key] ?? abort(404);
