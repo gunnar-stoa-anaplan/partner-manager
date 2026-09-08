@@ -58,7 +58,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" for="role">Role <span class="text-danger">*</span></label>
+                        <label class="form-label" for="role">Primary Role <span class="text-danger">*</span></label>
                         <select class="form-select" id="role" name="role" required>
                             <option value="">Select Role</option>
                             @foreach($roles as $role)
@@ -67,6 +67,19 @@
                                 </option>
                             @endforeach
                         </select>
+                        <div class="form-text">Drives the landing page. Permissions are the union of all roles below.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="additional_roles">Additional Roles</label>
+                        <select class="form-select" id="additional_roles" name="additional_roles[]" multiple size="6">
+                            @foreach($roles as $role)
+                                <option value="{{ $role->id }}" @selected(in_array($role->id, old('additional_roles', $additionalRoleIds ?? [])))>
+                                    {{ $role->display_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">Optional. Hold Ctrl/Cmd to select more than one — the user gets the combined access of the primary role plus these.</div>
                     </div>
 
                     <div class="mb-3">

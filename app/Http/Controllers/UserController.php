@@ -31,6 +31,8 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'role' => 'required|exists:roles,slug,type,internal',
+            'additional_roles' => 'nullable|array',
+            'additional_roles.*' => 'exists:roles,id',
             'password' => 'required|string|min:8|confirmed',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
             'manager_id' => 'nullable|exists:users,id',
@@ -43,7 +45,7 @@ class UserController extends Controller
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
         }
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'role_id' => $role->id,
@@ -52,6 +54,8 @@ class UserController extends Controller
             'manager_id' => $request->manager_id,
         ]);
 
+        $this->syncRoles($user, $role->id, $request->input('additional_roles', []));
+
         return redirect()->route('users.index')->with('success', 'User created successfully!');
     }
 
@@ -59,8 +63,10 @@ class UserController extends Controller
     {
         $managers = User::where('id', '!=', $user->id)->orderBy('name')->get();
         $roles = Role::internal()->orderBy('sort_order')->get();
+        $additionalRoleIds = $user->roles->pluck('id')
+            ->reject(fn ($id) => $id === $user->role_id)->values()->all();
 
-        return view('users.edit', compact('user', 'managers', 'roles'));
+        return view('users.edit', compact('user', 'managers', 'roles', 'additionalRoleIds'));
     }
 
     public function update(Request $request, User $user)
@@ -69,6 +75,8 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$user->id,
             'role' => 'required|exists:roles,slug,type,internal',
+            'additional_roles' => 'nullable|array',
+            'additional_roles.*' => 'exists:roles,id',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
             'manager_id' => 'nullable|exists:users,id',
         ]);
@@ -101,6 +109,8 @@ class UserController extends Controller
 
         $user->update($data);
 
+        $this->syncRoles($user, $role->id, $request->input('additional_roles', []));
+
         // Only update password if provided
         if ($request->filled('password')) {
             $request->validate([
@@ -112,6 +122,20 @@ class UserController extends Controller
         }
 
         return redirect()->route('users.index')->with('success', 'User updated successfully!');
+    }
+
+    /**
+     * Sync a user's role_user pivot to the primary role plus any additional
+     * roles (internal only). The primary role_id remains the landing/back-compat
+     * role; permission checks union across all of them.
+     *
+     * @param  array<int|string>  $additional  role ids
+     */
+    private function syncRoles(User $user, int $primaryRoleId, array $additional): void
+    {
+        $ids = collect($additional)->map(fn ($v) => (int) $v)->push($primaryRoleId)->unique();
+        $valid = Role::internal()->whereIn('id', $ids)->pluck('id')->all();
+        $user->roles()->sync($valid);
     }
 
     public function destroy(User $user)
