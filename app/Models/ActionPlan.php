@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ActionPlan extends Model
 {
+    use \App\Models\Concerns\ScopedToActor;
+
     protected $fillable = [
         'partner_id', 'title', 'description', 'source', 'status',
         'priority', 'owner_type', 'owner_user_id', 'owner_contact_id',

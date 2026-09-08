@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class OpportunitySnapshot extends Model
 {
     use HasFactory;
+    use \App\Models\Concerns\ScopedToActor;
 
     protected $fillable = [
         'opportunity_id',

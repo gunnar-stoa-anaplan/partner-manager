@@ -16,15 +16,17 @@ class PartnerSuccessController extends Controller
 {
     public function __construct(
         private readonly MetricService $metrics,
-        VisibilityContext $visibility,
-    ) {
-        // Constrain every metric/drill to the partners this actor may see.
-        $this->metrics->restrictTo($visibility->visiblePartnerNames());
-        $this->visiblePartnerNames = $visibility->visiblePartnerNames();
-    }
+        private readonly VisibilityContext $visibility,
+    ) {}
 
-    /** @var array<string>|null */
-    private ?array $visiblePartnerNames;
+    /**
+     * MetricService scoped to the partners the current actor may see. Resolved
+     * per request (NOT in the constructor, where auth is not yet available).
+     */
+    private function metrics(): MetricService
+    {
+        return $this->metrics->restrictTo($this->visibility->visiblePartnerNames());
+    }
 
     /**
      * PSM Engagement — the app-native dashboard built on the Insight Kit. All
@@ -34,10 +36,9 @@ class PartnerSuccessController extends Controller
      */
     public function index()
     {
-        // One pass computes all metrics (restrictTo already applied in ctor).
         $order = ['Pipeline', 'Delivery', 'Capability', 'Enablement', 'Catalog'];
         $sections = [];
-        foreach ($this->metrics->metrics() as $m) {
+        foreach ($this->metrics()->metrics() as $m) {
             $sections[$m['section'] ?: 'Other'][] = $m;
         }
         uksort($sections, fn ($a, $b) => (array_search($a, $order) === false ? 99 : array_search($a, $order))
@@ -54,16 +55,17 @@ class PartnerSuccessController extends Controller
 
     public function apiMetrics(Request $request)
     {
-        return response()->json($this->metrics->metrics($request->query('geo'), $request->query('partner')));
+        return response()->json($this->metrics()->metrics($request->query('geo'), $request->query('partner')));
     }
 
     public function apiPartners()
     {
-        $partners = $this->metrics->partners();
+        $partners = $this->metrics()->partners();
 
         // Restrict the picker to partners this actor may see.
-        if ($this->visiblePartnerNames !== null) {
-            $allowed = array_flip($this->visiblePartnerNames);
+        $visible = $this->visibility->visiblePartnerNames();
+        if ($visible !== null) {
+            $allowed = array_flip($visible);
             $partners = array_values(array_filter($partners, fn ($p) => isset($allowed[$p])));
         }
 
@@ -72,22 +74,22 @@ class PartnerSuccessController extends Controller
 
     public function apiDrill(Request $request, string $name)
     {
-        return response()->json($this->metrics->drill($name, $request->query('geo'), $request->query('partner')));
+        return response()->json($this->metrics()->drill($name, $request->query('geo'), $request->query('partner')));
     }
 
     public function apiTrend(Request $request, string $name)
     {
-        return response()->json($this->metrics->trend($name, $request->query('geo'), $request->query('partner')));
+        return response()->json($this->metrics()->trend($name, $request->query('geo'), $request->query('partner')));
     }
 
     public function apiBreakdown(Request $request, string $key)
     {
-        return response()->json($this->metrics->breakdown($key, $request->query('geo'), $request->query('partner')));
+        return response()->json($this->metrics()->breakdown($key, $request->query('geo'), $request->query('partner')));
     }
 
     public function apiDrillBreakdown(Request $request, string $key)
     {
-        return response()->json($this->metrics->drillBreakdown(
+        return response()->json($this->metrics()->drillBreakdown(
             $key, (string) $request->query('value', ''), $request->query('geo'), $request->query('partner')
         ));
     }

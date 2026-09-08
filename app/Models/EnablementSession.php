@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class EnablementSession extends Model
 {
     use HasFactory;
+    use \App\Models\Concerns\ScopedToActor;
 
     protected $fillable = [
         'enablement_event_id',

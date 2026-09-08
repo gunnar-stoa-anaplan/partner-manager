@@ -10,6 +10,7 @@ class WeeklyFocusItem extends Model
 {
     /** @use HasFactory<\Database\Factories\WeeklyFocusItemFactory> */
     use HasFactory;
+    use \App\Models\Concerns\ScopedToActor;
 
     protected $fillable = [
         'weekly_focus_id',

@@ -21,7 +21,12 @@ use Illuminate\Support\Facades\Auth;
  */
 class VisibilityContext
 {
-    private bool $resolved = false;
+    /**
+     * The actor identity the current resolution was computed for. Memoization is
+     * keyed by this so an early no-actor query (e.g. before auth is available)
+     * cannot poison the request — once a real actor appears we re-resolve.
+     */
+    private ?string $resolvedKey = null;
 
     /** @var array<int>|null */
     private ?array $partnerIds = null;
@@ -83,12 +88,13 @@ class VisibilityContext
 
     private function resolve(): void
     {
-        if ($this->resolved) {
+        $a = $this->actor();
+        $key = $a === null ? 'none' : get_class($a).':'.$a->getKey();
+
+        if ($this->resolvedKey === $key) {
             return;
         }
-        $this->resolved = true;
-
-        $a = $this->actor();
+        $this->resolvedKey = $key;
 
         // No actor (console, queue, system) or unrestricted internal → see all.
         if ($a === null || ($a instanceof User && ($a->bypassesPermissions() || $a->isAdmin()))) {

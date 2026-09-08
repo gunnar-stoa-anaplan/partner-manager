@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class LaunchProgramPartner extends Model
 {
     use HasFactory;
+    use \App\Models\Concerns\ScopedToActor;
 
     protected $fillable = [
         'launch_program_id',

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class PartnerSolution extends Model
 {
+    use \App\Models\Concerns\ScopedToActor;
+
     protected $fillable = [
         'partner_id', 'name', 'description', 'product_area',
         'industry_focus', 'lifecycle_stage', 'stage_entered_at',

@@ -10,6 +10,7 @@ class PartnerMarketplaceEntry extends Model
 {
     /** @use HasFactory<\Database\Factories\PartnerMarketplaceEntryFactory> */
     use HasFactory;
+    use \App\Models\Concerns\ScopedToActor;
 
     public const CATEGORIES = [
         'consumer_customer_stories' => 'Consumer Customer Stories',
