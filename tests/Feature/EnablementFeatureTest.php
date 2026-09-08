@@ -1071,7 +1071,8 @@ class EnablementFeatureTest extends TestCase
             'partner_id' => $otherPartner->id,
         ]);
 
-        $response->assertForbidden();
+        // Row-level visibility: another PSM's partner is invisible → 404.
+        $response->assertNotFound();
     }
 
     // ─── API: Remove Nomination ──────────────────────────────────

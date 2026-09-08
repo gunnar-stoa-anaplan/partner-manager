@@ -13,7 +13,10 @@ class PortalImpersonationController extends Controller
      */
     public function start(Request $request, Contact $contact): \Illuminate\Http\RedirectResponse
     {
-        $partner = $contact->partner;
+        // Authorize against the real partner regardless of row-level visibility
+        // (a scoped relation would return null for a partner the actor can't see,
+        // and impersonation authorization is an explicit ownership check).
+        $partner = $contact->partner()->withoutGlobalScopes()->first();
         $this->authorizeImpersonation($partner);
 
         if (! $contact->portal_access || ! $contact->portal_role_id) {
@@ -64,6 +67,10 @@ class PortalImpersonationController extends Controller
 
         if ($user->isAdmin()) {
             return;
+        }
+
+        if (! $partner) {
+            abort(404);
         }
 
         if ($partner->user_id === $user->id) {
