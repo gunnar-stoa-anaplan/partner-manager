@@ -48,6 +48,16 @@ class PartnerSuccessController extends Controller
         uksort($sections, fn ($a, $b) => (array_search($a, $order) === false ? 99 : array_search($a, $order))
             <=> (array_search($b, $order) === false ? 99 : array_search($b, $order)));
 
+        // Optional single-section focus (submenu deep-link, e.g. ?section=pipeline).
+        $focus = ucfirst(strtolower((string) request()->query('section')));
+        $pageTitle = 'PSM Engagement';
+        if ($focus && isset($sections[$focus])) {
+            $sections = [$focus => $sections[$focus]];
+            $pageTitle = $focus;
+        } else {
+            $focus = null;
+        }
+
         // Pinned filter panel data.
         $options = $svc->filterOptions();
         $visible = $this->visibility->visiblePartnerNames();
@@ -55,7 +65,25 @@ class PartnerSuccessController extends Controller
         sort($options['partners']);
         $active = PsmEngagementFilters::get();
 
-        return view('partner-success.overview', compact('sections', 'options', 'active'));
+        return view('partner-success.overview', compact('sections', 'options', 'active', 'focus', 'pageTitle'));
+    }
+
+    /** PSM Engagement → Business Plans (scaffold — to be built out). */
+    public function businessPlans()
+    {
+        return view('partner-success.placeholder', [
+            'pageTitle' => 'Business Plans',
+            'blurb' => 'Partner business plans — goals, initiatives, and the joint plan for each of your partners. Coming soon.',
+        ]);
+    }
+
+    /** PSM Engagement → Readiness Plan (scaffold — to be built out). */
+    public function readiness()
+    {
+        return view('partner-success.placeholder', [
+            'pageTitle' => 'Readiness Plan',
+            'blurb' => 'Partner readiness — the plan to get each partner to delivery-ready across capability and enablement. Coming soon.',
+        ]);
     }
 
     /** Persist the pinned-panel scope to the session (applies to all PSM Engagement views). */

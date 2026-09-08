@@ -1,7 +1,9 @@
 @extends('layouts.vertical', [
-    'pageTitle' => 'PSM Engagement',
+    'pageTitle' => $pageTitle ?? 'PSM Engagement',
     'pageSubTitle1' => 'Insights',
-    'pageSubText' => 'Audited, warehouse-backed engagement metrics — every number drills to its source; GEO and partner filters re-run everything, scoped to what you can see.',
+    'pageSubTitle2' => ($focus ?? null) ? 'PSM Engagement' : null,
+    'pageSubTitle2Url' => ($focus ?? null) ? url('partner-success') : null,
+    'pageSubText' => 'Audited, warehouse-backed engagement metrics — every number drills to its source; filters and scope apply across all PSM Engagement views.',
 ])
 
 @php
@@ -79,6 +81,7 @@
         </div>
     </div>
 
+    @unless($focus ?? false)
     <ul class="nav nav-tabs" role="tablist">
         @foreach($sections as $section => $metrics)
             <li class="nav-item" role="presentation">
@@ -89,6 +92,7 @@
             </li>
         @endforeach
     </ul>
+    @endunless
 
     <div class="tab-content pt-3">
         @foreach($sections as $section => $metrics)

@@ -965,6 +965,8 @@ Route::middleware(['auth'])->prefix('partner-success')->name('partner-success.')
 
 Route::middleware(['auth', 'module:partner_success.engagement'])->prefix('partner-success')->name('partner-success.')->group(function () {
     Route::get('legacy', [\App\Http\Controllers\PartnerSuccessController::class, 'legacy'])->name('legacy');
+    Route::get('business-plans', [\App\Http\Controllers\PartnerSuccessController::class, 'businessPlans'])->name('business-plans');
+    Route::get('readiness', [\App\Http\Controllers\PartnerSuccessController::class, 'readiness'])->name('readiness');
     Route::get('/', [App\Http\Controllers\PartnerSuccessController::class, 'index'])->name('index');
     Route::get('/api/metrics', [App\Http\Controllers\PartnerSuccessController::class, 'apiMetrics'])->name('api.metrics');
     Route::get('/api/partners', [App\Http\Controllers\PartnerSuccessController::class, 'apiPartners'])->name('api.partners');
