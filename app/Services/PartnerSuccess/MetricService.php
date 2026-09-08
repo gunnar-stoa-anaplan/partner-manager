@@ -87,6 +87,24 @@ class MetricService
         return $this;
     }
 
+    /**
+     * Multi-dimension scope from the pinned filter panel. Keys (all optional):
+     * geos[], partners[], lobs[], stages[], quarters[], capGroups[]. Each is
+     * applied only to bases whose table has that column (geo/partner broadly;
+     * lob/stage/quarter/capGroups on the opportunity base only).
+     *
+     * @param  array<string, array<string>>  $scope
+     */
+    public function withScope(array $scope): static
+    {
+        $this->scope = $scope;
+
+        return $this;
+    }
+
+    /** @var array<string, array<string>> */
+    private array $scope = [];
+
     private function filt(string $base, ?string $geo, ?string $partner): array
     {
         $clauses = [];
@@ -127,6 +145,49 @@ class MetricService
                     $params = array_merge($params, $this->allowedPartners);
                 }
                 $shown[] = 'visibility: '.count($this->allowedPartners).' partner(s)';
+            }
+        }
+
+        // Multi-dimension scope from the pinned filter panel.
+        $addIn = function (string $col, array $vals) use (&$clauses, &$params, &$shown) {
+            $vals = array_values($vals);
+            $ph = implode(',', array_fill(0, count($vals), '?'));
+            $clauses[] = "{$col} IN ({$ph})";
+            $params = array_merge($params, $vals);
+            $shown[] = "{$col} IN (".count($vals).' selected)';
+        };
+
+        if (! empty($this->scope['geos']) && $b['geo']) {
+            $addIn($b['geo'], $this->scope['geos']);
+        }
+        if (! empty($this->scope['partners']) && $b['partner']) {
+            $vals = array_values($this->scope['partners']);
+            $ph = implode(',', array_fill(0, count($vals), '?'));
+            if ($b['partner'] === 'opp') {
+                $clauses[] = "(partner IN ({$ph}) OR implementer IN ({$ph}))";
+                $params = array_merge($params, $vals, $vals);
+            } else {
+                $clauses[] = "partner IN ({$ph})";
+                $params = array_merge($params, $vals);
+            }
+            $shown[] = 'partner IN ('.count($vals).' selected)';
+        }
+        if ($base === 'opportunity') {
+            if (! empty($this->scope['lobs'])) {
+                $addIn('lob', $this->scope['lobs']);
+            }
+            if (! empty($this->scope['stages'])) {
+                $addIn('stage_label', $this->scope['stages']);
+            }
+            if (! empty($this->scope['quarters'])) {
+                $addIn('fiscal_qtr', $this->scope['quarters']);
+            }
+            if (! empty($this->scope['capGroups'])) {
+                $vals = array_values($this->scope['capGroups']);
+                $ph = implode(',', array_fill(0, count($vals), '?'));
+                $clauses[] = "cap_groups && ARRAY[{$ph}]::text[]";
+                $params = array_merge($params, $vals);
+                $shown[] = 'capability in ('.count($vals).' selected)';
             }
         }
 
@@ -213,6 +274,45 @@ class MetricService
             ) t WHERE p IS NOT NULL ORDER BY p");
 
         return array_map(fn ($r) => $r->p, $rows);
+    }
+
+    /**
+     * Distinct option lists for the pinned filter panel, constrained to the
+     * actor's visible partners (allowedPartners) but NOT to the current scope,
+     * so choosing one value never hides the others.
+     *
+     * @return array{geos: array<string>, lobs: array<string>, stages: array<string>, quarters: array<string>, capGroups: array<string>}
+     */
+    public function filterOptions(): array
+    {
+        $where = '1=1';
+        $params = [];
+        if ($this->allowedPartners !== null) {
+            if ($this->allowedPartners === []) {
+                $where = '1=0';
+            } else {
+                $ph = implode(',', array_fill(0, count($this->allowedPartners), '?'));
+                $where = "(partner IN ({$ph}) OR implementer IN ({$ph}))";
+                $params = array_merge($this->allowedPartners, $this->allowedPartners);
+            }
+        }
+
+        $db = $this->db();
+        $distinct = fn (string $col) => array_map(
+            fn ($r) => $r->v,
+            $db->select("SELECT DISTINCT {$col} v FROM wh.opportunity_current WHERE {$where} AND {$col} IS NOT NULL ORDER BY 1", $params)
+        );
+
+        return [
+            'geos' => $distinct('geo'),
+            'lobs' => $distinct('lob'),
+            'stages' => $distinct('stage_label'),
+            'quarters' => $distinct('fiscal_qtr'),
+            'capGroups' => array_map(
+                fn ($r) => $r->v,
+                $db->select("SELECT DISTINCT unnest(cap_groups) v FROM wh.opportunity_current WHERE {$where} ORDER BY 1", $params)
+            ),
+        ];
     }
 
     public function breakdown(string $key, ?string $geo = null, ?string $partner = null): array

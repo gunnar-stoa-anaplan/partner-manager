@@ -36,7 +36,7 @@ class WarehouseMetricSource implements MetricSource
 
     public function value(MetricFilter $filter): MetricValue
     {
-        $this->metrics->restrictTo($filter->allowedPartners);
+        $this->metrics->restrictTo($filter->allowedPartners)->withScope($filter->scope);
 
         foreach ($this->metrics->metrics($filter->geo, $filter->partner) as $m) {
             if ($m['name'] === $this->name) {
@@ -54,7 +54,7 @@ class WarehouseMetricSource implements MetricSource
 
     public function drill(MetricFilter $filter): MetricDrill
     {
-        $this->metrics->restrictTo($filter->allowedPartners);
+        $this->metrics->restrictTo($filter->allowedPartners)->withScope($filter->scope);
         $d = $this->metrics->drill($this->name, $filter->geo, $filter->partner);
 
         return new MetricDrill(
@@ -67,14 +67,14 @@ class WarehouseMetricSource implements MetricSource
 
     public function trend(MetricFilter $filter): array
     {
-        $this->metrics->restrictTo($filter->allowedPartners);
+        $this->metrics->restrictTo($filter->allowedPartners)->withScope($filter->scope);
 
         return $this->metrics->trend($this->name, $filter->geo, $filter->partner)['points'] ?? [];
     }
 
     public function breakdown(string $dimension, MetricFilter $filter): array
     {
-        $this->metrics->restrictTo($filter->allowedPartners);
+        $this->metrics->restrictTo($filter->allowedPartners)->withScope($filter->scope);
 
         return $this->metrics->breakdown($dimension, $filter->geo, $filter->partner);
     }

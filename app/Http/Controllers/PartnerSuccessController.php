@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\PartnerSuccess\MetricService;
+use App\Support\PsmEngagementFilters;
 use App\Support\VisibilityContext;
 use Illuminate\Http\Request;
 
@@ -25,7 +26,9 @@ class PartnerSuccessController extends Controller
      */
     private function metrics(): MetricService
     {
-        return $this->metrics->restrictTo($this->visibility->visiblePartnerNames());
+        return $this->metrics
+            ->restrictTo($this->visibility->visiblePartnerNames())
+            ->withScope(PsmEngagementFilters::get());
     }
 
     /**
@@ -37,14 +40,38 @@ class PartnerSuccessController extends Controller
     public function index()
     {
         $order = ['Pipeline', 'Delivery', 'Capability', 'Enablement', 'Catalog'];
+        $svc = $this->metrics();
         $sections = [];
-        foreach ($this->metrics()->metrics() as $m) {
+        foreach ($svc->metrics() as $m) {
             $sections[$m['section'] ?: 'Other'][] = $m;
         }
         uksort($sections, fn ($a, $b) => (array_search($a, $order) === false ? 99 : array_search($a, $order))
             <=> (array_search($b, $order) === false ? 99 : array_search($b, $order)));
 
-        return view('partner-success.overview', compact('sections'));
+        // Pinned filter panel data.
+        $options = $svc->filterOptions();
+        $visible = $this->visibility->visiblePartnerNames();
+        $options['partners'] = $visible ?? $svc->partners();
+        sort($options['partners']);
+        $active = PsmEngagementFilters::get();
+
+        return view('partner-success.overview', compact('sections', 'options', 'active'));
+    }
+
+    /** Persist the pinned-panel scope to the session (applies to all PSM Engagement views). */
+    public function setFilters(Request $request)
+    {
+        PsmEngagementFilters::put($request->only(PsmEngagementFilters::DIMENSIONS));
+
+        return redirect()->route('partner-success.index');
+    }
+
+    /** Clear the pinned-panel scope. */
+    public function clearFilters()
+    {
+        PsmEngagementFilters::clear();
+
+        return redirect()->route('partner-success.index');
     }
 
     /** Legacy imported dashboard (custom design), kept for reference only. */

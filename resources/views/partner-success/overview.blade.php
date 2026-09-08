@@ -13,13 +13,71 @@
         'Enablement' => [['role', 'bar', 'Partner people by role']],
         'Catalog'    => [['csource', 'bar', 'Courses by source']],
     ];
+
+    // Pinned filter panel dimensions (session key => label).
+    $dimDefs = [
+        'geos' => 'GEO',
+        'partners' => 'Partners',
+        'lobs' => 'Line of Business',
+        'stages' => 'Sales Stage',
+        'quarters' => 'Close Quarter',
+        'capGroups' => 'Capability',
+    ];
+    $activeCount = collect($active)->flatten()->count();
 @endphp
 
 @section('content')
 <div class="container-fluid py-3">
 
-    {{-- Filter bar (geo + partner), scoped to the partners the actor can see --}}
-    <x-insight.filter-bar :partnersUrl="url('partner-success/api/partners')" />
+    {{-- Pinned, collapsible scope panel. Session-backed: one selection applies
+         to every metric / chart / drill on all PSM Engagement tabs. --}}
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header d-flex align-items-center justify-content-between" role="button"
+             data-bs-toggle="collapse" data-bs-target="#ps-scope" aria-expanded="{{ $activeCount ? 'false' : 'true' }}">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="fw-600 me-1">
+                    <svg class="sa-icon sa-icon-sm"><use href="/icons/sprite.svg#filter"></use></svg>
+                    Filters
+                </span>
+                @if($activeCount)
+                    @foreach($dimDefs as $key => $label)
+                        @foreach($active[$key] ?? [] as $v)
+                            <span class="badge bg-body-secondary text-body border fw-normal">{{ $label }}: {{ $v }}</span>
+                        @endforeach
+                    @endforeach
+                @else
+                    <span class="text-muted fs-sm fst-italic">Showing all your data — no filters applied</span>
+                @endif
+            </div>
+            <svg class="sa-icon sa-icon-sm text-muted"><use href="/icons/sprite.svg#chevron-down"></use></svg>
+        </div>
+
+        <div id="ps-scope" class="collapse @if(! $activeCount) show @endif">
+            <div class="card-body">
+                <form method="POST" action="{{ route('partner-success.filters.set') }}">
+                    @csrf
+                    <div class="row g-3">
+                        @foreach($dimDefs as $key => $label)
+                            <div class="col-md-4">
+                                <label class="form-label fw-500 fs-sm">{{ $label }}</label>
+                                <select name="{{ $key }}[]" class="form-select form-select-sm" multiple size="5">
+                                    @foreach($options[$key] ?? [] as $opt)
+                                        <option value="{{ $opt }}" @selected(in_array($opt, $active[$key] ?? []))>{{ $opt }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="mt-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm">Apply filters</button>
+                        <button type="submit" class="btn btn-outline-secondary btn-sm"
+                                formaction="{{ route('partner-success.filters.clear') }}">Clear all</button>
+                        <span class="text-muted fs-xs align-self-center ms-2">Hold Ctrl/Cmd to select more than one.</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <ul class="nav nav-tabs" role="tablist">
         @foreach($sections as $section => $metrics)

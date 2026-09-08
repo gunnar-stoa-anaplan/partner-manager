@@ -956,6 +956,13 @@ Route::middleware(['auth'])->prefix('insights')->name('insights.')->group(functi
     Route::get('{metric}/breakdown', [\App\Http\Controllers\InsightController::class, 'breakdown'])->name('breakdown');
 });
 
+// PSM Engagement scope panel — session-only view preference (read-level action,
+// so it is not behind the module WRITE gate; the dashboard data stays gated).
+Route::middleware(['auth'])->prefix('partner-success')->name('partner-success.')->group(function () {
+    Route::post('filters', [\App\Http\Controllers\PartnerSuccessController::class, 'setFilters'])->name('filters.set');
+    Route::post('filters/clear', [\App\Http\Controllers\PartnerSuccessController::class, 'clearFilters'])->name('filters.clear');
+});
+
 Route::middleware(['auth', 'module:partner_success.engagement'])->prefix('partner-success')->name('partner-success.')->group(function () {
     Route::get('legacy', [\App\Http\Controllers\PartnerSuccessController::class, 'legacy'])->name('legacy');
     Route::get('/', [App\Http\Controllers\PartnerSuccessController::class, 'index'])->name('index');

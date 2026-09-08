@@ -27,6 +27,7 @@ class InsightController extends Controller
             geo: $request->query('geo'),
             partner: $request->query('partner'),
             allowedPartners: $this->visibility->visiblePartnerNames(),
+            scope: \App\Support\PsmEngagementFilters::get(),
         );
     }
 
