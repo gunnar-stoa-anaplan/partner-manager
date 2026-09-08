@@ -10,7 +10,6 @@ class EnablementGoal extends Model
 {
     /** @use HasFactory<\Database\Factories\EnablementGoalFactory> */
     use HasFactory;
-    use \App\Models\Concerns\ScopedToActor;
 
     protected $fillable = [
         'partner_id',

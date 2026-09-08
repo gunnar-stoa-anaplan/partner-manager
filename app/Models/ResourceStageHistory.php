@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class ResourceStageHistory extends Model
 {
     use HasFactory;
-    use \App\Models\Concerns\ScopedToActor;
 
     protected $table = 'resource_stage_history';
 

@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class PartnerScorecard extends Model
 {
-    use \App\Models\Concerns\ScopedToActor;
-
     protected $fillable = [
         'partner_id', 'scored_at', 'overall_score',
         'certification_score', 'pipeline_score', 'delivery_score',

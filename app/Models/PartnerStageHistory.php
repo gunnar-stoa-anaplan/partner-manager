@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class PartnerStageHistory extends Model
 {
     use HasFactory;
-    use \App\Models\Concerns\ScopedToActor;
 
     protected $table = 'partner_stage_history';
 

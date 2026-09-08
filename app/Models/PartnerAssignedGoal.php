@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PartnerAssignedGoal extends Model
 {
-    use \App\Models\Concerns\ScopedToActor;
-
     protected $fillable = [
         'partner_id',
         'goal_template_id',

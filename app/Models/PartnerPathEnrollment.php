@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class PartnerPathEnrollment extends Model
 {
     use HasFactory;
-    use \App\Models\Concerns\ScopedToActor;
 
     protected $fillable = [
         'partner_id', 'partner_path_id', 'current_stage_id',

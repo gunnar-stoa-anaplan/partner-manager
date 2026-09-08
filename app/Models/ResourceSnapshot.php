@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ResourceSnapshot extends Model
 {
     use HasFactory;
-    use \App\Models\Concerns\ScopedToActor;
 
     protected $fillable = [
         'partner_id',

@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class LabParticipant extends Model
 {
     use HasFactory;
-    use \App\Models\Concerns\ScopedToActor;
 
     protected $fillable = [
         'lab_id',

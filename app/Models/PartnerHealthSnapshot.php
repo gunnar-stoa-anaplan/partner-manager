@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PartnerHealthSnapshot extends Model
 {
-    use \App\Models\Concerns\ScopedToActor;
-
     protected $fillable = [
         'partner_id',
         'score',
