@@ -101,11 +101,15 @@ class VisibilityContext
         if ($a instanceof Contact) {
             $ids = $a->partner_id ? [$a->partner_id] : [];
         } else {
-            // Internal non-admin: partners they own/are assigned, plus (future)
-            // partners visible through shared team membership.
-            $ids = Partner::query()->withoutGlobalScopes()
-                ->where('user_id', $a->id)
-                ->pluck('id')->all();
+            // Internal non-admin: the partners they are associated with —
+            // direct ownership (partner.user_id) UNIONed with the canonical
+            // PSM/PAM assignments in the user_partner pivot (assignedPartners()).
+            // withoutGlobalScopes avoids recursing into this same scope.
+            $owned = Partner::query()->withoutGlobalScopes()
+                ->where('user_id', $a->id)->pluck('id');
+            $assigned = $a->assignedPartners()->withoutGlobalScopes()->pluck('partners.id');
+
+            $ids = $owned->merge($assigned)->unique()->values()->all();
         }
 
         $this->partnerIds = $ids;
