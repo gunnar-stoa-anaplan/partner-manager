@@ -26,28 +26,30 @@ class PartnerSuccessController extends Controller
     /** @var array<string>|null */
     private ?array $visiblePartnerNames;
 
+    /**
+     * PSM Engagement — the app-native dashboard built on the Insight Kit. All
+     * five sections (Pipeline / Delivery / Capability / Enablement / Catalog),
+     * every KPI drillable to source, visibility-scoped. Uses the shared
+     * SmartAdmin design language so it matches Workshops and the rest of the app.
+     */
     public function index()
     {
-        return view('partner-success.dashboard');
+        // One pass computes all metrics (restrictTo already applied in ctor).
+        $order = ['Pipeline', 'Delivery', 'Capability', 'Enablement', 'Catalog'];
+        $sections = [];
+        foreach ($this->metrics->metrics() as $m) {
+            $sections[$m['section'] ?: 'Other'][] = $m;
+        }
+        uksort($sections, fn ($a, $b) => (array_search($a, $order) === false ? 99 : array_search($a, $order))
+            <=> (array_search($b, $order) === false ? 99 : array_search($b, $order)));
+
+        return view('partner-success.overview', compact('sections'));
     }
 
-    /**
-     * Reference view of PSM Engagement built on the Insight Kit — stat-cards +
-     * chart + drill-panel, all fed by the visibility-scoped MetricRegistry.
-     * Proves the kit against a real view without disturbing the legacy dashboard.
-     */
-    public function kit(\App\Insights\MetricRegistry $registry)
+    /** Legacy imported dashboard (custom design), kept for reference only. */
+    public function legacy()
     {
-        $filter = new \App\Insights\MetricFilter(allowedPartners: $this->visiblePartnerNames);
-
-        $pipeline = [];
-        foreach ($registry->all() as $source) {
-            if (strtolower((string) $source->meta()->section) === 'pipeline') {
-                $pipeline[] = ['meta' => $source->meta(), 'value' => $source->value($filter)];
-            }
-        }
-
-        return view('partner-success.kit', compact('pipeline'));
+        return view('partner-success.dashboard');
     }
 
     public function apiMetrics(Request $request)
