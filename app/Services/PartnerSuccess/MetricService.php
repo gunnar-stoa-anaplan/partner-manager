@@ -1000,8 +1000,9 @@ class MetricService
         [$oc, $op] = $this->filt('opportunity', null, null);
         $ow = $oc ? ('WHERE '.implode(' AND ', $oc)) : '';
         $deals = $db->select("
-            SELECT stage, coalesce(capabilities, ARRAY[]::text[]) AS capabilities
-            FROM wh.opportunity_current {$ow}", $op);
+            SELECT account, use_case, partner, implementer, stage, stage_label, coalesce(acv,0)::bigint AS acv,
+              coalesce(capabilities, ARRAY[]::text[]) AS capabilities
+            FROM wh.opportunity_current {$ow} ORDER BY acv DESC NULLS LAST", $op);
         $dealCaps = array_map(fn ($d) => ['stage' => (int) $d->stage, 'caps' => $toArr($d->capabilities)], $deals);
 
         $coverage = [];
@@ -1031,11 +1032,97 @@ class MetricService
             ];
         }
 
+        // Deal readiness (Delivery) for the board + by-opportunity sub-views.
+        $capAbbr = [];
+        $productTopic = [];
+        foreach (self::SALES_CATALOG as $prods) {
+            foreach ($prods as [$name, $code]) {
+                $capAbbr[$name] = $code;
+            }
+        }
+        foreach (self::PLAN_PATHS as $path) {
+            foreach ($path['products'] as $prod) {
+                $productTopic[$prod] = $productTopic[$prod] ?? $path['topic'];
+            }
+        }
+        // Delivery-certified people per partner per topic.
+        $certMap = [];
+        foreach ($people as $p) {
+            if (! $p['partner'] || ! in_array('Delivery', $p['roles'], true)) {
+                continue;
+            }
+            foreach ($p['certified'] as $c) {
+                $certMap[$p['partner']][$c] = ($certMap[$p['partner']][$c] ?? 0) + 1;
+            }
+        }
+        $need = self::PLAN_NEED[2];
+        $status = function (?string $owner, array $caps) use ($certMap, $productTopic, $need) {
+            $topics = [];
+            foreach ($caps as $c) {
+                if (isset($productTopic[$c])) {
+                    $topics[$productTopic[$c]] = true;
+                }
+            }
+            if (! $topics) {
+                return 'untagged';
+            }
+            $anyGap = false;
+            $anyBelow = false;
+            foreach (array_keys($topics) as $t) {
+                $have = $certMap[$owner][$t] ?? 0;
+                if ($have < 1) {
+                    $anyGap = true;
+                } elseif ($have < $need) {
+                    $anyBelow = true;
+                }
+            }
+            return $anyGap ? 'gap' : ($anyBelow ? 'part' : 'ok');
+        };
+
+        $counts = ['ok' => 0, 'part' => 0, 'gap' => 0, 'untagged' => 0];
+        $stageMap = [];
+        $dealRows = array_map(function ($d) use ($toArr, $status, $capAbbr, &$counts, &$stageMap) {
+            $caps = $toArr($d->capabilities);
+            $owner = $d->implementer ?: $d->partner;
+            $st = $status($owner ?: '', $caps);
+            $counts[$st]++;
+            $stageMap[(int) $d->stage] = $d->stage_label;
+            return [
+                'account' => $d->account, 'opportunity' => $d->use_case,
+                'stage' => (int) $d->stage, 'stage_label' => $d->stage_label,
+                'caps' => array_values(array_map(fn ($c) => $capAbbr[$c] ?? $c, $caps)),
+                'status' => $st,
+            ];
+        }, array_slice($deals, 0, 200));
+        ksort($stageMap);
+
+        // Academy ↔ Product mapping — learning paths from the warehouse.
+        $roleFrom = function (string $id) {
+            foreach (['delivery' => 'Delivery', 'presales' => 'PreSales', 'gtm' => 'GTM', 'blueprint' => 'Blueprint'] as $k => $v) {
+                if (str_contains($id, $k)) {
+                    return $v;
+                }
+            }
+            return 'Other';
+        };
+        $paths = array_map(fn ($r) => [
+            'id' => $r->source_id, 'role' => $roleFrom(strtolower((string) $r->source_id)),
+            'courses' => (int) $r->n_courses, 'outcome' => $r->outcome,
+        ], $db->select("
+            SELECT source_id, outcome, coalesce(n_courses,0) AS n_courses
+            FROM wh.learning_path
+            WHERE snapshot_date = (SELECT max(snapshot_date) FROM wh.learning_path)
+            ORDER BY source_id"));
+
         return [
             'people' => $people,
             'coverage' => $coverage,
             'roles' => ['GTM', 'PreSales', 'Delivery'],
             'planNeed' => self::PLAN_NEED,
+            'deals' => $dealRows,
+            'counts' => $counts,
+            'stageOrder' => array_values($stageMap),
+            'paths' => $paths,
         ];
     }
 

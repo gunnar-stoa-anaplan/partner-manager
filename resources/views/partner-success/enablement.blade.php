@@ -14,7 +14,17 @@
     <ul class="nav nav-tabs mb-3" role="tablist">
         <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-indiv" type="button">By individual</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-cov" type="button">By product &amp; role</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-board" type="button">By sales stage</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-opps" type="button">By opportunity</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-map" type="button">Product mapping</button></li>
     </ul>
+
+    @php
+        $bst = [
+            'ok' => ['Ready', '#0A2F46'], 'part' => ['Assigned', '#C25000'],
+            'gap' => ['Not ready', '#B33014'], 'untagged' => ['Product not tagged', '#8FA6B4'],
+        ];
+    @endphp
 
     <div class="tab-content">
         {{-- ========================== BY INDIVIDUAL ========================== --}}
@@ -65,6 +75,71 @@
                 </div>
             </div>
         </div>
+
+        {{-- ========================== BY SALES STAGE ========================== --}}
+        <div class="tab-pane fade" id="tab-board">
+            <div class="row g-2 mb-3">
+                @foreach($bst as $k => $b)
+                    <div class="col-6 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100"><div class="card-body py-2">
+                            <div class="fs-xs text-uppercase text-muted">{{ $b[0] }}</div>
+                            <div class="fs-3 fw-700" style="color: {{ $b[1] }}">{{ number_format($en['counts'][$k]) }}</div>
+                        </div></div>
+                    </div>
+                @endforeach
+            </div>
+            <div id="en-board" class="d-flex gap-3 overflow-auto pb-2"></div>
+            <div class="fs-xs text-muted mt-1">Readiness is the delivering partner's Delivery bench for each product on the deal.</div>
+        </div>
+
+        {{-- ========================== BY OPPORTUNITY ========================== --}}
+        <div class="tab-pane fade" id="tab-opps">
+            <div class="row g-2 mb-3" id="en-opp-tiles">
+                @foreach($bst as $k => $b)
+                    <div class="col-6 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100 en-opp-tile" data-status="{{ $k }}" role="button" style="cursor:pointer">
+                            <div class="card-body py-2">
+                                <div class="fs-xs text-uppercase text-muted">{{ $b[0] }}</div>
+                                <div class="fs-3 fw-700" style="color: {{ $b[1] }}">{{ number_format($en['counts'][$k]) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+            <div class="d-flex justify-content-end mb-2"><input id="en-opp-search" type="search" class="form-control form-control-sm" style="max-width:260px" placeholder="Find account or deal…"></div>
+            <div class="card border-0 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0 align-middle">
+                        <thead><tr><th>Account</th><th>Opportunity</th><th>Stage</th><th>Products</th><th>Status</th></tr></thead>
+                        <tbody id="en-opp-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- ========================== PRODUCT MAPPING ========================== --}}
+        <div class="tab-pane fade" id="tab-map">
+            <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                <h5 class="fw-600 mb-0">Academy <span class="fs-sm fw-normal text-muted">↔ Product mapping</span></h5>
+                <select id="en-map-role" class="form-select form-select-sm ms-auto" style="width:auto">
+                    <option value="">All roles</option>
+                    <option value="Delivery">Delivery</option>
+                    <option value="PreSales">PreSales</option>
+                    <option value="GTM">GTM</option>
+                    <option value="Blueprint">Blueprint</option>
+                </select>
+                <input id="en-map-search" type="search" class="form-control form-control-sm" style="max-width:220px" placeholder="Find a path…">
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0 align-middle">
+                        <thead><tr><th>Learning path</th><th>Role</th><th class="text-end">Courses</th><th>Outcome</th></tr></thead>
+                        <tbody id="en-map-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="fs-xs text-muted mt-1">{{ count($en['paths']) }} academy paths from the current warehouse extract.</div>
+        </div>
     </div>
 </div>
 @endsection
@@ -103,6 +178,81 @@
     }
     roleSel.addEventListener('change', render);
     render();
+
+    // Shared deal data
+    const DEALS = @json($en['deals']);
+    const STAGES = @json($en['stageOrder']);
+    const BST = @json($bst);
+    const caps = arr => arr.length
+        ? arr.slice(0, 6).map(c => '<span class="badge rounded-pill bg-body-secondary text-body border me-1">' + c + '</span>').join('') + (arr.length > 6 ? '<span class="text-muted fs-xs">+' + (arr.length - 6) + '</span>' : '')
+        : '<span class="text-muted fs-xs">no product</span>';
+    const pill = st => '<span class="badge rounded-pill" style="background:' + BST[st][1] + ';color:#fff">' + BST[st][0] + '</span>';
+
+    // By sales stage — board
+    const board = document.getElementById('en-board');
+    if (board) {
+        STAGES.forEach(stage => {
+            const inStage = DEALS.filter(d => d.stage_label === stage);
+            const col = document.createElement('div');
+            col.style.minWidth = '260px'; col.style.flex = '0 0 260px';
+            col.innerHTML = '<div class="fw-600 fs-sm mb-2">' + stage + ' <span class="text-muted">(' + inStage.length + ')</span></div>'
+                + inStage.slice(0, 40).map(d =>
+                    '<div class="card border-0 shadow-sm mb-2"><div class="card-body p-2">'
+                    + '<div class="d-flex justify-content-between align-items-start gap-1"><span class="fw-500 fs-sm text-truncate" style="max-width:150px" title="' + (d.account || '') + '">' + (d.account || '—') + '</span>' + pill(d.status) + '</div>'
+                    + '<div class="text-muted fs-xs text-truncate" title="' + (d.opportunity || '') + '">' + (d.opportunity || '') + '</div>'
+                    + '<div class="mt-1">' + caps(d.caps) + '</div></div></div>').join('')
+                + (inStage.length > 40 ? '<div class="text-muted fs-xs">+' + (inStage.length - 40) + ' more</div>' : '');
+            board.appendChild(col);
+        });
+    }
+
+    // By opportunity — table + status tiles + search
+    const oppBody = document.getElementById('en-opp-body');
+    let oppFilter = null, oppQuery = '';
+    function renderOpps() {
+        oppBody.replaceChildren();
+        DEALS.filter(d => (!oppFilter || d.status === oppFilter)
+                && (!oppQuery || ((d.account || '') + ' ' + (d.opportunity || '')).toLowerCase().includes(oppQuery)))
+            .forEach(d => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td class="fw-500">' + (d.account || '—') + '</td>'
+                    + '<td class="fs-sm text-truncate" style="max-width:240px" title="' + (d.opportunity || '') + '">' + (d.opportunity || '—') + '</td>'
+                    + '<td class="fs-sm">' + (d.stage_label || '—') + '</td>'
+                    + '<td>' + caps(d.caps) + '</td><td>' + pill(d.status) + '</td>';
+                oppBody.appendChild(tr);
+            });
+    }
+    document.querySelectorAll('.en-opp-tile').forEach(t => t.addEventListener('click', () => {
+        const s = t.dataset.status; oppFilter = oppFilter === s ? null : s;
+        document.querySelectorAll('.en-opp-tile').forEach(x => x.classList.toggle('border', x === t && oppFilter));
+        document.querySelectorAll('.en-opp-tile').forEach(x => x.style.outline = (x === t && oppFilter) ? '2px solid var(--bs-primary)' : '');
+        renderOpps();
+    }));
+    const oppSearch = document.getElementById('en-opp-search');
+    if (oppSearch) oppSearch.addEventListener('input', () => { oppQuery = oppSearch.value.trim().toLowerCase(); renderOpps(); });
+    renderOpps();
+
+    // Product mapping
+    const PATHS = @json($en['paths']);
+    const mapBody = document.getElementById('en-map-body');
+    const mapRole = document.getElementById('en-map-role');
+    const mapSearch = document.getElementById('en-map-search');
+    function renderMap() {
+        const r = mapRole.value, q = (mapSearch.value || '').trim().toLowerCase();
+        mapBody.replaceChildren();
+        PATHS.filter(p => (!r || p.role === r) && (!q || (p.id + ' ' + (p.outcome || '')).toLowerCase().includes(q)))
+            .forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td class="fs-sm" style="font-family:monospace">' + p.id + '</td>'
+                    + '<td><span class="badge rounded-pill bg-body-secondary text-body border">' + p.role + '</span></td>'
+                    + '<td class="text-end">' + (p.courses || '—') + '</td>'
+                    + '<td class="fs-sm text-muted">' + (p.outcome || '—') + '</td>';
+                mapBody.appendChild(tr);
+            });
+    }
+    mapRole.addEventListener('change', renderMap);
+    mapSearch.addEventListener('input', renderMap);
+    renderMap();
 })();
 </script>
 @endpush
