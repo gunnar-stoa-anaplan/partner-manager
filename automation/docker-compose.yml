@@ -1,0 +1,14 @@
+# EC2 / production run. Bind to loopback only; the Laravel app calls it over
+# localhost. A roomy /dev/shm keeps headless Chromium from crashing.
+services:
+  playwright:
+    build: .
+    restart: unless-stopped
+    shm_size: "1gb"
+    ports:
+      - "127.0.0.1:3001:3001"
+    env_file:
+      - .env
+    volumes:
+      - ./state:/app/state
+      - ./artifacts:/app/artifacts

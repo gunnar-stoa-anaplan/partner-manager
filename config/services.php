@@ -82,4 +82,10 @@ return [
         'workshop_content_base' => env('WORKSHOP_CONTENT_BASE', 'workshops'),
     ],
 
+    // Playwright automation microservice (see automation/). Loopback in prod;
+    // from inside Sail the host service is reachable at host.docker.internal.
+    'playwright' => [
+        'url' => env('PLAYWRIGHT_URL', 'http://127.0.0.1:3001'),
+    ],
+
 ];
