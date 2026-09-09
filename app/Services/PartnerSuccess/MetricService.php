@@ -710,6 +710,21 @@ class MetricService
         }
 
         $partners = array_values(array_unique(array_merge(array_keys($base), array_keys($demand))));
+
+        // Rows are limited to the partners the actor may see and, when set, the
+        // pinned partner filter — a deal implemented by one of the actor's
+        // partners must not pull its outside selling partner in as a row.
+        $scopeP = $this->scope['partners'] ?? [];
+        if ($scopeP) {
+            $eff = $this->allowedPartners !== null ? array_intersect($scopeP, $this->allowedPartners) : $scopeP;
+        } else {
+            $eff = $this->allowedPartners; // null = all (admin / CoE)
+        }
+        if ($eff !== null) {
+            $allow = array_flip(array_values($eff));
+            $partners = array_values(array_filter($partners, fn ($p) => isset($allow[$p])));
+        }
+
         $paths = self::PLAN_PATHS;
 
         $rows = [];
