@@ -751,6 +751,136 @@ class MetricService
         ];
     }
 
+    /**
+     * Delivery — Use Cases status matrix + the project rows for Implementation
+     * Health. Delivery readiness is READY when, for every product on the deal,
+     * the delivering partner has at least one Delivery-certified person in that
+     * product's topic. Columns fed by extracts we don't hold (Support, Polaris,
+     * IHS, live use-case status) are returned empty for an honest empty-state.
+     *
+     * @return array<string, mixed>
+     */
+    public function delivery(): array
+    {
+        $db = $this->db();
+        $toArr = fn ($v) => is_array($v) ? $v
+            : array_map(fn ($x) => trim($x, '"'), array_filter(explode(',', trim((string) $v, '{}'))));
+
+        // Delivery-certified people per partner per topic.
+        [$rc, $rp] = $this->filt('person', null, null);
+        $rw = $rc ? ('WHERE '.implode(' AND ', $rc)) : '';
+        $certMap = [];
+        foreach ($db->select("SELECT partner, roles, certified FROM wh.person_current {$rw}", $rp) as $p) {
+            if (! $p->partner || ! in_array('Delivery', $toArr($p->roles), true)) {
+                continue;
+            }
+            foreach ($toArr($p->certified) as $c) {
+                $certMap[$p->partner][$c] = ($certMap[$p->partner][$c] ?? 0) + 1;
+            }
+        }
+        // product => topic (first path that lists the product).
+        $productTopic = [];
+        foreach (self::PLAN_PATHS as $path) {
+            foreach ($path['products'] as $prod) {
+                $productTopic[$prod] = $productTopic[$prod] ?? $path['topic'];
+            }
+        }
+
+        // Projects (delivery), for status/go-live lookup by account and the
+        // Implementation Health grid.
+        [$pc, $pp] = $this->filt('project', null, null);
+        $pw = $pc ? ('WHERE '.implode(' AND ', $pc)) : '';
+        $projRows = $db->select("
+            SELECT source_id, name, account, partner, owner, go_live, health_partner, health_ps, health_cs
+            FROM wh.project_current {$pw} ORDER BY go_live NULLS LAST", $pp);
+        $projByAccount = [];
+        foreach ($projRows as $pr) {
+            if ($pr->account && ! isset($projByAccount[$pr->account])) {
+                $projByAccount[$pr->account] = $pr->go_live;
+            }
+        }
+
+        // Opportunities → Use Cases matrix rows.
+        [$oc, $op] = $this->filt('opportunity', null, null);
+        $ow = $oc ? ('WHERE '.implode(' AND ', $oc)) : '';
+        $deals = $db->select("
+            SELECT account, use_case, partner, implementer, stage, coalesce(acv,0)::bigint AS acv,
+              coalesce(capabilities, ARRAY[]::text[]) AS capabilities
+            FROM wh.opportunity_current {$ow} ORDER BY acv DESC NULLS LAST LIMIT 300", $op);
+
+        $readyOf = function (string $owner, array $caps) use ($certMap, $productTopic) {
+            $topics = [];
+            foreach ($caps as $c) {
+                if (isset($productTopic[$c])) {
+                    $topics[$productTopic[$c]] = true;
+                }
+            }
+            foreach (array_keys($topics) as $t) {
+                if (($certMap[$owner][$t] ?? 0) < 1) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        $matrixGroups = [];
+        foreach (self::SALES_CATALOG as $lobKey => $prods) {
+            $matrixGroups[] = ['lob' => $lobKey, 'products' => array_map(fn ($p) => ['cap' => $p[0], 'abbr' => $p[1]], $prods)];
+        }
+
+        $inDelivery = $notStarted = $ledByPartner = $ready = $notReady = 0;
+        $activeCaps = [];
+        $rows = array_map(function ($d) use ($projByAccount, $readyOf, $toArr, &$inDelivery, &$notStarted, &$ledByPartner, &$ready, &$notReady, &$activeCaps) {
+            $caps = $toArr($d->capabilities);
+            foreach ($caps as $c) {
+                $activeCaps[$c] = true;
+            }
+            $owner = $d->implementer ?: $d->partner;
+            $hasProject = isset($projByAccount[$d->account]);
+            $status = $hasProject ? 'In delivery' : 'Not started';
+            $hasProject ? $inDelivery++ : $notStarted++;
+            $led = ! empty($d->implementer);
+            $led && $ledByPartner++;
+            $isReady = $readyOf($owner ?: '', $caps);
+            $isReady ? $ready++ : $notReady++;
+
+            return [
+                'account' => $d->account, 'opportunity' => $d->use_case,
+                'implementer' => $d->implementer ?: $d->partner, 'sales_only' => empty($d->implementer) && ! empty($d->partner),
+                'status' => $status, 'led_by' => $led ? 'Partner led' : '—',
+                'go_live' => $projByAccount[$d->account] ?? null,
+                'ready' => $isReady, 'caps' => array_fill_keys($caps, true),
+            ];
+        }, $deals);
+
+        return [
+            'stats' => [
+                'deals' => count($deals), 'live' => 0, 'in_delivery' => $inDelivery, 'not_started' => $notStarted,
+                'ready' => $ready, 'not_ready' => $notReady, 'led_by_partner' => $ledByPartner,
+                'apps_in_play' => count($activeCaps),
+            ],
+            'matrix' => ['groups' => $matrixGroups, 'rows' => $rows],
+            'activeCaps' => array_keys($activeCaps),
+            'projects' => array_map(fn ($p) => [
+                'key' => $p->source_id, 'name' => $p->name, 'account' => $p->account,
+                'partner' => $p->partner, 'owner' => $p->owner, 'go_live' => $p->go_live,
+                'health_ps' => $p->health_ps, 'health_cs' => $p->health_cs,
+            ], $projRows),
+        ];
+    }
+
+    /** Whether the given project (by warehouse source_id) is visible to the actor. */
+    public function deliveryProjectVisible(string $projectKey): bool
+    {
+        [$pc, $pp] = $this->filt('project', null, null);
+        $clauses = array_merge(['source_id = ?'], $pc);
+        $params = array_merge([$projectKey], $pp);
+
+        return (bool) $this->db()->selectOne(
+            'SELECT 1 FROM wh.project_current WHERE '.implode(' AND ', $clauses).' LIMIT 1', $params
+        );
+    }
+
     public function breakdown(string $key, ?string $geo = null, ?string $partner = null): array
     {
         $cfg = self::BK[$key] ?? abort(404);

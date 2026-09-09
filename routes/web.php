@@ -962,6 +962,7 @@ Route::middleware(['auth'])->prefix('partner-success')->name('partner-success.')
     Route::post('filters', [\App\Http\Controllers\PartnerSuccessController::class, 'setFilters'])->name('filters.set');
     Route::post('filters/clear', [\App\Http\Controllers\PartnerSuccessController::class, 'clearFilters'])->name('filters.clear');
     Route::post('plan-commit', [\App\Http\Controllers\PartnerSuccessController::class, 'setCommit'])->name('plan-commit');
+    Route::post('project-health', [\App\Http\Controllers\PartnerSuccessController::class, 'setProjectHealth'])->name('project-health');
 });
 
 Route::middleware(['auth', 'module:partner_success.engagement'])->prefix('partner-success')->name('partner-success.')->group(function () {
@@ -972,7 +973,7 @@ Route::middleware(['auth', 'module:partner_success.engagement'])->prefix('partne
     Route::get('pipeline', [\App\Http\Controllers\PartnerSuccessController::class, 'pipeline'])->name('pipeline');
     Route::get('capability', [\App\Http\Controllers\PartnerSuccessController::class, 'index'])->defaults('section', 'capability')->name('capability');
     Route::get('enablement', [\App\Http\Controllers\PartnerSuccessController::class, 'index'])->defaults('section', 'enablement')->name('enablement');
-    Route::get('delivery', [\App\Http\Controllers\PartnerSuccessController::class, 'index'])->defaults('section', 'delivery')->name('delivery');
+    Route::get('delivery', [\App\Http\Controllers\PartnerSuccessController::class, 'delivery'])->name('delivery');
     Route::get('/', [App\Http\Controllers\PartnerSuccessController::class, 'index'])->name('index');
     Route::get('/api/metrics', [App\Http\Controllers\PartnerSuccessController::class, 'apiMetrics'])->name('api.metrics');
     Route::get('/api/partners', [App\Http\Controllers\PartnerSuccessController::class, 'apiPartners'])->name('api.partners');

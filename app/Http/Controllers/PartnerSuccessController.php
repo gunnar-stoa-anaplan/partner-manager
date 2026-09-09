@@ -138,6 +138,76 @@ class PartnerSuccessController extends Controller
     }
 
     /**
+     * PSM Engagement → Delivery. Three tabs: Use Cases (delivery-status matrix),
+     * Implementation Health (editable project RAG grid), and Support (empty-state
+     * until a support extract is linked). Scoped to the actor's partners.
+     */
+    public function delivery()
+    {
+        $svc = $this->metrics();
+        $data = $svc->delivery();
+
+        // Merge PSM-entered health onto the project rows.
+        $health = \App\Models\ProjectHealth::whereIn('project_key', array_column($data['projects'], 'key'))
+            ->get()->keyBy('project_key');
+        $worst = function (?string ...$vals) {
+            $rank = ['R' => 3, 'Y' => 2, 'G' => 1];
+            $out = null;
+            $max = 0;
+            foreach ($vals as $v) {
+                if ($v && ($rank[$v] ?? 0) > $max) {
+                    $max = $rank[$v];
+                    $out = $v;
+                }
+            }
+            return $out;
+        };
+        $data['projects'] = array_map(function ($p) use ($health, $worst) {
+            $h = $health->get($p['key']);
+            $p['phase'] = $h->phase ?? null;
+            $p['scope'] = $h->scope ?? null;
+            $p['timeline'] = $h->timeline ?? null;
+            $p['budget'] = $h->budget ?? null;
+            $p['reason'] = $h->reason ?? null;
+            $p['overall'] = $worst($p['scope'], $p['timeline'], $p['budget']);
+            return $p;
+        }, $data['projects']);
+
+        $options = $svc->filterOptions();
+        $visible = $this->visibility->visiblePartnerNames();
+        $options['partners'] = $visible ?? $svc->partners();
+        sort($options['partners']);
+        $active = PsmEngagementFilters::get();
+
+        return view('partner-success.delivery', compact('data', 'options', 'active'));
+    }
+
+    /** Persist a PSM-entered implementation-health signal for a project. */
+    public function setProjectHealth(Request $request)
+    {
+        $data = $request->validate([
+            'project_key' => 'required|string',
+            'field' => 'required|string|in:phase,scope,timeline,budget,reason',
+            'value' => 'nullable|string|max:2000',
+        ]);
+
+        // Only allow editing a project the actor can see.
+        abort_unless($this->metrics()->deliveryProjectVisible($data['project_key']), 404);
+
+        $value = ($data['value'] ?? '') === '' ? null : $data['value'];
+        if (in_array($data['field'], ['scope', 'timeline', 'budget'], true)) {
+            $value = in_array($value, ['G', 'Y', 'R'], true) ? $value : null;
+        }
+
+        \App\Models\ProjectHealth::updateOrCreate(
+            ['project_key' => $data['project_key']],
+            [$data['field'] => $value],
+        );
+
+        return $request->wantsJson() ? response()->json(['ok' => true]) : back();
+    }
+
+    /**
      * Set a Business Plan headcount commit (single-partner scope). An empty lob
      * is the practice-wide commit (role tiles); a populated lob is a per-line-of-
      * business commit (the People-committed-by-line-of-business matrix).
