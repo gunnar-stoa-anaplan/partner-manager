@@ -884,6 +884,161 @@ class MetricService
         ];
     }
 
+    /**
+     * Capability — practice capability coverage. People by role (total vs
+     * certified), certifications across the practice (certified + in-progress),
+     * and a partner × certification grid. Fully scoped by filt('person'), which
+     * applies row-level visibility and the pinned partner filter.
+     *
+     * @return array<string, mixed>
+     */
+    public function capability(): array
+    {
+        $db = $this->db();
+        [$rc, $rp] = $this->filt('person', null, null);
+        $rw = $rc ? ('WHERE '.implode(' AND ', $rc)) : '';
+
+        $tot = $db->selectOne("
+            SELECT count(*)::int AS people,
+              count(*) FILTER (WHERE coalesce(array_length(certified,1),0) > 0)::int AS certified_any,
+              count(*) FILTER (WHERE coalesce(array_length(in_progress,1),0) > 0)::int AS inprogress_any
+            FROM wh.person_current {$rw}", $rp);
+
+        $roles = [];
+        foreach (['GTM', 'PreSales', 'Delivery'] as $role) {
+            $r = $db->selectOne("
+                SELECT count(*) FILTER (WHERE ? = ANY(roles))::int AS total,
+                  count(*) FILTER (WHERE ? = ANY(roles) AND coalesce(array_length(certified,1),0) > 0)::int AS certified
+                FROM wh.person_current {$rw}", array_merge([$role, $role], $rp));
+            $roles[$role] = ['total' => (int) $r->total, 'certified' => (int) $r->certified];
+        }
+
+        $cert = [];
+        foreach ($db->select("
+            SELECT c AS k, count(*)::int AS n FROM wh.person_current p, unnest(p.certified) c
+            {$rw} GROUP BY c", $rp) as $row) {
+            $cert[$row->k] = ['certified' => (int) $row->n, 'in_progress' => 0];
+        }
+        foreach ($db->select("
+            SELECT ip AS k, count(*)::int AS n FROM wh.person_current p, unnest(p.in_progress) ip
+            {$rw} GROUP BY ip", $rp) as $row) {
+            $cert[$row->k] = $cert[$row->k] ?? ['certified' => 0, 'in_progress' => 0];
+            $cert[$row->k]['in_progress'] = (int) $row->n;
+        }
+        $certs = [];
+        foreach ($cert as $k => $v) {
+            $certs[] = ['name' => $k, 'certified' => $v['certified'], 'in_progress' => $v['in_progress']];
+        }
+        usort($certs, fn ($a, $b) => $b['certified'] <=> $a['certified'] ?: strcmp($a['name'], $b['name']));
+
+        // Partner × certification grid (certified counts).
+        $grid = [];
+        foreach ($db->select("
+            SELECT partner, c AS cert, count(*)::int AS n FROM wh.person_current p, unnest(p.certified) c
+            {$rw} GROUP BY partner, c", $rp) as $row) {
+            if ($row->partner) {
+                $grid[$row->partner][$row->cert] = (int) $row->n;
+            }
+        }
+        $partners = array_keys($grid);
+        sort($partners);
+        $certNames = array_map(fn ($c) => $c['name'], $certs);
+
+        return [
+            'totals' => [
+                'people' => (int) $tot->people, 'certified_any' => (int) $tot->certified_any,
+                'inprogress_any' => (int) $tot->inprogress_any, 'distinct_certs' => count($certs),
+            ],
+            'roles' => $roles,
+            'certs' => $certs,
+            'grid' => ['partners' => $partners, 'certs' => $certNames, 'cells' => $grid],
+        ];
+    }
+
+    /**
+     * Enablement — two sub-views, both scoped. "By individual" is the people
+     * roster with certifications and in-progress paths; "By product & role" is
+     * practice coverage vs demand per path (certified / in-progress / target /
+     * gap by role).
+     *
+     * @return array<string, mixed>
+     */
+    public function enablement(): array
+    {
+        $db = $this->db();
+        $toArr = fn ($v) => is_array($v) ? $v
+            : array_map(fn ($x) => trim($x, '"'), array_filter(explode(',', trim((string) $v, '{}'))));
+
+        [$rc, $rp] = $this->filt('person', null, null);
+        $rw = $rc ? ('WHERE '.implode(' AND ', $rc)) : '';
+        $ppl = $db->select("
+            SELECT name, email, partner, roles, certified, in_progress
+            FROM wh.person_current {$rw} ORDER BY partner NULLS LAST, name", $rp);
+
+        $people = array_map(fn ($p) => [
+            'name' => $p->name, 'partner' => $p->partner,
+            'roles' => $toArr($p->roles), 'certified' => $toArr($p->certified), 'in_progress' => $toArr($p->in_progress),
+        ], $ppl);
+
+        // Practice coverage per path/role.
+        $roleIdx = ['GTM' => 0, 'PreSales' => 1, 'Delivery' => 2];
+        $certRT = [];  // [topic][r]
+        $inprog = [];  // [topic]
+        foreach ($people as $p) {
+            foreach ($p['certified'] as $c) {
+                foreach ($p['roles'] as $role) {
+                    if (isset($roleIdx[$role])) {
+                        $certRT[$c][$roleIdx[$role]] = ($certRT[$c][$roleIdx[$role]] ?? 0) + 1;
+                    }
+                }
+            }
+            foreach ($p['in_progress'] as $ip) {
+                $inprog[$ip] = ($inprog[$ip] ?? 0) + 1;
+            }
+        }
+
+        [$oc, $op] = $this->filt('opportunity', null, null);
+        $ow = $oc ? ('WHERE '.implode(' AND ', $oc)) : '';
+        $deals = $db->select("
+            SELECT stage, coalesce(capabilities, ARRAY[]::text[]) AS capabilities
+            FROM wh.opportunity_current {$ow}", $op);
+        $dealCaps = array_map(fn ($d) => ['stage' => (int) $d->stage, 'caps' => $toArr($d->capabilities)], $deals);
+
+        $coverage = [];
+        foreach (self::PLAN_PATHS as $path) {
+            $topic = $path['topic'];
+            $prod = $path['products'];
+            $demand = [0, 0, 0];
+            if ($prod) {
+                foreach ($dealCaps as $d) {
+                    if (! array_intersect($prod, $d['caps'])) {
+                        continue;
+                    }
+                    if ($d['stage'] < 5) {
+                        $demand[0]++;
+                        $demand[1]++;
+                    }
+                    $demand[2]++; // delivery counts all stages
+                }
+            }
+            $certified = [$certRT[$topic][0] ?? 0, $certRT[$topic][1] ?? 0, $certRT[$topic][2] ?? 0];
+            $target = [self::PLAN_NEED[0] * $demand[0], self::PLAN_NEED[1] * $demand[1], self::PLAN_NEED[2] * $demand[2]];
+            $gap = [max(0, $target[0] - $certified[0]), max(0, $target[1] - $certified[1]), max(0, $target[2] - $certified[2])];
+            $coverage[] = [
+                'abbr' => $path['abbr'], 'label' => $path['label'], 'foundational' => $path['foundational'],
+                'certified' => $certified, 'in_progress' => $inprog[$topic] ?? 0,
+                'target' => $target, 'gap' => $gap,
+            ];
+        }
+
+        return [
+            'people' => $people,
+            'coverage' => $coverage,
+            'roles' => ['GTM', 'PreSales', 'Delivery'],
+            'planNeed' => self::PLAN_NEED,
+        ];
+    }
+
     /** Whether the given project (by warehouse source_id) is visible to the actor. */
     public function deliveryProjectVisible(string $projectKey): bool
     {

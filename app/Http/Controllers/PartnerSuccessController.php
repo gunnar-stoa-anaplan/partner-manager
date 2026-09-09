@@ -138,6 +138,44 @@ class PartnerSuccessController extends Controller
     }
 
     /**
+     * PSM Engagement → Capability. Practice capability coverage — people by role,
+     * certifications across the practice, and a partner × certification grid.
+     * Scoped to the actor's partners and the pinned filters.
+     */
+    public function capability()
+    {
+        $svc = $this->metrics();
+        $cap = $svc->capability();
+
+        $options = $svc->filterOptions();
+        $visible = $this->visibility->visiblePartnerNames();
+        $options['partners'] = $visible ?? $svc->partners();
+        sort($options['partners']);
+        $active = PsmEngagementFilters::get();
+
+        return view('partner-success.capability', compact('cap', 'options', 'active'));
+    }
+
+    /**
+     * PSM Engagement → Enablement. Two sub-views: By individual (people roster
+     * with certs / in-progress) and By product & role (coverage vs demand).
+     * Scoped to the actor's partners and the pinned filters.
+     */
+    public function enablement()
+    {
+        $svc = $this->metrics();
+        $en = $svc->enablement();
+
+        $options = $svc->filterOptions();
+        $visible = $this->visibility->visiblePartnerNames();
+        $options['partners'] = $visible ?? $svc->partners();
+        sort($options['partners']);
+        $active = PsmEngagementFilters::get();
+
+        return view('partner-success.enablement', compact('en', 'options', 'active'));
+    }
+
+    /**
      * PSM Engagement → Delivery. Three tabs: Use Cases (delivery-status matrix),
      * Implementation Health (editable project RAG grid), and Support (empty-state
      * until a support extract is linked). Scoped to the actor's partners.
