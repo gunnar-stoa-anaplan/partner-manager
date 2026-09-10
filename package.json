@@ -22,8 +22,6 @@
         "@fullcalendar/list": "^6.1.18",
         "@fullcalendar/timegrid": "^6.1.18",
         "@highlightjs/cdn-assets": "^11.11.1",
-        "@rollup/rollup-darwin-arm64": "^4.57.1",
-        "@rollup/rollup-linux-arm64-gnu": "^4.57.1",
         "alpinejs": "^3.15.8",
         "apexcharts": "^5.2.0",
         "bootstrap": "^5.3.7",
