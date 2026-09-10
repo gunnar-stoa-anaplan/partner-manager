@@ -23,10 +23,11 @@ class GoalsController extends Controller
         $partners = $partnersQuery->select('id', 'name')->orderBy('name')->get();
         $partnerIds = $partners->pluck('id');
         $fy = $request->query('fy', $this->currentFiscalYear());
+        $fyInt = $this->fyToInt($fy); // partner_goals + opportunities store fiscal_year as an int
 
         // Legacy goals (sourced/influenced NNACV)
         $goals = PartnerGoal::whereIn('partner_id', $partnerIds)
-            ->where('fiscal_year', $fy)
+            ->where('fiscal_year', $fyInt)
             ->with('dimensions')
             ->get()
             ->keyBy('partner_id');
@@ -68,7 +69,7 @@ class GoalsController extends Controller
         $wonData = DB::table('opportunities')
             ->whereIn('partner_id', $partnerIds)
             ->where('stage', 'Closed Won')
-            ->where('fiscal_year', $fy)
+            ->where('fiscal_year', $fyInt)
             ->selectRaw('partner_id, SUM(amount) as won, COUNT(*) as won_count, AVG(amount) as asp')
             ->groupBy('partner_id')
             ->get()
@@ -192,5 +193,13 @@ class GoalsController extends Controller
         $num = (int) substr($fy, 2);
 
         return 'FY'.str_pad($num - 1, 2, '0', STR_PAD_LEFT);
+    }
+
+    /** "FY27" → 2027, for tables whose fiscal_year column is an integer. */
+    protected function fyToInt(string $fy): int
+    {
+        $n = (int) preg_replace('/\D/', '', $fy);
+
+        return $n < 100 ? 2000 + $n : $n;
     }
 }

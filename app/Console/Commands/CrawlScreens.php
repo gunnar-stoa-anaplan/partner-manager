@@ -112,7 +112,7 @@ class CrawlScreens extends Command
                 $seen[$uri] = true;
                 $out[] = ['name' => $route->getName() ?: $uri, 'url' => '/'.ltrim($uri, '/')];
             } elseif ($details && count($params) === 1) {
-                $id = $this->sampleId($params[0]);
+                $id = $this->sampleId($route, $params[0], $uri);
                 if ($id !== null) {
                     $url = '/'.ltrim(str_replace(['{'.$params[0].'}', '{'.$params[0].'?}'], (string) $id, $uri), '/');
                     if (! isset($seen[$url])) {
@@ -126,19 +126,55 @@ class CrawlScreens extends Command
         return $out;
     }
 
-    /** Best-effort: first id of the table named after the route parameter. */
-    private function sampleId(string $param): int|string|null
+    /**
+     * A real sample id for a single-parameter route. Resolves the route's bound
+     * Eloquent model by reflecting the controller action (so we use the model's
+     * real route key, not a guessed string that trips numeric-id routes), and
+     * falls back to a table named after the URI segment or the parameter.
+     */
+    private function sampleId(\Illuminate\Routing\Route $route, string $param, string $uri): int|string|null
     {
-        $table = Str::plural(Str::snake($param));
+        // 1. Bound model from the controller action signature (implicit binding).
         try {
-            if (! DB::getSchemaBuilder()->hasTable($table)) {
-                return null;
+            $action = $route->getActionName();
+            if (str_contains($action, '@')) {
+                [$class, $method] = explode('@', $action, 2);
+                $ref = new \ReflectionMethod($class, $method);
+                foreach ($ref->getParameters() as $p) {
+                    $type = $p->getType();
+                    $name = $type && ! $type->isBuiltin() ? $type->getName() : null;
+                    if ($name && is_subclass_of($name, \Illuminate\Database\Eloquent\Model::class)) {
+                        $model = $name::query()->first();
+                        if ($model) {
+                            return $model->getRouteKey();
+                        }
+                    }
+                }
             }
-
-            return DB::table($table)->value('id');
         } catch (\Throwable) {
-            return null;
+            // fall through to the heuristics
         }
+
+        // 2. Manual {id}/{...} params: table named after the first URI segment.
+        try {
+            $candidates = [];
+            if (in_array($param, ['id'], true) || str_ends_with($param, '_id')) {
+                $candidates[] = explode('/', $uri)[0];
+            }
+            $candidates[] = Str::plural(Str::snake($param));
+            foreach ($candidates as $table) {
+                if ($table && DB::getSchemaBuilder()->hasTable($table)) {
+                    $id = DB::table($table)->value('id');
+                    if ($id !== null) {
+                        return $id;
+                    }
+                }
+            }
+        } catch (\Throwable) {
+            // ignore
+        }
+
+        return null;
     }
 
     /** Pull the exception summary out of a JSON (APP_DEBUG) error response. */

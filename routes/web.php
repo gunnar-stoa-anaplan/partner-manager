@@ -149,8 +149,6 @@ Route::middleware(['auth'])->group(function () {
     | Key Metrics
     |--------------------------------------------------------------------------
     */
-    Route::view('partner_profile', 'partner_profile')->name('partner_profile');
-    Route::view('relationship_overview', 'relationship_overview')->name('relationship_overview');
     Route::get('/influence-map', [FieldEnablementController::class, 'influenceMap'])->name('influence_map')->middleware('module:enablement.field');
     Route::middleware('module:partner_management.management')->group(function () {
         Route::get('/calendar', function () {
@@ -195,7 +193,9 @@ Route::middleware(['auth'])->group(function () {
     */
     Route::middleware('module:launch_programs.projects')->group(function () {
         Route::get('/projects/risks', [ProjectController::class, 'risks'])->name('projects.risks');
-        Route::resource('projects', ProjectController::class);
+        // Projects are imported, not created via a form (no create/store action).
+        // whereNumber keeps /projects/create from matching {project} as an id.
+        Route::resource('projects', ProjectController::class)->except(['create', 'store'])->whereNumber('project');
     });
 
     /*
@@ -321,9 +321,8 @@ Route::middleware(['auth'])->group(function () {
     // Partner detail (gated by partner_management.management)
     Route::middleware('module:partner_management.management')->group(function () {
         Route::get('/my-partners', [PartnerController::class, 'myPartners'])->name('partners.my');
-        Route::get('/partners/{id}', [PartnerController::class, 'show'])->name('partners.show');
-        Route::get('/partners/{id}/summary', [PartnerController::class, 'summary'])->name('partners.summary');
-        Route::get('/partners/{id}/insights', [PartnerController::class, 'insights'])->name('partners.insights');
+        Route::get('/partners/{id}', [PartnerController::class, 'show'])->name('partners.show')->whereNumber('id');
+        Route::get('/partners/{id}/summary', [PartnerController::class, 'summary'])->name('partners.summary')->whereNumber('id');
         Route::get('/partners/{id}/blueprints', [PartnerController::class, 'blueprints'])->name('partners.blueprints');
         Route::post('/partners/{partner}/advisor', [PartnerController::class, 'advisor'])->name('partners.advisor');
         Route::get('/partners/{id}/tab/{tab}', [PartnerController::class, 'partnerTab'])
@@ -498,7 +497,8 @@ Route::middleware(['auth'])->group(function () {
         // System Administration
         Route::middleware('module:system_administration.admin')->group(function () {
             Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-            Route::resource('users', UserController::class);
+            // No dedicated show screen — user management uses index + edit.
+            Route::resource('users', UserController::class)->except(['show']);
             Route::get('/configuration', [ConfigurationController::class, 'index'])->name('configuration.index');
             Route::put('/configuration', [ConfigurationController::class, 'update'])->name('configuration.update');
             Route::put('/configuration/navigation', [ConfigurationController::class, 'updateNavigation'])->name('configuration.update-navigation');
@@ -704,7 +704,6 @@ Route::middleware(['auth'])->group(function () {
 
             // Competency Matrix
             Route::get('/competency-matrix', [CompetencyMatrixController::class, 'index'])->name('competency-matrix.index');
-            Route::get('/competency-matrix/{partner}', [CompetencyMatrixController::class, 'show'])->name('competency-matrix.show');
         });
 
         // Task Board (gated by action_plans.plans)

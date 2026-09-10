@@ -14,6 +14,7 @@ class MeasureController extends Controller
         $tab = $request->get('tab', 'at-a-glance');
         $user = auth()->user();
         $fy = $this->currentFiscalYear();
+        $fyInt = $this->fyToInt($fy); // opportunities.fiscal_year is an integer column
 
         $partnerIds = $user->isAdmin()
             ? Partner::pluck('id')
@@ -38,6 +39,7 @@ class MeasureController extends Controller
 
     protected function atAGlance($partnerIds, $fy): array
     {
+        $fyInt = $this->fyToInt($fy);
         $avgScore = DB::table('partner_scorecards')
             ->whereIn('partner_id', $partnerIds)
             ->whereIn('id', function ($q) {
@@ -55,11 +57,11 @@ class MeasureController extends Controller
         $winRate = ($won12m + $lost12m) > 0 ? round(($won12m / ($won12m + $lost12m)) * 100, 1) : 0;
 
         $sourcedRevenue = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
-            ->where('stage', 'Closed Won')->where('fiscal_year', $fy)
+            ->where('stage', 'Closed Won')->where('fiscal_year', $fyInt)
             ->where('revenue_type', 'sourced')->sum('amount');
 
         $influencedRevenue = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
-            ->where('stage', 'Closed Won')->where('fiscal_year', $fy)
+            ->where('stage', 'Closed Won')->where('fiscal_year', $fyInt)
             ->where('revenue_type', 'influenced')->sum('amount');
 
         $activeProjects = DB::table('projects')->whereIn('partner_id', $partnerIds)
@@ -75,7 +77,7 @@ class MeasureController extends Controller
 
         // Revenue by quarter
         $revenueByQuarter = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
-            ->where('stage', 'Closed Won')->where('fiscal_year', $fy)
+            ->where('stage', 'Closed Won')->where('fiscal_year', $fyInt)
             ->selectRaw('fiscal_quarter, revenue_type, SUM(amount) as total')
             ->groupBy('fiscal_quarter', 'revenue_type')
             ->get();
@@ -158,24 +160,25 @@ class MeasureController extends Controller
 
     protected function revenue($partnerIds, $fy): array
     {
+        $fyInt = $this->fyToInt($fy);
         $totalBookings = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
-            ->where('stage', 'Closed Won')->where('fiscal_year', $fy)->sum('amount');
+            ->where('stage', 'Closed Won')->where('fiscal_year', $fyInt)->sum('amount');
         $sourcedNnacv = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
-            ->where('stage', 'Closed Won')->where('fiscal_year', $fy)
+            ->where('stage', 'Closed Won')->where('fiscal_year', $fyInt)
             ->where('revenue_type', 'sourced')->sum('amount');
         $influencedNnacv = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
-            ->where('stage', 'Closed Won')->where('fiscal_year', $fy)
+            ->where('stage', 'Closed Won')->where('fiscal_year', $fyInt)
             ->where('revenue_type', 'influenced')->sum('amount');
         $avgAcv = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
-            ->where('stage', 'Closed Won')->where('fiscal_year', $fy)->avg('amount') ?? 0;
+            ->where('stage', 'Closed Won')->where('fiscal_year', $fyInt)->avg('amount') ?? 0;
 
         $byQuarter = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
-            ->where('stage', 'Closed Won')->where('fiscal_year', $fy)
+            ->where('stage', 'Closed Won')->where('fiscal_year', $fyInt)
             ->selectRaw('fiscal_quarter, revenue_type, SUM(amount) as total')
             ->groupBy('fiscal_quarter', 'revenue_type')->get();
 
         $byProductArea = DB::table('opportunities')->whereIn('partner_id', $partnerIds)
-            ->where('stage', 'Closed Won')->where('fiscal_year', $fy)
+            ->where('stage', 'Closed Won')->where('fiscal_year', $fyInt)
             ->whereNotNull('product_area')
             ->selectRaw('product_area, SUM(amount) as total')
             ->groupBy('product_area')->orderByDesc('total')->get();
@@ -183,7 +186,7 @@ class MeasureController extends Controller
         $byPartner = DB::table('opportunities as o')
             ->join('partners as p', 'o.partner_id', '=', 'p.id')
             ->whereIn('o.partner_id', $partnerIds)
-            ->where('o.stage', 'Closed Won')->where('o.fiscal_year', $fy)
+            ->where('o.stage', 'Closed Won')->where('o.fiscal_year', $fyInt)
             ->selectRaw('p.name, SUM(o.amount) as total')
             ->groupBy('p.name')->orderByDesc('total')->get();
 
@@ -253,5 +256,13 @@ class MeasureController extends Controller
         $year = $now->month >= $fyStart ? $now->year : $now->year - 1;
 
         return 'FY'.substr($year + 1, 2);
+    }
+
+    /** "FY27" → 2027, for tables whose fiscal_year column is an integer. */
+    protected function fyToInt(string $fy): int
+    {
+        $n = (int) preg_replace('/\D/', '', $fy);
+
+        return $n < 100 ? 2000 + $n : $n;
     }
 }

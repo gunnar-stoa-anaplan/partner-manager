@@ -1393,6 +1393,12 @@ class PartnerController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    /** Per-partner "Summary" link — opens the partner detail page. */
+    public function summary(string $id)
+    {
+        return redirect()->route('partners.show', $id);
+    }
+
     public function edit(Partner $partner)
     {
         $users = \App\Models\User::orderBy('name')->get();

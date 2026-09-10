@@ -28,7 +28,9 @@
         </div>
         <svg class="sa-icon sa-icon-sm text-muted"><use href="/icons/sprite.svg#chevron-down"></use></svg>
     </div>
-    <div id="ps-scope" class="collapse @if(collect($active)->flatten()->isEmpty()) show @endif">
+    {{-- Always start collapsed/minimized; the active-filter chips in the header
+         show what's applied without expanding the panel. --}}
+    <div id="ps-scope" class="collapse">
         <div class="card-body">
             @foreach($dimDefs as $key => $label)
                 @if(! empty($options[$key]))

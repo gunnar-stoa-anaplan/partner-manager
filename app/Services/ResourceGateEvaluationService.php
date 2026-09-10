@@ -50,8 +50,11 @@ class ResourceGateEvaluationService
                 ->where('contact_id', $contact->id)->where('type', 'solution_architect')->where('status', 'active')->count(),
             'master_certification_count' => DB::table('certifications')
                 ->where('contact_id', $contact->id)->where('type', 'master_anaplanner')->where('status', 'active')->count(),
-            'training_hours' => (float) DB::table('enablement_registrations')
-                ->where('contact_id', $contact->id)->where('status', 'completed')->sum('duration_hours'),
+            'training_hours' => (float) DB::table('enablement_registrations as er')
+                ->join('enablement_sessions as es', 'er.enablement_session_id', '=', 'es.id')
+                ->join('enablement_events as ee', 'es.enablement_event_id', '=', 'ee.id')
+                ->where('er.contact_id', $contact->id)->where('er.status', 'completed')
+                ->sum('ee.duration_hours'),
             'enablement_event_count' => DB::table('contact_partner_event')
                 ->where('contact_id', $contact->id)->count(),
             'blueprint_enrollment_count' => DB::table('blueprint_enrollments')
