@@ -1,0 +1,40 @@
+# Production stack for partner-manager: the app image (nginx + php-fpm +
+# scheduler + queue under supervisor) and a self-hosted Postgres (pgvector).
+# The app port is bound to loopback only — reach it via an SSM port-forward or
+# put a reverse proxy / load balancer in front. Postgres is never published.
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/production/Dockerfile
+    image: partner-manager:latest
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - app-storage:/var/www/html/storage/app
+
+  db:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-partner_manager}
+      POSTGRES_USER: ${DB_USERNAME:-sail}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-sail} -d ${DB_DATABASE:-partner_manager}"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  app-storage:
+  pgdata:
