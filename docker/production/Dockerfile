@@ -16,7 +16,8 @@ COPY public ./public
 RUN npm run build
 
 # ---- Stage 2: application ----
-FROM php:8.3-fpm-bookworm
+# PHP 8.4 to match the composer.lock (Symfony 8 / laravel-ai require >=8.4).
+FROM php:8.4-fpm-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         nginx supervisor git unzip \
