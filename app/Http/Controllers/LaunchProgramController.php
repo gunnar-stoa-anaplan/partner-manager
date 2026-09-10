@@ -76,6 +76,14 @@ class LaunchProgramController extends Controller
             'dateChanges.changedBy',
         ]);
 
+        // Row-level visibility: a program may span partners outside the actor's
+        // scope, whose Partner relation resolves to null (global scope). Drop
+        // those rows so the actor only sees the partners they may see.
+        $launchProgram->setRelation(
+            'programPartners',
+            $launchProgram->programPartners->filter(fn ($pp) => $pp->partner !== null)->values()
+        );
+
         $partners = Partner::orderBy('name')->get();
 
         return view('admin.launch-programs.show', [

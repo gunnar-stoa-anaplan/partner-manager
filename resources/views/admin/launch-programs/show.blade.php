@@ -233,7 +233,7 @@
                             @forelse($program->programPartners as $pp)
                                 @php $completion = $pp->completionPercentage(); @endphp
                                 <tr>
-                                    <td class="fw-500">{{ $pp->partner->name }}</td>
+                                    <td class="fw-500">{{ $pp->partner?->name ?? '—' }}</td>
                                     <td>
                                         <span class="badge" style="background-color: {{ \App\Models\LaunchProgramPartner::STATUS_COLORS[$pp->status] ?? '#868e96' }}; font-size: 0.7rem;">
                                             {{ \App\Models\LaunchProgramPartner::STATUSES[$pp->status] ?? $pp->status }}

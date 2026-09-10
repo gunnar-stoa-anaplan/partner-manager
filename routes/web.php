@@ -481,6 +481,19 @@ Route::middleware(['auth'])->group(function () {
     | Admin-Only Routes (Configuration & Setup)
     |--------------------------------------------------------------------------
     */
+    // Launch Programs — available to any role with the launch_programs module
+    // permission (e.g. PSM), not admin-only. GET needs read, writes need write.
+    Route::middleware('module:launch_programs.programs')->group(function () {
+        // Dashboard must precede the resource so /launch-programs/dashboard isn't
+        // captured as a {launchProgram} route-model binding.
+        Route::get('/launch-programs/dashboard', [LaunchProgramDashboardController::class, 'index'])->name('admin.launch-programs.dashboard');
+        Route::resource('launch-programs', LaunchProgramController::class)->names('admin.launch-programs')->parameters(['launch-programs' => 'launchProgram']);
+        Route::post('/launch-programs/{launchProgram}/milestones', [LaunchProgramController::class, 'addMilestone'])->name('admin.launch-programs.milestones.store');
+        Route::post('/launch-programs/{launchProgram}/admin-nominate', [LaunchProgramController::class, 'adminNominate'])->name('admin.launch-programs.admin-nominate');
+        Route::put('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'updateMilestone'])->name('admin.launch-program-milestones.update');
+        Route::delete('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'destroyMilestone'])->name('admin.launch-program-milestones.destroy');
+    });
+
     Route::middleware(['admin'])->group(function () {
         // System Administration
         Route::middleware('module:system_administration.admin')->group(function () {
@@ -508,19 +521,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/api-tokens', [ApiTokenController::class, 'index'])->name('admin.api-tokens');
             Route::post('/api-tokens', [ApiTokenController::class, 'store'])->name('admin.api-tokens.store');
             Route::delete('/api-tokens/{id}', [ApiTokenController::class, 'destroy'])->name('admin.api-tokens.destroy');
-        });
-
-        // Launch Programs Admin (gated by launch_programs.administration)
-        Route::middleware('module:launch_programs.administration')->group(function () {
-            // Launch Programs Dashboard (must be before resource to avoid {launchProgram} conflict)
-            Route::get('/launch-programs/dashboard', [LaunchProgramDashboardController::class, 'index'])->name('admin.launch-programs.dashboard');
-
-            // Launch Programs CRUD
-            Route::resource('launch-programs', LaunchProgramController::class)->names('admin.launch-programs')->parameters(['launch-programs' => 'launchProgram']);
-            Route::post('/launch-programs/{launchProgram}/milestones', [LaunchProgramController::class, 'addMilestone'])->name('admin.launch-programs.milestones.store');
-            Route::post('/launch-programs/{launchProgram}/admin-nominate', [LaunchProgramController::class, 'adminNominate'])->name('admin.launch-programs.admin-nominate');
-            Route::put('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'updateMilestone'])->name('admin.launch-program-milestones.update');
-            Route::delete('/launch-program-milestones/{milestone}', [LaunchProgramController::class, 'destroyMilestone'])->name('admin.launch-program-milestones.destroy');
         });
 
         // Workshop Labs (gated by workshops.administration)
