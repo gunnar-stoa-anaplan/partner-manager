@@ -119,7 +119,7 @@ class FieldEnablementController extends Controller
         $contacts = Contact::with(['partner', 'projects'])
             ->withCount('projects')
             ->whereIn('partner_id', $partnerIds)
-            ->having('projects_count', '>=', 3)
+            ->whereHas('projects', null, '>=', 3)
             ->orderByDesc('projects_count')
             ->get();
 

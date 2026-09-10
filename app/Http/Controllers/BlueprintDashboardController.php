@@ -64,7 +64,7 @@ class BlueprintDashboardController extends Controller
     {
         // Completed items per enrollment (single query)
         $completedCounts = DB::table('blueprint_progress')
-            ->select('blueprint_enrollment_id', DB::raw('SUM(completed) as completed_count'))
+            ->select('blueprint_enrollment_id', DB::raw('SUM(CASE WHEN completed THEN 1 ELSE 0 END) as completed_count'))
             ->where('completed', true)
             ->groupBy('blueprint_enrollment_id')
             ->pluck('completed_count', 'blueprint_enrollment_id');

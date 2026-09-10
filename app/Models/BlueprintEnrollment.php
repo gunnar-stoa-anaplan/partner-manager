@@ -61,7 +61,9 @@ class BlueprintEnrollment extends Model
 
     public function completedItemsCount(): int
     {
-        return $this->progress()->where('completed', true)->count();
+        // Use the loaded relation so eager-loaded lists (dashboards) don't run a
+        // query per enrollment; a lone call still lazy-loads once.
+        return $this->progress->where('completed', true)->count();
     }
 
     public function totalApplicableItems(): int

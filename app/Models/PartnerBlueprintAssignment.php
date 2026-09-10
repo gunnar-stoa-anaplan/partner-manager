@@ -77,7 +77,12 @@ class PartnerBlueprintAssignment extends Model
 
     public function applicableContentItemCount(): int
     {
-        return $this->applicableContentItems()->count();
+        // The count depends only on (blueprint, role), not the assignment — so
+        // memoize per request to avoid a query per enrollment on dashboards.
+        static $cache = [];
+        $key = $this->blueprint_id.':'.$this->role;
+
+        return $cache[$key] ??= $this->applicableContentItems()->count();
     }
 
     public function completionPercentage(): float

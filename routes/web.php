@@ -939,8 +939,6 @@ Route::get('/home', fn () => redirect()->route('welcome'))->name('home');
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
 /*
 |--------------------------------------------------------------------------
 | Partner Success dashboard (audited, warehouse-backed)

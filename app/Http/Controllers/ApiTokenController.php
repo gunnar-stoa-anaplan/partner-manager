@@ -27,7 +27,7 @@ class ApiTokenController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        $users = User::orderBy('name')->get(['id', 'name', 'email', 'role']);
+        $users = User::with('role')->orderBy('name')->get(['id', 'name', 'email', 'role_id']);
 
         return view('admin.api-tokens.index', [
             'tokens' => $tokens,

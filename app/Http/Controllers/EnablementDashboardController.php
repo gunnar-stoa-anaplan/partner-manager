@@ -26,12 +26,14 @@ class EnablementDashboardController extends Controller
         $totalRegistrations = EnablementRegistration::count();
         $totalLabs = Lab::count();
 
-        // Avg blueprint completion
-        $avgCompletion = 0;
-        $enrollmentsWithProgress = BlueprintEnrollment::with(['progress', 'assignment.blueprint.outcomes.contentItems'])->get();
-        if ($enrollmentsWithProgress->count() > 0) {
-            $avgCompletion = round($enrollmentsWithProgress->avg(fn ($e) => $e->completionPercentage()), 1);
-        }
+        // Completion — load enrollments once and reuse for both the overall
+        // average and the per-category breakdown (no per-category re-query).
+        $enrollmentsWithProgress = BlueprintEnrollment::with(['progress', 'assignment.blueprint'])->get();
+        $completions = $enrollmentsWithProgress->map(fn ($e) => [
+            'category' => $e->assignment?->blueprint?->category,
+            'pct' => $e->completionPercentage(),
+        ]);
+        $avgCompletion = $completions->count() > 0 ? round($completions->avg('pct'), 1) : 0;
 
         // ── Blueprint Status Breakdown (donut) ──
         $blueprintByStatus = Blueprint::select('status', DB::raw('count(*) as total'))
@@ -39,17 +41,10 @@ class EnablementDashboardController extends Controller
             ->pluck('total', 'status');
 
         // ── Blueprint Completion by Category (bar) ──
-        $categories = array_keys(Blueprint::CATEGORIES);
         $completionByCategory = [];
-        foreach ($categories as $cat) {
-            $catAssignments = PartnerBlueprintAssignment::whereHas('blueprint', fn ($q) => $q->where('category', $cat))
-                ->with(['enrollments.progress', 'blueprint.outcomes.contentItems'])
-                ->get();
-
-            $catEnrollments = $catAssignments->flatMap->enrollments;
-            $completionByCategory[$cat] = $catEnrollments->count() > 0
-                ? round($catEnrollments->avg(fn ($e) => $e->completionPercentage()), 1)
-                : 0;
+        foreach (array_keys(Blueprint::CATEGORIES) as $cat) {
+            $vals = $completions->where('category', $cat);
+            $completionByCategory[$cat] = $vals->count() > 0 ? round($vals->avg('pct'), 1) : 0;
         }
 
         // ── Top 10 Partners by Blueprint Assignments (horizontal bar) ──

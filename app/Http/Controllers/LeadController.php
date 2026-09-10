@@ -91,21 +91,21 @@ class LeadController extends Controller
 
     public function unassigned()
     {
-        $leads = Lead::where('status', 'Unassigned')->get();
+        $leads = Lead::with('partner')->where('status', 'Unassigned')->latest()->get();
 
         return view('business-development.leads.unassigned', compact('leads'));
     }
 
     public function assigned()
     {
-        $leads = Lead::where('status', 'Assigned')->get();
+        $leads = Lead::with('partner')->where('status', 'Assigned')->latest()->get();
 
         return view('business-development.leads.assigned', compact('leads'));
     }
 
     public function rejected()
     {
-        $leads = Lead::where('status', 'Rejected')->get();
+        $leads = Lead::with('partner')->where('status', 'Rejected')->latest()->get();
 
         return view('business-development.leads.rejected', compact('leads'));
     }

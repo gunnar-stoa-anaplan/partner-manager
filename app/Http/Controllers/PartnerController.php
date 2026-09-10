@@ -1652,7 +1652,7 @@ class PartnerController extends Controller
             $query->where('marketplace_status', $request->status);
         }
 
-        $partners = $query->orderByRaw("FIELD(marketplace_status, 'submitted', 'rejected', 'approved', 'draft')")
+        $partners = $query->orderByRaw(\App\Support\DatabasePortability::orderByValues('marketplace_status', ['submitted', 'rejected', 'approved', 'draft']))
             ->orderBy('name')
             ->get();
 

@@ -40,6 +40,7 @@ export default defineConfig({
                 // App CSS
                 'resources/sass/smartapp.scss',
                 'resources/sass/docs.scss',
+                'resources/sass/workshop-guides.scss',
                 ...getFilesFlat('resources/sass/themes'),
                 // App JS
                 ...getFilesRecursive('resources/scripts', ['.js'], ['smarttable']),

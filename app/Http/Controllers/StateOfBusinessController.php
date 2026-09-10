@@ -156,7 +156,7 @@ class StateOfBusinessController extends Controller
                 $teamQuery->whereIn('partner_id', $partnerIds);
             }
             $data['teamObjectives'] = $teamQuery
-                ->orderByRaw("FIELD(status, 'active', 'completed', 'missed', 'cancelled')")
+                ->orderByRaw(\App\Support\DatabasePortability::orderByValues('status', ['active', 'completed', 'missed', 'cancelled']))
                 ->orderBy('target_date')
                 ->get();
         }
