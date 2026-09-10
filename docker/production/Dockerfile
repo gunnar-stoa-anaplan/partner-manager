@@ -7,7 +7,10 @@
 FROM node:20-bookworm-slim AS assets
 WORKDIR /app
 COPY package.json package-lock.json vite.config.js ./
-RUN npm ci
+# npm install (not ci) so platform-specific Vite/Rollup binaries resolve for the
+# build's own arch — the lockfile is generated on arm64 (Apple Silicon), which
+# makes `npm ci` fail on an x86_64 builder.
+RUN npm install --no-audit --no-fund
 COPY resources ./resources
 COPY public ./public
 RUN npm run build
