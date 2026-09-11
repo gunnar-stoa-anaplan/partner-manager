@@ -480,9 +480,11 @@ Route::middleware(['auth'])->group(function () {
     | Admin-Only Routes (Configuration & Setup)
     |--------------------------------------------------------------------------
     */
-    // Launch Programs — available to any role with the launch_programs module
-    // permission (e.g. PSM), not admin-only. GET needs read, writes need write.
-    Route::middleware('module:launch_programs.programs')->group(function () {
+    // Launch Programs — ADMIN management of the program catalog (create/edit/
+    // delete programs, milestones, and the oversight dashboard). Admin-only:
+    // PSMs use launch programs via the partner detail tab (nominate their
+    // partners, manage participants), not this admin surface.
+    Route::middleware('admin')->group(function () {
         // Dashboard must precede the resource so /launch-programs/dashboard isn't
         // captured as a {launchProgram} route-model binding.
         Route::get('/launch-programs/dashboard', [LaunchProgramDashboardController::class, 'index'])->name('admin.launch-programs.dashboard');

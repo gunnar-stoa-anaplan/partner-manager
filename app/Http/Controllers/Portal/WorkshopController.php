@@ -179,12 +179,14 @@ class WorkshopController extends Controller
      */
     private function authorizeSessionAccess(WorkshopSession $session, int $partnerId): void
     {
+        // The management view (participants, invites) is restricted to partners
+        // with a participant in the session. Browsing/enrolling in open sessions
+        // is a separate flow (my-workshops.browse); an "open" session is not, by
+        // itself, grounds to view another partner's management page.
         $isRepresented = $session->participants()
             ->whereHas('contact', fn ($q) => $q->where('partner_id', $partnerId))
             ->exists();
 
-        $isOpen = $session->status === 'upcoming' && $session->workshop->status === 'active';
-
-        abort_unless($isRepresented || $isOpen, 403);
+        abort_unless($isRepresented, 403);
     }
 }

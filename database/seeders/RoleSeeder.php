@@ -270,6 +270,7 @@ class RoleSeeder extends Seeder
                 'description' => 'Full access to all portal features and team management.',
                 'permissions' => [
                     'enablement.blueprints' => 'read',
+                    'blueprints' => 'read',
                     'calendar' => 'write',
                     'cases' => 'write',
                     'certifications' => 'write',
@@ -301,6 +302,7 @@ class RoleSeeder extends Seeder
                 'description' => 'Manages delivery projects, cases, and enablement content.',
                 'permissions' => [
                     'enablement.blueprints' => 'read',
+                    'blueprints' => 'read',
                     'calendar' => 'read',
                     'cases' => 'read',
                     'enablement.calendar' => 'read',
@@ -321,6 +323,7 @@ class RoleSeeder extends Seeder
                 'description' => 'Manages partner engagement, enablement programs, and goals.',
                 'permissions' => [
                     'enablement.blueprints' => 'read',
+                    'blueprints' => 'read',
                     'calendar' => 'read',
                     'cases' => 'read',
                     'enablement.calendar' => 'read',
@@ -341,6 +344,7 @@ class RoleSeeder extends Seeder
                 'description' => 'Oversees enablement content, certifications, and goal tracking.',
                 'permissions' => [
                     'enablement.blueprints' => 'read',
+                    'blueprints' => 'read',
                     'calendar' => 'read',
                     'cases' => 'write',
                     'certifications' => 'read',
@@ -370,6 +374,7 @@ class RoleSeeder extends Seeder
                 'description' => 'View-only access to enablement content and deal registration.',
                 'permissions' => [
                     'enablement.blueprints' => 'read',
+                    'blueprints' => 'read',
                     'calendar' => 'read',
                     'deal_registration.deals' => 'read',
                     'enablement.calendar' => 'read',
@@ -385,6 +390,7 @@ class RoleSeeder extends Seeder
                 'description' => 'Deal registration, enablement content, and calendar.',
                 'permissions' => [
                     'enablement.blueprints' => 'read',
+                    'blueprints' => 'read',
                     'calendar' => 'read',
                     'deal_registration.deals' => 'write',
                     'deal_registrations' => 'write',
@@ -416,6 +422,7 @@ class RoleSeeder extends Seeder
                 'description' => 'Enablement content, cases, and calendar.',
                 'permissions' => [
                     'enablement.blueprints' => 'read',
+                    'blueprints' => 'read',
                     'calendar' => 'read',
                     'cases' => 'read',
                     'enablement.calendar' => 'read',
