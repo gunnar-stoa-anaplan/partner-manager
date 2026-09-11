@@ -155,6 +155,70 @@ class PartnerPathTest extends TestCase
         $this->assertEquals($this->partner->id, $enrollments->first()->partner_id);
     }
 
+    public function test_psm_sees_assigned_partner_enrollments_not_just_owned(): void
+    {
+        // A partner the PSM is ASSIGNED to (user_partner pivot) but does not own.
+        $ownerPsm = User::factory()->psm()->create();
+        $assignedPartner = Partner::factory()->create(['user_id' => $ownerPsm->id]);
+        \DB::table('user_partner')->insert([
+            'user_id' => $this->psm->id,
+            'partner_id' => $assignedPartner->id,
+        ]);
+        PartnerPathEnrollment::factory()->create([
+            'partner_id' => $assignedPartner->id,
+            'partner_path_id' => $this->path->id,
+            'current_stage_id' => $this->stages[0]->id,
+        ]);
+
+        $response = $this->actingAs($this->psm)->get(route('plan.paths.index'));
+
+        $response->assertOk();
+        $enrollments = $response->viewData('enrollments');
+        // The assigned partner's enrollment is visible (previously owned-only).
+        $this->assertTrue($enrollments->contains(fn ($e) => $e->partner_id === $assignedPartner->id));
+    }
+
+    public function test_manager_sees_reports_partner_enrollments(): void
+    {
+        $manager = User::factory()->manager()->create();
+        $this->psm->update(['manager_id' => $manager->id]); // psm (owns $this->partner) reports to manager
+        $this->createEnrollment();
+
+        // An unrelated PSM's partner + enrollment, outside the manager's hierarchy.
+        $otherPsm = User::factory()->psm()->create();
+        $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
+        PartnerPathEnrollment::factory()->create([
+            'partner_id' => $otherPartner->id,
+            'partner_path_id' => $this->path->id,
+            'current_stage_id' => $this->stages[0]->id,
+        ]);
+
+        $response = $this->actingAs($manager)->get(route('plan.paths.index'));
+
+        $response->assertOk();
+        $response->assertViewHas('canSeeAll', true); // manager has direct reports
+        $enrollments = $response->viewData('enrollments');
+        $this->assertCount(1, $enrollments);
+        $this->assertEquals($this->partner->id, $enrollments->first()->partner_id);
+    }
+
+    public function test_show_of_out_of_scope_enrollment_is_not_found(): void
+    {
+        // IDOR guard: an enrollment for a partner the actor cannot see must 404
+        // (route-model binding is now row-level scoped), not render.
+        $otherPsm = User::factory()->psm()->create();
+        $otherPartner = Partner::factory()->create(['user_id' => $otherPsm->id]);
+        $enrollment = PartnerPathEnrollment::factory()->create([
+            'partner_id' => $otherPartner->id,
+            'partner_path_id' => $this->path->id,
+            'current_stage_id' => $this->stages[0]->id,
+        ]);
+
+        $this->actingAs($this->psm)
+            ->get(route('plan.paths.show', $enrollment))
+            ->assertNotFound();
+    }
+
     // ─── Enrollment ───────────────────────────────────────────────
 
     public function test_psm_can_enroll_partner_in_path(): void

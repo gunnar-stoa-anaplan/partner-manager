@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ScopedToActor;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PartnerPathEnrollment extends Model
 {
-    use HasFactory;
+    use HasFactory, ScopedToActor;
 
     protected $fillable = [
         'partner_id', 'partner_path_id', 'current_stage_id',

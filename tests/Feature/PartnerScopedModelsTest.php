@@ -36,6 +36,8 @@ class PartnerScopedModelsTest extends TestCase
             'ResourceTask' => [ResourceTask::class],
             'WeeklyFocusItem' => [WeeklyFocusItem::class],
             'ActionPlan' => [ActionPlan::class],
+            'PartnerPathEnrollment' => [\App\Models\PartnerPathEnrollment::class],
+            'ResourcePathEnrollment' => [\App\Models\ResourcePathEnrollment::class],
             // LabParticipant is covered by its own method below — its factory
             // chain (Lab -> EnablementEvent) needs an admin user to exist first
             // (pre-existing EnablementEventFactory quirk), which the generic

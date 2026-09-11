@@ -12,6 +12,7 @@ use App\Models\PartnerTask;
 use App\Models\User;
 use App\Services\GateEvaluationService;
 use App\Services\TaskAutoPopulationService;
+use App\Support\VisibilityContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -21,15 +22,17 @@ class PartnerPathController extends Controller
     {
         $user = auth()->user();
 
-        // Role-based partner scoping — manager and admin see all partners
-        $canSeeAll = $user->isAdmin() || $user->role?->slug === 'manager';
-        $partnerIds = $canSeeAll
-            ? Partner::pluck('id')
-            : Partner::where('user_id', $user->id)->pluck('id');
+        // Partner visibility is enforced by the row-level scope (ScopedToActor
+        // on Partner): this list already contains only the actor's authorized
+        // partners — owner + assignments + reporting hierarchy, or all when the
+        // actor holds unrestricted visibility. No hard-coded role logic.
+        $visibleIds = app(VisibilityContext::class)->visiblePartnerIds();
+        $partners = Partner::orderBy('name')->get();
+        $partnerIds = $partners->pluck('id');
 
-        $partners = Partner::whereIn('id', $partnerIds)->orderBy('name')->get();
-
-        // PSM filter (manager/admin only)
+        // The PSM filter is an oversight convenience for actors who can see
+        // beyond their own book: unrestricted actors, or managers with reports.
+        $canSeeAll = $visibleIds === null || $user->directReports()->exists();
         $selectedPsmId = $canSeeAll ? $request->get('psm_id') : null;
         $psmUsers = $canSeeAll
             ? User::whereRelation('role', 'slug', 'psm')->orderBy('name')->get(['id', 'name'])

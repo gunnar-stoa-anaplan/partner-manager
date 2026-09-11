@@ -10,6 +10,7 @@ use App\Models\ResourceStageHistory;
 use App\Models\User;
 use App\Services\ResourceGateEvaluationService;
 use App\Services\ResourceTaskAutoPopulationService;
+use App\Support\VisibilityContext;
 use Illuminate\Http\Request;
 
 class ResourcePathController extends Controller
@@ -18,14 +19,17 @@ class ResourcePathController extends Controller
     {
         $user = auth()->user();
 
-        $canSeeAll = $user->isAdmin() || $user->role?->slug === 'manager';
-        $partnerIds = $canSeeAll
-            ? Partner::pluck('id')
-            : Partner::where('user_id', $user->id)->pluck('id');
+        // Partner visibility is enforced by the row-level scope (ScopedToActor
+        // on Partner): this list already contains only the actor's authorized
+        // partners — owner + assignments + reporting hierarchy, or all when the
+        // actor holds unrestricted visibility. No hard-coded role logic.
+        $visibleIds = app(VisibilityContext::class)->visiblePartnerIds();
+        $partners = Partner::orderBy('name')->get();
+        $partnerIds = $partners->pluck('id');
 
-        $partners = Partner::whereIn('id', $partnerIds)->orderBy('name')->get();
-
-        // Filters
+        // Filters — the PSM filter is an oversight convenience for actors who
+        // can see beyond their own book: unrestricted actors, or managers.
+        $canSeeAll = $visibleIds === null || $user->directReports()->exists();
         $selectedPsmId = $canSeeAll ? $request->get('psm_id') : null;
         $selectedPartnerId = $request->get('partner_id');
         $selectedPathId = $request->get('path_id');
