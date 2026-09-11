@@ -1,12 +1,24 @@
 # Authorization Model — Target Specification (DRAFT)
 
-Status: **draft for review.** Nothing in the codebase changes on the basis of this
-document. It defines the *desired* behavior so we can compare it against what
-exists and make small, validated changes toward it.
+Status: **decisions accepted (2026-09-11); implementation in progress.** This
+defines the desired behavior; changes are made in small, validated increments
+toward it (see §9). The five decisions in §4 are accepted at their recommended
+defaults — revise them there if intent changes.
 
-Each open choice is marked **DECISION** with a recommended default. Change the
-recommendation inline if you disagree; the recommendation is what we build if
-left as-is.
+Implementation findings (discovered while building, drive the plan):
+
+- **`Contact` cannot take the standard global scope.** It extends
+  `Authenticatable` and is the portal login actor; auto-scoping it creates an
+  auth-bootstrap hazard (loading the logged-in contact would query through a
+  scope that depends on already knowing that contact). It needs a bespoke
+  approach and is deferred out of the mechanical increment-2 pass.
+- **Snapshot/scorecard tables are dual-purpose.** `PartnerScorecard`,
+  `PartnerHealthSnapshot`, `OpportunitySnapshot`, `ResourceSnapshot` are read
+  both per-partner (dashboards) *and* cross-population (benchmarks/cohorts in
+  `BenchmarkService`, `CohortBenchmarkProcessor`, `BenchmarkProcessor`). A blanket
+  partner scope would corrupt benchmark math for non-admin actors. These need an
+  explicit per-read decision (scoped display vs `withoutGlobalScope` benchmark
+  reads) and are deferred from the mechanical pass.
 
 ---
 
@@ -94,9 +106,18 @@ safe by construction.
 
 ---
 
-## 4. Open decisions
+## 4. Decisions
 
-### DECISION 1 — Which fields roll up through the hierarchy?
+**Status: ACCEPTED at the recommended defaults** (2026-09-11). Each recommendation
+below is the decision unless revised here. Interim note for DECISION 2: until the
+principal model lands (increment 3), scoping is enforced by partner alone, which
+is *stricter* than the target (a record you're personally assigned to but whose
+partner is out of scope is hidden, not shown). Stricter-than-target is safe — it
+can only under-show, never leak — so it is an acceptable interim state; piercing
+is added uniformly in increment 3.
+
+
+### DECISION 1 — Which fields roll up through the hierarchy? — ACCEPTED
 
 `owner` and `assigned_to` roll up: a manager sees what their reports own or are
 assigned. `created_by` is an audit field; if it rolled up, a manager would see
@@ -108,7 +129,7 @@ records.
 not extend to the creator's managers. (A manager still sees the record if it is
 owned/assigned within their `myUserSet`.)
 
-### DECISION 2 — Does a direct principal association pierce partner scope?
+### DECISION 2 — Does a direct principal association pierce partner scope? — ACCEPTED
 
 A record for Partner Z (outside the actor's partner scope) is assigned directly
 to the actor. Can the actor see that one record?
@@ -120,7 +141,7 @@ to the actor. Can the actor see that one record?
 records. Aggregations must reflect the pierced record without revealing anything
 else about Partner Z.
 
-### DECISION 3 — Does the creator retain visibility after reassignment?
+### DECISION 3 — Does the creator retain visibility after reassignment? — ACCEPTED
 
 If the actor created a record that is later reassigned away from them, do they
 still see it via `created_by`?
@@ -130,7 +151,7 @@ a direct principal. Because `created_by` does not roll up, the blast radius is a
 single person. If specific record types need creator visibility to end at
 handoff, add a per-type opt-out later rather than changing the global rule.
 
-### DECISION 4 — Team sharing semantics
+### DECISION 4 — Team sharing semantics — ACCEPTED
 
 **Recommendation:** Team sharing is **flat and membership-based**. A user sees a
 team-shared record if they are a member of that team. Team visibility does **not**
@@ -142,7 +163,7 @@ records via the org chart (they get them through their own membership, or throug
 > (`team_members` maps users/contacts to teams). Adding a team principal to
 > records is a future step; this decision defines its semantics for when we do.
 
-### DECISION 5 — What is the unrestricted-visibility privilege, and who holds it?
+### DECISION 5 — What is the unrestricted-visibility privilege, and who holds it? — ACCEPTED
 
 Company-wide visibility (see every record regardless of relationship) must be an
 **explicit privilege**, not an implicit side effect of a role slug. See §5.
