@@ -12,9 +12,10 @@ class ContactController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $partnerIds = $user->isAdmin()
-            ? Partner::pluck('id')
-            : Partner::where('user_id', $user->id)->pluck('id');
+        // Partner is row-level scoped, so this already yields the actor's
+        // authorized partners (owner + assignments + hierarchy, or all when
+        // unrestricted) — no hard-coded role branch needed.
+        $partnerIds = Partner::pluck('id');
 
         $influencers = Contact::where('contact_type', 'influencer')
             ->whereIn('partner_id', $partnerIds)
@@ -39,9 +40,10 @@ class ContactController extends Controller
     public function directory()
     {
         $user = auth()->user();
-        $partnerIds = $user->isAdmin()
-            ? Partner::pluck('id')
-            : Partner::where('user_id', $user->id)->pluck('id');
+        // Partner is row-level scoped, so this already yields the actor's
+        // authorized partners (owner + assignments + hierarchy, or all when
+        // unrestricted) — no hard-coded role branch needed.
+        $partnerIds = Partner::pluck('id');
 
         $contacts = Contact::whereIn('partner_id', $partnerIds)
             ->with('partner')
@@ -65,9 +67,7 @@ class ContactController extends Controller
     public function create()
     {
         $user = auth()->user();
-        $partners = $user->isAdmin()
-            ? Partner::orderBy('name')->get()
-            : Partner::where('user_id', $user->id)->orderBy('name')->get();
+        $partners = Partner::orderBy('name')->get();
 
         return view('influencers.create', compact('partners'));
     }
@@ -95,7 +95,7 @@ class ContactController extends Controller
 
     public function show(string $id)
     {
-        $contact = Contact::with(['partner', 'events', 'projects'])
+        $contact = Contact::visibleToActor()->with(['partner', 'events', 'projects'])
             ->withCount('interactions')
             ->findOrFail($id);
 
@@ -109,18 +109,16 @@ class ContactController extends Controller
 
     public function edit(string $id)
     {
-        $contact = Contact::findOrFail($id);
+        $contact = Contact::visibleToActor()->findOrFail($id);
         $user = auth()->user();
-        $partners = $user->isAdmin()
-            ? Partner::orderBy('name')->get()
-            : Partner::where('user_id', $user->id)->orderBy('name')->get();
+        $partners = Partner::orderBy('name')->get();
 
         return view('influencers.edit', compact('contact', 'partners'));
     }
 
     public function update(Request $request, string $id)
     {
-        $contact = Contact::findOrFail($id);
+        $contact = Contact::visibleToActor()->findOrFail($id);
 
         $rules = [
             'partner_id' => 'required|exists:partners,id',
@@ -151,7 +149,7 @@ class ContactController extends Controller
 
     public function destroy(string $id)
     {
-        $contact = Contact::findOrFail($id);
+        $contact = Contact::visibleToActor()->findOrFail($id);
         $contact->interactions()->delete();
         $contact->delete();
 

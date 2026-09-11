@@ -16,10 +16,10 @@ class SearchController extends Controller
             return response()->json(['results' => []]);
         }
 
-        $user = auth()->user();
-        $partnerIds = $user->isAdmin()
-            ? null
-            : Partner::where('user_id', $user->id)->pluck('id')->toArray();
+        // Row-level visibility: null = unrestricted (admins / privilege holders);
+        // otherwise the actor's authorized partners (owner + assignments +
+        // reporting hierarchy). Replaces an owned-only isAdmin() branch.
+        $partnerIds = app(\App\Support\VisibilityContext::class)->visiblePartnerIds();
 
         $results = [];
 

@@ -250,6 +250,24 @@ class Contact extends Authenticatable
         return $query->where('portal_access', true)->whereNotNull('portal_role_id');
     }
 
+    /**
+     * Restrict to contacts of partners the current actor may see. Contact is the
+     * portal auth model, so it cannot carry the ScopedToActor GLOBAL scope (that
+     * would recurse through the portal guard during authentication). Apply this
+     * LOCAL scope at internal-facing read sites (lists, search, direct lookups)
+     * instead. Null visible set = unrestricted (admins / privilege holders).
+     */
+    public function scopeVisibleToActor($query)
+    {
+        $ids = app(\App\Support\VisibilityContext::class)->visiblePartnerIds();
+
+        if ($ids !== null) {
+            $query->whereIn($this->getTable().'.partner_id', $ids ?: [0]);
+        }
+
+        return $query;
+    }
+
     public function isPortalAdmin(): bool
     {
         return $this->role?->slug === 'partner_admin';

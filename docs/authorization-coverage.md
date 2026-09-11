@@ -158,11 +158,17 @@ Plus the increment-1 privilege refactor and the MCP/sanctum actor fix.
   Needs `->withoutGlobalScope('actor_visibility')` on the provisioning/linking
   path before the trait is added. Deferred.
 
-- **`Contact`** and the **benchmark tables** (PartnerScorecard,
-  PartnerHealthSnapshot, OpportunitySnapshot, ResourceSnapshot,
-  PartnerAssignedGoal) — deferred per the accepted approaches in the spec
-  (local query scope for Contact; ScopedToActor + explicit `withoutGlobalScope`
-  on benchmark reads).
+- **`Contact`** — DONE. Uses a LOCAL scope (`scopeVisibleToActor`) applied at
+  internal read sites, not the global scope (which would recurse through the
+  portal guard during auth). `ContactController` and `SearchController` were
+  reconciled off their owned-only `isAdmin()` scoping to `VisibilityContext` /
+  the scoped `Partner` query, and the four `Contact::findOrFail` IDOR sites now
+  go through `visibleToActor()` (out-of-scope → 404).
+
+- The **benchmark tables** (PartnerScorecard, PartnerHealthSnapshot,
+  OpportunitySnapshot, ResourceSnapshot, PartnerAssignedGoal) — deferred per the
+  accepted spec approach: ScopedToActor + explicit `withoutGlobalScope` on the
+  cross-population benchmark/cohort reads.
 
 - **`EnablementRegistration`, `EnablementGoal`, `LaunchProgramPartner`** —
   entangled with controllers that scope with the same hard-coded role logic as
@@ -172,7 +178,6 @@ Plus the increment-1 privilege refactor and the MCP/sanctum actor fix.
   Reconcile each controller to `VisibilityContext` first, then add the model
   scope — same pattern as the PartnerPathController fix. Tracked as a follow-up.
 
-**Remaining after this batch:** the entangled enablement/launch models above;
-`AnaplanWorkspace` (needs the provisioning `withoutGlobalScope`); `Contact` +
-the benchmark tables (per the accepted spec approaches). Then the
-`MetricService::filt()` / export universality audit and increment 3.
+**Remaining after this batch:** the entangled enablement/launch models above
+(tasked); the benchmark tables (scope + `withoutGlobalScope` on benchmark reads).
+Then the `MetricService::filt()` / export universality audit and increment 3.
