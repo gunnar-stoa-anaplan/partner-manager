@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ScopedToActor;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PartnerStageHistory extends Model
 {
-    use HasFactory;
+    use HasFactory, ScopedToActor;
 
     protected $table = 'partner_stage_history';
 
