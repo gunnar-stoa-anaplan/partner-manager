@@ -48,7 +48,8 @@ COPY docker/production/supervisord.conf /etc/supervisor/conf.d/app.conf
 COPY docker/production/php-overrides.ini /usr/local/etc/php/conf.d/zz-partner-manager.ini
 RUN rm -f /etc/nginx/sites-enabled/default \
     && ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default \
-    && mkdir -p /var/log/supervisor
+    && mkdir -p /var/log/supervisor \
+    && ln -sfn /var/www/html/storage/app/public /var/www/html/public/storage
 
 EXPOSE 80
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/app.conf"]
