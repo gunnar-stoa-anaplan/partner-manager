@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ScopedToActor;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AnaplanWorkspace extends Model
 {
-    use HasFactory;
+    use HasFactory, ScopedToActor;
 
     protected $fillable = [
         'anaplan_id',
@@ -131,8 +132,11 @@ class AnaplanWorkspace extends Model
      */
     public static function linkToPartners(): int
     {
-        $partners = Partner::pluck('name', 'id');
-        $unlinked = static::whereNull('partner_id')->get();
+        // Provisioning runs system-wide regardless of the current actor: bypass
+        // the row-level scope so unlinked workspaces (partner_id null) and the
+        // full partner list are visible even when a restricted user triggers it.
+        $partners = Partner::withoutGlobalScopes()->pluck('name', 'id');
+        $unlinked = static::withoutGlobalScope('actor_visibility')->whereNull('partner_id')->get();
         $linked = 0;
 
         foreach ($unlinked as $workspace) {

@@ -148,7 +148,11 @@ class AnaplanProvisioningTest extends TestCase
             ['partner_id' => $partner->id]
         );
 
-        $response->assertForbidden();
+        // AnaplanWorkspace is row-level scoped, so this unassigned (null-partner)
+        // workspace is invisible to a non-admin and route-model binding 404s
+        // before the admin gate — a fail-closed denial that also does not reveal
+        // the resource. (Admins bypass the scope and reach the assign action.)
+        $response->assertNotFound();
     }
 
     // ─── Sync ───────────────────────────────────────────────────────
