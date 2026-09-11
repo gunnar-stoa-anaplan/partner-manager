@@ -269,7 +269,7 @@ class PrioritiesController extends Controller
     {
         $user = auth()->user();
 
-        if ($item->weeklyFocus->user_id !== $user->id && ! $user->bypassesPermissions()) {
+        if ($item->weeklyFocus?->user_id !== $user->id && ! $user->bypassesPermissions()) {
             abort(403);
         }
 
@@ -290,7 +290,7 @@ class PrioritiesController extends Controller
     {
         $user = auth()->user();
 
-        if ($item->weeklyFocus->user_id !== $user->id && ! $user->bypassesPermissions()) {
+        if ($item->weeklyFocus?->user_id !== $user->id && ! $user->bypassesPermissions()) {
             abort(403);
         }
 

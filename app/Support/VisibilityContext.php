@@ -107,6 +107,41 @@ class VisibilityContext
         return $a ? $a->teams()->pluck('teams.id')->all() : [];
     }
 
+    /**
+     * The set of internal user ids the actor may act as/for on OWNER-scoped
+     * records: the actor plus every recursive reporting-hierarchy descendant
+     * (so a manager sees records owned by their reports — DECISION 1). Mirrors
+     * the visiblePartnerIds() convention:
+     *   null  = unrestricted (no actor / console / bypass roles)
+     *   [...] = restricted to exactly these user ids
+     *   []    = restricted to nothing (e.g. a portal contact has no internal
+     *           user identity, so owner-scoped internal records are not theirs)
+     *
+     * Increment 3: used by the ScopedToOwner trait for user-owned models
+     * (personal records like weekly focus). Program-wide catalog records are not
+     * owner-scoped and do not use this.
+     *
+     * @return array<int>|null
+     */
+    public function myUserSet(): ?array
+    {
+        $a = $this->actor();
+
+        if ($a === null) {
+            return null; // system / console / queue — unrestricted
+        }
+
+        if ($a instanceof User) {
+            if ($a->bypassesPermissions()) {
+                return null; // super_admin — unrestricted by design
+            }
+
+            return array_merge([$a->id], $this->descendantUserIds($a->id));
+        }
+
+        return []; // portal contact: no internal user identity
+    }
+
     private function resolve(): void
     {
         $a = $this->actor();
