@@ -38,6 +38,8 @@ class PartnerScopedModelsTest extends TestCase
             'ActionPlan' => [ActionPlan::class],
             'PartnerPathEnrollment' => [\App\Models\PartnerPathEnrollment::class],
             'ResourcePathEnrollment' => [\App\Models\ResourcePathEnrollment::class],
+            'PartnerBlueprintAssignment' => [\App\Models\PartnerBlueprintAssignment::class],
+            'PartnerPlanCommit' => [\App\Models\PartnerPlanCommit::class],
             // LabParticipant is covered by its own method below — its factory
             // chain (Lab -> EnablementEvent) needs an admin user to exist first
             // (pre-existing EnablementEventFactory quirk), which the generic

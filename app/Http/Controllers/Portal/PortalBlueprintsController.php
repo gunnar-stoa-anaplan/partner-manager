@@ -47,9 +47,11 @@ class PortalBlueprintsController extends Controller
     {
         $contact = Auth::guard('portal')->user();
 
-        // Ensure enrollment belongs to this partner
+        // Ensure enrollment belongs to this partner. The assignment relation is
+        // row-level scoped (ScopedToActor), so an out-of-scope assignment
+        // resolves to null — treat that as forbidden rather than dereferencing.
         $enrollment->load(['assignment.blueprint.outcomes.contentItems', 'progress', 'contact']);
-        abort_unless($enrollment->assignment->partner_id === $contact->partner_id, 403);
+        abort_unless($enrollment->assignment?->partner_id === $contact->partner_id, 403);
 
         // Non-admin contacts can only view their own enrollments
         if (! $contact->isPortalAdmin() && $enrollment->contact_id !== $contact->id) {

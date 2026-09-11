@@ -127,8 +127,15 @@ structural backstop if one forgets.
 
 **Scoped so far (ScopedToActor added, each with a zero-leak test):**
 PartnerStageHistory, ResourceStageHistory, PartnerMarketplaceEntry,
-PartnerSolution, ResourceTask, WeeklyFocusItem, LabParticipant, ActionPlan.
+PartnerSolution, ResourceTask, WeeklyFocusItem, LabParticipant, ActionPlan,
+PartnerPathEnrollment, ResourcePathEnrollment (with the PartnerPathController
+reconciliation), PartnerBlueprintAssignment, PartnerPlanCommit.
 Plus the increment-1 privilege refactor and the MCP/sanctum actor fix.
+
+**Program-wide (intentionally NOT partner-scoped):**
+- `EnablementSession` — a shared session catalog; `partner_id` lives on the
+  registration pivot, not the model. Per-partner scoping belongs on
+  `EnablementRegistration`, not the session.
 
 **Deferred with findings (NOT mechanical — need a decision or reconciliation):**
 
@@ -157,6 +164,15 @@ Plus the increment-1 privilege refactor and the MCP/sanctum actor fix.
   (local query scope for Contact; ScopedToActor + explicit `withoutGlobalScope`
   on benchmark reads).
 
-**Still mechanical / pending:** LaunchProgramPartner, PartnerBlueprintAssignment,
-EnablementSession, EnablementRegistration, EnablementGoal, PartnerPlanCommit
-(re-verify each read path first).
+- **`EnablementRegistration`, `EnablementGoal`, `LaunchProgramPartner`** —
+  entangled with controllers that scope with the same hard-coded role logic as
+  the path controllers (`Api\EnablementController`, `StateOfBusinessController`,
+  `LaunchProgramController` / `PartnerController`). `LaunchProgramPartner` also
+  drives program partner-count semantics and has pre-existing failing tests.
+  Reconcile each controller to `VisibilityContext` first, then add the model
+  scope — same pattern as the PartnerPathController fix. Tracked as a follow-up.
+
+**Remaining after this batch:** the entangled enablement/launch models above;
+`AnaplanWorkspace` (needs the provisioning `withoutGlobalScope`); `Contact` +
+the benchmark tables (per the accepted spec approaches). Then the
+`MetricService::filt()` / export universality audit and increment 3.
