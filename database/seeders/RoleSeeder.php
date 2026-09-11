@@ -49,6 +49,10 @@ class RoleSeeder extends Seeder
             'description' => 'Strategy design, enablement program management, and knowledge base curation.',
         ]);
         $this->syncPermissions($coe, [
+            // Explicit unrestricted partner visibility (was an implicit CoE slug
+            // check in VisibilityContext; now a first-class grant). See
+            // docs/authorization-spec.md DECISION 5.
+            'data_scope.all_partners' => 'read',
             'ai_knowledge.agents' => 'write',
             'ai_knowledge.knowledge_base' => 'write',
             'partner_management.analytics' => 'write',

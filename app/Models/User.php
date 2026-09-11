@@ -217,11 +217,31 @@ class User extends Authenticatable
     }
 
     /**
+     * Explicit privilege granting unrestricted partner data visibility: the
+     * actor sees every partner regardless of ownership, assignment, or
+     * reporting hierarchy. This is a capability grant (a role_permissions row),
+     * NOT an implicit consequence of a role slug. See
+     * docs/authorization-spec.md DECISION 5.
+     */
+    public const PRIVILEGE_ALL_PARTNERS = 'data_scope.all_partners';
+
+    /**
      * Check if this user's role bypasses all permission checks.
      */
     public function bypassesPermissions(): bool
     {
         return $this->allRoles()->contains(fn (Role $r) => (bool) $r->bypass_permissions);
+    }
+
+    /**
+     * Whether this user holds the explicit unrestricted-partner-visibility
+     * privilege. Bypass roles (super_admin) see everything by design and are
+     * handled separately in VisibilityContext; this covers only the explicit
+     * grant, so no role confers company-wide visibility via its slug.
+     */
+    public function hasUnrestrictedPartnerVisibility(): bool
+    {
+        return $this->hasModulePermission(self::PRIVILEGE_ALL_PARTNERS);
     }
 
     /**

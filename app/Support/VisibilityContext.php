@@ -98,8 +98,10 @@ class VisibilityContext
         $this->resolvedKey = $key;
 
         // Unrestricted (see ALL partners): no actor (console/queue/system),
-        // bypass roles, admins, and CoE (program-wide by policy).
-        if ($a === null || ($a instanceof User && ($a->bypassesPermissions() || $a->isAdmin() || $this->seesAllPartners($a)))) {
+        // bypass roles (super_admin — by design), and holders of the explicit
+        // unrestricted-visibility privilege. Role slugs no longer grant this
+        // implicitly — see docs/authorization-spec.md DECISION 5.
+        if ($a === null || ($a instanceof User && ($a->bypassesPermissions() || $a->hasUnrestrictedPartnerVisibility()))) {
             $this->partnerIds = null;
             $this->partnerNames = null;
 
@@ -126,14 +128,6 @@ class VisibilityContext
         $this->partnerNames = $ids
             ? Partner::query()->withoutGlobalScopes()->whereIn('id', $ids)->pluck('name')->all()
             : [];
-    }
-
-    /**
-     * Roles that get program-wide partner visibility (see every partner).
-     */
-    private function seesAllPartners(User $user): bool
-    {
-        return $user->allRoles()->contains(fn ($r) => in_array($r->slug, ['coe'], true));
     }
 
     /**
