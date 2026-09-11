@@ -214,3 +214,40 @@ reads inside MetricService and route them through `filt()`; treat any new raw
 `wh.*` partner-data query elsewhere as a review red flag. A future hardening
 option is a thin scoped query-builder wrapper for the `wh` connection so the
 filter is applied by construction rather than by convention.
+
+## 9. Increment 3 — the owner (second) principal axis
+
+Mechanism (PR #83): `VisibilityContext::myUserSet()` (actor + recursive
+reporting-hierarchy descendants; null = unrestricted) + the `ScopedToOwner` trait
+(fail-closed global scope over declared owner columns, default `user_id`).
+Additive — the partner `ScopedToActor` is untouched. NOT for Authenticatable
+models (recursion) — those use a local scope (cf. `Contact`).
+
+The ~40 user-owned models (coverage §3) are classified by intent:
+
+**Bucket A — program-wide catalog (intentionally NOT scoped):** CoE-authored,
+shared content used by everyone; availability is gated by module/feature/role,
+not row level. PartnerPath, ResourcePath, ActivationPath, ActivationStep,
+GoalTemplate, TaskTemplate, ResourceTaskTemplate, NotificationTemplate, Blueprint,
+Workshop (definition), WorkshopGuide, Lab, EnablementEvent, StrategyScenario,
+Journey (a definition; reached via its scoped assignments — no own user_id).
+
+**Bucket B — personal records, OWNER-SCOPED (done):** WeeklyFocus (slice 1),
+SavedFilter, SalesforceCredential (sensitive per-user creds), StepProgress,
+JourneyAssignment. Each on `ScopedToOwner` (user_id) with a zero-leak test.
+(JourneyPendingAction excluded — its `assigned_to` is a role STRING like 'agent',
+not a user id; reached via its scoped journey participant.)
+
+**Bucket C — shared discussion/activity (intentionally NOT author-scoped):**
+author-scoping would hide other people's posts in a shared thread; access is gated
+at the workshop/session/task level. WorkshopThread, WorkshopReply,
+WorkshopReaction, WorkshopReadState, WorkshopPresence, WorkshopContentReviewComment,
+ZoomMeeting, ZoomChatResponder, TaskComment.
+
+**Bucket D — system/admin (intentionally NOT owner-scoped):** admin-gated surface.
+AuditLog, Import, Asset.
+
+**Bucket E — pending a product ruling:** StrategyPlan / StrategyPlanInitiative
+(program-level vs owner), WorkshopSession (participation-gated vs owner),
+WorkshopSessionMonitor (a user's monitoring assignments), ActionPlanItem
+(assigned_to a user vs reached via its already-scoped ActionPlan partner).

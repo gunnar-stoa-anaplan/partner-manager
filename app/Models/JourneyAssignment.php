@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ScopedToOwner;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class JourneyAssignment extends Model
 {
-    use HasFactory;
+    use HasFactory, ScopedToOwner;
 
     protected $fillable = [
         'journey_id',
