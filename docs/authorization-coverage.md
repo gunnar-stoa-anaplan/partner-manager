@@ -122,3 +122,41 @@ structural backstop if one forgets.
 3. **Increment 3** (only when a non-partner resource needs enforcement):
    generalize to the principal model; decide per §3 group which are owner-scoped
    vs program-wide.
+
+## 7. Increment-2 progress and findings (live)
+
+**Scoped so far (ScopedToActor added, each with a zero-leak test):**
+PartnerStageHistory, ResourceStageHistory, PartnerMarketplaceEntry,
+PartnerSolution, ResourceTask, WeeklyFocusItem, LabParticipant, ActionPlan.
+Plus the increment-1 privilege refactor and the MCP/sanctum actor fix.
+
+**Deferred with findings (NOT mechanical — need a decision or reconciliation):**
+
+- **`PartnerPathEnrollment` / `ResourcePathEnrollment`** — entangled with
+  `PartnerPathController`, which scopes with **hard-coded role logic** that
+  diverges from `VisibilityContext`:
+  `$canSeeAll = $user->isAdmin() || $user->role?->slug === 'manager'` →
+  a `manager` gets `Partner::pluck('id')` (EVERY partner in the DB, not their
+  hierarchy), everyone else gets `Partner::where('user_id')` (owned only —
+  ignores assignments and reporting hierarchy). So managers are *over*-exposed
+  and assignees/hierarchy are *under*-shown, and it uses primary-role-only
+  (`role?->slug`) not multi-role. Adding the model scope would silently narrow
+  managers via intersection. Correct fix: reconcile the controller to rely on
+  `VisibilityContext` (remove the hard-coded role scoping), then add the model
+  scope. Tracked as a follow-up task.
+
+- **`AnaplanWorkspace`** — has provisioning logic that queries
+  `static::whereNull('partner_id')` to link unassigned workspaces; a blanket
+  partner scope makes that query return nothing for non-admin/non-system callers.
+  Needs `->withoutGlobalScope('actor_visibility')` on the provisioning/linking
+  path before the trait is added. Deferred.
+
+- **`Contact`** and the **benchmark tables** (PartnerScorecard,
+  PartnerHealthSnapshot, OpportunitySnapshot, ResourceSnapshot,
+  PartnerAssignedGoal) — deferred per the accepted approaches in the spec
+  (local query scope for Contact; ScopedToActor + explicit `withoutGlobalScope`
+  on benchmark reads).
+
+**Still mechanical / pending:** LaunchProgramPartner, PartnerBlueprintAssignment,
+EnablementSession, EnablementRegistration, EnablementGoal, PartnerPlanCommit
+(re-verify each read path first).

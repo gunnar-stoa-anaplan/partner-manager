@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ScopedToActor;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ActionPlan extends Model
 {
+    use HasFactory, ScopedToActor;
+
     protected $fillable = [
         'partner_id', 'title', 'description', 'source', 'status',
         'priority', 'owner_type', 'owner_user_id', 'owner_contact_id',

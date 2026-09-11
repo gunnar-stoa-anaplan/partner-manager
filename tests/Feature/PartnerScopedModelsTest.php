@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ActionPlan;
 use App\Models\LabParticipant;
 use App\Models\Partner;
 use App\Models\PartnerMarketplaceEntry;
@@ -34,6 +35,7 @@ class PartnerScopedModelsTest extends TestCase
             'PartnerSolution' => [PartnerSolution::class],
             'ResourceTask' => [ResourceTask::class],
             'WeeklyFocusItem' => [WeeklyFocusItem::class],
+            'ActionPlan' => [ActionPlan::class],
             // LabParticipant is covered by its own method below — its factory
             // chain (Lab -> EnablementEvent) needs an admin user to exist first
             // (pre-existing EnablementEventFactory quirk), which the generic
