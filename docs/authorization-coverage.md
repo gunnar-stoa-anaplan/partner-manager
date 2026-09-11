@@ -181,3 +181,36 @@ Plus the increment-1 privilege refactor and the MCP/sanctum actor fix.
 **Remaining after this batch:** the entangled enablement/launch models above
 (tasked); the benchmark tables (scope + `withoutGlobalScope` on benchmark reads).
 Then the `MetricService::filt()` / export universality audit and increment 3.
+
+## 8. Universality audit — warehouse / metrics / exports (2026-09-11)
+
+Verifies the spec's requirement that scope applies everywhere a fact derived
+from partner data can be observed (KPIs, aggregates, exports, APIs), focusing on
+the non-Eloquent surfaces where the global scope does not automatically apply.
+
+**Result: the surface is well-contained.**
+
+- **Warehouse (`wh.*`) partner-data access is centralized in `MetricService`**,
+  which scopes via its `filt()` helper (builds WHERE clauses from
+  `VisibilityContext`). No other class runs partner-data warehouse queries.
+- **Only one raw warehouse read exists outside MetricService** —
+  `InsightServiceProvider` selecting `wh.metric_definition` (the metric
+  *definitions* catalog: names/units/sections). This is program-wide metadata
+  with no partner data, so it is correctly unscoped.
+- **`InsightController`** (the drill/audit surface) scopes explicitly via
+  `VisibilityContext::visiblePartnerNames()` (`allowedPartners`).
+- **No unscoped partner-data export endpoint.** The `fputcsv`/streamed-download
+  controllers are workshop toolkit/report and portal-file downloads, not
+  partner/opportunity/contact data dumps; partner-data exports would inherit the
+  now-scoped Eloquent models.
+- With the increment-1/2 work, the core partner models (Partner, Opportunity,
+  Contact via local scope, Lead, Project, and the 13 added models) are scoped,
+  so ad-hoc queries in controllers/exports inherit scope.
+
+**Residual risk (discipline, not structure):** `MetricService::filt()` is opt-in
+per query — a new metric method must remember to call it; there is no structural
+backstop on the warehouse surface. Mitigation: keep all warehouse partner-data
+reads inside MetricService and route them through `filt()`; treat any new raw
+`wh.*` partner-data query elsewhere as a review red flag. A future hardening
+option is a thin scoped query-builder wrapper for the `wh` connection so the
+filter is applied by construction rather than by convention.
