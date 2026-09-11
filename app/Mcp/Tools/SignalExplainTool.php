@@ -7,12 +7,14 @@ use App\Services\PartnerHealthService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Get full context and explanation for a specific signal. Returns the signal data, correlated signals, partner health context, and underlying metrics that generated the signal.')]
 class SignalExplainTool extends Tool
 {
+    protected string $name = 'signal_explain';
+
+    protected string $description = 'Deep-dive ONE signal by signal_id: the signal itself, correlated signals, the partner\'s health context, and the underlying metrics that generated it. Discover signal ids first with signal_feed.';
+
     public function handle(Request $request): Response
     {
         $signal = Signal::with('partner', 'linkedAlert')->findOrFail($request->get('signal_id'));

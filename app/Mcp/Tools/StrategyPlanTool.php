@@ -6,12 +6,14 @@ use App\Models\StrategyPlan;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Query strategy plan data — targets, actuals, variance, assumptions, budgets, and initiatives. Answers questions like "How are we tracking against the FY27 plan?" or "What are our target metrics?"')]
 class StrategyPlanTool extends Tool
 {
+    protected string $name = 'strategy_plan';
+
+    protected string $description = 'Query strategy plan data — targets, actuals, variance, assumptions, budgets, and initiatives. Answers questions like "How are we tracking against the FY27 plan?" or "What are our target metrics?"';
+
     public function handle(Request $request): Response
     {
         $query = StrategyPlan::with(['targets', 'assumptions', 'budgets', 'initiatives']);
@@ -138,7 +140,7 @@ class StrategyPlanTool extends Tool
         return [
             'plan_id' => $schema->integer()->description('Specific plan ID to retrieve'),
             'fiscal_year' => $schema->string()->description('Filter by fiscal year (e.g. "FY27")'),
-            'status' => $schema->string()->description('Plan status filter (default: active). Options: draft, committed, active, closed'),
+            'status' => $schema->string()->enum(['draft', 'committed', 'active', 'closed'])->description('Plan status filter (default: active)'),
         ];
     }
 }

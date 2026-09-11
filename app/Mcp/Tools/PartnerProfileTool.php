@@ -6,12 +6,14 @@ use App\Models\Partner;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Get a full partner profile including contacts, projects, and recent opportunities.')]
 class PartnerProfileTool extends Tool
 {
+    protected string $name = 'partner_profile';
+
+    protected string $description = 'Full profile of ONE partner: its contacts, projects, and most recent opportunities. Requires partner_id (resolve a name via partner_list). For pipeline economics use partner_pipeline; for health use partner_scorecard.';
+
     public function handle(Request $request): Response
     {
         $partner = Partner::with(['contacts', 'projects', 'opportunities' => fn ($q) => $q->latest()->limit(20)])

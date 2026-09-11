@@ -10,12 +10,14 @@ use App\Models\Project;
 use App\Models\Resource;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Get portfolio-level analytics: partner counts, total pipeline, project status, enablement metrics.')]
 class AnalyticsSummaryTool extends Tool
 {
+    protected string $name = 'analytics_summary';
+
+    protected string $description = 'Portfolio-wide totals across ALL partners in your scope: partner counts by region/industry, total and by-stage pipeline, project status, and enablement counts. Takes no arguments. For a single partner use partner_pipeline or partner_profile, not this.';
+
     public function handle(Request $request): Response
     {
         return Response::json([

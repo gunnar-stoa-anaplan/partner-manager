@@ -6,12 +6,14 @@ use App\Models\Partner;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Search and filter partners. Returns a list of partners with basic info.')]
 class PartnerListTool extends Tool
 {
+    protected string $name = 'partner_list';
+
+    protected string $description = 'Search and filter partners in your scope and get their numeric ids. Returns id, name, region, geography, industry, and opportunity/project/contact counts. Use this FIRST to resolve a partner name to the partner_id the single-partner tools require. For one partner\'s full detail use partner_profile; for portfolio-wide totals use analytics_summary.';
+
     public function handle(Request $request): Response
     {
         $query = Partner::query()->withCount(['opportunities', 'projects', 'contacts']);

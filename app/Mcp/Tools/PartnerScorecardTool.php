@@ -6,12 +6,14 @@ use App\Models\Partner;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Get partner health scorecard including goal progress, certifications, and key metrics.')]
 class PartnerScorecardTool extends Tool
 {
+    protected string $name = 'partner_scorecard';
+
+    protected string $description = 'ONE partner\'s health scorecard: overall score plus goal progress, certifications, and key metrics. Requires partner_id. For what needs attention use signal_feed; for capability/staffing gaps use delivery_readiness.';
+
     public function handle(Request $request): Response
     {
         $partner = Partner::with(['goals', 'certifications', 'resources'])

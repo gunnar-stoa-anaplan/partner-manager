@@ -6,12 +6,14 @@ use App\Models\IntegrationConnection;
 use App\Models\IntegrationJob;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Get Integration Hub status: active connections, recent jobs, and failure rates.')]
 class IntegrationStatusTool extends Tool
 {
+    protected string $name = 'integration_status';
+
+    protected string $description = 'Integration Hub health: connections with per-connection job and failure counts, the 10 most recent jobs, and a today/24h summary. This is about data-sync plumbing, not partner business data. Takes no arguments.';
+
     public function handle(Request $request): Response
     {
         $connections = IntegrationConnection::query()

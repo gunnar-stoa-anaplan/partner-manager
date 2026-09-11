@@ -6,12 +6,14 @@ use App\Models\Partner;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Get a partner\'s opportunity pipeline with stage breakdown and revenue totals.')]
 class PartnerPipelineTool extends Tool
 {
+    protected string $name = 'partner_pipeline';
+
+    protected string $description = 'ONE partner\'s opportunity pipeline: total and weighted pipeline (USD), a per-stage breakdown, and the deal list. Requires partner_id. For pipeline across ALL partners in scope use analytics_summary instead.';
+
     public function handle(Request $request): Response
     {
         $partner = Partner::findOrFail($request->get('partner_id'));

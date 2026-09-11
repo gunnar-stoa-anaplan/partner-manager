@@ -7,12 +7,14 @@ use App\Support\DatabasePortability;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Query active signals from the Signal Engine. Filter by channel (risk, opportunity, trend, anomaly, recommendation, benchmark), severity, partner, or signal type. Returns prioritized signal feed with descriptions and recommended actions.')]
 class SignalFeedTool extends Tool
 {
+    protected string $name = 'signal_feed';
+
+    protected string $description = 'The Signal Engine\'s prioritized feed of insights across partners in your scope. Filter by channel, severity, partner_id, type, or status. Returns each signal\'s description and recommended action — the "what needs attention" queue. For the full context behind ONE signal, use signal_explain.';
+
     public function handle(Request $request): Response
     {
         $query = Signal::with('partner');
@@ -75,11 +77,11 @@ class SignalFeedTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'channel' => $schema->string()->description('Filter by channel: risk, opportunity, trend, anomaly, recommendation, benchmark'),
-            'severity' => $schema->string()->description('Filter by severity: critical, warning, info, positive'),
-            'partner_id' => $schema->integer()->description('Filter by partner ID'),
+            'channel' => $schema->string()->enum(['risk', 'opportunity', 'trend', 'anomaly', 'recommendation', 'benchmark'])->description('Filter by signal channel'),
+            'severity' => $schema->string()->enum(['critical', 'warning', 'info', 'positive'])->description('Filter by severity'),
+            'partner_id' => $schema->integer()->description('Filter to one partner (numeric id from partner_list)'),
             'type' => $schema->string()->description('Filter by signal type (partial match)'),
-            'status' => $schema->string()->description('Signal status (default: active). Options: active, acknowledged, resolved, expired, dismissed'),
+            'status' => $schema->string()->enum(['active', 'acknowledged', 'resolved', 'expired', 'dismissed'])->description('Signal lifecycle status (default: active)'),
             'limit' => $schema->integer()->description('Max results (default 20, max 50)'),
         ];
     }

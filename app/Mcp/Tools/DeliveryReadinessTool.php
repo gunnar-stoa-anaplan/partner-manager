@@ -9,12 +9,14 @@ use App\Services\DeliveryCapabilityRiskService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Assess delivery readiness across the partner portfolio by product area. Shows forecasted projects, available certified resources, enablement completion, and risk assessment per product area. Answers questions like "Do I have the right partners to deliver all forecasted FY27 projects?"')]
 class DeliveryReadinessTool extends Tool
 {
+    protected string $name = 'delivery_readiness';
+
+    protected string $description = 'Assess delivery readiness across the partner portfolio by product area. Shows forecasted projects, available certified resources, enablement completion, and risk assessment per product area. Answers questions like "Do I have the right partners to deliver all forecasted FY27 projects?"';
+
     public function handle(Request $request): Response
     {
         $productAreaFilter = $request->get('product_area');
