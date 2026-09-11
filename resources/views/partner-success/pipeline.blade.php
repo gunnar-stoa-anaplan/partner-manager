@@ -24,13 +24,20 @@
 <div class="container-fluid py-3">
 
     @include('partner-success.partials.scope-filter')
+    <x-insight.drill-panel />
+    <style>
+        .pipe-drill { cursor: pointer; }
+        .pipe-drill:hover .card { outline: 2px solid var(--bs-primary); }
+        .pipe-drill-link { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px; }
+        #ch-stage, #ch-lob, #ch-region, #ch-app, #ch-ai, #ch-est { cursor: pointer; }
+    </style>
 
     {{-- Pipeline totals --}}
     <div class="row g-3 mb-3">
-        <div class="col-6 col-xl-3"><x-insight.stat-card title="Total $ACV" :value="$m($total)" sub="all stages in scope" /></div>
-        <div class="col-6 col-xl-3"><x-insight.stat-card title="Open $ACV" :value="$m($open)" sub="not yet won" /></div>
-        <div class="col-6 col-xl-3"><x-insight.stat-card title="Closed Won $ACV" :value="$m($won)" sub="stage 5" /></div>
-        <div class="col-6 col-xl-3"><x-insight.stat-card title="Products in play" :value="number_format(count($pipe['activeCaps']))" sub="distinct across these deals" /></div>
+        <div class="col-6 col-xl-3 pipe-drill" role="button" data-dim="all" data-title="Total $ACV"><x-insight.stat-card title="Total $ACV" :value="$m($total)" sub="all stages in scope" /></div>
+        <div class="col-6 col-xl-3 pipe-drill" role="button" data-dim="open" data-title="Open $ACV"><x-insight.stat-card title="Open $ACV" :value="$m($open)" sub="not yet won" /></div>
+        <div class="col-6 col-xl-3 pipe-drill" role="button" data-dim="won" data-title="Closed Won $ACV"><x-insight.stat-card title="Closed Won $ACV" :value="$m($won)" sub="stage 5" /></div>
+        <div class="col-6 col-xl-3 pipe-drill" role="button" data-dim="hasproduct" data-title="Products in play"><x-insight.stat-card title="Products in play" :value="number_format(count($pipe['activeCaps']))" sub="distinct across these deals" /></div>
     </div>
 
     {{-- Distribution charts --}}
@@ -95,7 +102,9 @@
                         @endphp
                         <tr data-hay="{{ $hay }}">
                             <td>
-                                <span class="fw-500">{{ $r['account'] ?: '—' }}</span>
+                                @if($r['account'])
+                                    <span class="fw-500 pipe-drill-link" role="button" data-dim="account" data-value="{{ $r['account'] }}" data-title="{{ $r['account'] }}">{{ $r['account'] }}</span>
+                                @else <span class="fw-500">—</span> @endif
                                 @if($salesOnly)<span class="badge bg-dark text-white salesonly ms-1">SALES ONLY</span>@endif
                             </td>
                             <td class="text-truncate" style="max-width:260px" title="{{ $r['opportunity'] }}">{{ $r['opportunity'] ?: '—' }}</td>
@@ -139,14 +148,64 @@
     const money = v => { v = +v || 0; if (Math.abs(v) >= 1e6) return '$' + (v/1e6).toFixed(1) + 'M'; if (Math.abs(v) >= 1e3) return '$' + Math.round(v/1e3) + 'K'; return '$' + v; };
     const stageShort = s => (s || '').replace(/^\s*\d+\.?\s*/, '').replace('Qualification and Discovery','Qual & Disc').replace('Solution Development','Sol. Dev').replace('Solution Validation','Sol. Valid').replace('Negotiate and Close','Neg & Close').replace('Closed Won','Closed Won');
 
-    const mk = (id, opt) => { const el = document.getElementById(id); if (el) new ApexCharts(el, opt).render(); };
-    const donut = (id, labels, series, colors) => mk(id, {
+    // ── Click-to-drill audit drawer (reuses the Insight Kit drill-panel markup) ──
+    const DRILL_BASE = @js(url('partner-success/api/pipeline-drill'));
+    async function openDrill(dim, value, value2, title) {
+        const panelEl = document.getElementById('insight-drill');
+        if (!panelEl) return;
+        if (window.bootstrap) window.bootstrap.Offcanvas.getOrCreateInstance(panelEl).show();
+        const body = document.getElementById('insight-drill-body');
+        body.replaceChildren();
+        const loading = document.createElement('tr'); const lc = document.createElement('td');
+        lc.className = 'text-muted'; lc.textContent = 'Loading…'; loading.appendChild(lc); body.appendChild(loading);
+        const qs = new URLSearchParams({ value: value ?? '' });
+        if (value2 != null) qs.set('value2', value2);
+        let d = {};
+        try {
+            d = await (await fetch(DRILL_BASE + '/' + encodeURIComponent(dim) + '?' + qs.toString(), { headers: { Accept: 'application/json' } })).json();
+        } catch (e) {
+            body.replaceChildren(); const tr = document.createElement('tr'), td = document.createElement('td');
+            td.className = 'text-danger'; td.textContent = 'Could not load source.'; tr.appendChild(td); body.appendChild(tr); return;
+        }
+        document.getElementById('insight-drill-title').textContent = (title || 'Source') + ' — ' + (d.row_count ?? (d.rows || []).length) + ' rows';
+        document.getElementById('insight-drill-sql').textContent = d.sql || '';
+        const prov = (d.provenance || []).map(p => (p.source_file || '') + ' @ ' + (p.snapshot_date || '')).join(' · ');
+        document.getElementById('insight-drill-provenance').textContent = prov ? ('Provenance: ' + prov) : '';
+        const cols = d.columns || [];
+        const head = document.getElementById('insight-drill-head');
+        head.replaceChildren(); body.replaceChildren();
+        const htr = document.createElement('tr');
+        cols.forEach(c => { const th = document.createElement('th'); th.textContent = c; htr.appendChild(th); });
+        head.appendChild(htr);
+        const rws = (d.rows || []).slice(0, 500);
+        if (!rws.length) {
+            const tr = document.createElement('tr'), td = document.createElement('td');
+            td.className = 'text-muted'; td.colSpan = cols.length || 1; td.textContent = 'No rows.'; tr.appendChild(td); body.appendChild(tr); return;
+        }
+        rws.forEach(r => {
+            const tr = document.createElement('tr');
+            cols.forEach(c => { const td = document.createElement('td'); const v = r[c]; td.textContent = (v === null || v === undefined) ? '' : String(v); tr.appendChild(td); });
+            body.appendChild(tr);
+        });
+    }
+
+    const mk = (id, opt, onPoint) => {
+        const el = document.getElementById(id); if (!el) return;
+        if (onPoint) {
+            opt.chart = opt.chart || {};
+            opt.chart.events = Object.assign({}, opt.chart.events, {
+                dataPointSelection: (e, ctx, cfg) => { const d = onPoint(cfg.dataPointIndex); if (d) openDrill(d.dim, d.value, d.value2, d.title); },
+            });
+        }
+        new ApexCharts(el, opt).render();
+    };
+    const donut = (id, labels, series, colors, onPoint) => mk(id, {
         chart: { type: 'donut', height: 240 }, labels, series,
         colors: colors || labels.map((_, i) => PAL[i % PAL.length]),
         legend: { position: 'bottom', fontSize: '11px' }, dataLabels: { enabled: false },
         stroke: { width: 2 }, tooltip: { y: { formatter: money } },
         plotOptions: { pie: { donut: { size: '62%' } } },
-    });
+    }, onPoint);
 
     // By sales stage (bar)
     mk('ch-stage', {
@@ -156,10 +215,12 @@
         yaxis: { labels: { formatter: money } },
         colors: [INK], plotOptions: { bar: { borderRadius: 4, columnWidth: '55%' } },
         dataLabels: { enabled: false }, tooltip: { y: { formatter: money } },
-    });
+    }, i => ({ dim: 'stage', value: PIPE.byStage[i].k, title: 'Stage · ' + PIPE.byStage[i].k }));
 
-    donut('ch-lob', PIPE.byLob.map(x => x.k), PIPE.byLob.map(x => x.v));
-    donut('ch-region', PIPE.byGeo.map(x => x.k), PIPE.byGeo.map(x => x.v));
+    donut('ch-lob', PIPE.byLob.map(x => x.k), PIPE.byLob.map(x => x.v), null,
+        i => ({ dim: 'lob', value: PIPE.byLob[i].k, title: 'LOB · ' + PIPE.byLob[i].k }));
+    donut('ch-region', PIPE.byGeo.map(x => x.k), PIPE.byGeo.map(x => x.v), null,
+        i => ({ dim: 'geo', value: PIPE.byGeo[i].k, title: 'Region · ' + PIPE.byGeo[i].k }));
 
     // Top products (horizontal bar), coloured by LOB; platform + untagged grey
     const platGrey = { 'Core Platform': 1, 'Polaris': 1, 'Anaplan Data Orchestrator': 1 };
@@ -171,12 +232,16 @@
         plotOptions: { bar: { horizontal: true, borderRadius: 3, distributed: true, barHeight: '70%' } },
         dataLabels: { enabled: false }, legend: { show: false },
         tooltip: { y: { formatter: v => Math.round(v) + ' opps' } },
-    });
+    }, i => { const p = PIPE.topProducts[i]; return p.k === 'No product'
+        ? { dim: 'noproduct', title: 'No product' }
+        : { dim: 'product', value: p.k, title: 'Product · ' + p.k }; });
 
     donut('ch-ai', ['AI-engaged', 'No AI feature', 'No product assigned'],
-        [PIPE.ai.engaged, PIPE.ai.no_ai, PIPE.ai.unassigned], ['#8a7ff0', GREY, '#e9ecef']);
+        [PIPE.ai.engaged, PIPE.ai.no_ai, PIPE.ai.unassigned], ['#8a7ff0', GREY, '#e9ecef'],
+        i => ({ dim: 'ai', value: ['engaged', 'no_ai', 'unassigned'][i], title: 'AI · ' + ['AI-engaged', 'No AI feature', 'No product assigned'][i] }));
     donut('ch-est', ['Apps', 'Core platform only', 'No product assigned'],
-        [PIPE.appsCore.apps, PIPE.appsCore.core, PIPE.appsCore.unassigned], [ORANGE, GREY, '#e9ecef']);
+        [PIPE.appsCore.apps, PIPE.appsCore.core, PIPE.appsCore.unassigned], [ORANGE, GREY, '#e9ecef'],
+        i => ({ dim: 'appscore', value: ['apps', 'core', 'unassigned'][i], title: ['Apps', 'Core platform only', 'No product assigned'][i] }));
 
     // Matrix: search filter
     const search = document.getElementById('mx-search');
@@ -203,6 +268,13 @@
             const vis = prods.filter(p => !hidden || ACTIVE.has(p.cap)).length;
             h.colSpan = Math.max(1, vis); h.hidden = vis === 0;
         });
+    });
+
+    // KPI tiles + matrix account cells → open the audit drawer.
+    document.addEventListener('click', (e) => {
+        const t = e.target.closest('.pipe-drill, .pipe-drill-link');
+        if (!t) return;
+        openDrill(t.dataset.dim, t.dataset.value || '', t.dataset.value2 || null, t.dataset.title || '');
     });
 })();
 </script>

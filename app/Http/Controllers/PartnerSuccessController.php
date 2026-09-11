@@ -358,6 +358,16 @@ class PartnerSuccessController extends Controller
         return response()->json($partners);
     }
 
+    /** Audit drill for a clicked Pipeline number (scoped rows + SQL + provenance). */
+    public function apiPipelineDrill(Request $request, string $dim)
+    {
+        return response()->json($this->metrics()->pipelineDrill(
+            $dim,
+            (string) $request->query('value', ''),
+            $request->query('value2'),
+        ));
+    }
+
     public function apiDrill(Request $request, string $name)
     {
         return response()->json($this->metrics()->drill($name, $request->query('geo'), $request->query('partner')));

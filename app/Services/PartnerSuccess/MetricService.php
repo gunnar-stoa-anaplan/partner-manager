@@ -1138,6 +1138,73 @@ class MetricService
         );
     }
 
+    /**
+     * Audit drill for a Pipeline number: given a dimension + value (the segment
+     * the user clicked), return the underlying opportunity rows + the SQL + the
+     * data provenance. Scoped by filt() (row-level visibility + pinned filters),
+     * so a drill can never surface out-of-scope rows.
+     *
+     * @return array{columns: array<int,string>, rows: array<int,array>, row_count: int, sql: string, provenance: array}
+     */
+    public function pipelineDrill(string $dim, string $value = '', ?string $value2 = null): array
+    {
+        $db = $this->db();
+        [$clauses, $params, $shown] = $this->filt('opportunity', null, null);
+
+        $platform = array_map(fn ($p) => $p[0], self::SALES_CATALOG['Platform']);
+        $platArr = "ARRAY['".implode("','", array_map(fn ($n) => str_replace("'", "''", $n), $platform))."']::text[]";
+        $q = fn ($s) => "'".str_replace("'", "''", (string) $s)."'";
+        $add = function (string $sql, string $human) use (&$clauses, &$shown) {
+            $clauses[] = $sql;
+            $shown[] = $human;
+        };
+
+        switch ($dim) {
+            case 'all': break;
+            case 'open': $add('stage < 5', 'stage < 5'); break;
+            case 'won': $add('stage = 5', 'stage = 5'); break;
+            case 'hasproduct': $add('coalesce(array_length(capabilities,1),0) > 0', 'has a product'); break;
+            case 'stage': $clauses[] = 'stage_label = ?'; $params[] = $value; $shown[] = "stage_label = {$q($value)}"; break;
+            case 'geo': $clauses[] = 'geo = ?'; $params[] = $value; $shown[] = "geo = {$q($value)}"; break;
+            case 'lob': $clauses[] = "coalesce(lob,'(unspecified)') = ?"; $params[] = $value; $shown[] = "lob = {$q($value)}"; break;
+            case 'account': $clauses[] = 'account = ?'; $params[] = $value; $shown[] = "account = {$q($value)}"; break;
+            case 'product': $clauses[] = '? = ANY(capabilities)'; $params[] = $value; $shown[] = "{$q($value)} = ANY(capabilities)"; break;
+            case 'noproduct': $add('coalesce(array_length(capabilities,1),0) = 0', 'no product tagged'); break;
+            case 'cell':
+                $clauses[] = 'stage_label = ?'; $params[] = $value; $shown[] = "stage_label = {$q($value)}";
+                $clauses[] = '? = ANY(capabilities)'; $params[] = $value2; $shown[] = "{$q($value2)} = ANY(capabilities)";
+                break;
+            case 'ai':
+                if ($value === 'unassigned') { $add('coalesce(array_length(capabilities,1),0) = 0', 'no product assigned'); }
+                elseif ($value === 'engaged') { $add('coalesce(array_length(capabilities,1),0) > 0', 'has a product'); $add('is_ai', 'is_ai'); }
+                else { $add('coalesce(array_length(capabilities,1),0) > 0', 'has a product'); $add('NOT coalesce(is_ai,false)', 'not AI'); }
+                break;
+            case 'appscore':
+                if ($value === 'unassigned') { $add('coalesce(array_length(capabilities,1),0) = 0', 'no product assigned'); }
+                elseif ($value === 'apps') { $add('coalesce(array_length(capabilities,1),0) > 0', 'has a product'); $add("coalesce(array_length(ARRAY(SELECT unnest(capabilities) EXCEPT SELECT unnest({$platArr})),1),0) > 0", 'has a non-platform app'); }
+                else { $add('coalesce(array_length(capabilities,1),0) > 0', 'has a product'); $add("coalesce(array_length(ARRAY(SELECT unnest(capabilities) EXCEPT SELECT unnest({$platArr})),1),0) = 0", 'platform only'); }
+                break;
+            default: abort(404);
+        }
+
+        $where = $clauses ? ('WHERE '.implode(' AND ', $clauses)) : '';
+        $cols = ['account', 'use_case', 'partner', 'implementer', 'geo', 'fiscal_qtr', 'lob', 'stage_label', 'acv'];
+        $sel = implode(', ', $cols);
+        $rows = $db->select("SELECT {$sel} FROM wh.opportunity_current {$where} ORDER BY acv DESC NULLS LAST LIMIT 500", $params);
+        $count = (int) ($db->selectOne("SELECT count(*)::int AS n FROM wh.opportunity_current {$where}", $params)->n ?? 0);
+        $prov = $db->select("SELECT DISTINCT source_file, max(snapshot_date) AS snapshot_date FROM wh.opportunity_current {$where} GROUP BY source_file LIMIT 5", $params);
+
+        $sqlShown = "SELECT {$sel}\nFROM wh.opportunity_current\nWHERE ".implode("\n  AND ", $shown ?: ['1=1'])."\nORDER BY acv DESC\nLIMIT 500";
+
+        return [
+            'columns' => $cols,
+            'rows' => array_map(fn ($r) => (array) $r, $rows),
+            'row_count' => $count,
+            'sql' => $sqlShown,
+            'provenance' => array_map(fn ($p) => ['source_file' => $p->source_file, 'snapshot_date' => $p->snapshot_date], $prov),
+        ];
+    }
+
     public function breakdown(string $key, ?string $geo = null, ?string $partner = null): array
     {
         $cfg = self::BK[$key] ?? abort(404);

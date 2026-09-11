@@ -975,6 +975,7 @@ Route::middleware(['auth', 'module:partner_success.engagement'])->prefix('partne
     Route::get('/api/metrics', [App\Http\Controllers\PartnerSuccessController::class, 'apiMetrics'])->name('api.metrics');
     Route::get('/api/partners', [App\Http\Controllers\PartnerSuccessController::class, 'apiPartners'])->name('api.partners');
     Route::get('/api/drill/{name}', [App\Http\Controllers\PartnerSuccessController::class, 'apiDrill'])->name('api.drill');
+    Route::get('/api/pipeline-drill/{dim}', [App\Http\Controllers\PartnerSuccessController::class, 'apiPipelineDrill'])->name('api.pipeline-drill');
     Route::get('/api/trend/{name}', [App\Http\Controllers\PartnerSuccessController::class, 'apiTrend'])->name('api.trend');
     Route::get('/api/breakdown/{key}', [App\Http\Controllers\PartnerSuccessController::class, 'apiBreakdown'])->name('api.breakdown');
     Route::get('/api/drill-breakdown/{key}', [App\Http\Controllers\PartnerSuccessController::class, 'apiDrillBreakdown'])->name('api.drill_bk');
