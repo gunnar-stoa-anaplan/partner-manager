@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SaveRoleRequest;
 use App\Models\Role;
 use App\Models\RolePermission;
+use App\Models\User;
 use App\Services\ModuleRegistry;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -40,8 +41,38 @@ class RoleController extends Controller
     {
         $role->load('permissions');
         $moduleGroups = $this->getModuleGroups();
+        $assignedMembers = $this->assignedMembers($role);
 
-        return view('admin.roles.edit', compact('role', 'moduleGroups'));
+        return view('admin.roles.edit', compact('role', 'moduleGroups', 'assignedMembers'));
+    }
+
+    /**
+     * The people assigned to a role: internal users holding it as their primary
+     * role (role_id) OR via the multi-role pivot; portal roles list their
+     * contacts. Returned as a uniform, view-ready collection.
+     *
+     * @return \Illuminate\Support\Collection<int, array{name: string, email: ?string, detail: ?string}>
+     */
+    private function assignedMembers(Role $role): \Illuminate\Support\Collection
+    {
+        if ($role->type === 'portal') {
+            return $role->contacts()->with('partner')
+                ->orderBy('first_name')->orderBy('last_name')->get()
+                ->map(fn ($c) => [
+                    'name' => trim($c->first_name.' '.$c->last_name) ?: ($c->email ?? 'Contact'),
+                    'email' => $c->email,
+                    'detail' => $c->partner?->name,
+                ]);
+        }
+
+        return User::where('role_id', $role->id)
+            ->orWhereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
+            ->orderBy('name')->get()
+            ->map(fn (User $u) => [
+                'name' => $u->name,
+                'email' => $u->email,
+                'detail' => $u->role_id === $role->id ? 'Primary role' : 'Additional role',
+            ]);
     }
 
     public function store(SaveRoleRequest $request): RedirectResponse

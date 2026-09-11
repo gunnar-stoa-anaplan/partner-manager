@@ -220,6 +220,44 @@
     </div>
 </form>
 
+@if ($role)
+    <div class="card shadow-0 mb-g">
+        <div class="card-header">
+            <div class="card-title">
+                Assigned {{ $role->type === 'portal' ? 'Contacts' : 'Users' }}
+                <span class="badge badge-secondary ms-1">{{ ($assignedMembers ?? collect())->count() }}</span>
+            </div>
+        </div>
+        <div class="card-body">
+            @php($members = $assignedMembers ?? collect())
+            @if ($members->isEmpty())
+                <div class="text-muted">No {{ $role->type === 'portal' ? 'contacts' : 'users' }} are assigned to this role.</div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>{{ $role->type === 'portal' ? 'Partner' : 'Assignment' }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($members as $member)
+                                <tr>
+                                    <td>{{ $member['name'] }}</td>
+                                    <td>{{ $member['email'] }}</td>
+                                    <td class="text-muted">{{ $member['detail'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </div>
+@endif
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
