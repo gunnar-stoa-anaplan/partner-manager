@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ScopedToActor;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PartnerMarketplaceEntry extends Model
 {
     /** @use HasFactory<\Database\Factories\PartnerMarketplaceEntryFactory> */
-    use HasFactory;
+    use HasFactory, ScopedToActor;
 
     public const CATEGORIES = [
         'consumer_customer_stories' => 'Consumer Customer Stories',

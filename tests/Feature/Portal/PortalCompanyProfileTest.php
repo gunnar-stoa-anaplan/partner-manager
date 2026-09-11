@@ -254,7 +254,10 @@ class PortalCompanyProfileTest extends TestCase
                 'link' => $entry->link,
                 'description' => $entry->description,
             ])
-            ->assertForbidden();
+            // Row-level scope (ScopedToActor) hides another partner's entry, so
+            // route-model binding 404s before the controller's ownership check —
+            // the fail-closed, no-existence-leak outcome the spec prefers.
+            ->assertNotFound();
     }
 
     // ─── Marketplace Entries — Delete ─────────────────────────────
@@ -279,7 +282,8 @@ class PortalCompanyProfileTest extends TestCase
 
         $this->actingAs($contact, 'portal')
             ->delete(route('portal.company-profile.entries.destroy', $entry))
-            ->assertForbidden();
+            // See update test above: scope 404s another partner's entry.
+            ->assertNotFound();
     }
 
     // ─── Cascade Delete ───────────────────────────────────────────
