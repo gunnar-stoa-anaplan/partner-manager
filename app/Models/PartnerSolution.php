@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ScopedToActor;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PartnerSolution extends Model
 {
+    use HasFactory, ScopedToActor;
+
     protected $fillable = [
         'partner_id', 'name', 'description', 'product_area',
         'industry_focus', 'lifecycle_stage', 'stage_entered_at',

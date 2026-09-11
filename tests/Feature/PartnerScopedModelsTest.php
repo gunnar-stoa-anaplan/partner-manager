@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\LabParticipant;
 use App\Models\Partner;
 use App\Models\PartnerMarketplaceEntry;
+use App\Models\PartnerSolution;
 use App\Models\ResourceStageHistory;
+use App\Models\ResourceTask;
 use App\Models\User;
+use App\Models\WeeklyFocusItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -27,6 +31,13 @@ class PartnerScopedModelsTest extends TestCase
         return [
             'ResourceStageHistory' => [ResourceStageHistory::class],
             'PartnerMarketplaceEntry' => [PartnerMarketplaceEntry::class],
+            'PartnerSolution' => [PartnerSolution::class],
+            'ResourceTask' => [ResourceTask::class],
+            'WeeklyFocusItem' => [WeeklyFocusItem::class],
+            // LabParticipant is covered by its own method below — its factory
+            // chain (Lab -> EnablementEvent) needs an admin user to exist first
+            // (pre-existing EnablementEventFactory quirk), which the generic
+            // provider setup does not create.
         ];
     }
 
@@ -68,5 +79,28 @@ class PartnerScopedModelsTest extends TestCase
         $this->actingAs($admin);
 
         $this->assertCount(3, $model::all());
+    }
+
+    public function test_lab_participant_is_scoped(): void
+    {
+        // EnablementEventFactory (reached via LabParticipant -> Lab) resolves
+        // created_by from an existing admin user; ensure one exists so the
+        // factory chain is valid. (Pre-existing factory quirk, not scoping.)
+        $admin = User::factory()->admin()->create();
+
+        $psm = User::factory()->psm()->create();
+        $mine = Partner::factory()->create(['user_id' => $psm->id]);
+        $other = Partner::factory()->create();
+
+        LabParticipant::factory()->create(['partner_id' => $mine->id]);
+        LabParticipant::factory()->create(['partner_id' => $other->id]);
+
+        $this->actingAs($psm);
+        $rows = LabParticipant::all();
+        $this->assertCount(1, $rows, 'LabParticipant must be scoped to the actor partners');
+        $this->assertTrue($rows->every(fn ($r) => $r->partner_id === $mine->id));
+
+        $this->actingAs($admin);
+        $this->assertCount(2, LabParticipant::all());
     }
 }
