@@ -9,16 +9,24 @@ Implementation findings (discovered while building, drive the plan):
 
 - **`Contact` cannot take the standard global scope.** It extends
   `Authenticatable` and is the portal login actor; auto-scoping it creates an
-  auth-bootstrap hazard (loading the logged-in contact would query through a
-  scope that depends on already knowing that contact). It needs a bespoke
-  approach and is deferred out of the mechanical increment-2 pass.
+  auth-bootstrap hazard — the portal guard's `retrieveById` would query Contact
+  through a scope whose `actor()` calls the portal guard again, recursing.
+  **Accepted approach:** enforce Contact visibility with a *local* query scope
+  (`scopeVisibleToActor`, reusing `visiblePartnerIds()`) applied at the
+  internal-facing read sites (contact lists, search, autocomplete). The auth
+  retrieval path never uses it, so no recursion. Portal contacts already reach
+  contacts only through their own (visible) partner.
 - **Snapshot/scorecard tables are dual-purpose.** `PartnerScorecard`,
-  `PartnerHealthSnapshot`, `OpportunitySnapshot`, `ResourceSnapshot` are read
-  both per-partner (dashboards) *and* cross-population (benchmarks/cohorts in
-  `BenchmarkService`, `CohortBenchmarkProcessor`, `BenchmarkProcessor`). A blanket
-  partner scope would corrupt benchmark math for non-admin actors. These need an
-  explicit per-read decision (scoped display vs `withoutGlobalScope` benchmark
-  reads) and are deferred from the mechanical pass.
+  `PartnerHealthSnapshot`, `OpportunitySnapshot`, `ResourceSnapshot`, and
+  `PartnerAssignedGoal` are read both per-partner (dashboards) *and*
+  cross-population (benchmarks/cohorts in `BenchmarkService`,
+  `CohortBenchmarkProcessor`, `BenchmarkProcessor`). A blanket partner scope would
+  corrupt benchmark math for non-admin actors. **Accepted approach:** add the
+  `ScopedToActor` global scope (per-partner display is safe by default) and have
+  the benchmark/cohort reads opt out **explicitly** with
+  `->withoutGlobalScope('actor_visibility')` — making the safe path structural
+  and the cross-population reads auditable. Each benchmark read site must be
+  reviewed and annotated as a deliberate population-wide aggregate.
 
 ---
 

@@ -35,9 +35,29 @@ class VisibilityContext
     /** @var array<string>|null */
     private ?array $partnerNames = null;
 
+    /**
+     * The authenticated actor across every guard that can carry one: internal
+     * users on `web`, partner contacts on `portal`, and API/MCP callers on
+     * `sanctum` (token auth). Sanctum must be included or a token-authenticated
+     * request resolves to no actor and is treated as unrestricted — a data leak
+     * on the MCP surface. Resolution is defensive so an unconfigured guard or a
+     * console/queue context (no request) simply yields no actor.
+     */
     public function actor(): User|Contact|null
     {
-        return Auth::guard('web')->user() ?? Auth::guard('portal')->user();
+        foreach (['web', 'portal', 'sanctum'] as $guard) {
+            try {
+                $user = Auth::guard($guard)->user();
+            } catch (\Throwable) {
+                continue; // guard not available in this environment/context
+            }
+
+            if ($user instanceof User || $user instanceof Contact) {
+                return $user;
+            }
+        }
+
+        return null;
     }
 
     public function isInternal(): bool
