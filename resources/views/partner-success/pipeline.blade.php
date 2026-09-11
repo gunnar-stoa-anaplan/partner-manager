@@ -132,6 +132,9 @@
     </div>
     <div class="fs-xs text-muted mt-1">Top {{ count($pipe['matrix']['rows']) }} deals by $ACV in scope. A ✓ marks each product tagged on the deal; “SALES ONLY” means no implementation partner is named yet.</div>
 </div>
+
+{{-- Embedded screen agent (renders only when config('agent.enabled')). --}}
+<x-agent.panel screen="pipeline" />
 @endsection
 
 @push('scripts')

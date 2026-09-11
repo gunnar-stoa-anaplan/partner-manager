@@ -943,6 +943,13 @@ Auth::routes();
 | Partner Success dashboard (audited, warehouse-backed)
 |--------------------------------------------------------------------------
 */
+// Screen Agent — embedded assistant grounded in the caller's scoped data.
+// Inert unless config('agent.enabled'); the controller aborts 404 otherwise.
+Route::middleware(['auth'])->prefix('agent')->name('agent.')->group(function () {
+    Route::post('insights', [\App\Http\Controllers\AgentController::class, 'insights'])->name('insights');
+    Route::post('ask', [\App\Http\Controllers\AgentController::class, 'ask'])->name('ask');
+});
+
 // Insight Kit — uniform metric endpoint (value/drill/trend/breakdown). Every
 // response is row-level-visibility scoped via VisibilityContext.
 Route::middleware(['auth'])->prefix('insights')->name('insights.')->group(function () {
