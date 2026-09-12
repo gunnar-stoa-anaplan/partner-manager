@@ -42,6 +42,14 @@ class PartnerScopedModelsTest extends TestCase
             'EnablementRegistration' => [\App\Models\EnablementRegistration::class],
             'EnablementGoal' => [\App\Models\EnablementGoal::class],
             'PartnerPlanCommit' => [\App\Models\PartnerPlanCommit::class],
+            // Benchmark / snapshot tables. These also feed population-wide
+            // aggregates that must bypass the scope — see
+            // BenchmarkPopulationReadTest for that guarantee.
+            'PartnerScorecard' => [\App\Models\PartnerScorecard::class],
+            'PartnerHealthSnapshot' => [\App\Models\PartnerHealthSnapshot::class],
+            'OpportunitySnapshot' => [\App\Models\OpportunitySnapshot::class],
+            'ResourceSnapshot' => [\App\Models\ResourceSnapshot::class],
+            'PartnerAssignedGoal' => [\App\Models\PartnerAssignedGoal::class],
             // LabParticipant is covered by its own method below — its factory
             // chain (Lab -> EnablementEvent) needs an admin user to exist first
             // (pre-existing EnablementEventFactory quirk), which the generic

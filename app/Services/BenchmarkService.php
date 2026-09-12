@@ -143,15 +143,20 @@ class BenchmarkService
             ->get()
             ->keyBy('partner_id');
 
-        // Scorecard dimension scores
-        $scorecards = PartnerScorecard::whereIn('partner_id', $partnerIds)
+        // Scorecard dimension scores. The read is already bounded to the
+        // caller-supplied population ($partnerIds); bypass the row-level scope
+        // so the benchmark is computed over exactly that set, not re-filtered to
+        // the current actor's visibility.
+        $scorecards = PartnerScorecard::withoutGlobalScope('actor_visibility')
+            ->whereIn('partner_id', $partnerIds)
             ->orderByDesc('scored_at')
             ->get()
             ->unique('partner_id')
             ->keyBy('partner_id');
 
-        // Goal attainment
-        $goalData = PartnerAssignedGoal::whereIn('partner_id', $partnerIds)
+        // Goal attainment — bounded to the caller-supplied population.
+        $goalData = PartnerAssignedGoal::withoutGlobalScope('actor_visibility')
+            ->whereIn('partner_id', $partnerIds)
             ->where('target_value', '>', 0)
             ->groupBy('partner_id')
             ->selectRaw('partner_id, AVG('.DatabasePortability::least('(actual_value / target_value) * 100', '100').') as avg_attainment')

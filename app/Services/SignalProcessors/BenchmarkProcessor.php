@@ -89,7 +89,10 @@ class BenchmarkProcessor implements SignalProcessor
             return null;
         }
 
+        // Portfolio average — spans the full population regardless of the
+        // current actor's row-level visibility.
         $avgHealth = PartnerHealthSnapshot::query()
+            ->withoutGlobalScope('actor_visibility')
             ->where('snapshot_date', '>=', now()->subDays(7))
             ->selectRaw('AVG(score) as avg_score')
             ->value('avg_score');

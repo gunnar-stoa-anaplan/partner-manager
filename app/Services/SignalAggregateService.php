@@ -91,7 +91,10 @@ class SignalAggregateService
      */
     protected function buildHealthDistribution(): array
     {
+        // Portfolio-level distribution — must span the full population regardless
+        // of the current actor's row-level visibility.
         $latestSnapshots = PartnerHealthSnapshot::query()
+            ->withoutGlobalScope('actor_visibility')
             ->whereIn('id', function ($q) {
                 $q->selectRaw('MAX(id)')
                     ->from('partner_health_snapshots')
@@ -112,7 +115,10 @@ class SignalAggregateService
      */
     protected function buildDimensionAverages(): array
     {
+        // Portfolio-level averages — must span the full population regardless of
+        // the current actor's row-level visibility.
         $latestSnapshots = PartnerHealthSnapshot::query()
+            ->withoutGlobalScope('actor_visibility')
             ->whereIn('id', function ($q) {
                 $q->selectRaw('MAX(id)')
                     ->from('partner_health_snapshots')
@@ -163,6 +169,7 @@ class SignalAggregateService
         $totalClosed = Opportunity::whereIn('stage', ['Closed Won', 'Closed Lost'])->count();
 
         $avgHealth = PartnerHealthSnapshot::query()
+            ->withoutGlobalScope('actor_visibility')
             ->whereIn('id', function ($q) {
                 $q->selectRaw('MAX(id)')
                     ->from('partner_health_snapshots')

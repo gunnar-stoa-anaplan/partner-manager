@@ -23,7 +23,7 @@ class ScreenAgentService
     public function provider(): AgentProvider
     {
         return match (config('agent.provider', 'simulated')) {
-            // Future: 'anthropic' => App::make(AnthropicProvider::class),
+            'anthropic' => App::make(AnthropicProvider::class),
             default => App::make(SimulatedProvider::class),
         };
     }

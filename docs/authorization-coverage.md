@@ -91,6 +91,9 @@ owner-scoped. Which are owner-scoped vs program-wide is a business call per grou
 | PartnerSuccessController:87, :116 | Re-applies scope manually (`whereIn('id', visibleIds)`); safe, but correctness lives in the controller, not the model |
 | PartnerHealthService:97 (`snapshotAll`) | System/console job, no actor → unrestricted by design; safe |
 | PortalImpersonationController:19 | Admin impersonation flow; acceptable, but confirm it is capability-gated |
+| SignalAggregateService (health distribution / dimension averages / portfolio metrics) | Portfolio-wide statistics pushed to the control plane; must span the full population — see §10 |
+| SignalProcessors/BenchmarkProcessor (`computePortfolioAverages`) | Portfolio average health; population-wide by definition — see §10 |
+| BenchmarkService (`gatherRawData`) | Percentiles over the caller-supplied population; bounded by `$partnerIds`, so bypass is safe — see §10 |
 
 No bypass leaks data today. The concern is that they are the *pattern* the 23
 unscoped partner models rely on — discipline, not structure.
@@ -273,3 +276,42 @@ user-owned models classified and dispositioned (A/C/D program-wide or shared, B
 owner-scoped, E resolved above). Contact keeps its local scope (Authenticatable).
 Team-membership scoping (spec DECISION 4) remains future work — no record carries a
 team field yet.
+
+## 10. Benchmark / snapshot tables (2026-09-11)
+
+Five partner-bearing tables that feed benchmarking and health analytics are now
+under `ScopedToActor` (partner axis, default `partner_id` column):
+
+| Model | Notes |
+|---|---|
+| PartnerScorecard | Latest-per-partner dimension scores |
+| PartnerHealthSnapshot | Daily health score / risk level history |
+| OpportunitySnapshot | `partner_id` is **nullable** — unmatched-opportunity snapshots (null partner) are invisible to restricted actors by design (fail-closed); unrestricted actors see them. No direct Eloquent list read exists today, so this is defense-in-depth |
+| ResourceSnapshot | Per-partner enablement resource counts |
+| PartnerAssignedGoal | Per-partner goal targets/actuals |
+
+**The population-read tension and how it is resolved.** Benchmarks compare a
+partner against the *full population* (per the authorization spec decision), so a
+handful of reads are definitionally population-wide and must not be re-filtered to
+the acting user. Those reads carry an explicit
+`->withoutGlobalScope('actor_visibility')` (see §4) and are pinned by
+`tests/Feature/BenchmarkPopulationReadTest.php`, which proves that under a
+restricted PSM: (a) an ad-hoc `PartnerHealthSnapshot::count()` is fail-closed to
+the actor's own partners, while (b) `SignalAggregateService::buildAggregate()` and
+`BenchmarkService::computeAll()` still span every partner. All other reads of these
+models stay scoped.
+
+**Reviewed but intentionally left scoped (single-partner reads, no bypass needed):**
+`PartnerHealthService::computeForPartner`, `HealthTrendProcessor`,
+`CohortBenchmarkProcessor` — each reads only `where('partner_id', $partner->id)` for
+the specific partner being processed (cohort figures come from the control plane via
+`AppSetting`, not local population reads). In cron there is no actor, so the scope is
+inert; in a web context they fail-closed for an invisible partner, which is correct.
+
+**Controller-level note (surfaced, not changed):** `BenchmarkController` still
+restricts a non-admin's comparison set to `Partner::where('user_id', $user->id)`, so
+a PSM's on-screen percentiles today compare only against their *own* partners, not
+the full population. The model scope + service bypasses make full-population
+benchmarking *correct and safe* to enable; flipping the controller to feed
+full-population ids to a PSM is a product decision (it changes what a PSM sees) and
+is left for explicit sign-off.

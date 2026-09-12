@@ -25,4 +25,29 @@ return [
     */
     'provider' => env('AGENT_PROVIDER', 'simulated'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Anthropic provider (Phase 2)
+    |--------------------------------------------------------------------------
+    |
+    | Used only when 'provider' is 'anthropic'. The provider sends the already
+    | row-level-scoped screen facts to the Messages API and grounds every answer
+    | in them. With no api_key set (or on any API error) it degrades gracefully
+    | to the deterministic simulated provider, so switching providers without a
+    | key never breaks the feature.
+    |
+    | Egress note: enabling this sends scoped business figures (partner names,
+    | pipeline values) to Anthropic. Keep it opt-in and review your data policy.
+    |
+    */
+
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('AGENT_ANTHROPIC_MODEL', 'claude-sonnet-5'),
+        'max_tokens' => env('AGENT_ANTHROPIC_MAX_TOKENS', 1024),
+        'base_uri' => env('ANTHROPIC_BASE_URI', 'https://api.anthropic.com'),
+        'version' => env('ANTHROPIC_VERSION', '2023-06-01'),
+        'timeout' => env('AGENT_ANTHROPIC_TIMEOUT', 20),
+    ],
+
 ];
