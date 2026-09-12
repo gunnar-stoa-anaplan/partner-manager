@@ -89,6 +89,9 @@
         </div>
         @endforeach
     </div>
+
+{{-- Embedded screen agent (renders only when config('agent.enabled')). --}}
+<x-agent.panel screen="my-partners" />
 @endsection
 
 @section('extra-content')
