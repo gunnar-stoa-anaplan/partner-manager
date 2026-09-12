@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use App\Services\PsmTargetImport\PsmTargetImporter;
 use Illuminate\Console\Command;
 
@@ -17,6 +18,9 @@ class ImportPsmTargets extends Command
         {--role= : delivery | sales | pre-sales (which resource role this file is for)}
         {--period=Q3-FY27 : the target period, e.g. Q3-FY27}
         {--target-date= : due date for created objectives (default: end of current quarter); period label is authoritative in metric_config}
+        {--create-missing-partners : create a Partner (owned by the fallback owner) for each unmatched name}
+        {--fallback-owner=gunnar.stoa@gmail.com : email or id of the owner for ownerless/created partners}
+        {--retire-placeholders : cancel the surfaced placeholder objectives}
         {--commit : Write the changes (otherwise dry-run only)}';
 
     protected $description = 'Import per-partner enablement targets (PSM Target Tracking) into objectives';
@@ -38,7 +42,23 @@ class ImportPsmTargets extends Command
             return self::FAILURE;
         }
 
-        $plan = $importer->plan($file, $role, $period);
+        $createMissing = (bool) $this->option('create-missing-partners');
+        $fallbackOwnerId = null;
+        if ($createMissing || $this->option('fallback-owner')) {
+            $ref = (string) $this->option('fallback-owner');
+            $owner = is_numeric($ref)
+                ? User::find((int) $ref)
+                : User::where('email', $ref)->first();
+            if (! $owner) {
+                $this->error("--fallback-owner not found: {$ref}");
+
+                return self::FAILURE;
+            }
+            $fallbackOwnerId = $owner->id;
+            $this->line("Fallback owner: <comment>{$owner->name}</comment> (#{$owner->id})");
+        }
+
+        $plan = $importer->plan($file, $role, $period, $fallbackOwnerId, $createMissing);
 
         $this->line('');
         $this->info("PSM Target import — role: <comment>{$role}</comment>  period: <comment>{$period}</comment>");
@@ -49,6 +69,13 @@ class ImportPsmTargets extends Command
             $s['partners_matched'], $s['create'], $s['update'], $s['skipped_zero'],
         ));
 
+        if (! empty($plan['partners_to_create'])) {
+            $this->warn('Partners to CREATE ('.count($plan['partners_to_create']).') — owned by the fallback owner:');
+            foreach ($plan['partners_to_create'] as $p) {
+                $this->line('   + '.$p);
+            }
+        }
+
         if ($plan['unmatched_partners']) {
             $this->warn('Unmatched partners ('.count($plan['unmatched_partners']).') — NOT imported, resolve names:');
             foreach ($plan['unmatched_partners'] as $u) {
@@ -56,8 +83,15 @@ class ImportPsmTargets extends Command
             }
         }
 
+        if (! empty($plan['owner_assigned_fallback'])) {
+            $this->warn('Ownerless partners → objectives assigned to fallback owner ('.count($plan['owner_assigned_fallback']).') — the partner itself still has no PSM:');
+            foreach ($plan['owner_assigned_fallback'] as $p) {
+                $this->line('   • '.$p);
+            }
+        }
+
         if (! empty($plan['partners_without_owner'])) {
-            $this->warn('Partners with no owning PSM ('.count($plan['partners_without_owner']).') — NOT imported (objectives need an owner):');
+            $this->warn('Partners with no owning PSM ('.count($plan['partners_without_owner']).') — NOT imported (no fallback owner given):');
             foreach ($plan['partners_without_owner'] as $p) {
                 $this->line('   • '.$p);
             }
@@ -65,12 +99,14 @@ class ImportPsmTargets extends Command
 
         if ($plan['review_candidates']) {
             $this->line('');
-            $this->warn('Review — pre-existing objectives that may be placeholders to retire ('.count($plan['review_candidates']).'):');
-            foreach (array_slice($plan['review_candidates'], 0, 20) as $c) {
+            $retiring = (bool) $this->option('retire-placeholders');
+            $verb = $retiring ? 'will be RETIRED (status → cancelled)' : 'may be placeholders to retire';
+            $this->warn('Placeholder objectives — '.$verb.' ('.count($plan['review_candidates']).'):');
+            foreach (array_slice($plan['review_candidates'], 0, 30) as $c) {
                 $this->line(sprintf('   • #%d (partner %d) "%s" target %s', $c['id'], $c['partner_id'], $c['title'], $c['target'] ?? '—'));
             }
-            if (count($plan['review_candidates']) > 20) {
-                $this->line('   … +'.(count($plan['review_candidates']) - 20).' more');
+            if (count($plan['review_candidates']) > 30) {
+                $this->line('   … +'.(count($plan['review_candidates']) - 30).' more');
             }
         }
 
@@ -90,9 +126,16 @@ class ImportPsmTargets extends Command
             return self::SUCCESS;
         }
 
-        $counts = $importer->apply($plan, $this->option('target-date') ?: null);
+        $counts = $importer->apply(
+            $plan,
+            $this->option('target-date') ?: null,
+            (bool) $this->option('retire-placeholders'),
+        );
         $this->line('');
-        $this->info(sprintf('Applied: created %d, updated %d objectives.', $counts['created'], $counts['updated']));
+        $this->info(sprintf(
+            'Applied: %d partners created, %d objectives created, %d updated, %d retired.',
+            $counts['partners_created'], $counts['created'], $counts['updated'], $counts['retired'],
+        ));
 
         return self::SUCCESS;
     }

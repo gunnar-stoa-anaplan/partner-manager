@@ -24,14 +24,24 @@ class PsmTargetImporter
     private const PRODUCT_AREAS = ['IFP', 'OWP', 'Platform', 'Polaris', 'SCM', 'SPM'];
 
     /**
+     * @param  int|null  $fallbackOwnerId  owner assigned to objectives whose partner
+     *                                      has no PSM (and to partners created here);
+     *                                      when null, ownerless partners are skipped.
+     * @param  bool  $createMissing  create a Partner for each unmatched name (owned by
+     *                               the fallback owner) instead of skipping it.
      * @return array{
      *   role: string, period: string, columns: array<int, string>,
+     *   fallback_owner_id: int|null,
      *   actions: array<int, array<string, mixed>>,
+     *   partners_to_create: array<int, string>,
+     *   owner_assigned_fallback: array<int, string>,
      *   unmatched_partners: array<int, string>,
+     *   partners_without_owner: array<int, string>,
+     *   review_candidates: array<int, array<string, mixed>>,
      *   summary: array<string, int>
      * }
      */
-    public function plan(string $filePath, string $role, string $period): array
+    public function plan(string $filePath, string $role, string $period, ?int $fallbackOwnerId = null, bool $createMissing = false): array
     {
         $rows = $this->readSheet($filePath);
         $headerRow = $rows[1] ?? [];               // row 2 = headers
@@ -47,27 +57,55 @@ class PsmTargetImporter
         $actions = [];
         $unmatched = [];
         $noOwner = [];
+        $toCreate = [];              // normalized => original name
+        $ownerAssigned = [];         // existing partners whose objectives fall back to $fallbackOwnerId
         $matchedIds = [];
-        $summary = ['create' => 0, 'update' => 0, 'skipped_zero' => 0, 'partners_matched' => 0];
+        $summary = ['create' => 0, 'update' => 0, 'skipped_zero' => 0, 'partners_matched' => 0, 'partners_to_create' => 0];
 
         foreach (array_slice($rows, 2, null, true) as $r) {       // data rows (3+)
             $name = trim((string) ($r[0] ?? ''));
             if ($name === '') {
                 continue;
             }
+
             $partner = $this->matchPartner($name, $partnersByName);
+            $createPartnerName = null;
+
             if (! $partner) {
-                $unmatched[] = $name;
-                continue;
+                if (! $createMissing) {
+                    $unmatched[] = $name;
+
+                    continue;
+                }
+                // Deferred to apply(): the partner is created there, owned by the
+                // fallback owner. plan() only records the intent.
+                $createPartnerName = $name;
+                $ownerId = $fallbackOwnerId;
+                $partnerId = null;
+                $partnerName = $name;
+                $norm = $this->normalize($name);
+                if (! isset($toCreate[$norm])) {
+                    $toCreate[$norm] = $name;
+                    $summary['partners_to_create']++;
+                }
+            } else {
+                if (! $partner->user_id) {
+                    // Objectives require an owning user. With a fallback owner we
+                    // assign the objective to them (the partner itself keeps no PSM
+                    // — that data gap is surfaced, not silently reassigned).
+                    if ($fallbackOwnerId === null) {
+                        $noOwner[] = $partner->name;
+
+                        continue;
+                    }
+                    $ownerAssigned[] = $partner->name;
+                }
+                $ownerId = $partner->user_id ?: $fallbackOwnerId;
+                $partnerId = $partner->id;
+                $partnerName = $partner->name;
+                $summary['partners_matched']++;
+                $matchedIds[] = $partner->id;
             }
-            if (! $partner->user_id) {
-                // Objectives require an owning user; a partner with no PSM can't
-                // receive one. Report rather than fail the whole import.
-                $noOwner[] = $partner->name;
-                continue;
-            }
-            $summary['partners_matched']++;
-            $matchedIds[] = $partner->id;
 
             foreach ($columns as $col => $capabilityRaw) {
                 $value = $r[$col] ?? null;
@@ -83,15 +121,18 @@ class PsmTargetImporter
                 $capability = $this->cleanCapability($capabilityRaw);
                 $productArea = $this->productAreaFor($capability);
                 $importKey = $this->importKey($role, $period, $capability);
-                [$verb, $existingId] = $this->resolveExisting($partner, $importKey);
+                [$verb, $existingId] = $partner
+                    ? $this->resolveExisting($partner, $importKey)
+                    : ['create', null];       // new partner → always create
 
                 $summary[$verb]++;
                 $actions[] = [
-                    'verb' => $verb,                 // create | update | adopt
+                    'verb' => $verb,                 // create | update
                     'existing_id' => $existingId,
-                    'partner_id' => $partner->id,
-                    'partner_name' => $partner->name,
-                    'user_id' => $partner->user_id,
+                    'partner_id' => $partnerId,      // null when the partner is created in apply()
+                    'create_partner_name' => $createPartnerName,
+                    'partner_name' => $partnerName,
+                    'user_id' => $ownerId,
                     'capability' => $capability,
                     'product_area' => $productArea,
                     'target' => $target,
@@ -105,7 +146,10 @@ class PsmTargetImporter
             'role' => $role,
             'period' => $period,
             'columns' => array_values($columns),
+            'fallback_owner_id' => $fallbackOwnerId,
             'actions' => $actions,
+            'partners_to_create' => array_values($toCreate),
+            'owner_assigned_fallback' => array_values(array_unique($ownerAssigned)),
             'unmatched_partners' => array_values(array_unique($unmatched)),
             'partners_without_owner' => array_values(array_unique($noOwner)),
             'review_candidates' => $this->reviewCandidates(array_values(array_unique($matchedIds))),
@@ -117,14 +161,43 @@ class PsmTargetImporter
      * Apply a plan produced by plan(). Returns counts actually written.
      *
      * @param  array<string, mixed>  $plan
-     * @return array{created: int, updated: int}
+     * @param  bool  $retirePlaceholders  cancel the surfaced review_candidates
+     * @return array{created: int, updated: int, partners_created: int, retired: int}
      */
-    public function apply(array $plan, ?string $targetDate = null): array
+    public function apply(array $plan, ?string $targetDate = null, bool $retirePlaceholders = false): array
     {
-        $counts = ['created' => 0, 'updated' => 0];
+        $counts = ['created' => 0, 'updated' => 0, 'partners_created' => 0, 'retired' => 0];
         $targetDate ??= now()->endOfQuarter()->toDateString();
 
+        // 1. Create the missing partners first so their objectives can reference
+        //    the new ids. Owned by the fallback owner; idempotent because a second
+        //    run finds them already present and matches instead of re-creating.
+        $createdPartnerIds = [];   // normalized name => id
+        foreach ($plan['partners_to_create'] as $name) {
+            $norm = $this->normalize($name);
+            $partner = Partner::withoutGlobalScopes()
+                ->whereRaw('lower(name) = ?', [Str::lower($name)])
+                ->first();
+            if (! $partner) {
+                $partner = Partner::create([
+                    'name' => $name,
+                    'user_id' => $plan['fallback_owner_id'],
+                ]);
+                $counts['partners_created']++;
+            }
+            $createdPartnerIds[$norm] = $partner->id;
+        }
+
+        // 2. Objectives.
         foreach ($plan['actions'] as $a) {
+            $partnerId = $a['partner_id']
+                ?? ($a['create_partner_name'] !== null
+                    ? ($createdPartnerIds[$this->normalize($a['create_partner_name'])] ?? null)
+                    : null);
+            if ($partnerId === null) {
+                continue; // defensive: partner could not be resolved
+            }
+
             $objective = $a['existing_id']
                 ? PsmObjective::find($a['existing_id'])
                 : new PsmObjective;
@@ -141,7 +214,7 @@ class PsmTargetImporter
                 'column' => $a['column'],
             ]);
 
-            $objective->partner_id = $a['partner_id'];
+            $objective->partner_id = $partnerId;
             if ($isNew) {
                 // Only set these on create; adoption preserves the existing
                 // owner/title/metric_type so we never downgrade a tracked goal.
@@ -161,6 +234,25 @@ class PsmTargetImporter
             $objective->save();
 
             $counts[$isNew ? 'created' : 'updated']++;
+        }
+
+        // 3. Retire the surfaced placeholder objectives (status → cancelled).
+        //    Reversible and idempotent: an already-cancelled objective is skipped.
+        if ($retirePlaceholders) {
+            foreach ($plan['review_candidates'] as $c) {
+                $objective = PsmObjective::withoutGlobalScopes()->find($c['id']);
+                if (! $objective || $objective->status === 'cancelled') {
+                    continue;
+                }
+                $config = $objective->metric_config ?? [];
+                $config['retired_by'] = 'psm_target_import';
+                $config['retired_at'] = now()->toIso8601String();
+                $config['retired_reason'] = sprintf('Superseded by imported %s targets (%s).', $plan['role'], $plan['period']);
+                $objective->status = 'cancelled';
+                $objective->metric_config = $config;
+                $objective->save();
+                $counts['retired']++;
+            }
         }
 
         return $counts;
