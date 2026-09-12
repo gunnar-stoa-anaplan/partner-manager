@@ -73,6 +73,43 @@ class AgentScreenTest extends TestCase
         $this->assertNotEmpty($res->json('insights'));
     }
 
+    public function test_insights_endpoint_returns_scoped_charts(): void
+    {
+        config(['agent.enabled' => true]);
+        $psm = User::factory()->psm()->create();
+        $mine = Partner::factory()->create(['user_id' => $psm->id]);
+        Opportunity::factory()->create(['partner_id' => $mine->id, 'stage' => 'Prospecting', 'amount' => 100000, 'probability' => 50]);
+
+        $res = $this->actingAs($psm)->postJson(route('agent.insights'), ['screen' => 'pipeline']);
+
+        $res->assertOk();
+        $titles = collect($res->json('charts'))->pluck('title');
+        $this->assertTrue($titles->contains('Open pipeline by stage'));
+    }
+
+    public function test_ask_ranks_partners_by_delivery_enablement_gap_scoped(): void
+    {
+        config(['agent.enabled' => true]);
+        $psm = User::factory()->psm()->create();
+        $mine = Partner::factory()->create(['user_id' => $psm->id, 'name' => 'GapCo']);
+        $other = Partner::factory()->create(['name' => 'HiddenCo']);
+
+        // Mine: open deals, no certifications → a delivery-enablement gap.
+        Opportunity::factory()->count(3)->create(['partner_id' => $mine->id, 'stage' => 'Prospecting', 'probability' => 50]);
+        // Other partner (out of scope) with an even bigger gap — must not appear.
+        Opportunity::factory()->count(9)->create(['partner_id' => $other->id, 'stage' => 'Prospecting', 'probability' => 50]);
+
+        $res = $this->actingAs($psm)->postJson(route('agent.ask'), [
+            'screen' => 'pipeline',
+            'question' => 'Which of my partners needs the most enablement for delivery resources?',
+        ]);
+
+        $res->assertOk();
+        $answer = $res->json('answer');
+        $this->assertStringContainsString('GapCo', $answer);
+        $this->assertStringNotContainsString('HiddenCo', $answer, 'ranking must not leak out-of-scope partners');
+    }
+
     public function test_ask_endpoint_answers_from_scoped_facts(): void
     {
         config(['agent.enabled' => true]);

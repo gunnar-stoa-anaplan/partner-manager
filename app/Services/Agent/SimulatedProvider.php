@@ -48,6 +48,16 @@ class SimulatedProvider implements AgentProvider
                 $f['top_stage_label'], $this->money($f['top_stage_value']));
         }
 
+        if (! empty($f['delivery_enablement_gaps'])) {
+            $topGap = $f['delivery_enablement_gaps'][0];
+            if (($topGap['gap'] ?? 0) > 0) {
+                $out[] = sprintf(
+                    '%s has the largest delivery-enablement gap in %s (%d open deals vs %d active certifications).',
+                    $topGap['partner'], $scope, $topGap['open_opps'], $topGap['certified'],
+                );
+            }
+        }
+
         if ($out === []) {
             $out[] = sprintf('No summarizable figures for this screen yet within %s.', $scope);
         }
@@ -88,6 +98,17 @@ class SimulatedProvider implements AgentProvider
             }
         }
 
+        if ($this->mentions($q, ['enablement', 'enable', 'deliver', 'delivery', 'readiness', 'certif', 'gap', 'resource'])) {
+            $gaps = collect($f['delivery_enablement_gaps'] ?? [])->filter(fn ($g) => ($g['gap'] ?? 0) > 0)->take(5);
+            if ($gaps->isNotEmpty()) {
+                $ranked = $gaps->map(fn ($g, $i) => sprintf('%d) %s (gap %d: %d open deals, %d certified)',
+                    $i + 1, $g['partner'], $g['gap'], $g['open_opps'], $g['certified']))->implode('; ');
+                $lines[] = sprintf('Partners in %s most needing delivery enablement (open deals minus active certifications): %s.', $scope, $ranked);
+            } else {
+                $lines[] = sprintf('No delivery-enablement gaps in %s — active certifications keep pace with open pipeline.', $scope);
+            }
+        }
+
         if ($lines === []) {
             $lines[] = sprintf(
                 'I can answer from what this screen shows within %s. Available figures: %s.',
@@ -99,6 +120,33 @@ class SimulatedProvider implements AgentProvider
         $lines[] = '(Simulated analysis grounded in your scoped data — a real LLM provider will give fuller answers.)';
 
         return implode(' ', $lines);
+    }
+
+    public function charts(ScreenContext $context): array
+    {
+        $f = $context->facts;
+        $charts = [];
+
+        if (! empty($f['stage_breakdown'])) {
+            $charts[] = [
+                'title' => 'Open pipeline by stage',
+                'type' => 'bar',
+                'labels' => array_map(fn ($r) => (string) $r['stage'], $f['stage_breakdown']),
+                'series' => array_map(fn ($r) => round((float) $r['value']), $f['stage_breakdown']),
+            ];
+        }
+
+        $gaps = collect($f['delivery_enablement_gaps'] ?? [])->filter(fn ($g) => ($g['gap'] ?? 0) > 0)->take(8);
+        if ($gaps->isNotEmpty()) {
+            $charts[] = [
+                'title' => 'Partners by delivery-enablement gap',
+                'type' => 'bar',
+                'labels' => $gaps->pluck('partner')->map(fn ($n) => (string) $n)->all(),
+                'series' => $gaps->pluck('gap')->map(fn ($g) => (int) $g)->all(),
+            ];
+        }
+
+        return $charts;
     }
 
     private function mentions(string $haystack, array $needles): bool

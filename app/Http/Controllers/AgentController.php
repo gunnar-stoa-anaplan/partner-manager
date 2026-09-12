@@ -33,6 +33,7 @@ class AgentController extends Controller
             'provider' => $provider->name(),
             'scope' => $context->scopeLabel(),
             'insights' => $provider->insights($context),
+            'charts' => $provider->charts($context),
         ]);
     }
 

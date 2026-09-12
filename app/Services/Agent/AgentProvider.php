@@ -22,6 +22,15 @@ interface AgentProvider
      */
     public function answer(ScreenContext $context, string $question): string;
 
+    /**
+     * Chart specs to render alongside the text, built from the scoped facts.
+     * Each is ['title' => string, 'type' => 'bar', 'labels' => string[],
+     * 'series' => number[]]. Empty when the screen has nothing to chart.
+     *
+     * @return array<int, array{title: string, type: string, labels: array<int, string>, series: array<int, int|float>}>
+     */
+    public function charts(ScreenContext $context): array;
+
     /** Identifier for the active provider (for UI/debug). */
     public function name(): string;
 }

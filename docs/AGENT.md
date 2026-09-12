@@ -5,7 +5,7 @@ current screen and answers the user's questions about that screen's data — alw
 grounded in the caller's **row-level-scoped** data, so it can only ever surface
 what the user is already allowed to see.
 
-**Status:** Phase 1 — the engine (provider strategy, scoped grounding, endpoints,
+**Status:** Phase 1 + charts/rankings — the engine, charts, and deterministic scoped rankings (provider strategy, scoped grounding, endpoints,
 reusable panel). Disabled by default (`AGENT_ENABLED=false`); additive and inert
 until enabled.
 
@@ -30,6 +30,20 @@ scoped by construction. The LLM (when added) never writes SQL; it receives the
 pre-scoped facts (and, later, calls the scoped MCP tools). This is exactly why the
 authorization/scoping work is the prerequisite: the agent turns any scoping gap
 into a spoken answer.
+
+## Charts & deterministic rankings
+
+The provider also returns **chart specs** (`charts`: title/type/labels/series) rendered
+in the panel with the app's ApexCharts — e.g. *Open pipeline by stage* and *Partners by
+delivery-enablement gap*.
+
+Some high-value questions are answered **without any LLM or data egress**, because the
+answer is a deterministic ranking over scoped data. `ScreenAgentService` computes, for
+example, `delivery_enablement_gaps` — partners ranked by open opportunities minus active
+certifications (both row-level scoped). So "which of my partners needs the most enablement
+for delivery?" is answered locally today by `SimulatedProvider`. The LLM (Phase 2) is
+reserved for open-ended questions that need real language understanding; the tool results
+it would then see are the only partner data that would leave the app.
 
 ## Enabling
 

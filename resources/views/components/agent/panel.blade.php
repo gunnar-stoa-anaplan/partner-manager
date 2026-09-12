@@ -26,6 +26,8 @@
                 <li class="text-muted">Loading…</li>
             </ul>
 
+            <div id="agent-charts" class="mb-3"></div>
+
             <h6 class="text-uppercase text-muted small mb-2">Ask a question</h6>
             <div id="agent-answer" class="small mb-2"></div>
             <div class="mt-auto">
@@ -66,6 +68,37 @@
             });
         }
 
+        const charts = [];
+
+        function renderCharts(specs) {
+            const host = el('agent-charts');
+            charts.forEach((c) => c.destroy());
+            charts.length = 0;
+            host.textContent = '';
+            if (!Array.isArray(specs) || typeof ApexCharts === 'undefined') return;
+
+            specs.forEach((spec) => {
+                const title = document.createElement('div');
+                title.className = 'text-uppercase text-muted small mb-1';
+                title.textContent = spec.title; // textContent — XSS-safe
+                host.appendChild(title);
+
+                const mount = document.createElement('div');
+                host.appendChild(mount);
+
+                const chart = new ApexCharts(mount, {
+                    chart: {type: spec.type || 'bar', height: 200, toolbar: {show: false}},
+                    plotOptions: {bar: {horizontal: true, borderRadius: 3}},
+                    series: [{name: spec.title, data: spec.series || []}],
+                    xaxis: {categories: spec.labels || []},
+                    dataLabels: {enabled: false},
+                    tooltip: {theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light'},
+                });
+                chart.render();
+                charts.push(chart);
+            });
+        }
+
         async function loadInsights() {
             if (loaded) return;
             try {
@@ -73,6 +106,7 @@
                 el('agent-scope').textContent = data.scope || 'your data';
                 el('agent-provider').textContent = data.provider || '';
                 setList(data.insights);
+                renderCharts(data.charts);
                 loaded = true;
             } catch (e) {
                 setList(['Could not load insights right now.']);
