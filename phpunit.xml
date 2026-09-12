@@ -29,5 +29,9 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Keep the screen agent deterministic and offline in tests, regardless
+             of a developer's local .env (AGENT_PROVIDER=anthropic + a real key). -->
+        <env name="AGENT_PROVIDER" value="simulated"/>
+        <env name="ANTHROPIC_API_KEY" value=""/>
     </php>
 </phpunit>

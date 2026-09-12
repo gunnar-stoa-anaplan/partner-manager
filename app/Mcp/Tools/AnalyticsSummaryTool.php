@@ -58,7 +58,11 @@ class AnalyticsSummaryTool extends Tool
                     ->all(),
             ],
             'enablement' => [
-                'total_contacts' => Contact::count(),
+                // Contact is the portal auth model, so it carries a LOCAL scope
+                // (scopeVisibleToActor), not the ScopedToActor global scope — a
+                // bare Contact::count() would leak the org-wide total to a
+                // restricted caller. Every other model here is globally scoped.
+                'total_contacts' => Contact::visibleToActor()->count(),
                 'total_resources' => Resource::count(),
                 'certified_resources' => Resource::where('status', 'Completed')->count(),
             ],
