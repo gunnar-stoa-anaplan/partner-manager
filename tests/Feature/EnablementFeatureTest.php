@@ -1113,7 +1113,10 @@ class EnablementFeatureTest extends TestCase
 
         $response = $this->actingAs($this->psm)->deleteJson(route('api.enablement.remove-nomination', $registration->id));
 
-        $response->assertForbidden();
+        // EnablementRegistration is row-level scoped, so another partner's
+        // registration is invisible and findOrFail 404s before the nominator
+        // check — a fail-closed denial that doesn't reveal the record.
+        $response->assertNotFound();
     }
 
     public function test_cannot_remove_confirmed_nomination(): void

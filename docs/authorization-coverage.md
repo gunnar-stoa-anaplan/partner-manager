@@ -170,17 +170,21 @@ Plus the increment-1 privilege refactor and the MCP/sanctum actor fix.
   accepted spec approach: ScopedToActor + explicit `withoutGlobalScope` on the
   cross-population benchmark/cohort reads.
 
-- **`EnablementRegistration`, `EnablementGoal`, `LaunchProgramPartner`** —
-  entangled with controllers that scope with the same hard-coded role logic as
-  the path controllers (`Api\EnablementController`, `StateOfBusinessController`,
-  `LaunchProgramController` / `PartnerController`). `LaunchProgramPartner` also
-  drives program partner-count semantics and has pre-existing failing tests.
-  Reconcile each controller to `VisibilityContext` first, then add the model
-  scope — same pattern as the PartnerPathController fix. Tracked as a follow-up.
+- **`EnablementRegistration`, `EnablementGoal`** — DONE: `ScopedToActor` added
+  (partner_id), each with a zero-leak test. Their controllers still use owned-only
+  `isAdmin()` scoping; the model scope is now a structural ceiling on top, so a
+  PSM sees the same rows as before (owned ∩ scope) plus IDOR protection on any
+  route-bound record. Reconciling the controllers to `VisibilityContext` (so PSMs
+  see assigned + hierarchy, not owned-only) is a minor correctness follow-up.
+- **`LaunchProgramPartner`** — NOT partner-scoped: it is program-scoped. A
+  launch-program OWNER manages enrollments across many partners, so partner-level
+  ScopedToActor broke the owner-approve workflow (5 tests, incl. the positive
+  "owner can approve"). Needs a program-owner/admin + partner union, enforced per
+  context. Tracked as its own task.
 
-**Remaining after this batch:** the entangled enablement/launch models above
-(tasked); the benchmark tables (scope + `withoutGlobalScope` on benchmark reads).
-Then the `MetricService::filt()` / export universality audit and increment 3.
+**Remaining:** the benchmark tables (scope + `withoutGlobalScope` on the
+cross-population reads); `LaunchProgramPartner` program-scoping and the
+ActionPlanController route/IDOR fix (both tasked).
 
 ## 8. Universality audit — warehouse / metrics / exports (2026-09-11)
 

@@ -39,7 +39,8 @@ class EnablementSessionFactory extends Factory
             'status' => 'scheduled',
             'notes' => null,
             'registration_deadline' => null,
-            'created_by' => User::whereRelation('role', 'slug', 'admin')->first()?->id ?? 1,
+            'created_by' => User::whereRelation('role', 'slug', 'admin')->first()?->id
+                ?? User::factory(),
         ];
     }
 
