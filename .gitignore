@@ -55,3 +55,4 @@ workspace_activity_report*.csv
 
 # Local DB engine backup of .env (contains secrets)
 .env.mysql-backup-*
+storage/app/imports/
