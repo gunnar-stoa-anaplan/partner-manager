@@ -1,6 +1,9 @@
 @extends('layouts.vertical', ['pageTitle' => 'PSM Engagement'])
 
 @section('content')
+
+{{-- Embedded screen agent (renders only when config('agent.enabled')). --}}
+<x-agent.panel screen="psm-dashboard" />
 <div id="ps-dash">
   <div class="ps-toolbar">
     <div class="ps-geo" id="ps-geo"></div>

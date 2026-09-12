@@ -23,6 +23,9 @@
 @endphp
 
 @section('content')
+
+{{-- Embedded screen agent (renders only when config('agent.enabled')). --}}
+<x-agent.panel screen="business-plan" />
 <div class="container-fluid py-3">
 
     @include('partner-success.partials.scope-filter')
