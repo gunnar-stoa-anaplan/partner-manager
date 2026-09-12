@@ -247,7 +247,25 @@ ZoomMeeting, ZoomChatResponder, TaskComment.
 **Bucket D — system/admin (intentionally NOT owner-scoped):** admin-gated surface.
 AuditLog, Import, Asset.
 
-**Bucket E — pending a product ruling:** StrategyPlan / StrategyPlanInitiative
-(program-level vs owner), WorkshopSession (participation-gated vs owner),
-WorkshopSessionMonitor (a user's monitoring assignments), ActionPlanItem
-(assigned_to a user vs reached via its already-scoped ActionPlan partner).
+**Bucket E — RESOLVED: none owner-scoped** (verified per model):
+- `StrategyPlan` / `StrategyPlanInitiative` — program-level plans (one per program,
+  CoE/leadership-authored), not personal → program-wide (Bucket A).
+- `WorkshopSession` — shared sessions; `created_by` is an audit field. Owner-scoping
+  would hide sessions from participants. Access is participation/session-gated → not
+  owner-scoped (Bucket A/C).
+- `WorkshopSessionMonitor` — a session-membership record: it backs the shared
+  "monitors of this session" list, the "am I a monitor?" auth check, and admin
+  add/remove. Owner-scoping would break the shared list → session-gated (Bucket C).
+- `ActionPlanItem` — child of the partner-scoped `ActionPlan`, reached via
+  `$actionPlan->items()`; no own `partner_id`. Parent-scoped, not owner-scoped.
+  (Its controller has pre-existing broken routes + a latent IDOR on
+  `updateItemStatus` — tracked separately, not part of the principal model.)
+
+## Increment 3 — COMPLETE
+
+The owner (second) principal axis is in place: the `myUserSet()` resolver + the
+`ScopedToOwner` trait, Bucket B personal records scoped (5 models), and all ~40
+user-owned models classified and dispositioned (A/C/D program-wide or shared, B
+owner-scoped, E resolved above). Contact keeps its local scope (Authenticatable).
+Team-membership scoping (spec DECISION 4) remains future work — no record carries a
+team field yet.
