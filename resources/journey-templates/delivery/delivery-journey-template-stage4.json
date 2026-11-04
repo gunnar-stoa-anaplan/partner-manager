@@ -1,0 +1,292 @@
+{
+  "_meta": {
+    "description": "Updated Stage 4 (Delivering) for the universal Anaplan product Delivery journey template. Slots into the larger template at stages[3]. Reflects iteration from Stage 4 review pass.",
+    "iteration_date": "2026-04-27",
+    "changes_from_previous": [
+      "Preserved: Three-co-delivery progression (PS-primed → Partner-primed → Partner-led) with increasing partner ownership. Each engagement is tracked and measured.",
+      "Reframed: PS role is ADVISORY, not co-delivery. PS reviews artifacts and provides input. Tracks engagement progression but does not deliver alongside.",
+      "Replaced: Per-project documentation tasks (1 week each) — the artifacts ARE the documentation",
+      "Removed: Per-project CSAT gates (CSAT not measurable at this phase)",
+      "Removed: Per-project retrospective tasks (3 originally)",
+      "Removed: Capstone retrospective at end of stage",
+      "Removed: Engagement scoping and discovery exposure task (retired — implicitly covered by being on real engagements)",
+      "Removed: SA scorecard task and gate (retired — artifact gates and engagement completion gates are sufficient verification)",
+      "Added: Six artifact types mapped to methodology phases 5-10 (design doc, customer data review, configuration review, list/hierarchy review, extensions review, app-led workshop readiness). Each artifact is reviewed by the PSM as advisory checkpoint.",
+      "Added: Model B artifact-to-engagement cardinality — PS-primed engagement requires 2 artifacts, Partner-primed requires 4, Partner-led requires the full 6. Mirrors increasing partner ownership.",
+      "Decision: PSM coordinates all artifact reviews — Stage 4 is explicitly white-glove territory",
+      "Decision: No Stage 4 on-ramp — stage starts when participant submits first artifact in PS-primed engagement",
+      "Decision: Engagement completion gates kept alongside artifact gates — engagement going live with customer is distinct from artifact production"
+    ],
+    "open_items_parked_for_later": [
+      "Per-artifact review rubric — what specifically the PSM reviews each artifact against. Per-product authoring obligation.",
+      "PSM review SLA — how long a PSM has to return advisory feedback on a submitted artifact",
+      "PSM review load — operational implication of ~12 advisory reviews per participant per Stage 4. May need PSM-to-participant ratio guidance.",
+      "Engagement completion criteria — what specifically defines 'engagement complete' (go-live, signoff, hypercare end, etc.) — likely a separate engagement lifecycle definition",
+      "Artifact resubmission policy — what happens when PSM advisory review identifies issues. Default: revise and resubmit, no attempt limit.",
+      "What if no engagement is available — long-tail partners may stall in Stage 4 due to lack of engagement opportunities. Program-level concern."
+    ],
+    "boundary_with_stage_5": "End of Stage 4: participant has completed three real client engagements with progressively increasing ownership (PS-primed → Partner-primed → Partner-led), produced and had reviewed 12 client artifacts across the three engagements, and demonstrated competency on real customer work. Stage 5 (Expert) covers ongoing independent delivery, blueprint contribution, mentorship, and adjacent-product credentialing.",
+    "stage_assumption": "Stage 4 is white-glove. Partners reaching this stage have an active PSM relationship. Long-tail self-serve partners typically progress no further than Stage 3."
+  },
+
+  "_fixed": true,
+  "_note": "Stage 4 task structure is FIXED across all product journeys. Artifact content varies by client engagement (real customer data and scenarios), but the artifact types, ownership progression, and review process are universal.",
+  "stage_number": 4,
+  "name": "Delivering",
+  "phase": "doing",
+  "description": "Participant completes three real client engagements with progressively increasing ownership — PS-primed, Partner-primed, Partner-led. Within each engagement, participant produces structured artifacts at methodology checkpoints. PSM coordinates advisory review of all artifacts. Engagement completion is tracked separately from artifact completion.",
+
+  "engagements": [
+    {
+      "engagement_id": "co-delivery-1",
+      "engagement_number": 1,
+      "ownership_model": "PS-primed",
+      "ownership_description": "PS leads engagement; partner observes and contributes. Participant focuses on absorbing how PS structures the methodology in a live customer setting, with a small artifact subset to anchor early learning.",
+      "estimated_effort": "8-16 weeks engagement duration",
+      "required_artifacts": [
+        "co-delivery-1-design-document",
+        "co-delivery-1-customer-data-review"
+      ]
+    },
+    {
+      "engagement_id": "co-delivery-2",
+      "engagement_number": 2,
+      "ownership_model": "Partner-primed",
+      "ownership_description": "Partner leads engagement; PS advises. Participant takes primary responsibility for engagement direction, with PSM advisory input on artifacts. Artifact subset expands to include configuration and validation activities.",
+      "estimated_effort": "8-16 weeks engagement duration",
+      "required_artifacts": [
+        "co-delivery-2-design-document",
+        "co-delivery-2-customer-data-review",
+        "co-delivery-2-configuration-review",
+        "co-delivery-2-list-hierarchy-review"
+      ]
+    },
+    {
+      "engagement_id": "co-delivery-3",
+      "engagement_number": 3,
+      "ownership_model": "Partner-led",
+      "ownership_description": "Partner runs the engagement; PS on call. Participant produces the full artifact set across all six methodology phases, demonstrating end-to-end delivery competency.",
+      "estimated_effort": "8-16 weeks engagement duration",
+      "required_artifacts": [
+        "co-delivery-3-design-document",
+        "co-delivery-3-customer-data-review",
+        "co-delivery-3-configuration-review",
+        "co-delivery-3-list-hierarchy-review",
+        "co-delivery-3-extensions-review",
+        "co-delivery-3-app-led-workshop-readiness"
+      ]
+    }
+  ],
+
+  "_artifact_type_catalog": {
+    "description": "Six artifact types map to methodology phases 5-10 from Stage 2 Block C. Each artifact is a real client work product reviewed by the PSM as an advisory checkpoint.",
+    "types": [
+      { "artifact_type": "design-document",          "methodology_phase": 5,  "title": "Initial design document",            "description": "Partner's design for the application configuration on the client engagement, submitted to PSM prior to configuration build." },
+      { "artifact_type": "customer-data-review",     "methodology_phase": 5,  "title": "Customer data review",                "description": "Partner's review and validation of customer data files prior to running the configurator. PSM reviews data quality and readiness." },
+      { "artifact_type": "configuration-review",     "methodology_phase": 6,  "title": "Configuration review",                "description": "Partner's submitted configured application for advisory review. PSM reviews against design intent and product best practices." },
+      { "artifact_type": "list-hierarchy-review",    "methodology_phase": 8,  "title": "List and hierarchy review",          "description": "Partner's submitted lists and hierarchies for validation. PSM reviews structure, completeness, and alignment with customer data." },
+      { "artifact_type": "extensions-review",        "methodology_phase": 10, "title": "Extensions review",                  "description": "Partner's identified extensions on the engagement, reviewed by PSM for approach and feasibility before build begins." },
+      { "artifact_type": "app-led-workshop-readiness","methodology_phase": 9, "title": "Application-led workshop readiness", "description": "Partner's facilitation plan and materials for the customer-facing application-led workshop. PSM reviews readiness and provides advisory input." }
+    ]
+  },
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "task_id": "co-delivery-1",
+      "engagement": "co-delivery-1",
+      "title": "Co-delivery Engagement 1 — PS-primed (PS leads, partner contributes)",
+      "description": "First real client engagement. PS leads the methodology while partner observes, contributes, and produces 2 artifacts for PSM advisory review.",
+      "estimated_effort": "8-16 weeks",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM signs off on engagement completion when customer engagement is delivered and live.",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "co-delivery-1-design-document",
+      "engagement": "co-delivery-1",
+      "artifact_type": "design-document",
+      "title": "Engagement 1 — Submit design document for PSM review",
+      "description": "Submit initial design document for the client engagement to PSM for advisory review.",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM signs off after advisory review (revise-and-resubmit allowed).",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "co-delivery-1-customer-data-review",
+      "engagement": "co-delivery-1",
+      "artifact_type": "customer-data-review",
+      "title": "Engagement 1 — Submit customer data review for PSM review",
+      "description": "Submit customer data files and the partner's data review/validation to PSM for advisory review prior to running the configurator.",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+
+    {
+      "_fixed": true,
+      "task_id": "co-delivery-2",
+      "engagement": "co-delivery-2",
+      "title": "Co-delivery Engagement 2 — Partner-primed (partner leads, PS advises)",
+      "description": "Second real client engagement. Partner takes primary engagement ownership; PS provides advisory input. Partner produces 4 artifacts for PSM review.",
+      "estimated_effort": "8-16 weeks",
+      "completion_mechanism": "admin_signoff",
+      "required": true,
+      "prerequisite": "co-delivery-1"
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "co-delivery-2-design-document",
+      "engagement": "co-delivery-2",
+      "artifact_type": "design-document",
+      "title": "Engagement 2 — Submit design document for PSM review",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "co-delivery-2-customer-data-review",
+      "engagement": "co-delivery-2",
+      "artifact_type": "customer-data-review",
+      "title": "Engagement 2 — Submit customer data review for PSM review",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "co-delivery-2-configuration-review",
+      "engagement": "co-delivery-2",
+      "artifact_type": "configuration-review",
+      "title": "Engagement 2 — Submit configuration review for PSM review",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "co-delivery-2-list-hierarchy-review",
+      "engagement": "co-delivery-2",
+      "artifact_type": "list-hierarchy-review",
+      "title": "Engagement 2 — Submit list and hierarchy review for PSM review",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+
+    {
+      "_fixed": true,
+      "task_id": "co-delivery-3",
+      "engagement": "co-delivery-3",
+      "title": "Co-delivery Engagement 3 — Partner-led (partner runs engagement, PS on call)",
+      "description": "Third real client engagement. Partner runs end-to-end delivery; PS available on call. Partner produces the full set of 6 artifacts demonstrating complete delivery competency.",
+      "estimated_effort": "8-16 weeks",
+      "completion_mechanism": "admin_signoff",
+      "required": true,
+      "prerequisite": "co-delivery-2"
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "co-delivery-3-design-document",
+      "engagement": "co-delivery-3",
+      "artifact_type": "design-document",
+      "title": "Engagement 3 — Submit design document for PSM review",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "co-delivery-3-customer-data-review",
+      "engagement": "co-delivery-3",
+      "artifact_type": "customer-data-review",
+      "title": "Engagement 3 — Submit customer data review for PSM review",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "co-delivery-3-configuration-review",
+      "engagement": "co-delivery-3",
+      "artifact_type": "configuration-review",
+      "title": "Engagement 3 — Submit configuration review for PSM review",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "co-delivery-3-list-hierarchy-review",
+      "engagement": "co-delivery-3",
+      "artifact_type": "list-hierarchy-review",
+      "title": "Engagement 3 — Submit list and hierarchy review for PSM review",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "co-delivery-3-extensions-review",
+      "engagement": "co-delivery-3",
+      "artifact_type": "extensions-review",
+      "title": "Engagement 3 — Submit extensions review for PSM review",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_new": true,
+      "task_id": "co-delivery-3-app-led-workshop-readiness",
+      "engagement": "co-delivery-3",
+      "artifact_type": "app-led-workshop-readiness",
+      "title": "Engagement 3 — Submit application-led workshop readiness for PSM review",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true,                "gate_id": "co-delivery-1-complete",                       "description": "Engagement 1 (PS-primed) complete — customer engagement delivered and live; PSM sign-off",                  "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "co-delivery-1-design-document-approved",       "description": "Engagement 1 design document reviewed and approved by PSM",                                              "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "co-delivery-1-customer-data-review-approved", "description": "Engagement 1 customer data review reviewed and approved by PSM",                                          "verification_source": "admin_signoff" },
+
+    { "_fixed": true,                "gate_id": "co-delivery-2-complete",                       "description": "Engagement 2 (Partner-primed) complete — customer engagement delivered and live; PSM sign-off",            "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "co-delivery-2-design-document-approved",       "description": "Engagement 2 design document reviewed and approved by PSM",                                              "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "co-delivery-2-customer-data-review-approved", "description": "Engagement 2 customer data review reviewed and approved by PSM",                                          "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "co-delivery-2-configuration-review-approved", "description": "Engagement 2 configuration review reviewed and approved by PSM",                                          "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "co-delivery-2-list-hierarchy-review-approved","description": "Engagement 2 list and hierarchy review reviewed and approved by PSM",                                     "verification_source": "admin_signoff" },
+
+    { "_fixed": true,                "gate_id": "co-delivery-3-complete",                                  "description": "Engagement 3 (Partner-led) complete — customer engagement delivered and live; PSM sign-off",                "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "co-delivery-3-design-document-approved",                  "description": "Engagement 3 design document reviewed and approved by PSM",                                              "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "co-delivery-3-customer-data-review-approved",            "description": "Engagement 3 customer data review reviewed and approved by PSM",                                          "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "co-delivery-3-configuration-review-approved",            "description": "Engagement 3 configuration review reviewed and approved by PSM",                                          "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "co-delivery-3-list-hierarchy-review-approved",           "description": "Engagement 3 list and hierarchy review reviewed and approved by PSM",                                    "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "co-delivery-3-extensions-review-approved",               "description": "Engagement 3 extensions review reviewed and approved by PSM",                                            "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "co-delivery-3-app-led-workshop-readiness-approved",      "description": "Engagement 3 application-led workshop readiness reviewed and approved by PSM",                           "verification_source": "admin_signoff" }
+  ],
+
+  "estimated_effort_total": "24-48 weeks engagement duration (3 × 8-16 weeks); ~12 PSM advisory reviews; participant time embedded in engagement delivery, not additive",
+  "_estimated_effort_total_note": "Stage 4 elapsed time is bound by real engagement availability and customer pace. Realistic Stage 4 duration: 12-24+ months for active partners; longer or stalled for lower-pipeline partners.",
+
+  "_per_product_authoring_obligations": {
+    "description": "Stage 4 has no per-product asset authoring (no courses, recordings, or labs). Per-product authoring is review rubric definition.",
+    "items": [
+      { "item": "Per-artifact review rubrics", "scope": "For each of the six artifact types, define what the PSM is reviewing against — required content, quality bar, common issues. Same rubrics apply across all engagements within a product journey." }
+    ]
+  },
+
+  "_operational_considerations": {
+    "items": [
+      "PSM review load: ~12 advisory reviews per participant. Operational ratio of PSMs to active Stage 4 participants needs to be sustainable.",
+      "Engagement availability: a participant cannot progress through Stage 4 without three available client engagements at the partner firm. Partners with thin pipeline may stall here.",
+      "Review SLA: time PSM has to return advisory feedback. Default v0: TBD. Affects participant velocity through Stage 4.",
+      "Artifact resubmission: default v0 is revise-and-resubmit with no attempt limit. PSM advisory feedback drives revision."
+    ]
+  }
+}

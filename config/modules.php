@@ -96,6 +96,30 @@ return [
         ],
     ],
 
+    'journeys' => [
+        'name' => 'Journeys',
+        'description' => 'Owner-facing dashboards, the journey builder, and the read-only content asset catalog.',
+        'icon' => 'compass',
+        'group' => 'core',
+        'enabled' => env('MODULE_JOURNEYS', true),
+        'sections' => [
+            'my_journeys' => [
+                'label' => 'My Journeys',
+                'icon' => 'compass',
+                'items' => [
+                    ['label' => 'My Journeys', 'route' => 'journeys.my', 'icon' => 'list'],
+                ],
+            ],
+            'catalog' => [
+                'label' => 'Asset Catalog',
+                'icon' => 'book-open',
+                'items' => [
+                    ['label' => 'Browse Assets', 'route' => 'assets.index', 'icon' => 'book-open'],
+                ],
+            ],
+        ],
+    ],
+
     'competency' => [
         'name' => 'Competency',
         'description' => 'Partner paths, scorecard, competency matrix, and path reviews.',

@@ -1,0 +1,282 @@
+{
+  "_meta": {
+    "description": "Updated Stage 5 (Expert) for the universal Anaplan product Delivery journey template. Slots into the larger template at stages[4]. Reflects iteration from Stage 5 review pass.",
+    "iteration_date": "2026-04-27",
+    "changes_from_previous": [
+      "Adopted: Model C — Expert designation is EARNED via a defined set of contributive deliverables, then MAINTAINED via ongoing-state activities. Resolves the conceptual tension between `terminal_stage: true` and `type: 'ongoing'` gates.",
+      "Restructured: Stage 5 tasks split into three groups — earn_set (required to achieve Expert designation), maintain_set (ongoing activities expected of an active Expert), optional_set (recognized but not required).",
+      "Added: Submit customer project overview (earn_set, contributive deliverable — structured project narrative becomes per-product knowledge asset)",
+      "Added: Sponsor client references (earn_set, contributive deliverable — tangible commercial value)",
+      "Added: Adjacent product overview review (precedes credentialing intent declaration; informs the declaration with context)",
+      "Added: Formal Expert designation event (recognition moment — certificate, badge, announcement — replaces the quiet gate-clearing of the original)",
+      "Modified: Independent deliveries — moved to maintain_set since `lead independent deliveries` is fundamentally an ongoing-state activity, not a one-time deliverable. Initial bar of 2 deliveries is required to be considered for Expert designation; ongoing delivery is expected to maintain status.",
+      "Modified: Mentorship — kept as ongoing maintain_set activity. Verification upgraded from self_attest to require named mentee + PSM acknowledgment.",
+      "Modified: Community contribution — moved to optional_set. Distinct from project overview (project overview = structured internal record; community contribution = polished marketable output, optional).",
+      "Modified: SME registration — kept optional. Clarified semantics: Expert designation is earned through the journey; SME registration is opt-in directory presence.",
+      "Modified: Adjacent product credentialing intent — singular declaration retained for v0; multi-product credentialing is captured at the parent-journey level (parking-lot for parent-journey work).",
+      "Decision: Stage 5 phase changed from `doing` (original) to `expert` to differentiate it from Stage 4. Expert is a distinct phase from Delivering."
+    ],
+    "open_items_parked_for_later": [
+      "Multi-product credentialing intent declaration — current template captures one adjacent product. Parent-journey concept (introduced in Stage 1) will likely require expressing intent across multiple adjacent products.",
+      "Expert maintenance review cadence — how often Expert status is re-confirmed against the maintain_set. Annual? On-demand? Activity-driven? Program-level operational decision.",
+      "Loss of Expert status — what triggers it, what the recovery path is. Operational policy.",
+      "Per-product blueprint contribution review — which CoE/product team owns reviewing and accepting blueprint contributions per product.",
+      "Customer project overview standard — template/format for the structured project narrative. Per-product authoring obligation.",
+      "Client reference sponsorship process — how a partner formally sponsors a reference. Operational integration with Anaplan customer reference programs."
+    ]
+  },
+
+  "_fixed": false,
+  "_note": "Stage 5 task structure is FIXED across all product journeys. Adjacent product references are VARIABLE per product. Asset templates (project overview format, blueprint contribution format) are fixed; specific contributions are per-Expert.",
+  "stage_number": 5,
+  "name": "Expert",
+  "phase": "expert",
+  "_phase_change_note": "Phase changed from 'doing' (original) to 'expert'. Stage 5 is a distinct phase from Stage 4 — it represents practitioner status with ecosystem contribution responsibilities, not a continuation of delivery work.",
+  "terminal_stage": true,
+  "terminal_outcome": "{{TERMINAL_OUTCOME}}",
+  "_terminal_outcome_example_ifp": "Finance Expert designation → FCR and Connected Planning Champion pathways",
+  "designation_model": "earn_once_then_maintain",
+  "_designation_model_note": "Model C — Expert designation is EARNED by completing the earn_set tasks (contributive deliverables that convert individual delivery experience into ecosystem value), then MAINTAINED by ongoing-state activities in the maintain_set. Optional_set tasks are recognized but not required for either earning or maintaining the designation.",
+  "description": "Participant achieves and maintains Expert designation for {{PRODUCT_NAME}} by contributing structured deliverables back to the ecosystem (project overviews, client references, blueprint contributions) and maintaining ongoing practitioner activities (independent deliveries, mentorship). The Expert is no longer just someone who can deliver — they are someone who actively shapes how others deliver and what customers see.",
+
+  "task_groups": {
+    "earn_set": {
+      "description": "Required contributive deliverables. All must be completed to achieve Expert designation.",
+      "tasks": [
+        "submit-customer-project-overview",
+        "sponsor-client-reference",
+        "contribute-blueprint",
+        "complete-initial-independent-deliveries",
+        "{{ADJACENT_JOURNEY_ID}}-overview-review",
+        "{{ADJACENT_JOURNEY_ID}}-credentialing-intent"
+      ]
+    },
+    "maintain_set": {
+      "description": "Ongoing activities expected of an active Expert. Status maintenance reviewed on cadence (TBD).",
+      "tasks": [
+        "lead-independent-deliveries-ongoing",
+        "mentor-junior-resource"
+      ]
+    },
+    "optional_set": {
+      "description": "Recognized contributions that are not required for earning or maintaining Expert designation.",
+      "tasks": [
+        "community-contribution",
+        "sme-designation-registration"
+      ]
+    }
+  },
+
+  "tasks": [
+
+    {
+      "_fixed": true,
+      "_new": true,
+      "group": "earn_set",
+      "task_id": "submit-customer-project-overview",
+      "title": "Submit customer project overview",
+      "description": "Produce a structured overview of one delivered customer project — customer, scope, what was delivered, what worked, what was learned. Becomes a per-product knowledge asset future participants can learn from. Distinct from Stage 4 artifacts (which were per-phase advisory reviews) — this is a full project narrative.",
+      "deliverable": "Structured project narrative document",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM reviews the project overview against the standard format and accepts it as a per-product knowledge asset.",
+      "minimum_count": 1,
+      "required": true,
+      "examples_of_good_output": [
+        "Customer: Mid-market manufacturer (5,000 employees). Scope: IFP rollout covering planning + reporting + budgeting modules across 12 cost centers. Implementation: 14 weeks. Key learning: customer's existing Hyperion data quality required 3 weeks of cleanup before configuration could begin — recommend adding data readiness assessment as a pre-engagement gate.",
+          "Customer: Global retailer (40,000 employees). Scope: IFP for revenue planning across 6 regions. Implementation: 22 weeks across 3 phases. Key learning: regional finance teams resisted standardized hierarchies; resolved through phased rollout with regional pilots before global cutover."
+      ]
+    },
+
+    {
+      "_fixed": true,
+      "_new": true,
+      "group": "earn_set",
+      "task_id": "sponsor-client-reference",
+      "title": "Sponsor a client reference",
+      "description": "Sponsor at least one customer reference. Customer agrees to be referenced for the {{PRODUCT_NAME}} delivery. Real signal — the customer is willing, the partner has the relationship, and the engagement was successful enough to warrant referencing.",
+      "deliverable": "Customer reference confirmation (customer-acknowledged willingness to be referenced)",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM confirms the reference is sponsored and integrated into Anaplan's customer reference program.",
+      "minimum_count": 1,
+      "required": true,
+      "examples_of_good_output": [
+        "Customer X agrees to participate in 1-2 prospect reference calls per quarter and to be named in case study materials. Reference scope: IFP rollout, 6-month implementation, scope and outcomes specified.",
+        "Customer Y agrees to a video case study and conference speaking opportunity. Reference scope: end-to-end IFP delivery with 18-month roadmap including FCR follow-on."
+      ]
+    },
+
+    {
+      "_fixed": true,
+      "_modified": true,
+      "_modification_note": "Task remains; semantics clarified. Blueprint contribution is required to earn Expert designation (1 minimum); additional contributions are welcomed but not gated.",
+      "group": "earn_set",
+      "task_id": "contribute-blueprint",
+      "title": "Contribute to {{PRODUCT_NAME}} delivery blueprint",
+      "description": "Submit at least one accepted contribution to the {{PRODUCT_NAME}} delivery blueprint. Contributions can be drawn from Stage 4 artifact review feedback, project overview learnings, or independent observation. The 12 artifacts produced in Stage 4 are likely the raw material for blueprint contribution.",
+      "deliverable": "Accepted blueprint contribution",
+      "examples_of_contribution_types": [
+        "New methodology pattern (e.g., 'phased-rollout pattern for regions resisting standardized hierarchies')",
+        "New extension pattern (e.g., 'currency-translation extension approach when customer has multi-entity consolidation')",
+        "Edit to existing methodology section (e.g., 'expanded data readiness phase with new pre-configurator data quality checks')",
+        "New case study or example in an existing methodology section"
+      ],
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "Product CoE / blueprint owner reviews and accepts the contribution.",
+      "minimum_count": 1,
+      "required": true
+    },
+
+    {
+      "_fixed": true,
+      "_modified": true,
+      "_renamed_from": "lead-independent-deliveries",
+      "_modification_note": "Original was a single ongoing task with minimum_count: 2. Split into two: a one-time `complete-initial-independent-deliveries` (earn_set, gates Expert designation) and an ongoing `lead-independent-deliveries-ongoing` (maintain_set, expected of active Experts).",
+      "group": "earn_set",
+      "task_id": "complete-initial-independent-deliveries",
+      "title": "Complete initial independent {{PRODUCT_NAME}} deliveries",
+      "description": "Lead 2 independent {{PRODUCT_NAME}} client deliveries (no PS co-delivery, PS available on call only). These are deliveries beyond the 3 co-deliveries from Stage 4. Demonstrates ability to deliver without PS structure.",
+      "completion_mechanism": "admin_signoff",
+      "minimum_count": 2,
+      "required": true
+    },
+
+    {
+      "_fixed": true,
+      "_new": true,
+      "_moved_from_stage_2": "Adjacent product overview was originally a Stage 2 task; restructured Stage 2 retired it. Restored here where it has decision-utility — informs the credentialing intent declaration with adjacent product context.",
+      "group": "earn_set",
+      "task_id": "{{ADJACENT_JOURNEY_ID}}-overview-review",
+      "title": "Review {{ADJACENT_PRODUCT}} overview",
+      "description": "Review {{ADJACENT_PRODUCT}} overview content to inform the credentialing intent declaration. Provides context for whether to pursue, defer, or decline the adjacent product journey.",
+      "asset": "{{ADJACENT_PRODUCT}} overview content",
+      "source_system": "Seismic",
+      "estimated_effort": "30 min",
+      "completion_mechanism": "self_attest",
+      "required": true,
+      "prerequisite_for": "{{ADJACENT_JOURNEY_ID}}-credentialing-intent"
+    },
+
+    {
+      "_variable": "adjacent product varies per journey",
+      "_modified": true,
+      "_modification_note": "Original was optional with self_attest. Now part of earn_set — making the declaration is required (the answer can be defer or decline; only the act of declaring is gated). The declaration is a signal-only gate, not an action gate — it does not start the next journey.",
+      "group": "earn_set",
+      "task_id": "{{ADJACENT_JOURNEY_ID}}-credentialing-intent",
+      "title": "Declare {{ADJACENT_PRODUCT}} credentialing intent",
+      "description": "After reviewing {{ADJACENT_PRODUCT}} overview, declare credentialing intent. Signal-only — does not start the adjacent journey, only captures the Expert's intent for partner-firm and Anaplan planning.",
+      "options": ["pursue", "defer", "decline"],
+      "completion_mechanism": "self_attest",
+      "required": true,
+      "prerequisite": "{{ADJACENT_JOURNEY_ID}}-overview-review",
+      "_multi_product_note": "v0 captures one adjacent product. Multi-product credentialing intent (for parent-journey enrolees) is parking-lot for parent-journey work."
+    },
+
+    {
+      "_fixed": true,
+      "_new": true,
+      "_inserted_after_earn_set_complete": true,
+      "task_id": "expert-designation-event",
+      "title": "{{PRODUCT_NAME}} Expert designation",
+      "description": "Formal recognition moment when the earn_set is complete. Issues Expert credential, badge, and announces designation in partner community channels. Replaces the original template's quiet gate-clearing.",
+      "deliverable": "Expert credential issued; participant added to Expert directory; community announcement",
+      "completion_mechanism": "external_system",
+      "_completion_mechanism_note": "Triggered automatically when all earn_set tasks complete. No participant action required.",
+      "required": true,
+      "trigger": "all_earn_set_tasks_complete"
+    },
+
+    {
+      "_fixed": true,
+      "_new": true,
+      "_split_from": "lead-independent-deliveries (original)",
+      "group": "maintain_set",
+      "task_id": "lead-independent-deliveries-ongoing",
+      "title": "Lead ongoing independent {{PRODUCT_NAME}} deliveries",
+      "description": "Continue leading independent {{PRODUCT_NAME}} client deliveries to maintain active Expert status. No fixed count — review on cadence (TBD) confirms continued practitioner activity.",
+      "completion_mechanism": "admin_signoff",
+      "verification_cadence": "TBD",
+      "required_for": "expert_status_maintenance"
+    },
+
+    {
+      "_fixed": true,
+      "_modified": true,
+      "_modification_note": "Verification upgraded from self_attest. Now requires named mentee plus PSM acknowledgment. Mentorship is the most consequential ecosystem contribution; self-attest alone is too weak.",
+      "group": "maintain_set",
+      "task_id": "mentor-junior-resource",
+      "title": "Mentor a junior {{PRODUCT_NAME}} delivery resource",
+      "description": "Active mentorship of a junior delivery resource progressing through the {{PRODUCT_NAME}} Delivery Journey. Requires named mentee and ongoing relationship.",
+      "deliverable": "Named mentee + active relationship",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM acknowledges the mentee-mentor relationship and confirms ongoing activity. Mentee may be asked to attest to the relationship.",
+      "verification_cadence": "TBD",
+      "required_for": "expert_status_maintenance"
+    },
+
+    {
+      "_fixed": true,
+      "_modified": true,
+      "_modification_note": "Moved to optional_set. Distinct from project overview (project overview = structured internal knowledge record, required; community contribution = polished marketable output, optional).",
+      "group": "optional_set",
+      "task_id": "community-contribution",
+      "title": "Community contribution",
+      "description": "Recognized contributions to the partner community beyond the required earn_set deliverables.",
+      "completion_mechanism": "admin_signoff",
+      "required": false,
+      "examples": [
+        "Seismic content authorship",
+        "Partner community Q&A leadership",
+        "Webinar or conference speaking",
+        "Polished case study (beyond the structured project overview)",
+        "Open-source tool contribution",
+        "Customer-facing thought-leadership content"
+      ]
+    },
+
+    {
+      "_fixed": true,
+      "_modified": true,
+      "_modification_note": "Kept optional. Clarified semantics: Expert designation is earned through the journey; SME registration is opt-in directory presence for those who want to be discoverable in the {{PRODUCT_SHORT}} SME registry.",
+      "group": "optional_set",
+      "task_id": "sme-designation-registration",
+      "title": "Register as {{PRODUCT_SHORT}} SME",
+      "description": "Opt-in registry entry as a {{PRODUCT_SHORT}} Subject Matter Expert. Discoverable in the Anaplan SME directory; eligible for community speaking opportunities, escalation routing, and partner-firm staffing queries.",
+      "completion_mechanism": "admin_signoff",
+      "required": false
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "_new": true,     "gate_id": "customer-project-overview-accepted",        "description": "Customer project overview submitted and accepted by PSM (≥1)",                          "verification_source": "admin_signoff", "type": "earn_gate" },
+    { "_fixed": true, "_new": true,     "gate_id": "client-reference-sponsored",                "description": "Client reference sponsored and integrated into Anaplan reference program (≥1)",          "verification_source": "admin_signoff", "type": "earn_gate" },
+    { "_fixed": true, "_modified": true, "gate_id": "blueprint-contribution-accepted",           "description": "≥1 accepted contribution to {{PRODUCT_NAME}} delivery blueprint",                       "verification_source": "admin_signoff", "type": "earn_gate" },
+    { "_fixed": true, "_modified": true, "gate_id": "initial-independent-deliveries-confirmed", "description": "≥2 initial independent {{PRODUCT_NAME}} deliveries confirmed by PSM",                   "verification_source": "admin_signoff", "type": "earn_gate" },
+    { "_fixed": true, "_new": true,     "gate_id": "{{ADJACENT_JOURNEY_ID}}-overview-acknowledged", "description": "{{ADJACENT_PRODUCT}} overview reviewed and acknowledged",                            "verification_source": "self_attest",   "type": "earn_gate" },
+    { "_variable": true, "_modified": true, "gate_id": "{{ADJACENT_JOURNEY_ID}}-pathway-declared", "description": "{{ADJACENT_PRODUCT}} credentialing intent declared (pursue / defer / decline)",      "verification_source": "self_attest",   "type": "earn_gate" },
+    { "_fixed": true, "_new": true,     "gate_id": "expert-designated",                          "description": "Expert designation issued — earn_set complete, credential and badge issued, community announcement made", "verification_source": "external_system", "type": "designation_event" },
+    { "_fixed": true, "_modified": true, "gate_id": "ongoing-deliveries-active",                 "description": "Active Expert continues leading independent {{PRODUCT_NAME}} deliveries",                  "verification_source": "admin_signoff", "type": "maintain_gate" },
+    { "_fixed": true, "_modified": true, "gate_id": "mentorship-active",                         "description": "Active mentee-mentor relationship logged with named mentee",                              "verification_source": "admin_signoff", "type": "maintain_gate" }
+  ],
+
+  "estimated_effort_total": "Variable — earn_set typically achieved 6-18 months after Stage 4 completion depending on engagement velocity and contribution opportunities. Maintain_set is ongoing.",
+  "_estimated_effort_total_note": "Stage 5 is bound by real engagement availability, blueprint contribution opportunities, and customer reference relationships — not participant work hours. Realistic earn_set timing: 6-18 months for active practitioners.",
+
+  "_per_product_authoring_obligations": {
+    "description": "Stage 5 has minimal per-product asset authoring. Per-product obligations are review and acceptance processes.",
+    "items": [
+      { "item": "Customer project overview standard",   "scope": "Template/format for the structured project narrative. Same template across products preferred." },
+      { "item": "Blueprint contribution review process","scope": "Per-product CoE / blueprint owner identified and review process defined." },
+      { "item": "Adjacent product mapping",             "scope": "Identify the correct {{ADJACENT_PRODUCT}} and {{ADJACENT_JOURNEY_ID}} for each product journey." }
+    ]
+  },
+
+  "_operational_considerations": {
+    "items": [
+      "Expert maintenance review cadence — when and how Expert status is re-confirmed against the maintain_set. Affects whether Expert is a status that can be lost.",
+      "Blueprint contribution review SLA — time from contribution submission to acceptance. Affects how long Stage 5 takes.",
+      "Client reference sponsorship coordination — Anaplan customer reference programs may have their own gates and processes to align with.",
+      "Mentee pool — Stage 5 mentorship requires a junior resource available to mentor. Healthy partner ecosystem is a prerequisite.",
+      "Multi-product Experts — under parent journeys, an Expert may hold designation for IFP + FCR + AI simultaneously. Multi-designation expression is parking-lot."
+    ]
+  }
+}

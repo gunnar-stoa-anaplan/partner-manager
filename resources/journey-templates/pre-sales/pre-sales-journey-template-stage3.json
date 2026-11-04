@@ -1,0 +1,145 @@
+{
+  "_meta": {
+    "description": "Stage 3 (Credentialized) for the universal Anaplan product Pre-Sales journey template. Practice-and-credential stage built around a chained set of rubric-scored labs (discovery + light-config + demo) and a senior-PSE-graded credential exercise. Slots into the larger Pre-Sales template at stages[2].",
+    "iteration_date": "2026-04-30",
+    "persona": "pre-sales",
+    "structural_alignment_with_delivery": [
+      "Same shape as Delivery Stage 3: progression of graded labs followed by a credential gate, plus a mandatory Academy course covering field patterns",
+      "Replaces Delivery's instructor-led workshop sessions with self-paced labs — the foundational Pre-Sales Workshop (one-day ILT) lives in the Connected Planning Pre-Sales Foundations prereq, not in the per-topic journey",
+      "Mixes lab verification mechanisms: AI-graded mock for discovery, tooling-verified for light-config, AI-or-panel-graded for demo delivery, senior-reviewer-attested for the end-to-end credential",
+      "Uses the per-PSE sandbox provisioned in Stage 2 for the light-config and demo-delivery labs",
+      "Replaces Delivery's Top-10-Extensions Academy course with Top-10-Field-Demo-Patterns — analogous purpose: field-experience content that labs cannot teach",
+      "Phase remains 'learning' — Stage 3 sharpens skill in a controlled environment; Stage 4 is the first true 'doing' stage with real customers"
+    ],
+    "credentialing_mechanism": {
+      "ai_mock_discovery_agent": "Lab 1 uses an AI agent (planned capability, depends on P10 tooling spec) playing a prospect for a discovery conversation tailored to {{PRODUCT_NAME}}. AI grades against a structured rubric (discovery breadth, technical signal capture, requirement-mapping correctness) and produces feedback.",
+      "tooling_verified_light_config": "Lab 2 is a tooling-verified light-config exercise in the per-PSE sandbox: load a specified set of client orgs, hierarchies, and product entries; tooling validates structural correctness against the spec.",
+      "ai_or_panel_graded_demo": "Lab 3 is a recorded demo delivery. Default grading mode: AI agent grades fluency, pacing, talking-point coverage, and demo-script adherence against rubric. Fallback grading mode: senior PSE panel grades from recording. Either yields rubric pass/fail.",
+      "senior_reviewer_credential": "After Labs 1-3 pass, the PSE delivers an end-to-end credential exercise: discovery conversation → light-config the sandbox to match the discovered client → demo delivered with that configured sandbox → handle technical objections. Recorded asynchronously or live to a senior PSE reviewer (or panel). Reviewer scores against rubric and attests pass/fail. This is the official Stage 3 credential."
+    },
+    "boundary_with_stage_4": "End of Stage 3: PSE has demonstrated discovery, light-config, demo delivery, and technical objection handling fluency in a controlled mock environment, and has been exposed to the field's most common demo patterns for {{PRODUCT_NAME}}. They have NOT yet faced a real customer. Stage 4 is the progressive 3-level real-engagement model (shadow demo → co-deliver → solo deliver with post-engagement review).",
+    "open_items_parked_for_later": [
+      "AI mock-discovery agent — whether to share infrastructure with the Sales mock-pitch agent or build pre-sales-specific. P10 tooling spec.",
+      "Demo-delivery grading — AI grading vs panel grading default. Op Cmte / P10 decision.",
+      "Mock discovery + demo rubric design — per-lab rubrics need to be authored, not just per-product scenarios.",
+      "Senior PSE reviewer pool — sourcing, training, scheduling.",
+      "Failed-lab retry policy — unlimited retries vs cooldown vs escalation.",
+      "Light-config lab tooling — automated validation of org/hierarchy/product loads. Per-product spec.",
+      "Per-product Top-10-Field-Demo-Patterns Academy course — must be authored per product."
+    ]
+  },
+
+  "_fixed": false,
+  "_note": "Stage 3 task structure is FIXED across all product journeys within the Pre-Sales persona. Mock scenarios, customer scenarios, light-config specs, demo scripts, and rubric specifics are VARIABLE per product.",
+  "stage_number": 3,
+  "name": "Credentialized",
+  "phase": "learning",
+  "description": "PSE demonstrates {{PRODUCT_NAME}} pre-sales fluency by completing a chained set of rubric-scored labs (AI-graded discovery, tooling-verified light-config, AI-or-panel-graded demo delivery) and a senior-reviewer-graded end-to-end credential exercise. Closes with the Top 10 Field Demo Patterns Academy course covering the most common field demo situations for {{PRODUCT_NAME}}.",
+
+  "tasks": [
+    {
+      "_fixed": "task definition fixed; mock scenario and rubric specifics variable per product",
+      "task_id": "{{PRODUCT_ID}}-mock-discovery",
+      "title": "{{PRODUCT_NAME}} mock discovery — AI-graded prospect conversation",
+      "description": "AI-graded mock discovery conversation. The AI agent plays a prospect with implicit requirements that the PSE must surface through structured discovery and map to {{PRODUCT_NAME}} capabilities. The PSE produces a brief mapping artifact (which {{PRODUCT_NAME}} capabilities answer which requirements). AI grades the conversation and the mapping artifact against a structured rubric and produces feedback.",
+      "asset": "{{PRODUCT_NAME}} Mock Discovery (AI scenario + rubric + mapping-artifact template)",
+      "source_system": "AI mock-discovery agent",
+      "estimated_effort": "45-60 min (mock + mapping artifact + feedback review; allow time for retry if needed)",
+      "completion_mechanism": "ai_lab_verification",
+      "pass_criteria": "rubric_threshold",
+      "required": true,
+      "sequence": 1
+    },
+    {
+      "_fixed": "task definition fixed; light-config spec variable per product",
+      "task_id": "{{PRODUCT_ID}}-light-config-lab",
+      "title": "{{PRODUCT_NAME}} light-config lab — load client orgs, hierarchies, products",
+      "description": "Tooling-verified light-config exercise in the per-PSE sandbox of the {{PRODUCT_NAME}} pre-built demo environment. Given a specification of client organizations, hierarchies, and product catalog, the PSE loads the data into the sandbox following the canonical patterns from Stage 2. Tooling verifies structural correctness (hierarchy validity, completeness of org/product loads, sample-data substitutions). No model-building, no formula or list-structure changes — light config only.",
+      "asset": "{{PRODUCT_NAME}} Light-Config Lab (spec + sandbox + verification tooling)",
+      "source_system": "Sandbox + lab verification tooling",
+      "estimated_effort": "60-90 min",
+      "completion_mechanism": "lab_verification",
+      "pass_criteria": "binary",
+      "required": true,
+      "sequence": 2,
+      "prerequisite": "{{PRODUCT_ID}}-mock-discovery"
+    },
+    {
+      "_fixed": "task definition fixed; demo script and rubric specifics variable per product",
+      "task_id": "{{PRODUCT_ID}}-demo-delivery-lab",
+      "title": "{{PRODUCT_NAME}} demo delivery lab — recorded demo against rubric",
+      "description": "Recorded delivery of the canonical {{PRODUCT_NAME}} demo from the Stage 2 walkthrough. PSE delivers the demo in the configured sandbox (post-Lab-2), following the canonical script while demonstrating fluency, pacing, accurate talking-point coverage, and graceful handling of inline questions. Default grading: AI agent grades against rubric. Fallback grading: senior PSE panel review. Either yields rubric pass/fail.",
+      "asset": "{{PRODUCT_NAME}} Demo Delivery Lab (canonical script + rubric)",
+      "source_system": "AI demo-grading agent (default) or senior PSE panel (fallback)",
+      "estimated_effort": "60-90 min (delivery + grading turnaround; allow time for retry if needed)",
+      "completion_mechanism": "ai_lab_verification",
+      "pass_criteria": "rubric_threshold",
+      "_completion_mechanism_note": "Default ai_lab_verification; fallback senior_reviewer_attestation if AI demo-grading agent unavailable.",
+      "required": true,
+      "sequence": 3,
+      "prerequisite": "{{PRODUCT_ID}}-light-config-lab"
+    },
+    {
+      "_fixed": "task definition fixed; credential scenario and rubric specifics variable per product",
+      "task_id": "{{PRODUCT_ID}}-credential-demo",
+      "title": "{{PRODUCT_NAME}} credential demo — senior-reviewer-graded end-to-end",
+      "description": "End-to-end credential exercise: live or recorded simulated customer engagement covering discovery conversation → light-config the sandbox to match the discovered client → demo delivery against that configured sandbox → handling technical objections. Default mode is async recording reviewed by a senior PSE reviewer; live mode (panel-attended) is also acceptable. Reviewer scores against a holistic rubric and attests pass/fail. This is the official Stage 3 credential gate.",
+      "asset": "{{PRODUCT_NAME}} Credential Demo — scenario + holistic rubric + reviewer attestation form",
+      "source_system": "Senior PSE reviewer pool (PSM-coordinated)",
+      "estimated_effort": "90-120 min (delivery + reviewer turnaround time)",
+      "completion_mechanism": "senior_reviewer_attestation",
+      "pass_criteria": "rubric_threshold",
+      "required": true,
+      "sequence": 4,
+      "prerequisite": "{{PRODUCT_ID}}-demo-delivery-lab"
+    },
+    {
+      "_fixed": "task definition fixed; course content variable per product",
+      "task_id": "{{PRODUCT_ID}}-top-10-field-demo-patterns",
+      "title": "{{PRODUCT_NAME}} Top 10 Field Demo Patterns Academy course",
+      "description": "Mandatory Academy course authored by the {{PRODUCT_NAME}} CoE / pre-sales enablement team covering the 10 demo patterns most commonly seen in the field for {{PRODUCT_NAME}} — common discovery surprises, mid-demo pivots, technical curveballs, executive-vs-practitioner audience handling, and recurring tactical situations. Field-experience content the participant cannot get from labs. Includes a completion quiz.",
+      "asset": "{{PRODUCT_NAME}} Top 10 Field Demo Patterns",
+      "source_system": "Academy",
+      "estimated_effort": "45-60 min",
+      "completion_mechanism": "academy_xls",
+      "required": true,
+      "prerequisite": "{{PRODUCT_ID}}-credential-demo",
+      "_placement_note": "Required to be completed AFTER the credential demo (credential-demo pass unlocks the course)."
+    }
+  ],
+
+  "stage_entry_gates": [
+    { "_fixed": true, "gate_id": "demo-sandbox-active",                "description": "{{PRODUCT_NAME}} pre-built demo environment sandbox provisioned and accessible (verifies the Stage 2 provisioning succeeded)", "verification_source": "external_system" },
+    { "_fixed": true, "gate_id": "ai-mock-discovery-agent-available", "description": "AI mock-discovery agent infrastructure available for {{PRODUCT_NAME}} scenarios (program-level dependency on P10 tooling spec)",   "verification_source": "external_system" }
+  ],
+  "_stage_entry_gates_note": "Stage 3 has two stage-entry verification gates: sandbox active (per-PSE) and AI mock-discovery agent available (program-level). If AI agent is unavailable at launch, fallback is human-panel-graded mocks.",
+
+  "gates": [
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-mock-discovery-passed",                  "description": "{{PRODUCT_NAME}} Mock Discovery passed",                                                                "verification_source": "ai_lab_verification" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-light-config-lab-passed",                "description": "{{PRODUCT_NAME}} Light-Config Lab passed — tooling verification",                                       "verification_source": "lab_verification" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-demo-delivery-lab-passed",               "description": "{{PRODUCT_NAME}} Demo Delivery Lab passed",                                                             "verification_source": "ai_lab_verification" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-credential-demo-passed",                  "description": "{{PRODUCT_NAME}} Credential Demo passed — senior reviewer attestation",                                  "verification_source": "senior_reviewer_attestation" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-top-10-field-demo-patterns-complete",    "description": "{{PRODUCT_NAME}} Top 10 Field Demo Patterns Academy course completion confirmed (quiz passed)",            "verification_source": "academy_xls" }
+  ],
+
+  "estimated_effort_total": "5h 45min - 7h 30min",
+  "_estimated_effort_total_note": "Computed from task estimates. Heavier than Sales Stage 3 (~4-5.5 hrs) because PSEs carry both the discovery-and-demo skills AND the light-config skill; lighter than Delivery Stage 3 (~10 hrs) because there is no instructor-led workshop. Range accounts for retry on failed labs.",
+
+  "_per_product_authoring_obligations": {
+    "description": "For every product Pre-Sales journey instantiation, the following must be authored. The template specifies; the product team produces.",
+    "assets": [
+      { "asset": "Mock Discovery (AI scenario + rubric + mapping-artifact template)", "duration": "~45-60 min PSE-time", "owner": "Pre-sales enablement + AI tooling team", "note": "AI scenario + grading rubric + mapping-artifact template." },
+      { "asset": "Light-Config Lab (spec + sandbox + verification tooling)",          "duration": "~60-90 min PSE-time", "owner": "Pre-sales enablement + product team",     "note": "Light-config spec covering orgs/hierarchies/products + verification tooling per product." },
+      { "asset": "Demo Delivery Lab (canonical script + rubric)",                     "duration": "~60-90 min PSE-time", "owner": "Pre-sales enablement + product team",     "note": "Canonical demo script + grading rubric." },
+      { "asset": "Credential Demo — scenario + holistic rubric + reviewer attestation form", "duration": "~90-120 min PSE-time", "owner": "Pre-sales enablement",         "note": "End-to-end scenario combining discovery + light-config + demo + objection handling." },
+      { "asset": "Top 10 Field Demo Patterns Academy course (with quiz)",             "duration": "~45-60 min",          "owner": "CoE / pre-sales enablement",              "note": "Field-experience content covering recurring demo situations." }
+    ],
+    "infrastructure": [
+      { "item": "AI mock-discovery agent",  "scope": "Per P10 tooling spec — agent that plays prospect role per scenario script and grades discovery + mapping against rubric." },
+      { "item": "AI demo-grading agent",    "scope": "Per P10 tooling spec — agent that grades recorded demo delivery against rubric. Fallback: senior PSE panel grading." },
+      { "item": "Light-config lab tooling", "scope": "Automated validation of org/hierarchy/product loads in sandbox against spec." },
+      { "item": "Senior PSE reviewer pool", "scope": "Sourcing, training, scheduling, and reviewer-attestation tooling for the credential demo." },
+      { "item": "Per-PSE sandbox lifecycle", "scope": "Provisioned in Stage 2, used through Stage 3, retained for Stage 4 light-config practice or torn down post-credential — operational policy." }
+    ]
+  }
+}

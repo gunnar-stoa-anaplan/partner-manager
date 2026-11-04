@@ -1,0 +1,62 @@
+{
+  "_meta": {
+    "description": "Stage 3 (Credentialized) for the Anaplan Overview foundational journey. Comprehension check via Academy course + persona pathway declaration. Completion of Stage 3 routes the resource to their persona-specific Foundations journey (Sales Foundations / Pre-Sales Foundations / Anaplan Platform → Delivery).",
+    "iteration_date": "2026-05-01",
+    "persona": "all",
+    "foundational": true,
+    "terminal_for_foundational": true,
+    "_terminal_note": "Stage 3 is the final stage of the Anaplan Overview foundational journey — there is no Stage 4 or 5. Completion of this stage marks the resource as having satisfied the universal Anaplan Overview prerequisite for every other journey."
+  },
+
+  "_fixed": false,
+  "_note": "Stage 3 task structure is FIXED. Anaplan Overview Academy course content is the canonical comprehension check.",
+  "stage_number": 3,
+  "name": "Credentialized",
+  "phase": "learning",
+  "description": "Resource demonstrates foundational Anaplan understanding by completing the Anaplan Overview Academy course (with quiz) and declares their persona pathway forward.",
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "task_id": "anaplan-overview-academy",
+      "title": "Anaplan Overview Academy course",
+      "description": "Self-paced Academy course covering the foundational content from Stage 2 in a quiz-verified format. Acts as the comprehension check — confirms the resource has internalized Anaplan story, Connected Planning narrative, platform-at-a-glance, partner ecosystem, and customer success patterns. Includes a completion quiz.",
+      "asset": "Anaplan Overview Academy course (with quiz)",
+      "source_system": "Academy",
+      "estimated_effort": "60-90 min",
+      "completion_mechanism": "academy_xls",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "persona-pathway-declaration",
+      "title": "Declare persona pathway forward",
+      "description": "Final step: declare which persona pathway the resource is pursuing. This routes the resource to their next required journey: Sales → Connected Planning Sales Foundations; Pre-Sales → Connected Planning Pre-Sales Foundations; Delivery → Anaplan Platform foundational journey. Resource confirms their declared pathway with their manager (who was captured in Stage 1 profile).",
+      "asset": "Persona Pathway Declaration form",
+      "source_system": "Seismic",
+      "options": ["sales", "pre-sales", "delivery"],
+      "estimated_effort": "15 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    }
+  ],
+
+  "stage_entry_gates": [],
+  "_stage_entry_gates_note": "No stage-entry verification — Stage 2 completion is the only prerequisite.",
+
+  "gates": [
+    { "_fixed": true, "gate_id": "anaplan-overview-academy-complete",     "description": "Anaplan Overview Academy course completion confirmed (quiz passed)",                                "verification_source": "academy_xls" },
+    { "_fixed": true, "gate_id": "persona-pathway-declared",              "description": "Persona pathway declared (sales / pre-sales / delivery); resource is queued for the corresponding next journey", "verification_source": "self_attest" }
+  ],
+
+  "estimated_effort_total": "1h 15min - 1h 45min",
+  "_estimated_effort_total_note": "Light Stage 3 — Academy course + persona declaration. No labs, no senior-reviewer credential, no extension course (those exist for per-application journeys, not foundationals).",
+
+  "_per_product_authoring_obligations": {
+    "description": "Foundational journey — single canonical asset set, not per-product.",
+    "assets": [
+      { "asset": "Anaplan Overview Academy course (with quiz)", "duration": "~60-90 min", "owner": "Academy / Connected Enablement leadership", "note": "Comprehension check. Should mirror Stage 2 content blocks." },
+      { "asset": "Persona Pathway Declaration form",            "duration": "~15 min PSE-time",        "owner": "Connected Enablement leadership",          "note": "Simple form; backend updates resource profile and queues next journey." }
+    ]
+  }
+}

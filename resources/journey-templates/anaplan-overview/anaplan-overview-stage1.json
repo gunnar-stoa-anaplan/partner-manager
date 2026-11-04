@@ -1,0 +1,71 @@
+{
+  "_meta": {
+    "description": "Stage 1 (Registered) for the Anaplan Overview foundational journey. Universal entry-point — every partner resource completes this regardless of intended persona. Stripped-down vs per-application Stage 1: no primary-focus task, no parent-journey enrollment, no prereq verification (this IS the prereq).",
+    "iteration_date": "2026-05-01",
+    "persona": "all",
+    "foundational": true
+  },
+
+  "_fixed": false,
+  "_note": "Stage 1 task structure for foundational Anaplan Overview journey.",
+  "stage_number": 1,
+  "name": "Registered",
+  "phase": "onboarding",
+  "description": "Resource confirms journey understanding, partner portal access, expanded resource profile, and Partner Success engagement model.",
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "task_id": "journey-orientation",
+      "title": "Review Anaplan Overview Journey roadmap & expectations",
+      "description": "Walk through the 3 stages of the Anaplan Overview journey, what's covered in each, and how this foundational journey routes you to your persona-specific Foundations journey on completion. Sets expectations before any other work begins.",
+      "asset": "Anaplan Overview Journey roadmap",
+      "source_system": "Seismic",
+      "estimated_effort": "10-15 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "join-partner-portal",
+      "title": "Join the partner portal",
+      "completion_mechanism": "external_system",
+      "estimated_effort": "30 min",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "complete-resource-profile",
+      "title": "Complete resource profile",
+      "description": "Capture firm, intended role declaration (Sales / Pre-Sales / Delivery / undecided), region and language coverage, prior Anaplan exposure, and manager contact info (name, email, role). The role declaration is provisional — the final pathway is confirmed at Stage 3 exit.",
+      "completion_mechanism": "self_attest",
+      "estimated_effort": "20-30 min",
+      "required": true,
+      "_profile_field_spec_status": "draft — foundational profile spec is a subset of persona-specific specs; locked as separate work item"
+    },
+    {
+      "_fixed": true,
+      "task_id": "partner-success-engagement",
+      "title": "Understand how to engage Anaplan Partner Success",
+      "description": "Review the Partner Success engagement model — how to raise tickets, which Slack channels apply, and how to use the Partner Success agent. Same content surfaced in per-application journey Stage 1; foundational-stage exposure ensures every resource knows the path before they need it.",
+      "asset": "Partner Success engagement guide",
+      "source_system": "Seismic",
+      "estimated_effort": "15 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "journey-orientation-acknowledged",        "description": "Anaplan Overview Journey roadmap reviewed and acknowledged",                              "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "portal-active",                            "description": "Partner portal login active",                                                            "verification_source": "external_system" },
+    { "_fixed": true, "gate_id": "profile-complete",                          "description": "Resource profile complete with intended-role declaration and required fields populated", "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "partner-success-engagement-acknowledged",  "description": "Partner Success engagement model acknowledged",                                          "verification_source": "self_attest" }
+  ],
+
+  "stage_exit_actions": [],
+  "_stage_exit_actions_note": "No system-side actions on Stage 1 exit.",
+
+  "estimated_effort_total": "1h 15min - 1h 30min",
+  "_estimated_effort_total_note": "Roughly 30 min lighter than per-application Stage 1 because there's no primary-focus task, parent-journey enrollment, or prereq verification."
+}

@@ -1,0 +1,131 @@
+{
+  "_meta": {
+    "description": "Stage 1 (Onboarding / Registered) for the universal Anaplan product Sales journey template. Mirrors the Delivery Stage 1 structure with persona-specific resource profile fields, support engagement model, and prerequisite journeys. Slots into the larger Sales template at stages[0].",
+    "iteration_date": "2026-04-30",
+    "persona": "sales",
+    "persona_audience_note": "Primary audience: partner seller. Bar set high enough that internal Anaplan sellers can use the same content. Not necessarily a prerequisite for the corresponding Pre-Sales journey — Sales and Pre-Sales are independent tracks for typically different people.",
+    "structural_alignment_with_delivery": [
+      "Same task spine: orientation → portal → profile → support engagement → confirm primary focus → conditional parent-journey → prereq verification",
+      "Same gate model and verification sources",
+      "Same _fixed flags on universal tasks; product-name templating identical",
+      "Resource profile field set diverges (sales-specific fields) — captured as persona-specific spec, locked separately",
+      "Support engagement task is renamed to reflect the channel-sales support model rather than Partner Success delivery model",
+      "Prerequisite journey list diverges: Anaplan Platform replaced with Connected Planning Sales Foundations (sellers do not need deep platform fluency)"
+    ],
+    "open_items_parked_for_later": [
+      "Sales resource profile field spec — to be locked as a separate work item alongside the data model (territory, segments, industries, sales credentials, quota tier, etc.)",
+      "Computed time per stage — to be wired in once Stage 2 and Stage 3 task lists are locked",
+      "Parent-journey conditional logic — needs parent-journey concept defined as its own structural layer",
+      "Prereq journey naming — 'Connected Planning Sales Foundations' is a placeholder pending Op Cmte decision",
+      "Prereq recency policy (Anaplan Overview / Sales Foundations staleness) — program-level decision",
+      "Dormancy / stale-state handling — program-level decision"
+    ]
+  },
+
+  "_fixed": false,
+  "_note": "Stage 1 is mostly fixed across all products within the Sales persona. Variable elements: confirm-primary-focus task title and primary-focus-confirmed gate description.",
+  "stage_number": 1,
+  "name": "Registered",
+  "phase": "onboarding",
+  "description": "Partner seller confirms journey understanding, portal access, expanded sales profile, support engagement model, primary focus area, parent-journey enrollment if applicable, and prerequisite journey completion before product-specific work begins.",
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "task_id": "journey-orientation",
+      "title": "Review {{PRODUCT_NAME}} Sales Journey roadmap & expectations",
+      "description": "Walk through the 5 stages, computed time commitment per stage, the Expert outcome, and how multi-journey / parent-journey enrollment works. Sets expectations before any other work begins. Calls out the Stage 4 progressive 3-level engagement model (shadow → co-lead → solo with post-engagement review) so sellers understand the customer-facing investment Stage 4 represents.",
+      "asset": "{{PRODUCT_NAME}} Sales Journey roadmap",
+      "source_system": "Seismic",
+      "estimated_effort": "20-30 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "join-partner-portal",
+      "title": "Join the partner portal",
+      "completion_mechanism": "external_system",
+      "estimated_effort": "30 min",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "complete-resource-profile",
+      "title": "Complete sales resource profile",
+      "description": "Capture firm, sales practice, territory, region and language coverage, market segments covered (Enterprise / Mid-Market / SMB), industries covered, prior Anaplan sales credentials and badges, years in sales, years selling Anaplan, current utilization band (time available for this journey), prior products sold, and manager contact info (name, email, role). Profile is a living record — fields can be updated as the seller progresses across journeys.",
+      "completion_mechanism": "self_attest",
+      "estimated_effort": "30-45 min",
+      "required": true,
+      "_profile_field_spec_status": "draft — to be locked as a separate work item; sales-specific spec diverges from delivery-resource spec",
+      "_persona_field_divergence": [
+        "ADDED for sales: territory, market segments covered, industries covered, prior products sold, years in sales",
+        "REMOVED from delivery spec: prior delivery role, prior products delivered (replaced with sales analogues)",
+        "RETAINED from delivery spec: firm, region/language, prior credentials, manager contact"
+      ]
+    },
+    {
+      "_fixed": true,
+      "task_id": "partner-sales-support-engagement",
+      "title": "Understand how to engage Anaplan partner-sales support",
+      "description": "Review the engagement model for partner-sales support — channel manager / Partner Account Manager contact, deal-desk and pricing escalation path, pre-sales support request mechanism, competitive-intelligence support, and how to use the Partner Sales agent. Differs from the Partner Success engagement model used in Delivery — sellers route through channel-sales channels first.",
+      "asset": "Partner Sales support engagement guide",
+      "source_system": "Seismic",
+      "estimated_effort": "15 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_variable": "task_id suffix and title only",
+      "task_id": "confirm-{{PRODUCT_ID}}-primary-focus",
+      "title": "Confirm {{PRODUCT_NAME}} as primary focus for this journey",
+      "description": "Sellers may hold multiple active focus declarations across concurrent journeys. This declaration scopes the current journey only, not the seller's overall product coverage.",
+      "completion_mechanism": "self_attest",
+      "estimated_effort": "5 min",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_conditional": "Required only if seller is enrolled in a parent journey (e.g., a logical bundle such as Connected Financial Planning across IFP + FCR). Otherwise auto-skipped.",
+      "task_id": "confirm-parent-journey-enrollment",
+      "title": "Confirm parent journey enrollment (if applicable)",
+      "description": "If this journey is part of a parent journey, confirm enrollment so progression, gates, and Expert outcomes are tracked at the parent-journey level.",
+      "completion_mechanism": "self_attest",
+      "estimated_effort": "5 min",
+      "required": false,
+      "conditional_required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "verify-anaplan-overview-complete",
+      "title": "Verify Anaplan Overview journey complete",
+      "completion_mechanism": "prereq_journey_check",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "_persona_specific_prereq": "Sales replaces 'Anaplan Platform' (delivery prereq) with 'Connected Planning Sales Foundations'. Sellers need value-messaging and Connected Planning narrative grounding, not deep platform fluency.",
+      "task_id": "verify-connected-planning-sales-foundations-complete",
+      "title": "Verify Connected Planning Sales Foundations journey complete",
+      "completion_mechanism": "prereq_journey_check",
+      "required": true
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true,                      "gate_id": "journey-orientation-acknowledged",                       "description": "{{PRODUCT_NAME}} Sales Journey roadmap reviewed and acknowledged",                                                            "verification_source": "self_attest"          },
+    { "_fixed": true,                      "gate_id": "portal-active",                                          "description": "Partner portal login active",                                                                                                "verification_source": "external_system"      },
+    { "_fixed": true,                      "gate_id": "profile-complete",                                       "description": "Sales resource profile complete with Role = Sales and required fields populated. Manager info is OPTIONAL at this gate and REQUIRED at Stage 2 exit.", "verification_source": "self_attest" },
+    { "_fixed": true,                      "gate_id": "partner-sales-support-engagement-acknowledged",          "description": "Partner-sales support engagement model acknowledged",                                                                        "verification_source": "self_attest"          },
+    { "_variable": true,                   "gate_id": "primary-focus-confirmed",                                "description": "{{PRODUCT_NAME}} confirmed as primary focus for this journey",                                                               "verification_source": "self_attest"          },
+    { "_fixed": true,  "_conditional": true, "gate_id": "parent-journey-enrollment-confirmed",                  "description": "Parent journey enrollment confirmed (only required if seller is enrolled in a parent journey)",                              "verification_source": "self_attest"          },
+    { "_fixed": true,                      "gate_id": "anaplan-overview-complete",                              "description": "Anaplan Overview journey marked complete",                                                                                   "verification_source": "prereq_journey_check" },
+    { "_fixed": true,                      "gate_id": "connected-planning-sales-foundations-complete",          "description": "Connected Planning Sales Foundations journey marked complete",                                                              "verification_source": "prereq_journey_check" }
+  ],
+
+  "stage_exit_actions": [],
+  "_stage_exit_actions_note": "No system-side actions on Stage 1 exit. Sales journeys do not provision sandboxes — Stage 2 webcasts and Stage 3 mock-pitch labs do not require dedicated workspaces.",
+
+  "estimated_effort_total": "1h 50min - 2h 15min",
+  "_estimated_effort_total_note": "Computed from task estimates excluding zero-effort verification tasks. Same range as Delivery Stage 1 since the task spine is structurally identical."
+}

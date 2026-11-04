@@ -1,0 +1,115 @@
+{
+  "_meta": {
+    "description": "Stage 2 (Trained) for the Connected Planning Pre-Sales Foundations journey. Five blocks built around the one-day instructor-led Pre-Sales Workshop (Block B) plus self-paced supporting content. The Pre-Sales Workshop is the centerpiece — it teaches general pre-sales methodology and includes mock presentations for practice with feedback.",
+    "iteration_date": "2026-05-01",
+    "persona": "pre-sales",
+    "foundational": true,
+    "_workshop_note": "Pre-Sales Workshop is delivered as a one-day instructor-led course, exception to the otherwise self-serve digital Stage 2 model. Mock presentations within the workshop are practice-with-feedback, not the credentialing event — Stage 3 has the rubric-scored mock discovery + certification.",
+    "boundary_with_stage_3": "End of Stage 2: PSE has internalized general pre-sales methodology (via the workshop), demo orchestration craft, technical discovery and requirement-mapping fundamentals, and high-level competitive battlecards. Stage 3 is the AI-graded mock discovery + Pre-Sales Foundations certification."
+  },
+
+  "_fixed": false,
+  "_note": "Stage 2 task structure is FIXED. Block B is instructor-led; the rest are self-paced.",
+  "stage_number": 2,
+  "name": "Trained",
+  "phase": "learning",
+  "description": "PSE builds universal pre-sales-foundation skills via the one-day instructor-led Pre-Sales Workshop plus self-paced content on Connected Planning narrative, demo orchestration craft, generic discovery + requirement mapping, and competitive battlecard fundamentals.",
+
+  "blocks": [
+    { "block_id": "A", "name": "Connected Planning Narrative (Pre-Sales lens)", "description": "Connected Planning narrative with pre-sales-specific framing — translating buyer outcomes to demo flow and proof-points." },
+    { "block_id": "B", "name": "Pre-Sales Workshop (instructor-led)",            "description": "One-day instructor-led course covering general pre-sales methodology + mock presentations. Centerpiece of Stage 2." },
+    { "block_id": "C", "name": "Demo Orchestration Craft",                       "description": "Demo flow patterns, pacing, talking-point delivery, audience management — the universal craft of demoing Anaplan." },
+    { "block_id": "D", "name": "Discovery & Requirement-Mapping Foundations",   "description": "Generic technical discovery and requirement-to-application mapping methodology." },
+    { "block_id": "E", "name": "Competitive Battlecard Fundamentals",           "description": "Technical competitive landscape at high level — per-app technical battlecards in per-app Pre-Sales journeys." }
+  ],
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "block": "A",
+      "task_id": "connected-planning-narrative-pre-sales-deep-dive",
+      "title": "Connected Planning Narrative (Pre-Sales lens)",
+      "description": "Webcast deepening the Connected Planning narrative for PSE use — translating buyer outcomes into demo flow choices, proof points to surface during demo, and the multi-application story (how IFP + FCR + AI compose into a Connected Planning enterprise solution architecture).",
+      "asset": "Connected Planning Narrative (Pre-Sales) deep-dive webcast",
+      "source_system": "Seismic",
+      "estimated_effort": "45-60 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "B",
+      "task_id": "pre-sales-workshop",
+      "title": "Pre-Sales Workshop (one-day instructor-led)",
+      "description": "Anaplan's existing one-day instructor-led Pre-Sales Workshop. Covers general pre-sales methodology (discovery, demo orchestration, audience management, objection handling) and includes mock presentations within the workshop for practice with instructor feedback. Centerpiece of Pre-Sales Foundations — every PSE attends once.",
+      "asset": "Pre-Sales Workshop (instructor-led)",
+      "source_system": "Anaplan Pre-Sales / instructor-led",
+      "estimated_effort": "1 day (~8 hrs incl. mock presentations and feedback)",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "Workshop instructor attests attendance and engagement.",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "C",
+      "task_id": "demo-orchestration-craft",
+      "title": "Demo Orchestration Craft",
+      "description": "Recording covering universal demo orchestration patterns — opening, pacing, transitions, action-button moments, dealing with mid-demo questions, audience attention management, and recovering from technical hiccups. Generic across applications; per-app demo flow lives in per-app Pre-Sales journeys.",
+      "asset": "Demo Orchestration Craft recording",
+      "source_system": "Seismic",
+      "estimated_effort": "45-60 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "D",
+      "task_id": "discovery-requirement-mapping-foundations",
+      "title": "Discovery & Requirement-Mapping Foundations",
+      "description": "Guide covering generic technical discovery — how to surface technical signals during a discovery conversation (data shape, integration constraints, planning maturity, performance expectations) and how to map customer requirements to Anaplan capabilities at the platform level. Per-app discovery layers on top in per-app Pre-Sales journeys.",
+      "asset": "Discovery & Requirement-Mapping Foundations guide",
+      "source_system": "Seismic",
+      "estimated_effort": "45-60 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "E",
+      "task_id": "competitive-battlecard-fundamentals",
+      "title": "Competitive Battlecard Fundamentals",
+      "description": "Walkthrough of the technical-competitive landscape at high level — architectural differentiators (multi-dimensional vs spreadsheet-based, in-memory engine, calculation transparency), planning-maturity differentiators, and integration-pattern differentiators. Per-app technical battlecards in per-app Pre-Sales journeys.",
+      "asset": "Competitive Battlecard Fundamentals deck/recording",
+      "source_system": "Seismic",
+      "estimated_effort": "45-60 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "connected-planning-narrative-pre-sales-deep-dive-acknowledged", "description": "Connected Planning Narrative (Pre-Sales) deep-dive webcast acknowledged", "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "pre-sales-workshop-completed",                                  "description": "Pre-Sales Workshop attended and completed — instructor attestation",      "verification_source": "admin_signoff" },
+    { "_fixed": true, "gate_id": "demo-orchestration-craft-acknowledged",                          "description": "Demo Orchestration Craft recording acknowledged",                          "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "discovery-requirement-mapping-foundations-acknowledged",         "description": "Discovery & Requirement-Mapping Foundations guide acknowledged",          "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "competitive-battlecard-fundamentals-acknowledged",               "description": "Competitive Battlecard Fundamentals acknowledged",                         "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "manager-info-populated",                                          "description": "Manager name, email, and role populated in resource profile (REQUIRED to exit Stage 2)", "verification_source": "self_attest" }
+  ],
+
+  "stage_actions": [],
+  "_stage_actions_note": "No system-side actions in Stage 2 — no per-PSE sandbox at the foundational level.",
+
+  "estimated_effort_total": "11-14 hrs (1 day workshop + 3-4 hrs supporting content)",
+  "_estimated_effort_total_note": "The Pre-Sales Workshop is the dominant time investment. Heavier than Sales Foundations Stage 2 (~3-4 hrs) because of the workshop; lighter than Anaplan Platform Stage 2 (~23-31 hrs) because there is no Academy Level 1/2 content here.",
+
+  "_per_product_authoring_obligations": {
+    "description": "Foundational journey — single canonical asset set. Block B is the existing Pre-Sales Workshop; the other 4 blocks are net-new authoring.",
+    "assets": [
+      { "asset": "Connected Planning Narrative (Pre-Sales) deep-dive webcast", "duration": "~45-60 min", "block": "A", "note": "Net-new authoring; pre-sales-lens version of the Sales Foundations narrative deep-dive." },
+      { "asset": "Pre-Sales Workshop (instructor-led)",                         "duration": "~1 day",     "block": "B", "note": "EXISTING — Anaplan's current one-day instructor-led course. Confirm canonical name and scheduling integration." },
+      { "asset": "Demo Orchestration Craft recording",                          "duration": "~45-60 min", "block": "C", "note": "Net-new authoring." },
+      { "asset": "Discovery & Requirement-Mapping Foundations guide",          "duration": "~45-60 min", "block": "D", "note": "Net-new authoring." },
+      { "asset": "Competitive Battlecard Fundamentals deck/recording",          "duration": "~45-60 min", "block": "E", "note": "Net-new authoring." }
+    ]
+  }
+}

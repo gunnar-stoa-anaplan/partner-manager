@@ -25,6 +25,16 @@ class JourneyController extends Controller
                 $db = new JourneyDatabase($journey);
                 $journey->participant_count = $db->participants()->count();
 
+                $assetTotal = $journey->journeyAssets()->count();
+                $assetApproved = $assetTotal === 0
+                    ? 0
+                    : $journey->journeyAssets()->where('status', 'approved')->count();
+                $journey->asset_total = $assetTotal;
+                $journey->asset_approved = $assetApproved;
+                $journey->asset_approved_pct = $assetTotal === 0
+                    ? null
+                    : (int) round(($assetApproved / $assetTotal) * 100);
+
                 return $journey;
             });
 

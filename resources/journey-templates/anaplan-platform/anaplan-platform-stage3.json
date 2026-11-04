@@ -1,0 +1,102 @@
+{
+  "_meta": {
+    "description": "Stage 3 (Credentialized) for the Anaplan Platform foundational journey. Three hands-on platform labs (model build, UX page build, integration) followed by the Anaplan Certified Solutions Associate (or equivalent) certification exam. Completion of Stage 3 unlocks Anaplan Platform certification — the prerequisite for every per-application Delivery and Pre-Sales journey.",
+    "iteration_date": "2026-05-01",
+    "persona": "technical",
+    "foundational": true,
+    "terminal_for_foundational": true,
+    "_terminal_note": "Stage 3 is the final stage of the Anaplan Platform foundational journey — there is no Stage 4 or 5. Real-customer technical work happens in per-application Delivery / Pre-Sales journeys, not here.",
+    "open_items_parked_for_later": [
+      "Official Anaplan certification name — confirm whether the credential mapped here is Anaplan Certified Solutions Associate, Model Builder, or another. Affects gate naming.",
+      "Lab grading approach — currently tooling-verified pass/fail. Could be expanded to rubric-scored if needed.",
+      "Lab scenario / starter data spec — needs to be defined per lab (separate work item)."
+    ]
+  },
+
+  "_fixed": false,
+  "_note": "Stage 3 task structure is FIXED. Lab scenarios and certification exam content are defined externally.",
+  "stage_number": 3,
+  "name": "Credentialized",
+  "phase": "learning",
+  "description": "Resource demonstrates platform fluency through three hands-on labs (build a model, design a UX page, build an integration) and earns the Anaplan Platform certification.",
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "task_id": "lab-model-build",
+      "title": "Lab 1 — Model Build (lists, hierarchy, modules, formulas)",
+      "description": "Hands-on lab in the Stage 2 sandbox: starting from an empty workspace, build a small model that includes 2-3 lists with a parent-child hierarchy, 2 modules with line items and formulas, and a published Page. Tooling verifies structural correctness against the lab spec.",
+      "asset": "Lab 1 — Model Build (spec + sandbox + verification tooling)",
+      "source_system": "Sandbox + lab verification tooling",
+      "estimated_effort": "2-3 hrs",
+      "completion_mechanism": "lab_verification",
+      "pass_criteria": "binary",
+      "required": true,
+      "sequence": 1
+    },
+    {
+      "_fixed": true,
+      "task_id": "lab-ux-page",
+      "title": "Lab 2 — UX Page Build (board / worksheet / actions)",
+      "description": "Hands-on lab: extend the Lab 1 sandbox model with a Pages-based UX. Build a board page with cards, a worksheet page for data entry, and at least one action button with a process. Tooling verifies the page set against spec.",
+      "asset": "Lab 2 — UX Page Build (spec + sandbox + verification tooling)",
+      "source_system": "Sandbox + lab verification tooling",
+      "estimated_effort": "2-3 hrs",
+      "completion_mechanism": "lab_verification",
+      "pass_criteria": "binary",
+      "required": true,
+      "sequence": 2,
+      "prerequisite": "lab-model-build"
+    },
+    {
+      "_fixed": true,
+      "task_id": "lab-integration",
+      "title": "Lab 3 — Data Hub + Integration",
+      "description": "Hands-on lab: build a small data hub, create a model-to-model import from the data hub into the Lab 1 sandbox model, and demonstrate one external integration pattern (file-based or API). Tooling verifies the import structure and run.",
+      "asset": "Lab 3 — Data Hub + Integration (spec + sandbox + verification tooling)",
+      "source_system": "Sandbox + lab verification tooling",
+      "estimated_effort": "2-3 hrs",
+      "completion_mechanism": "lab_verification",
+      "pass_criteria": "binary",
+      "required": true,
+      "sequence": 3,
+      "prerequisite": "lab-ux-page"
+    },
+    {
+      "_fixed": true,
+      "task_id": "platform-certification-exam",
+      "title": "Anaplan Platform certification exam",
+      "description": "Anaplan-administered certification exam (Anaplan Certified Solutions Associate or equivalent — name TBD pending Op Cmte confirmation). Mix of multiple-choice questions covering all six Stage 2 domains plus a hands-on practical component.",
+      "asset": "Anaplan Platform certification exam (Academy)",
+      "source_system": "Academy",
+      "estimated_effort": "2 hrs",
+      "completion_mechanism": "academy_xls",
+      "required": true,
+      "prerequisite": "lab-integration"
+    }
+  ],
+
+  "stage_entry_gates": [
+    { "_fixed": true, "gate_id": "platform-sandbox-active", "description": "Anaplan Platform lab sandbox provisioned and accessible (verifies the Stage 2 provisioning succeeded)", "verification_source": "external_system" }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "lab-model-build-passed",            "description": "Lab 1 (Model Build) passed — tooling verification",                                                  "verification_source": "lab_verification" },
+    { "_fixed": true, "gate_id": "lab-ux-page-passed",                 "description": "Lab 2 (UX Page Build) passed — tooling verification",                                                "verification_source": "lab_verification" },
+    { "_fixed": true, "gate_id": "lab-integration-passed",             "description": "Lab 3 (Data Hub + Integration) passed — tooling verification",                                       "verification_source": "lab_verification" },
+    { "_fixed": true, "gate_id": "platform-certification-earned",     "description": "Anaplan Platform certification exam passed — credential issued, foundational prereq satisfied",     "verification_source": "academy_xls" }
+  ],
+
+  "estimated_effort_total": "8-11 hrs",
+  "_estimated_effort_total_note": "Three labs (~6-9 hrs total) plus certification exam (~2 hrs).",
+
+  "_per_product_authoring_obligations": {
+    "description": "Foundational journey — single canonical asset set. Lab specs and verification tooling are net-new partner-program-level work; certification exam is Academy-authored.",
+    "items": [
+      { "item": "Lab 1 — Model Build (spec + sandbox + verification tooling)",            "scope": "Lab spec, starter sandbox, pass criteria, verification tooling integration." },
+      { "item": "Lab 2 — UX Page Build (spec + sandbox + verification tooling)",          "scope": "Lab spec, sandbox extension from Lab 1, pass criteria." },
+      { "item": "Lab 3 — Data Hub + Integration (spec + sandbox + verification tooling)", "scope": "Lab spec, data hub starter content, integration run verification." },
+      { "item": "Anaplan Platform certification exam (Academy)",                          "scope": "Academy-authored; confirm canonical certification name and exam scope." }
+    ]
+  }
+}
