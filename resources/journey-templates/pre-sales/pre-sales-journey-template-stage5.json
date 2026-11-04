@@ -1,0 +1,269 @@
+{
+  "_meta": {
+    "description": "Stage 5 (Expert) for the universal Anaplan product Pre-Sales journey template. Earn-once-then-maintain designation model — Expert PSEs earn designation through contributive deliverables (solution-architecture case studies, client references, demo-platform / battlecard / discovery-pattern contributions, initial independent demo wins) and maintain it via ongoing demos + mentorship. Slots into the larger Pre-Sales template at stages[4].",
+    "iteration_date": "2026-04-30",
+    "persona": "pre-sales",
+    "structural_alignment_with_delivery": [
+      "Same Model C structure: earn_set (required deliverables) → designation event → maintain_set (ongoing activities) → optional_set (recognized but not required)",
+      "Same six earn_set tasks mapped to pre-sales-equivalents: solution-architecture case study, client reference, pre-sales playbook contribution, initial independent demo wins, adjacent product overview review, adjacent product credentialing intent",
+      "Same maintain_set shape (2 tasks): ongoing independent demos + mentor a junior PSE",
+      "Optional_set adds a third option specific to Pre-Sales: competitive-escalation contact role",
+      "Phase = 'expert' (matches Delivery's phase change from 'doing' to 'expert')"
+    ],
+    "persona_specific_calls": [
+      "Earn_set 'submit-customer-project-overview' (Delivery) → 'submit-solution-architecture-case-study' (Pre-Sales) — structured account of one delivered customer demo-to-deployment story: discovery → light-config → demo → competitive context → customer outcome and architecture decisions. Becomes per-product knowledge asset.",
+      "Earn_set 'contribute-blueprint' (Delivery) → 'contribute-pre-sales-playbook' (Pre-Sales) — per-product pre-sales playbook covering demo-flow patterns, discovery patterns, technical objection responses, battlecard updates, light-config patterns for industry verticals.",
+      "Earn_set 'complete-initial-independent-deliveries' (Delivery) → 'complete-initial-independent-demo-wins' (Pre-Sales) — 2 independent customer-demo engagements (full discovery + light-config + demo + technical objection handling) beyond Stage 4, no senior-PSE co-deliver. Demonstrates self-sufficient demo delivery.",
+      "Maintain_set 'lead-independent-deliveries-ongoing' (Delivery) → 'lead-ongoing-demos' (Pre-Sales) — continued demo activity expected of active Pre-Sales Experts.",
+      "Optional_set adds 'competitive-escalation-contact' — opt-in role serving as the {{PRODUCT_NAME}} competitive escalation point of contact."
+    ],
+    "open_items_parked_for_later": [
+      "Multi-product credentialing intent declaration — same parking-lot as Delivery and Sales (parent-journey work).",
+      "Expert maintenance review cadence — annual / on-demand / activity-driven. Program-level operational decision.",
+      "Loss of Expert status — what triggers it, what the recovery path is.",
+      "Per-product pre-sales playbook review process — which CoE / pre-sales enablement team owns reviewing and accepting playbook contributions.",
+      "Solution-architecture case study standard — template/format for the structured case study document.",
+      "Client reference sponsorship process — operational integration with Anaplan customer reference programs (shared with Delivery and Sales).",
+      "Competitive-escalation point operational scope — definition of escalation triggers, response SLA, compensation/recognition for escalation work.",
+      "User direction: 'your recommendations are fine for now and will be adjusted later after review' — this Stage 5 design is a starting point, expected to be refined."
+    ]
+  },
+
+  "_fixed": false,
+  "_note": "Stage 5 task structure is FIXED across all product journeys within the Pre-Sales persona. Adjacent product references are VARIABLE per product. Asset templates (solution-architecture case study, pre-sales playbook contribution) are fixed; specific contributions are per-Expert.",
+  "stage_number": 5,
+  "name": "Expert",
+  "phase": "expert",
+  "terminal_stage": true,
+  "terminal_outcome": "{{TERMINAL_OUTCOME}}",
+  "_terminal_outcome_example_ifp": "Finance Pre-Sales Expert designation → FCR and Connected Planning Champion pre-sales pathways",
+  "designation_model": "earn_once_then_maintain",
+  "_designation_model_note": "Model C — same as Delivery and Sales. Expert designation is EARNED by completing the earn_set tasks (contributive deliverables that convert individual pre-sales experience into ecosystem value), then MAINTAINED by ongoing-state activities in the maintain_set. Optional_set tasks are recognized but not required for either earning or maintaining the designation.",
+  "description": "PSE achieves and maintains Pre-Sales Expert designation for {{PRODUCT_NAME}} by contributing structured deliverables back to the ecosystem (solution-architecture case studies, client references, pre-sales playbook contributions) and maintaining ongoing practitioner activities (independent demos, mentorship). The Pre-Sales Expert is no longer just someone who can deliver demos — they are someone who actively shapes how others demo, what battlecards say, and how complex deals are won technically.",
+
+  "task_groups": {
+    "earn_set": {
+      "description": "Required contributive deliverables. All must be completed to achieve Pre-Sales Expert designation.",
+      "tasks": [
+        "submit-solution-architecture-case-study",
+        "sponsor-client-reference",
+        "contribute-pre-sales-playbook",
+        "complete-initial-independent-demo-wins",
+        "{{ADJACENT_JOURNEY_ID}}-overview-review",
+        "{{ADJACENT_JOURNEY_ID}}-credentialing-intent"
+      ]
+    },
+    "maintain_set": {
+      "description": "Ongoing activities expected of an active Pre-Sales Expert. Status maintenance reviewed on cadence (TBD).",
+      "tasks": [
+        "lead-ongoing-demos",
+        "mentor-junior-pse"
+      ]
+    },
+    "optional_set": {
+      "description": "Recognized contributions and roles that are not required for earning or maintaining Pre-Sales Expert designation.",
+      "tasks": [
+        "community-contribution",
+        "pre-sales-sme-designation-registration",
+        "competitive-escalation-contact"
+      ]
+    }
+  },
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "group": "earn_set",
+      "task_id": "submit-solution-architecture-case-study",
+      "title": "Submit solution-architecture case study",
+      "description": "Produce a structured case study of one customer demo-to-deployment story for {{PRODUCT_NAME}} — customer, business context, discovery findings, light-config decisions made for the customer's data, demo-flow choices and what landed, technical objections handled, competitive context, customer outcome and architecture decisions taken into deployment. Becomes a per-product knowledge asset future PSEs can learn from. Distinct from Stage 4 engagement artifacts (which were per-engagement advisory reviews) — this is a full solution-architecture story.",
+      "deliverable": "Structured solution-architecture case study document",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM + pre-sales enablement reviews the case study against the standard format and accepts it as a per-product knowledge asset.",
+      "minimum_count": 1,
+      "required": true,
+      "examples_of_good_output": [
+        "Customer: Mid-market manufacturer (5,000 employees). Business context: 12 cost centers, fragmented quarterly close. Discovery: surfaced 8 weeks of close-cycle pain. Light-config: loaded their org/hierarchy/product taxonomy into IFP demo env to mirror real reporting structure. Demo flow: led with rolling-forecast scenario most relevant to their CFO. Technical objection: 'how do you handle our existing Hyperion data model' — countered with integration-pattern walk-through. Outcome: 9-week sales cycle to deployment-ready.",
+        "Customer: Global retailer (40,000 employees). Business context: revenue-planning across 6 regions with regional-finance autonomy. Discovery: surfaced regional-fragmentation requirement. Light-config: built region-specific hierarchy variants in demo env. Competitive: head-to-head vs Workday Adaptive — won on multi-region demo-time scalability. Architecture decision: phased deployment to preserve regional autonomy."
+      ]
+    },
+    {
+      "_fixed": true,
+      "group": "earn_set",
+      "task_id": "sponsor-client-reference",
+      "title": "Sponsor a client reference",
+      "description": "Sponsor at least one customer reference. Customer agrees to be referenced for the {{PRODUCT_NAME}} solution architecture and demo experience. Real signal — the customer is willing, the partner has the relationship, and the engagement was successful enough to warrant referencing.",
+      "deliverable": "Customer reference confirmation (customer-acknowledged willingness to be referenced)",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM confirms the reference is sponsored and integrated into Anaplan's customer reference program.",
+      "minimum_count": 1,
+      "required": true,
+      "examples_of_good_output": [
+        "Customer X agrees to participate in 1-2 prospect reference calls per quarter (technical track) and to be named in case study materials. Reference scope: {{PRODUCT_NAME}} architecture decisions, deployment timeline, and technical outcomes specified.",
+        "Customer Y agrees to a video case study and Anaplan Connect speaking opportunity (technical track). Reference scope: {{PRODUCT_NAME}} multi-region deployment with adjacent product expansion architecture."
+      ]
+    },
+    {
+      "_fixed": true,
+      "group": "earn_set",
+      "task_id": "contribute-pre-sales-playbook",
+      "title": "Contribute to {{PRODUCT_NAME}} pre-sales playbook",
+      "description": "Submit at least one accepted contribution to the {{PRODUCT_NAME}} pre-sales playbook. Contributions can be drawn from Stage 4 artifact review feedback, solution-architecture case study learnings, or independent observation. The Stage 4 engagement reviews and the case study are likely raw material for playbook contribution.",
+      "deliverable": "Accepted pre-sales playbook contribution",
+      "examples_of_contribution_types": [
+        "New demo-flow pattern (e.g., 'CFO-led discovery → rolling-forecast scenario → close pivot for Mid-Market Finance')",
+        "New discovery pattern (e.g., 'surfacing data-readiness signals during initial discovery')",
+        "New technical objection response (e.g., 'positioning {{PRODUCT_NAME}} architecture vs. existing Hyperion installation')",
+        "New battlecard variant (e.g., 'multi-region scalability talk-track vs. Workday Adaptive')",
+        "New light-config pattern for an industry vertical (e.g., 'retail product-taxonomy loading pattern')",
+        "Edit to existing playbook section (e.g., 'expanded technical-objection list with new architecture-pattern response')"
+      ],
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "Pre-sales enablement / playbook owner reviews and accepts the contribution.",
+      "minimum_count": 1,
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "group": "earn_set",
+      "task_id": "complete-initial-independent-demo-wins",
+      "title": "Complete initial independent {{PRODUCT_NAME}} demo wins",
+      "description": "Complete 2 independent {{PRODUCT_NAME}} customer-demo engagements (full discovery + light-config + demo + technical objection handling, no senior-PSE co-deliver, senior available on call only). These are demo-to-customer-progression wins beyond the 3 engagements from Stage 4. Demonstrates ability to deliver without senior-PSE scaffolding.",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM + senior PSE confirms the demos were independently led and resulted in customer-progression outcomes (qualified opportunity advanced, technical-fit confirmed, proposal-stage reached).",
+      "minimum_count": 2,
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "group": "earn_set",
+      "task_id": "{{ADJACENT_JOURNEY_ID}}-overview-review",
+      "title": "Review {{ADJACENT_PRODUCT}} pre-sales overview",
+      "description": "Review {{ADJACENT_PRODUCT}} pre-sales overview content to inform the credentialing intent declaration. Provides context for whether to pursue, defer, or decline the adjacent product Pre-Sales journey.",
+      "asset": "{{ADJACENT_PRODUCT}} Pre-Sales overview content",
+      "source_system": "Seismic",
+      "estimated_effort": "30 min",
+      "completion_mechanism": "self_attest",
+      "required": true,
+      "prerequisite_for": "{{ADJACENT_JOURNEY_ID}}-credentialing-intent"
+    },
+    {
+      "_variable": "adjacent product varies per journey",
+      "group": "earn_set",
+      "task_id": "{{ADJACENT_JOURNEY_ID}}-credentialing-intent",
+      "title": "Declare {{ADJACENT_PRODUCT}} pre-sales credentialing intent",
+      "description": "After reviewing {{ADJACENT_PRODUCT}} pre-sales overview, declare credentialing intent. Signal-only — does not start the adjacent journey, only captures the Pre-Sales Expert's intent for partner-firm and Anaplan planning.",
+      "options": ["pursue", "defer", "decline"],
+      "completion_mechanism": "self_attest",
+      "required": true,
+      "prerequisite": "{{ADJACENT_JOURNEY_ID}}-overview-review",
+      "_multi_product_note": "v0 captures one adjacent product. Multi-product credentialing intent (for parent-journey enrolees) is parking-lot for parent-journey work — same as Delivery and Sales."
+    },
+    {
+      "_fixed": true,
+      "_inserted_after_earn_set_complete": true,
+      "task_id": "expert-designation-event",
+      "title": "{{PRODUCT_NAME}} Pre-Sales Expert designation",
+      "description": "Formal recognition moment when the earn_set is complete. Issues Pre-Sales Expert credential, badge, and announces designation in partner community channels.",
+      "deliverable": "Pre-Sales Expert credential issued; participant added to Pre-Sales Expert directory; community announcement",
+      "completion_mechanism": "external_system",
+      "_completion_mechanism_note": "Triggered automatically when all earn_set tasks complete. No participant action required.",
+      "required": true,
+      "trigger": "all_earn_set_tasks_complete"
+    },
+    {
+      "_fixed": true,
+      "group": "maintain_set",
+      "task_id": "lead-ongoing-demos",
+      "title": "Lead ongoing independent {{PRODUCT_NAME}} customer demos",
+      "description": "Continue leading independent {{PRODUCT_NAME}} customer-demo engagements to maintain active Pre-Sales Expert status. No fixed count — review on cadence (TBD) confirms continued practitioner activity.",
+      "completion_mechanism": "admin_signoff",
+      "verification_cadence": "TBD",
+      "required_for": "expert_status_maintenance"
+    },
+    {
+      "_fixed": true,
+      "group": "maintain_set",
+      "task_id": "mentor-junior-pse",
+      "title": "Mentor a junior {{PRODUCT_NAME}} PSE",
+      "description": "Active mentorship of a junior PSE progressing through the {{PRODUCT_NAME}} Pre-Sales Journey. Requires named mentee and ongoing relationship.",
+      "deliverable": "Named mentee + active relationship",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "PSM acknowledges the mentee-mentor relationship and confirms ongoing activity. Mentee may be asked to attest to the relationship.",
+      "verification_cadence": "TBD",
+      "required_for": "expert_status_maintenance"
+    },
+    {
+      "_fixed": true,
+      "group": "optional_set",
+      "task_id": "community-contribution",
+      "title": "Community contribution",
+      "description": "Recognized contributions to the partner community beyond the required earn_set deliverables.",
+      "completion_mechanism": "admin_signoff",
+      "required": false,
+      "examples": [
+        "Polished case study (beyond the structured solution-architecture case study)",
+        "Anaplan Connect technical-track speaking",
+        "Webinar on demo strategy for {{PRODUCT_NAME}}",
+        "Customer-facing thought-leadership content (architecture / industry vertical)",
+        "Demo-platform improvements committed to the canonical environment",
+        "Partner community technical Q&A leadership"
+      ]
+    },
+    {
+      "_fixed": true,
+      "group": "optional_set",
+      "task_id": "pre-sales-sme-designation-registration",
+      "title": "Register as {{PRODUCT_SHORT}} Pre-Sales SME",
+      "description": "Opt-in registry entry as a {{PRODUCT_SHORT}} Pre-Sales Subject Matter Expert. Discoverable in the Anaplan Pre-Sales SME directory; eligible for community speaking opportunities, complex-deal solution-architect queries, and partner-firm staffing queries.",
+      "completion_mechanism": "admin_signoff",
+      "required": false
+    },
+    {
+      "_fixed": true,
+      "group": "optional_set",
+      "task_id": "competitive-escalation-contact",
+      "title": "Serve as {{PRODUCT_NAME}} competitive-escalation point of contact",
+      "description": "Opt-in role: when a partner or Anaplan team needs deep competitive-positioning support during a live pursuit (specific competitor in play, technical-bake-off, displacement scenario), the Expert PSE is on the rotation to provide structured guidance. Demonstrates leadership beyond own deals — Expert PSE sharpens the broader ecosystem's competitive posture for {{PRODUCT_NAME}}.",
+      "deliverable": "Opt-in registration + accepted escalation requests logged",
+      "completion_mechanism": "admin_signoff",
+      "required": false,
+      "_note": "Operational scope (escalation triggers, response SLA, recognition model) parked for later. Recognition that this role exists; mechanics TBD."
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "solution-architecture-case-study-accepted",                "description": "Solution-architecture case study submitted and accepted by PSM + pre-sales enablement (≥1)",            "verification_source": "admin_signoff",   "type": "earn_gate" },
+    { "_fixed": true, "gate_id": "client-reference-sponsored",                                "description": "Client reference sponsored and integrated into Anaplan reference program (≥1)",                          "verification_source": "admin_signoff",   "type": "earn_gate" },
+    { "_fixed": true, "gate_id": "pre-sales-playbook-contribution-accepted",                  "description": "≥1 accepted contribution to {{PRODUCT_NAME}} pre-sales playbook",                                        "verification_source": "admin_signoff",   "type": "earn_gate" },
+    { "_fixed": true, "gate_id": "initial-independent-demo-wins-confirmed",                   "description": "≥2 initial independent {{PRODUCT_NAME}} demo wins confirmed by PSM + senior PSE",                       "verification_source": "admin_signoff",   "type": "earn_gate" },
+    { "_fixed": true, "gate_id": "{{ADJACENT_JOURNEY_ID}}-overview-acknowledged",              "description": "{{ADJACENT_PRODUCT}} pre-sales overview reviewed and acknowledged",                                      "verification_source": "self_attest",     "type": "earn_gate" },
+    { "_variable": true, "gate_id": "{{ADJACENT_JOURNEY_ID}}-pathway-declared",                "description": "{{ADJACENT_PRODUCT}} pre-sales credentialing intent declared (pursue / defer / decline)",                "verification_source": "self_attest",     "type": "earn_gate" },
+    { "_fixed": true, "gate_id": "pre-sales-expert-designated",                                 "description": "Pre-Sales Expert designation issued — earn_set complete, credential and badge issued, community announcement made", "verification_source": "external_system", "type": "designation_event" },
+    { "_fixed": true, "gate_id": "ongoing-demos-active",                                        "description": "Active Pre-Sales Expert continues leading independent {{PRODUCT_NAME}} customer demos",                  "verification_source": "admin_signoff",   "type": "maintain_gate" },
+    { "_fixed": true, "gate_id": "mentorship-active",                                          "description": "Active mentee-mentor relationship logged with named junior PSE",                                          "verification_source": "admin_signoff",   "type": "maintain_gate" }
+  ],
+
+  "estimated_effort_total": "Variable — earn_set typically achieved 6-18 months after Stage 4 completion depending on demo-engagement velocity and contribution opportunities. Maintain_set is ongoing.",
+  "_estimated_effort_total_note": "Stage 5 is bound by real demo engagement availability, playbook contribution opportunities, and customer reference relationships — not participant work hours.",
+
+  "_per_product_authoring_obligations": {
+    "description": "Stage 5 has minimal per-product asset authoring. Per-product obligations are review and acceptance processes.",
+    "items": [
+      { "item": "Solution-architecture case study standard", "scope": "Template/format for the structured case study document. Same template across products preferred." },
+      { "item": "Pre-sales playbook review process",         "scope": "Per-product pre-sales-enablement / playbook owner identified and review process defined." },
+      { "item": "Adjacent product mapping",                  "scope": "Identify the correct {{ADJACENT_PRODUCT}} and {{ADJACENT_JOURNEY_ID}} for each Pre-Sales journey." }
+    ]
+  },
+
+  "_operational_considerations": {
+    "items": [
+      "Expert maintenance review cadence — when and how Pre-Sales Expert status is re-confirmed against the maintain_set.",
+      "Pre-sales playbook contribution review SLA — time from contribution submission to acceptance.",
+      "Client reference sponsorship coordination — Anaplan customer reference programs may have their own gates (shared with Delivery and Sales Stage 5).",
+      "Mentee pool — Stage 5 mentorship requires a junior PSE available to mentor.",
+      "Competitive-escalation contact program — operational scope (triggers, SLA, recognition) needs definition before enabling the optional role.",
+      "Multi-product Pre-Sales Experts — under parent journeys, an Expert may hold designation for IFP + FCR + AI simultaneously."
+    ]
+  }
+}

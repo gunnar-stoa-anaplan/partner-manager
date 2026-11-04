@@ -13,13 +13,28 @@ class Journey extends Model
 
     protected $fillable = [
         'name',
+        'description',
         'journey_key',
         'product_area',
         'persona',
         'status',
         'db_path',
         'config_path',
+        'linked_pipeline_value',
+        'linked_win_rate',
+        'delivery_zero_trouble_rate',
+        'pillar_metrics_updated_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'linked_pipeline_value' => 'decimal:2',
+            'linked_win_rate' => 'decimal:2',
+            'delivery_zero_trouble_rate' => 'decimal:2',
+            'pillar_metrics_updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Many-to-many relationship with User through journey_assignments.
@@ -56,6 +71,16 @@ class Journey extends Model
     public function stageItems(): HasMany
     {
         return $this->hasMany(JourneyStageItem::class);
+    }
+
+    public function journeyAssets(): HasMany
+    {
+        return $this->hasMany(JourneyAsset::class);
+    }
+
+    public function blockers(): HasMany
+    {
+        return $this->hasMany(Blocker::class);
     }
 
     /**

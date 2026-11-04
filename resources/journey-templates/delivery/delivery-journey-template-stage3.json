@@ -1,0 +1,180 @@
+{
+  "_meta": {
+    "description": "Updated Stage 3 (Credentialized) for the universal Anaplan product Delivery journey template. Slots into the larger template at stages[2]. Reflects iteration from Stage 3 review pass.",
+    "iteration_date": "2026-04-27",
+    "changes_from_previous": [
+      "Removed: Configuration Guide reading task (moved to Stage 2 as reference material with guided walkthrough)",
+      "Removed: Integration Architecture Patterns reading task (moved to Anaplan Platform prereq journey)",
+      "Removed: Pre-delivery readiness check-in with PSM (no longer needed; the workshop completion + Top-10-Extensions course are the Stage 3 → Stage 4 gate)",
+      "Consolidated: Sandbox model build + Deep-Dive Enablement + Regional Implementer Workshop into a single Delivery Readiness Workshop construct (these were three names for the same hands-on activity)",
+      "Restructured: Stage 3 hands-on work expressed as a week-long cohort-based workshop — three 2-hour instructor-led sessions (Monday, Wednesday, Friday) with three ~1-hour labs completed by the participant between and after sessions",
+      "Added: New completion mechanism `lab_verification` for tooling-verified lab outcomes",
+      "Added: Stage entry verification gate `tenant-access-active` (verifies the auto-provisioning that fired in Stage 2 succeeded)",
+      "Changed: Top-10-Extensions content is mandatory and authored as an Academy course (academy_xls verification), placed after the workshop concludes",
+      "Decision: Phase remains `learning` — even though Stage 3 is hands-on, the customer is not in the loop and the participant is still being taught. Stage 4 is the first true `doing` stage.",
+      "Decision: Sessions are sequential within a cohort — participants register for the cohort and attend Mon/Wed/Fri as a group",
+      "Decision: Labs are tooling-verified pass/fail, no scoring",
+      "Decision: Lab dependencies are lab-chain (Lab N requires Lab N-1 passed) — labs build on each other in the sandbox"
+    ],
+    "open_items_parked_for_later": [
+      "Lab failure handling — what the participant sees on lab failure (just 'try again' vs. hints/diagnostics) and whether there is an automatic escalation path after repeated failures. Operational policy, not structural.",
+      "Missed-session policy — default for v0 is 'reschedule into next cohort', but recordings, makeup sessions, or individual catch-up are alternatives worth revisiting.",
+      "Cohort cadence — how often regional cohorts run. Affects how long a participant waits between Stage 2 completion and Stage 3 entry.",
+      "Per-lab effort estimates within the ~1-hour bound — to be refined once labs are authored per product.",
+      "Lab tooling integration spec — how the verification tooling reports lab outcomes back to the journey system.",
+      "Per-product Top-10-Extensions Academy course — must be authored per product."
+    ],
+    "boundary_with_stage_4": "End of Stage 3: participant has demonstrated configuration-side competency in a controlled sandbox via instructor-led workshop with tooling-verified labs, and has been exposed to the field's most common extensions for {{PRODUCT_NAME}}. They have NOT touched a real customer engagement. Stage 4 covers tasks leading up to and through real client deployments. Verb shift: hands-on with sandbox → hands-on with customer."
+  },
+
+  "_fixed": false,
+  "_note": "Stage 3 task structure is FIXED across all product journeys. Workshop session content and lab content are VARIABLE per product — sessions and labs map to the same six configuration-side methodology phases (phases 5-10 from Stage 2 Block C), but the session material, sandbox data, customer scenarios, and pass criteria are product-specific.",
+  "stage_number": 3,
+  "name": "Credentialized",
+  "phase": "learning",
+  "description": "Participant demonstrates configuration-side competency by completing the Delivery Readiness Workshop — a week-long cohort-based experience with three 2-hour instructor-led sessions (Monday, Wednesday, Friday) and three ~1-hour tooling-verified labs completed between and after sessions. Closes with the Top-10-Extensions Academy course covering the most common field patterns for {{PRODUCT_NAME}}.",
+
+  "tasks": [
+    {
+      "_fixed": "task definition fixed; session and lab content variable per product",
+      "_new": true,
+      "_note": "Single workshop task containing six sub-units (3 sessions + 3 labs) interleaved across a week. Sessions are instructor-led and cohort-based (Mon/Wed/Fri). Labs are self-paced and tooling-verified, completed between/after sessions. Replaces what was historically called Implementer Workshop, Deep-Dive Enablement, and Sandbox Model Build.",
+      "task_id": "{{PRODUCT_ID}}-delivery-readiness-workshop",
+      "title": "{{PRODUCT_NAME}} Delivery Readiness Workshop",
+      "description": "Week-long cohort-based workshop covering configuration-side methodology phases 5-10. Three 2-hour instructor-led sessions delivered Monday, Wednesday, and Friday, paired with three ~1-hour labs completed by the participant between and after sessions. Each session teaches content; each lab applies it in the provisioned sandbox with tooling-verified pass/fail.",
+      "asset": "{{PRODUCT_NAME}} Delivery Readiness Workshop — sessions + labs",
+      "source_system": "App COE",
+      "estimated_effort": "9 hrs total (6 hrs instructor-led + 3 hrs labs), spread over ~1 week elapsed",
+      "delivery_mode": "cohort_based",
+      "cohort_cadence": "TBD per region",
+      "completion_mechanism": "composite",
+      "_completion_mechanism_note": "Workshop is complete when all 3 sessions are admin_signoff confirmed AND all 3 labs are lab_verification passed.",
+      "required": true,
+      "sub_units": [
+        {
+          "sub_unit_id": "{{PRODUCT_ID}}-session-1",
+          "type": "instructor_led_session",
+          "sequence": 1,
+          "schedule": "Monday",
+          "title": "Session 1 — Customer Data Validation & Application Configuration",
+          "methodology_phases_covered": [5, 6],
+          "estimated_effort": "2 hrs",
+          "completion_mechanism": "admin_signoff",
+          "_completion_mechanism_note": "Instructor confirms attendance and engagement.",
+          "unlocks": "{{PRODUCT_ID}}-lab-1"
+        },
+        {
+          "sub_unit_id": "{{PRODUCT_ID}}-lab-1",
+          "type": "tooling_verified_lab",
+          "sequence": 2,
+          "schedule": "Between Mon and Wed (participant's own time)",
+          "title": "Lab 1 — Customer data validation + configuration practice",
+          "methodology_phases_covered": [5, 6],
+          "estimated_effort": "~1 hr",
+          "completion_mechanism": "lab_verification",
+          "pass_criteria": "binary",
+          "prerequisite": "{{PRODUCT_ID}}-session-1",
+          "unlocks": "{{PRODUCT_ID}}-session-2"
+        },
+        {
+          "sub_unit_id": "{{PRODUCT_ID}}-session-2",
+          "type": "instructor_led_session",
+          "sequence": 3,
+          "schedule": "Wednesday",
+          "title": "Session 2 — Loading Data & List/Hierarchy Validation",
+          "methodology_phases_covered": [7, 8],
+          "estimated_effort": "2 hrs",
+          "completion_mechanism": "admin_signoff",
+          "prerequisite": "{{PRODUCT_ID}}-lab-1",
+          "unlocks": "{{PRODUCT_ID}}-lab-2"
+        },
+        {
+          "sub_unit_id": "{{PRODUCT_ID}}-lab-2",
+          "type": "tooling_verified_lab",
+          "sequence": 4,
+          "schedule": "Between Wed and Fri (participant's own time)",
+          "title": "Lab 2 — Loading and validation practice",
+          "methodology_phases_covered": [7, 8],
+          "estimated_effort": "~1 hr",
+          "completion_mechanism": "lab_verification",
+          "pass_criteria": "binary",
+          "prerequisite": "{{PRODUCT_ID}}-session-2",
+          "unlocks": "{{PRODUCT_ID}}-session-3"
+        },
+        {
+          "sub_unit_id": "{{PRODUCT_ID}}-session-3",
+          "type": "instructor_led_session",
+          "sequence": 5,
+          "schedule": "Friday",
+          "title": "Session 3 — Application-led Workshops & Handling Extensions",
+          "methodology_phases_covered": [9, 10],
+          "estimated_effort": "2 hrs",
+          "completion_mechanism": "admin_signoff",
+          "prerequisite": "{{PRODUCT_ID}}-lab-2",
+          "unlocks": "{{PRODUCT_ID}}-lab-3"
+        },
+        {
+          "sub_unit_id": "{{PRODUCT_ID}}-lab-3",
+          "type": "tooling_verified_lab",
+          "sequence": 6,
+          "schedule": "After Fri (participant's own time)",
+          "title": "Lab 3 — Application-led workshops + extensions practice",
+          "methodology_phases_covered": [9, 10],
+          "estimated_effort": "~1 hr",
+          "completion_mechanism": "lab_verification",
+          "pass_criteria": "binary",
+          "prerequisite": "{{PRODUCT_ID}}-session-3",
+          "unlocks": null
+        }
+      ],
+      "_lab_failure_handling_status": "TBD — operational policy. Default for v0: simple retry, no escalation. Adjustable post-launch.",
+      "_missed_session_handling_status": "TBD — operational policy. Default for v0: reschedule into next cohort. Recordings, makeup sessions, or individual catch-up are alternatives worth revisiting."
+    },
+    {
+      "_fixed": "task definition fixed; course content variable per product",
+      "_new": true,
+      "task_id": "{{PRODUCT_ID}}-top-10-extensions",
+      "title": "{{PRODUCT_NAME}} Top 10 Extensions Academy course",
+      "description": "Mandatory Academy course authored by the {{PRODUCT_NAME}} CoE / product team covering the 10 extensions most commonly seen in the field for {{PRODUCT_NAME}}. Field-experience content the participant cannot get from a lab — Lab 3 teaches the mechanics of building extensions; this course teaches what extensions to expect and how to approach them in real customer engagements. Includes a completion quiz.",
+      "asset": "{{PRODUCT_NAME}} Top 10 Extensions",
+      "source_system": "Academy",
+      "estimated_effort": "45-60 min",
+      "completion_mechanism": "academy_xls",
+      "required": true,
+      "prerequisite": "{{PRODUCT_ID}}-delivery-readiness-workshop",
+      "_placement_note": "Required to be completed AFTER the Delivery Readiness Workshop (workshop completion unlocks the course)."
+    }
+  ],
+
+  "stage_entry_gates": [
+    { "_fixed": true, "_new": true, "gate_id": "tenant-access-active", "description": "{{PRODUCT_NAME}} delivery workspaces and workshop models provisioned and accessible (verifies the auto-provisioning action that fired in Stage 2 succeeded)", "verification_source": "external_system" }
+  ],
+  "_stage_entry_gates_note": "Stage 3 has a stage-entry verification gate (tenant access) separate from the per-task gates. This is a verification-only check — provisioning was triggered in Stage 2; Stage 3 just confirms it landed.",
+
+  "gates": [
+    { "_fixed": true, "_new": true, "gate_id": "{{PRODUCT_ID}}-session-1-attended",        "description": "{{PRODUCT_NAME}} Workshop Session 1 attended — instructor sign-off",                "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "{{PRODUCT_ID}}-lab-1-passed",              "description": "{{PRODUCT_NAME}} Lab 1 passed — tooling verification",                                "verification_source": "lab_verification" },
+    { "_fixed": true, "_new": true, "gate_id": "{{PRODUCT_ID}}-session-2-attended",        "description": "{{PRODUCT_NAME}} Workshop Session 2 attended — instructor sign-off",                "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "{{PRODUCT_ID}}-lab-2-passed",              "description": "{{PRODUCT_NAME}} Lab 2 passed — tooling verification",                                "verification_source": "lab_verification" },
+    { "_fixed": true, "_new": true, "gate_id": "{{PRODUCT_ID}}-session-3-attended",        "description": "{{PRODUCT_NAME}} Workshop Session 3 attended — instructor sign-off",                "verification_source": "admin_signoff" },
+    { "_fixed": true, "_new": true, "gate_id": "{{PRODUCT_ID}}-lab-3-passed",              "description": "{{PRODUCT_NAME}} Lab 3 passed — tooling verification",                                "verification_source": "lab_verification" },
+    { "_fixed": true, "_new": true, "gate_id": "{{PRODUCT_ID}}-top-10-extensions-complete","description": "{{PRODUCT_NAME}} Top 10 Extensions Academy course completion confirmed (quiz passed)", "verification_source": "academy_xls" }
+  ],
+
+  "estimated_effort_total": "9h 45min - 10h 0min",
+  "_estimated_effort_total_note": "Computed from 6 hrs instructor-led + 3 hrs labs + 45-60 min extensions course. Spread over ~1 week elapsed (Mon/Wed/Fri sessions plus interleaved lab time plus post-workshop course).",
+
+  "_per_product_authoring_obligations": {
+    "description": "For every product journey instantiation, the following must be authored. The template specifies; the product team produces.",
+    "assets": [
+      { "asset": "Delivery Readiness Workshop — 3 instructor-led sessions",          "duration": "2 hrs each, 6 hrs total", "owner": "App COE",             "note": "Sessions cover methodology phases 5-10, paired 2 phases per session." },
+      { "asset": "Delivery Readiness Workshop — 3 tooling-verified labs",            "duration": "~1 hr each, ~3 hrs total","owner": "App COE + product team","note": "Each lab requires sandbox data, scenario, and pass criteria definition. Labs build on each other in the sandbox." },
+      { "asset": "Top 10 Extensions Academy course (with quiz)",                     "duration": "~45-60 min",              "owner": "CoE / product team",   "note": "Content scope: the 10 extensions most commonly seen in the field for this product." }
+    ],
+    "infrastructure": [
+      { "item": "Provisioning manifest",      "scope": "List of workspaces and models constituting the Stage 3 workshop environment for {{PRODUCT_NAME}}. Triggered in Stage 2; verified at Stage 3 entry." },
+      { "item": "Lab tooling integration",    "scope": "Lab verification tooling must be configured per product to accept lab submissions, run pass/fail checks, and report outcomes back to the journey system." },
+      { "item": "Cohort scheduling system",   "scope": "Regional cohort cadence and registration mechanism. Defines when participants can enter Stage 3." }
+    ]
+  }
+}

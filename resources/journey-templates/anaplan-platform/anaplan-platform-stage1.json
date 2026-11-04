@@ -1,0 +1,79 @@
+{
+  "_meta": {
+    "description": "Stage 1 (Registered) for the Anaplan Platform foundational journey. Required for Delivery and Pre-Sales personas (technical roles). Adds Anaplan Overview as prereq — completion of the universal foundation comes first.",
+    "iteration_date": "2026-05-01",
+    "persona": "technical",
+    "foundational": true,
+    "_audience_note": "Required for Delivery (configures models on customer engagements) and Pre-Sales (drives demo environments). Sales persona does not enroll in this journey."
+  },
+
+  "_fixed": false,
+  "_note": "Stage 1 task structure for the Anaplan Platform foundational journey.",
+  "stage_number": 1,
+  "name": "Registered",
+  "phase": "onboarding",
+  "description": "Resource confirms journey understanding, partner portal access, technical-resource profile, Partner Success engagement model, and Anaplan Overview prereq completion.",
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "task_id": "journey-orientation",
+      "title": "Review Anaplan Platform Journey roadmap & expectations",
+      "description": "Walk through the 3 stages of the Anaplan Platform journey, what's covered in each, the certification exam at Stage 3 exit, and how this foundational journey routes to per-application Delivery or Pre-Sales journeys on completion.",
+      "asset": "Anaplan Platform Journey roadmap",
+      "source_system": "Seismic",
+      "estimated_effort": "10-15 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "join-partner-portal",
+      "title": "Join the partner portal",
+      "completion_mechanism": "external_system",
+      "estimated_effort": "30 min",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "complete-technical-resource-profile",
+      "title": "Complete technical-resource profile",
+      "description": "Augment the resource profile with technical specialization fields: prior modeling experience (other platforms), prior Anaplan exposure (workspace user, end-user, model builder), preferred specialization (Modeler / UX / Integrations / Admin), and intended persona pathway (Delivery / Pre-Sales). Manager attestation required to exit Stage 2.",
+      "completion_mechanism": "self_attest",
+      "estimated_effort": "15-20 min",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "partner-success-engagement",
+      "title": "Re-confirm Anaplan Partner Success engagement model",
+      "description": "Quick re-confirmation of the Partner Success engagement model from Anaplan Overview — relevant here because technical roles have specific support paths (Anapedia, Community, Partner Engineering escalation). Resource acknowledges familiarity.",
+      "asset": "Partner Success engagement guide",
+      "source_system": "Seismic",
+      "estimated_effort": "5 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "verify-anaplan-overview-complete",
+      "title": "Verify Anaplan Overview journey complete",
+      "completion_mechanism": "prereq_journey_check",
+      "required": true
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "journey-orientation-acknowledged",        "description": "Anaplan Platform Journey roadmap reviewed and acknowledged",            "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "portal-active",                            "description": "Partner portal login active",                                          "verification_source": "external_system" },
+    { "_fixed": true, "gate_id": "profile-complete",                          "description": "Technical-resource profile complete",                                  "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "partner-success-engagement-acknowledged",  "description": "Partner Success engagement model re-acknowledged",                     "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "anaplan-overview-complete",                "description": "Anaplan Overview journey marked complete",                              "verification_source": "prereq_journey_check" }
+  ],
+
+  "stage_exit_actions": [],
+  "_stage_exit_actions_note": "No system-side actions on Stage 1 exit. Sandbox provisioning for hands-on labs fires within Stage 2.",
+
+  "estimated_effort_total": "1h 0min - 1h 10min",
+  "_estimated_effort_total_note": "Light Stage 1 — mostly carryover from Anaplan Overview completion."
+}

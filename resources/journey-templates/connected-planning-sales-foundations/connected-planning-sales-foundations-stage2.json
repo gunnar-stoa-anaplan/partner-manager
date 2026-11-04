@@ -1,0 +1,113 @@
+{
+  "_meta": {
+    "description": "Stage 2 (Trained) for the Connected Planning Sales Foundations journey. Five content blocks covering the universal sales-foundation domains — Connected Planning narrative deep-dive, generic discovery + qualification, value-messaging fundamentals, competitive landscape overview, universal objection handling. Per-application specifics are added in per-app Sales journeys (IFP Sales, FCR Sales, etc.).",
+    "iteration_date": "2026-05-01",
+    "persona": "sales",
+    "foundational": true,
+    "boundary_with_stage_3": "End of Stage 2: seller has internalized the Connected Planning narrative, can run a generic Anaplan discovery and qualification conversation, can articulate value at executive and practitioner levels, knows the high-level competitive landscape, and has practiced top universal objections. Stage 3 is the AI-graded mock pitch + Sales Foundations certification."
+  },
+
+  "_fixed": false,
+  "_note": "Stage 2 task structure is FIXED. Asset content is the canonical sales-foundation set.",
+  "stage_number": 2,
+  "name": "Trained",
+  "phase": "learning",
+  "description": "Seller builds universal sales-foundation skills across Connected Planning narrative, discovery, value messaging, competitive, and objection handling. All content is generic across applications — per-app specifics layer on top in subsequent per-app Sales journeys.",
+
+  "blocks": [
+    { "block_id": "A", "name": "Connected Planning Narrative (deep-dive)", "description": "Deeper than Anaplan Overview's intro — value framing for executives, ROI conversations, multi-application strategic deals." },
+    { "block_id": "B", "name": "Discovery & Qualification (generic)",     "description": "Anaplan discovery question library and qualification framework (e.g., MEDDPICC applied to Anaplan)." },
+    { "block_id": "C", "name": "Value-Messaging Fundamentals",              "description": "Story arcs, executive-vs-practitioner messaging, business-outcome anchors. The construction craft for any per-app pitch." },
+    { "block_id": "D", "name": "Competitive Landscape (high-level)",        "description": "The major competitive sets — planning suites, Excel, point solutions, GenAI tools — at the strategic level. Per-app battlecards in per-app journeys." },
+    { "block_id": "E", "name": "Universal Objection Handling",              "description": "Top 5-7 universal objections every seller faces, with canonical responses." }
+  ],
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "block": "A",
+      "task_id": "connected-planning-narrative-deep-dive",
+      "title": "Connected Planning Narrative (deep-dive)",
+      "description": "Webcast deepening the Connected Planning narrative beyond the Anaplan Overview intro — executive value frame, ROI conversation patterns, the multi-application strategic-deal story (how IFP + FCR + AI compose into a Connected Planning enterprise narrative).",
+      "asset": "Connected Planning Narrative (Sales) deep-dive webcast",
+      "source_system": "Seismic",
+      "estimated_effort": "45-60 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "B",
+      "task_id": "discovery-qualification-foundations",
+      "title": "Discovery & Qualification Foundations",
+      "description": "Guide covering the universal Anaplan discovery question library (pain signals, decision criteria, planning maturity indicators) and qualification framework (MEDDPICC or partner equivalent applied to Anaplan opportunities). Per-app discovery layers on top in per-app Sales journeys.",
+      "asset": "Discovery & Qualification Foundations guide",
+      "source_system": "Seismic",
+      "estimated_effort": "45-60 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "C",
+      "task_id": "value-messaging-fundamentals",
+      "title": "Value-Messaging Fundamentals",
+      "description": "Recording covering value-pitch construction craft — story arcs, executive-vs-practitioner messaging, business-outcome anchors, and how to weave proof points and references into a tailored pitch. The structural approach every per-app value pitch builds on.",
+      "asset": "Value-Messaging Fundamentals recording",
+      "source_system": "Seismic",
+      "estimated_effort": "30-45 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "D",
+      "task_id": "competitive-landscape-overview",
+      "title": "Competitive Landscape Overview",
+      "description": "Walkthrough of the major competitive sets sellers encounter — enterprise planning suites (Workday Adaptive, Pigment, OneStream, etc.), Excel/Hyperion/legacy installs, point solutions (single-purpose tools), and GenAI tools (ChatGPT, Copilot — emerging objection). High-level positioning only; per-app technical battlecards in per-app journeys.",
+      "asset": "Competitive Landscape Overview deck/recording",
+      "source_system": "Seismic",
+      "estimated_effort": "30-45 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "E",
+      "task_id": "universal-objection-handling",
+      "title": "Universal Objection Handling",
+      "description": "Top 5-7 universal objections every Anaplan seller faces, with canonical responses: 'we already have this in Excel/Hyperion/Workday', 'we'll just use ChatGPT', 'platform vs point solution', 'TCO concerns', 'change management', 'integration concerns'. The response patterns sellers reach for repeatedly.",
+      "asset": "Universal Objection Handling guide",
+      "source_system": "Seismic",
+      "estimated_effort": "30-45 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "connected-planning-narrative-deep-dive-acknowledged", "description": "Connected Planning Narrative (Sales) deep-dive webcast acknowledged",     "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "discovery-qualification-foundations-acknowledged",     "description": "Discovery & Qualification Foundations guide acknowledged",              "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "value-messaging-fundamentals-acknowledged",            "description": "Value-Messaging Fundamentals recording acknowledged",                   "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "competitive-landscape-overview-acknowledged",           "description": "Competitive Landscape Overview acknowledged",                          "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "universal-objection-handling-acknowledged",            "description": "Universal Objection Handling guide acknowledged",                       "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "manager-info-populated",                                "description": "Manager name, email, and role populated in resource profile (REQUIRED to exit Stage 2)", "verification_source": "self_attest" }
+  ],
+
+  "stage_actions": [],
+  "_stage_actions_note": "No system-side actions in Stage 2 — no sandbox needed for sales foundation content.",
+
+  "estimated_effort_total": "3h 0min - 4h 0min",
+  "_estimated_effort_total_note": "Roughly twice Anaplan Overview Stage 2 — sellers carry deeper narrative + 4 selling-craft blocks. Lighter than Anaplan Platform Stage 2 (~23-31 hrs) since no Academy curriculum is involved.",
+
+  "_per_product_authoring_obligations": {
+    "description": "Foundational journey — single canonical asset set, not per-product. All 5 content assets are net-new authoring.",
+    "assets": [
+      { "asset": "Connected Planning Narrative (Sales) deep-dive webcast", "duration": "~45-60 min", "block": "A", "note": "Net-new; deeper than the Anaplan Overview narrative." },
+      { "asset": "Discovery & Qualification Foundations guide",            "duration": "~45-60 min", "block": "B", "note": "Generic Anaplan discovery + MEDDPICC application; net-new authoring." },
+      { "asset": "Value-Messaging Fundamentals recording",                  "duration": "~30-45 min", "block": "C", "note": "Pitch-construction craft; net-new authoring." },
+      { "asset": "Competitive Landscape Overview deck/recording",           "duration": "~30-45 min", "block": "D", "note": "High-level competitive sets; net-new authoring." },
+      { "asset": "Universal Objection Handling guide",                       "duration": "~30-45 min", "block": "E", "note": "Universal objection response set; net-new authoring." }
+    ]
+  }
+}

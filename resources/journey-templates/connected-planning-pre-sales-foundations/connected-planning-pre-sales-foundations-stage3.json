@@ -1,0 +1,69 @@
+{
+  "_meta": {
+    "description": "Stage 3 (Credentialized) for the Connected Planning Pre-Sales Foundations journey. AI-graded mock discovery (generic Anaplan platform-level discovery + requirement mapping) followed by the Pre-Sales Foundations Academy course / certification. Completion of Stage 3 satisfies the Pre-Sales-track foundational prereq required for every per-application Pre-Sales journey.",
+    "iteration_date": "2026-05-01",
+    "persona": "pre-sales",
+    "foundational": true,
+    "terminal_for_foundational": true,
+    "_terminal_note": "Stage 3 is the final stage of the Pre-Sales Foundations journey — no Stage 4 or 5. Real-customer demos happen in per-application Pre-Sales journeys, not here.",
+    "open_items_parked_for_later": [
+      "AI mock-discovery agent — shared infrastructure with the per-app Pre-Sales journey mock discoveries. Confirm scenario library covers a generic platform-level discovery.",
+      "Pre-Sales Foundations Academy course — name and content scope to be confirmed by Op Cmte / pre-sales enablement.",
+      "Mock discovery rubric — generic version of the per-app rubric; needs definition."
+    ]
+  },
+
+  "_fixed": false,
+  "_note": "Stage 3 task structure is FIXED. Mock discovery scenario and rubric are defined externally.",
+  "stage_number": 3,
+  "name": "Credentialized",
+  "phase": "learning",
+  "description": "PSE demonstrates universal Anaplan pre-sales fluency through an AI-graded mock discovery and earns the Pre-Sales Foundations certification.",
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "task_id": "mock-discovery-anaplan-foundations",
+      "title": "Mock discovery — Anaplan platform-level discovery + requirement mapping",
+      "description": "AI-graded mock discovery conversation. The AI agent plays a prospect with implicit technical requirements; the PSE runs a generic Anaplan discovery, surfaces technical signals (data shape, integration constraints, planning maturity), and produces a brief mapping artifact at the platform level. Generic across applications — per-app discovery lives in per-app Pre-Sales journey Stage 3 mocks.",
+      "asset": "Mock Discovery — Anaplan Foundations (AI scenario + rubric + mapping-artifact template)",
+      "source_system": "AI mock-discovery agent",
+      "estimated_effort": "60-90 min (mock + mapping artifact + feedback review; allow time for retry if needed)",
+      "completion_mechanism": "ai_lab_verification",
+      "pass_criteria": "rubric_threshold",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "pre-sales-foundations-academy",
+      "title": "Pre-Sales Foundations Academy course",
+      "description": "Self-paced Academy course consolidating Stage 2 content with a comprehension exam. Covers Connected Planning narrative (PSE lens), demo orchestration craft, discovery + requirement mapping, and competitive battlecard fundamentals. Mix of multiple-choice and case-style questions.",
+      "asset": "Pre-Sales Foundations Academy course (with exam)",
+      "source_system": "Academy",
+      "estimated_effort": "60-90 min",
+      "completion_mechanism": "academy_xls",
+      "required": true,
+      "prerequisite": "mock-discovery-anaplan-foundations"
+    }
+  ],
+
+  "stage_entry_gates": [
+    { "_fixed": true, "gate_id": "ai-mock-discovery-agent-available", "description": "AI mock-discovery agent infrastructure available (program-level dependency on P10 tooling spec)", "verification_source": "external_system" }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "mock-discovery-anaplan-foundations-passed", "description": "Mock discovery (Anaplan Foundations) passed — AI rubric threshold met",                       "verification_source": "ai_lab_verification" },
+    { "_fixed": true, "gate_id": "pre-sales-foundations-certified",            "description": "Pre-Sales Foundations Academy course completion confirmed (exam passed) — credential issued", "verification_source": "academy_xls" }
+  ],
+
+  "estimated_effort_total": "2h 0min - 3h 0min",
+  "_estimated_effort_total_note": "Mock discovery + certification course. Same shape as Sales Foundations Stage 3.",
+
+  "_per_product_authoring_obligations": {
+    "description": "Foundational journey — single canonical asset set.",
+    "items": [
+      { "item": "Mock Discovery — Anaplan Foundations (AI scenario + rubric + mapping-artifact template)", "scope": "AI scenario script (generic platform-level discovery) + rubric + mapping-artifact template." },
+      { "item": "Pre-Sales Foundations Academy course (with exam)",                                       "scope": "Academy-authored; consolidates Stage 2 content into a coherent comprehension exam." }
+    ]
+  }
+}

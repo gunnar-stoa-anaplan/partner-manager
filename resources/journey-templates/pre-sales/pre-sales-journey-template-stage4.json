@@ -1,0 +1,207 @@
+{
+  "_meta": {
+    "description": "Stage 4 (Delivering) for the universal Anaplan product Pre-Sales journey template. Three-engagement progression of increasing PSE responsibility (shadow demo → co-deliver → solo deliver with post-engagement review) keyed to real customer demo requests. Slots into the larger Pre-Sales template at stages[3].",
+    "iteration_date": "2026-04-30",
+    "persona": "pre-sales",
+    "structural_alignment_with_delivery": [
+      "Same shape as Delivery Stage 4: three real-customer engagements with progressively increasing PSE ownership, plus per-engagement artifacts reviewed advisorily",
+      "Replaces Delivery's PS-primed → Partner-primed → Partner-led model with explicit Pre-Sales 3-level model per user direction: Shadow demo → Co-deliver → Solo deliver with post-engagement review",
+      "Replaces Delivery's 12 methodology-keyed artifacts with 5 pre-sales-keyed artifacts (post-engagement shadow debrief, co-deliver pre-plan, co-deliver review, solo pre-plan, solo review-and-next-steps)",
+      "Engagement trigger: real customer demo request per user direction. Long-tail partners with thin demo pipeline may stall here — same Stage 4 stall risk as Delivery and Sales",
+      "Pass criteria: rubric-passing (NOT count-passing) per user direction — at least one engagement at each level that meets rubric; senior PSE + PSM jointly approve. Additional engagements may be needed if rubric not met.",
+      "Phase = 'doing' — first real-customer stage; same phase boundary as Delivery and Sales"
+    ],
+    "engagement_definition": "An 'engagement' here is a customer-facing demo / discovery / requirements meeting or short meeting sequence (1-3 meetings) within a real customer demo request, where the participant has a defined role at one of the three progression levels. Customer-progression outcomes (demo delivered, requirements mapped, technical objections cleared) are tracked separately as engagement-completion signals.",
+    "reviewer_model": "Two reviewers per engagement: (1) the senior PSE in the shadow/co-deliver role for L1 and L2, or the senior PSE reviewing the recording/silent-attendance for L3 — provides rubric-scored engagement-level assessment; (2) the PSM as program coordinator and advisory reviewer of artifacts. Both attest gates.",
+    "open_items_parked_for_later": [
+      "Per-artifact review rubrics — what the senior PSE and PSM are evaluating each artifact against. Per-product authoring obligation.",
+      "Senior PSE pool sourcing — Anaplan senior PSEs, senior partner PSEs, and/or solution architects. Operational policy.",
+      "Engagement-availability backstop — what happens when partner doesn't generate enough real customer demo requests. Possible 'approved practice scenario with internal pseudo-customer' fallback. Op Cmte / operational policy decision.",
+      "Rubric-not-met retry policy — additional engagements at the same level vs cooldown. Default: PSM + senior PSE discretion.",
+      "Engagement completion criteria — what specifically defines 'engagement complete' (customer meeting happened + light-config artifacts captured + recording captured for L3).",
+      "Sandbox lifecycle in Stage 4 — does the per-PSE Stage 2 sandbox carry forward for Stage 4 light-config practice or is each engagement its own sandbox? Operational policy."
+    ],
+    "boundary_with_stage_5": "End of Stage 4: PSE has completed at least three real customer-demo engagements with progressively increasing ownership (shadow → co-deliver → solo), produced and had reviewed five engagement artifacts, and demonstrated rubric-meeting pre-sales competency on real customer work. Stage 5 (Expert) covers ongoing independent demo delivery, mentorship to junior PSEs, contribution to demo-platform / battlecard libraries, solution-architect role on complex deals, and competitive-escalation point of contact."
+  },
+
+  "_fixed": true,
+  "_note": "Stage 4 task structure is FIXED across all product journeys within the Pre-Sales persona. Engagement content varies by real customer (real customer data and scenarios), but the engagement progression, artifact types, and review process are universal.",
+  "stage_number": 4,
+  "name": "Delivering",
+  "phase": "doing",
+  "description": "PSE completes at least three real customer-demo engagements with progressively increasing ownership — Shadow demo, Co-deliver, Solo deliver with post-engagement review. Within each engagement, PSE produces structured artifacts at progression checkpoints. Senior PSE and PSM jointly review artifacts and attest engagement rubric pass.",
+
+  "engagements": [
+    {
+      "engagement_id": "engagement-1",
+      "engagement_number": 1,
+      "level": "L1",
+      "ownership_model": "Shadow demo",
+      "ownership_description": "Senior PSE delivers a real customer demo (discovery + light config + demo + technical objections). Participant observes the entire engagement, then submits a structured post-engagement debrief. Pass criteria: rubric on observation depth, demo-flow understanding, technical-objection-handling note quality, and learning extraction.",
+      "estimated_effort": "1-3 customer meetings + prep + debrief; ~3-6 participant hours per engagement",
+      "required_artifacts": [
+        "engagement-1-shadow-debrief"
+      ]
+    },
+    {
+      "engagement_id": "engagement-2",
+      "engagement_number": 2,
+      "level": "L2",
+      "ownership_model": "Co-deliver",
+      "ownership_description": "Senior PSE is on the call; participant leads the configured-data portion + standard demo flow while senior covers technical objections, deep dives, and competitive positioning. Pass criteria: rubric on owned-segment delivery quality, light-config accuracy, recoverability, and partnership-with-co-deliverer.",
+      "estimated_effort": "1-3 customer meetings + prep (incl. light config) + debrief; ~5-10 participant hours per engagement",
+      "required_artifacts": [
+        "engagement-2-co-deliver-pre-plan",
+        "engagement-2-co-deliver-review"
+      ]
+    },
+    {
+      "engagement_id": "engagement-3",
+      "engagement_number": 3,
+      "level": "L3",
+      "ownership_model": "Solo deliver with post-engagement review",
+      "ownership_description": "Participant solo-runs the customer demo end-to-end: discovery → light-config → demo → technical objection handling. Senior PSE is on standby — typical mode is recording-reviewed afterward, with silent-attendance as alternative. Participant submits a comprehensive post-engagement review and next steps. Pass criteria: rubric on end-to-end command, configuration accuracy, technical objection handling, customer-progression result, recovery from surprises.",
+      "estimated_effort": "1-3 customer meetings + prep (incl. light config) + review write-up; ~5-12 participant hours per engagement",
+      "required_artifacts": [
+        "engagement-3-solo-pre-plan",
+        "engagement-3-solo-review-and-next-steps"
+      ]
+    }
+  ],
+
+  "_artifact_type_catalog": {
+    "description": "Five artifact types map to the three engagements, with progressive artifact density that mirrors increasing participant ownership. Each artifact is a real customer engagement work product reviewed by the senior PSE and the PSM as advisory checkpoints.",
+    "types": [
+      { "artifact_type": "shadow-debrief",                "level": "L1", "title": "Post-engagement shadow debrief",          "description": "Structured write-up of what was observed during the senior PSE's engagement: demo flow choices, customer reactions, talking-point delivery, technical objections handled, the participant's articulation of what they learned and what they would do differently in the PSE's seat." },
+      { "artifact_type": "co-deliver-pre-plan",           "level": "L2", "title": "Co-deliver pre-engagement plan",           "description": "Pre-engagement plan: which segments the participant will own (typically light-config + standard demo flow), customer-tailored light-configuration plan (orgs / hierarchies / products to load), value framing, expected technical questions and prepared responses." },
+      { "artifact_type": "co-deliver-review",             "level": "L2", "title": "Co-deliver post-engagement review",       "description": "Reflection on owned segments + senior PSE's structured assessment (what worked in the light-config, the standard demo flow, the customer interaction; what to address) + agreed development areas before progressing to L3." },
+      { "artifact_type": "solo-pre-plan",                 "level": "L3", "title": "Solo pre-engagement plan",                 "description": "Full pre-engagement plan the participant will execute solo: discovery questions, mapped customer requirements, light-config plan for the demo, tailored demo flow, talking points, expected technical objections, target next step." },
+      { "artifact_type": "solo-review-and-next-steps",   "level": "L3", "title": "Solo post-engagement review and next steps","description": "Comprehensive structured account of the engagement end-to-end: discovery captured, light-config outcomes, demo-flow execution, technical objections handled, customer-progression signals, agreed next steps + senior PSE's rubric evaluation. Replaces the recording-or-silent-attendance review with the participant's narrative." }
+    ]
+  },
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "task_id": "engagement-1",
+      "engagement": "engagement-1",
+      "level": "L1",
+      "title": "Engagement 1 — Shadow demo (senior PSE delivers, participant observes)",
+      "description": "First real customer-demo engagement at the Shadow level. Senior PSE delivers; participant observes and submits the post-engagement debrief artifact. Engagement completion is gated on the customer interaction happening AND the senior PSE + PSM attesting rubric pass on the debrief.",
+      "estimated_effort": "1-3 customer meetings + ~3-6 participant hours; elapsed time pipeline-cadence dependent",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "Senior PSE + PSM jointly sign off on engagement completion when the customer interaction is delivered AND the shadow debrief artifact passes rubric.",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-1-shadow-debrief",
+      "engagement": "engagement-1",
+      "artifact_type": "shadow-debrief",
+      "title": "Engagement 1 — Submit post-engagement shadow debrief",
+      "description": "Submit the structured post-engagement debrief for advisory review by senior PSE + PSM. Reviewers attest rubric pass on observation depth, demo-flow understanding, technical-objection-handling note quality, and learning extraction.",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "Senior PSE + PSM jointly attest after rubric review (revise-and-resubmit allowed).",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-2",
+      "engagement": "engagement-2",
+      "level": "L2",
+      "title": "Engagement 2 — Co-deliver (participant leads light-config + demo flow, senior covers technical depth)",
+      "description": "Second real customer-demo engagement at the Co-deliver level. Participant leads light-config + standard demo flow; senior PSE covers technical objections, deep dives, and competitive. Engagement completion is gated on the customer interaction happening AND the senior PSE + PSM attesting rubric pass on the pre-plan and the co-deliver review.",
+      "estimated_effort": "1-3 customer meetings + ~5-10 participant hours; elapsed time pipeline-cadence dependent",
+      "completion_mechanism": "admin_signoff",
+      "required": true,
+      "prerequisite": "engagement-1"
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-2-co-deliver-pre-plan",
+      "engagement": "engagement-2",
+      "artifact_type": "co-deliver-pre-plan",
+      "title": "Engagement 2 — Submit co-deliver pre-engagement plan",
+      "description": "Submit the pre-engagement plan (segment ownership, light-config plan for client orgs/hierarchies/products, value framing, expected technical questions) for advisory review by senior PSE + PSM prior to the customer interaction.",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-2-co-deliver-review",
+      "engagement": "engagement-2",
+      "artifact_type": "co-deliver-review",
+      "title": "Engagement 2 — Submit co-deliver post-engagement review",
+      "description": "Submit reflection on owned segments + senior PSE's structured assessment + agreed development areas before progressing to L3.",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-3",
+      "engagement": "engagement-3",
+      "level": "L3",
+      "title": "Engagement 3 — Solo deliver with post-engagement review (participant runs solo, senior reviews)",
+      "description": "Third real customer-demo engagement at the Solo level. Participant solo-runs the engagement end-to-end (discovery + light-config + demo + technical objection handling); senior PSE reviews the recording (default) or silently attends. Engagement completion is gated on the customer interaction happening AND the senior PSE + PSM attesting rubric pass on the pre-plan and the review-and-next-steps artifact.",
+      "estimated_effort": "1-3 customer meetings + ~5-12 participant hours; elapsed time pipeline-cadence dependent",
+      "completion_mechanism": "admin_signoff",
+      "required": true,
+      "prerequisite": "engagement-2"
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-3-solo-pre-plan",
+      "engagement": "engagement-3",
+      "artifact_type": "solo-pre-plan",
+      "title": "Engagement 3 — Submit solo pre-engagement plan",
+      "description": "Submit the full pre-engagement plan (discovery questions, mapped customer requirements, light-config plan, tailored demo flow, expected technical objections, target next step) for advisory review by senior PSE + PSM prior to the customer interaction.",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-3-solo-review-and-next-steps",
+      "engagement": "engagement-3",
+      "artifact_type": "solo-review-and-next-steps",
+      "title": "Engagement 3 — Submit solo post-engagement review and next steps",
+      "description": "Submit the comprehensive post-engagement review and next-steps artifact. Senior PSE (recording-reviewed or silent-attendance) and PSM jointly attest rubric pass on end-to-end command, configuration accuracy, technical objection handling, customer-progression result, and recovery from surprises.",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "engagement-1-complete",                              "description": "Engagement 1 (Shadow demo) complete — customer interaction happened; shadow debrief approved; senior PSE + PSM sign-off",                "verification_source": "admin_signoff" },
+    { "_fixed": true, "gate_id": "engagement-1-shadow-debrief-approved",               "description": "Engagement 1 shadow debrief reviewed and approved by senior PSE + PSM",                                                                "verification_source": "admin_signoff" },
+
+    { "_fixed": true, "gate_id": "engagement-2-complete",                              "description": "Engagement 2 (Co-deliver) complete — customer interaction happened; pre-plan + co-deliver review approved; senior PSE + PSM sign-off",  "verification_source": "admin_signoff" },
+    { "_fixed": true, "gate_id": "engagement-2-co-deliver-pre-plan-approved",          "description": "Engagement 2 co-deliver pre-engagement plan reviewed and approved by senior PSE + PSM",                                                "verification_source": "admin_signoff" },
+    { "_fixed": true, "gate_id": "engagement-2-co-deliver-review-approved",            "description": "Engagement 2 co-deliver post-engagement review reviewed and approved by senior PSE + PSM",                                              "verification_source": "admin_signoff" },
+
+    { "_fixed": true, "gate_id": "engagement-3-complete",                              "description": "Engagement 3 (Solo deliver) complete — customer interaction happened; pre-plan + review-and-next-steps approved; senior PSE + PSM sign-off", "verification_source": "admin_signoff" },
+    { "_fixed": true, "gate_id": "engagement-3-solo-pre-plan-approved",                "description": "Engagement 3 solo pre-engagement plan reviewed and approved by senior PSE + PSM",                                                          "verification_source": "admin_signoff" },
+    { "_fixed": true, "gate_id": "engagement-3-solo-review-and-next-steps-approved",   "description": "Engagement 3 solo post-engagement review and next steps reviewed and approved by senior PSE + PSM",                                            "verification_source": "admin_signoff" }
+  ],
+
+  "estimated_effort_total": "~13-28 participant hours focused work across 3 engagements; elapsed Stage 4 duration is bound by real customer demo-request cadence — realistic range 6-18 months",
+  "_estimated_effort_total_note": "Per user direction, pass criteria is rubric-passing not count-passing: a single engagement per level can suffice if rubric is met. If rubric not met, additional same-level engagements may be needed at senior PSE + PSM discretion — focused hours scale accordingly. PSEs carry more focused hours than sellers because of light-config + demo prep overhead. Pipeline cadence is the dominant driver of elapsed time.",
+
+  "_per_product_authoring_obligations": {
+    "description": "Stage 4 has no per-product asset authoring (no courses, recordings, or labs). Per-product authoring is review rubric definition.",
+    "items": [
+      { "item": "Per-artifact review rubrics", "scope": "For each of the five artifact types, define what senior PSE + PSM are evaluating against — required content, quality bar, common issues. Same rubrics apply across all engagements within a product journey." },
+      { "item": "Per-level engagement rubric",  "scope": "For each of the three levels (Shadow demo, Co-deliver, Solo deliver), define what 'rubric pass' means in terms of customer-progression outcome and PSE-skill demonstration. Used by senior PSE + PSM to attest engagement completion." }
+    ]
+  },
+
+  "_operational_considerations": {
+    "items": [
+      "Senior PSE pool: Stage 4 throughput depends on senior PSE availability for shadow/co-deliver engagements. Operational ratio of senior PSEs to active Stage 4 participants needs to be sustainable.",
+      "Engagement availability: a participant cannot progress through Stage 4 without three customer demo-request opportunities at appropriate levels. Partners with thin demo pipeline may stall here. Possible mitigation: 'approved practice scenario with internal pseudo-customer' fallback (Op Cmte decision).",
+      "Rubric-not-met retry policy: default v0 is senior PSE + PSM discretion to require additional same-level engagements. Adjustable post-launch.",
+      "Stage assumption: Stage 4 is white-glove. Long-tail partners with no PSM relationship may not progress beyond Stage 3.",
+      "PSM advisory load: ~5 artifact reviews + 3 engagement-completion attestations per participant — same load as Sales Stage 4; lighter than Delivery's ~12 artifacts.",
+      "Sandbox lifecycle: per-PSE Stage 2 sandbox is the default light-config practice environment for Stage 4 prep. Whether each customer engagement gets its own dedicated sandbox or all share the persistent one is an operational policy decision."
+    ]
+  }
+}

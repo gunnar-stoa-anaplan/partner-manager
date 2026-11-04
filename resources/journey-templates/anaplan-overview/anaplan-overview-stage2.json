@@ -1,0 +1,113 @@
+{
+  "_meta": {
+    "description": "Stage 2 (Trained) for the Anaplan Overview foundational journey. Five content blocks: Anaplan Story & Vision, Connected Planning Narrative, Platform-at-a-glance, Partner Ecosystem & Pathways, Customer Success Patterns. High-level only — deep platform fluency lives in the separate Anaplan Platform foundational journey.",
+    "iteration_date": "2026-05-01",
+    "persona": "all",
+    "foundational": true,
+    "boundary_with_stage_3": "End of Stage 2: resource understands what Anaplan does as a company, the Connected Planning narrative they will use across customer engagements, the high-level platform shape, and the partner ecosystem they are joining. They have NOT yet been credentialed. Stage 3 is the comprehension check + persona pathway declaration."
+  },
+
+  "_fixed": false,
+  "_note": "Stage 2 task structure is FIXED. Asset content is the canonical Anaplan Overview content set.",
+  "stage_number": 2,
+  "name": "Trained",
+  "phase": "learning",
+  "description": "Resource gains foundational understanding of Anaplan as a company, the Connected Planning narrative, the platform at a high level, the partner ecosystem and pathways, and recurring customer success patterns. Universal content — same for every persona.",
+
+  "blocks": [
+    { "block_id": "A", "name": "Anaplan Story & Vision",       "description": "Who Anaplan is, where it came from, where it's going." },
+    { "block_id": "B", "name": "Connected Planning Narrative", "description": "The conceptual frame every partner uses with customers." },
+    { "block_id": "C", "name": "Platform Overview",            "description": "What the Anaplan platform does at a high level. Deep platform fluency lives in the Anaplan Platform foundational journey." },
+    { "block_id": "D", "name": "Partner Ecosystem & Pathways", "description": "How the partner program works, certification ladders, and where each persona's journey leads." },
+    { "block_id": "E", "name": "Customer Success Patterns",    "description": "Recurring patterns of how customers transform planning with Anaplan." }
+  ],
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "block": "A",
+      "task_id": "anaplan-story-vision",
+      "title": "Anaplan Story & Vision",
+      "description": "Recording covering Anaplan as a company — origin, mission, leadership, and current strategic direction. Frames why a partner resource is joining the ecosystem.",
+      "asset": "Anaplan Story & Vision recording",
+      "source_system": "Seismic",
+      "estimated_effort": "20-30 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "B",
+      "task_id": "connected-planning-narrative",
+      "title": "Connected Planning narrative",
+      "description": "Webcast introducing the Connected Planning conceptual frame — what makes planning 'connected', how it differs from siloed planning, and the customer outcomes it enables. The narrative every partner resource uses to frame Anaplan's value across roles.",
+      "asset": "Connected Planning Narrative webcast",
+      "source_system": "Seismic",
+      "estimated_effort": "30-45 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "C",
+      "task_id": "platform-overview",
+      "title": "Anaplan Platform Overview (high-level)",
+      "description": "Deck or recording covering the Anaplan platform at a navigational level: what a workspace is, what a model is, what the user experience looks like, and the major product modules. Stays at the orientation depth; deep platform fluency is the Anaplan Platform foundational journey (a separate prereq for Delivery and Pre-Sales).",
+      "asset": "Anaplan Platform Overview deck/recording",
+      "source_system": "Seismic",
+      "estimated_effort": "30-45 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "D",
+      "task_id": "partner-ecosystem-pathways",
+      "title": "Partner Ecosystem & Pathways",
+      "description": "Guide covering how the Anaplan partner program is structured (Strategic / Specialist / App Builder paths), the certification ladders, the role-to-pathway map (Sales → Sales Foundations → per-app Sales journeys; Pre-Sales → Pre-Sales Foundations → per-app Pre-Sales journeys; Delivery → Anaplan Platform → per-app Delivery journeys), and where this Anaplan Overview journey routes the resource on completion.",
+      "asset": "Partner Ecosystem & Pathways guide",
+      "source_system": "Seismic",
+      "estimated_effort": "20-30 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "block": "E",
+      "task_id": "customer-success-patterns",
+      "title": "Customer Success Patterns",
+      "description": "Recording walking through 3-5 recurring patterns of how customers transform planning with Anaplan — typical pain points, transformation arcs, business outcomes. Concrete examples that bring the Connected Planning narrative to life.",
+      "asset": "Customer Success Patterns recording",
+      "source_system": "Seismic",
+      "estimated_effort": "20-30 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "anaplan-story-vision-acknowledged",        "description": "Anaplan Story & Vision recording acknowledged",                "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "connected-planning-narrative-acknowledged", "description": "Connected Planning narrative webcast acknowledged",            "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "platform-overview-acknowledged",            "description": "Anaplan Platform Overview acknowledged",                       "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "partner-ecosystem-pathways-acknowledged",   "description": "Partner Ecosystem & Pathways guide acknowledged",              "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "customer-success-patterns-acknowledged",    "description": "Customer Success Patterns recording acknowledged",            "verification_source": "self_attest" },
+    { "_fixed": true, "gate_id": "manager-info-populated",                    "description": "Manager name, email, and role populated in resource profile (carry-over from Stage 1; REQUIRED to exit Stage 2)", "verification_source": "self_attest" }
+  ],
+
+  "stage_actions": [],
+  "_stage_actions_note": "No system-side actions in Stage 2.",
+
+  "estimated_effort_total": "2h 0min - 3h 0min",
+  "_estimated_effort_total_note": "Lighter than per-application Stage 2 (~4h-5h) because foundational content is high-level only — depth lives in subsequent journeys.",
+
+  "_per_product_authoring_obligations": {
+    "description": "Anaplan Overview is foundational, not per-product. The 'authoring obligations' here are the canonical assets that need to exist (one set, not per-product like the per-application templates).",
+    "assets": [
+      { "asset": "Anaplan Story & Vision recording",            "duration": "~20-30 min", "block": "A" },
+      { "asset": "Connected Planning Narrative webcast",        "duration": "~30-45 min", "block": "B" },
+      { "asset": "Anaplan Platform Overview deck/recording",     "duration": "~30-45 min", "block": "C" },
+      { "asset": "Partner Ecosystem & Pathways guide",           "duration": "~20-30 min", "block": "D" },
+      { "asset": "Customer Success Patterns recording",          "duration": "~20-30 min", "block": "E" }
+    ]
+  }
+}

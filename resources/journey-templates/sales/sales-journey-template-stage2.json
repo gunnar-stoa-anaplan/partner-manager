@@ -1,0 +1,167 @@
+{
+  "_meta": {
+    "description": "Stage 2 (Trained) for the universal Anaplan product Sales journey template. Mirrors the Delivery Stage 2 three-block structure (A: positioning context, B: application mastery, C: persona-specific motion) with sales-relevant content. Slots into the larger Sales template at stages[1].",
+    "iteration_date": "2026-04-30",
+    "persona": "sales",
+    "structural_alignment_with_delivery": [
+      "Same three-block structure: A (positioning context), B (application mastery), C (persona-specific motion)",
+      "Same self-serve digital scalable delivery model — no instructor-led tasks (no Sales workshop equivalent)",
+      "Same manager-info exit gate (manager contact required to exit Stage 2)",
+      "No comprehension check at Stage 2 exit — Stage 3 mock-pitch labs are the proof of mastery",
+      "Block A is persona-tailored to the Connected Planning narrative — sellers must position the individual application within the broader enterprise story per user direction",
+      "Block B replaces methodology-phases content (Delivery-only) with sales-relevant proof points: use cases, industry examples, client references",
+      "Block C replaces the methodology-phases webcast with a Selling Motion track: competitive, discovery, value-pitch playbook"
+    ],
+    "boundary_with_stage_3": "End of Stage 2: seller knows what the application does, who buys it, why, how to position it against competitors, how to qualify a customer, and how to construct a value pitch. They have NOT yet practiced delivering a pitch live. Stage 3 begins with mock pitches (AI-graded and senior-reviewer-graded). Verb shift: understand → practice.",
+    "open_items_parked_for_later": [
+      "Per-product authoring spec — every Block A/B/C asset must be authored per product. Spec/template for each asset type to be defined as a separate work item.",
+      "Connected Planning context recording — single asset reused with per-topic framing; canonical version vs per-topic versions to be decided.",
+      "Sales-flavored Application Overview Academy course — does this exist for any product today, or must it be authored fresh? P7 inventory will answer.",
+      "Asset reuse with Pre-Sales — Use Cases, Industry Examples, Client References likely sharable across personas; Op Cmte / Single Content Policy decision."
+    ]
+  },
+
+  "_fixed": false,
+  "_note": "Stage 2 task structure is FIXED across all product journeys within the Sales persona. Asset content is VARIABLE per product.",
+  "stage_number": 2,
+  "name": "Trained",
+  "phase": "learning",
+  "description": "Seller gains deep understanding of the {{PRODUCT_NAME}} application's value, positioning, use cases, client references, competitive landscape, and selling motion. No live customer interaction in this stage — that begins in Stage 4 (Stage 3 mock pitches sharpen the skill before Stage 4 client engagements).",
+
+  "blocks": [
+    { "block_id": "A", "name": "Connected Planning Context",  "description": "Brief framing of where the application fits within Anaplan's Connected Planning enterprise narrative." },
+    { "block_id": "B", "name": "Application Value Mastery",   "description": "Cluster of complementary content — strategy, application overview, use cases, references — aimed at confidence in articulating the application's value." },
+    { "block_id": "C", "name": "Selling Motion",                "description": "Competitive landscape, discovery and qualification approach, value pitch construction and objection handling." }
+  ],
+
+  "tasks": [
+    {
+      "_fixed": "task definition fixed; asset content variable per product",
+      "block": "A",
+      "task_id": "{{PRODUCT_ID}}-connected-planning-context",
+      "title": "{{PRODUCT_NAME}} in the Connected Planning narrative",
+      "description": "Short recording framing how {{PRODUCT_NAME}} fits into Anaplan's broader Connected Planning enterprise story. Sellers must be able to position the individual application AND elevate the conversation when multiple applications are in play (multi-application enterprise opportunities).",
+      "asset": "{{PRODUCT_NAME}} Connected Planning Context recording",
+      "source_system": "Seismic",
+      "estimated_effort": "15-20 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": "task definition fixed; asset content variable per product",
+      "block": "B",
+      "task_id": "{{PRODUCT_ID}}-strategy-positioning-sales",
+      "title": "{{PRODUCT_NAME}} strategy & positioning (sales lens)",
+      "description": "Webcast framing why the application exists, who it's for, the business outcomes it delivers, and how it's positioned in the market. Sales-lens emphasis on buyer personas, decision criteria, and the executive-level narrative.",
+      "asset": "{{PRODUCT_NAME}} Strategy & Positioning (Sales) webcast recording",
+      "source_system": "Seismic",
+      "estimated_effort": "20-30 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": "task definition fixed; asset content variable per product",
+      "block": "B",
+      "task_id": "{{PRODUCT_ID}}-application-overview-sales",
+      "title": "{{PRODUCT_NAME}} Application Overview (Sales) Academy course",
+      "description": "Self-paced Academy course providing a sales-relevant overview of the application — what it does, what dashboards and outputs the buyer sees, what business questions it answers. Lighter on configuration depth than the Delivery-persona Academy course; emphasis on buyer-visible value. Includes a short completion quiz.",
+      "asset": "{{PRODUCT_NAME}} Application Overview (Sales)",
+      "source_system": "Academy",
+      "estimated_effort": "45-60 min",
+      "completion_mechanism": "academy_xls",
+      "required": true
+    },
+    {
+      "_fixed": "task definition fixed; asset content variable per product",
+      "block": "B",
+      "task_id": "{{PRODUCT_ID}}-use-cases-industry-examples",
+      "title": "{{PRODUCT_NAME}} use cases & industry examples",
+      "description": "Curated set of 5-7 use cases and industry exemplars showing how customers in different industries deploy {{PRODUCT_NAME}} and what business outcomes they achieve. Sellers absorb these as raw material for tailoring conversations to the prospect's industry.",
+      "asset": "{{PRODUCT_NAME}} Use Cases & Industry Examples deck/recording",
+      "source_system": "Seismic",
+      "estimated_effort": "30-45 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": "task definition fixed; asset content variable per product",
+      "block": "B",
+      "task_id": "{{PRODUCT_ID}}-client-reference-stories",
+      "title": "{{PRODUCT_NAME}} client reference stories",
+      "description": "Library of named client reference stories with attributable outcomes, customer quotes, and reference-call protocol. Sellers learn the canonical references for {{PRODUCT_NAME}} and the rules of engagement for each.",
+      "asset": "{{PRODUCT_NAME}} Client Reference Stories library",
+      "source_system": "Seismic",
+      "estimated_effort": "30-45 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": "task definition fixed; asset content variable per product",
+      "block": "C",
+      "task_id": "{{PRODUCT_ID}}-competitive-battlecards-sales",
+      "title": "{{PRODUCT_NAME}} competitive battlecards walkthrough (sales lens)",
+      "description": "Walkthrough of the competitive landscape for {{PRODUCT_NAME}}: top 3-5 competitors, where Anaplan wins and loses, key differentiators, and battlecard-by-battlecard talking points. Sales-lens emphasis on positioning and high-level differentiation; technical depth lives in the Pre-Sales journey.",
+      "asset": "{{PRODUCT_NAME}} Competitive Battlecards (Sales) walkthrough recording",
+      "source_system": "Seismic",
+      "estimated_effort": "30-45 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": "task definition fixed; asset content variable per product",
+      "block": "C",
+      "task_id": "{{PRODUCT_ID}}-discovery-qualification",
+      "title": "{{PRODUCT_NAME}} discovery & qualification guide",
+      "description": "Discovery question library, qualification framework (e.g., MEDDPICC or partner equivalent applied to {{PRODUCT_NAME}}), and pattern guidance for moving a conversation from initial interest to a qualified opportunity.",
+      "asset": "{{PRODUCT_NAME}} Discovery & Qualification guide",
+      "source_system": "Seismic",
+      "estimated_effort": "30 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    },
+    {
+      "_fixed": "task definition fixed; asset content variable per product",
+      "block": "C",
+      "task_id": "{{PRODUCT_ID}}-value-pitch-playbook",
+      "title": "{{PRODUCT_NAME}} value pitch playbook & objection handling",
+      "description": "Playbook for constructing a tailored value pitch — opening, value framing, proof points, ROI / business outcome anchors — combined with the top objections sellers encounter and their canonical responses. Together these prepare the seller for the Stage 3 mock-pitch lab.",
+      "asset": "{{PRODUCT_NAME}} Value Pitch Playbook & Objection Handling guide",
+      "source_system": "Seismic",
+      "estimated_effort": "30-45 min",
+      "completion_mechanism": "self_attest",
+      "required": true
+    }
+  ],
+
+  "gates": [
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-connected-planning-context-acknowledged",   "description": "{{PRODUCT_NAME}} Connected Planning context recording acknowledged",                                                "verification_source": "self_attest" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-strategy-positioning-sales-acknowledged",   "description": "{{PRODUCT_NAME}} Strategy & Positioning (Sales) webcast acknowledged",                                              "verification_source": "self_attest" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-application-overview-sales-complete",       "description": "{{PRODUCT_NAME}} Application Overview (Sales) Academy course completion confirmed (quiz passed)",                  "verification_source": "academy_xls" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-use-cases-industry-examples-acknowledged",  "description": "{{PRODUCT_NAME}} Use cases & industry examples acknowledged",                                                       "verification_source": "self_attest" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-client-reference-stories-acknowledged",     "description": "{{PRODUCT_NAME}} Client reference stories acknowledged",                                                            "verification_source": "self_attest" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-competitive-battlecards-sales-acknowledged", "description": "{{PRODUCT_NAME}} Competitive battlecards (Sales) walkthrough acknowledged",                                          "verification_source": "self_attest" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-discovery-qualification-acknowledged",       "description": "{{PRODUCT_NAME}} Discovery & qualification guide acknowledged",                                                    "verification_source": "self_attest" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-value-pitch-playbook-acknowledged",          "description": "{{PRODUCT_NAME}} Value pitch playbook & objection handling acknowledged",                                          "verification_source": "self_attest" },
+    { "_fixed": true,    "gate_id": "manager-info-populated",                                    "description": "Manager name, email, and role populated in resource profile (carry-over from Stage 1; REQUIRED to exit Stage 2)", "verification_source": "self_attest" }
+  ],
+
+  "stage_actions": [],
+  "_stage_actions_note": "No system-side actions in Stage 2. Sales journeys do not provision sandboxes — Stage 3 mock-pitch lab requires only an AI-agent conversation interface and (for the live-reviewer mock) a scheduling slot.",
+
+  "estimated_effort_total": "3h 50min - 5h 10min",
+  "_estimated_effort_total_note": "Computed from task estimates. Comparable to Delivery Stage 2 (~3h 45min - 5h). Sellers' time is at a premium; every minute is purpose-built for selling-readiness.",
+
+  "_per_product_authoring_obligations": {
+    "description": "For every product Sales journey instantiation, the following assets must be authored. The template specifies; the product team produces. Some assets may be shared with the corresponding Pre-Sales journey (Op Cmte / Single Content Policy decision).",
+    "assets": [
+      { "asset": "Connected Planning Context recording (per-topic framing)",  "duration": "~15-20 min", "block": "A", "shared_with_pre_sales": true },
+      { "asset": "Strategy & Positioning (Sales) webcast",                    "duration": "~20-30 min", "block": "B", "shared_with_pre_sales": "possibly — if the sales/pre-sales lenses can be combined into a single webcast" },
+      { "asset": "Application Overview (Sales) Academy course (with quiz)",   "duration": "~45-60 min", "block": "B", "shared_with_pre_sales": false, "note": "Sales lens is lighter than the Pre-Sales / Delivery overviews." },
+      { "asset": "Use Cases & Industry Examples deck/recording",              "duration": "~30-45 min", "block": "B", "shared_with_pre_sales": true },
+      { "asset": "Client Reference Stories library",                          "duration": "~30-45 min", "block": "B", "shared_with_pre_sales": true },
+      { "asset": "Competitive Battlecards (Sales) walkthrough recording",     "duration": "~30-45 min", "block": "C", "shared_with_pre_sales": false, "note": "Sales positioning lens; Pre-Sales has its own technical battlecards." },
+      { "asset": "Discovery & Qualification guide",                           "duration": "~30 min",    "block": "C", "shared_with_pre_sales": "possibly — discovery skill is core to both" },
+      { "asset": "Value Pitch Playbook & Objection Handling guide",           "duration": "~30-45 min", "block": "C", "shared_with_pre_sales": false }
+    ]
+  }
+}

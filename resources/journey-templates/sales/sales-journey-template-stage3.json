@@ -1,0 +1,139 @@
+{
+  "_meta": {
+    "description": "Stage 3 (Credentialized) for the universal Anaplan product Sales journey template. Practice-and-credential stage built around AI-graded mock pitches plus a senior-reviewer credential pitch. Slots into the larger Sales template at stages[2].",
+    "iteration_date": "2026-04-30",
+    "persona": "sales",
+    "structural_alignment_with_delivery": [
+      "Same shape as Delivery Stage 3: progression of 3 graded labs followed by a credential gate, plus a mandatory Academy course covering field patterns",
+      "Replaces Delivery's instructor-led workshop sessions with self-paced AI-graded mock pitches — sellers' time is at a premium and AI grading scales without instructor capacity bottlenecks",
+      "Replaces Delivery's tooling-verified labs with AI-graded mock pitches (mocks evaluated against a structured rubric)",
+      "Replaces Delivery's Top-10-Extensions Academy course with Top-10-Field-Selling-Patterns — analogous purpose: field-experience content that mocks cannot teach",
+      "Phase remains 'learning' — Stage 3 sharpens skill in a controlled environment; Stage 4 is the first true 'doing' stage with real customers"
+    ],
+    "credentialing_mechanism": {
+      "ai_mock_pitch_agent": "Each of the 3 mock-pitch labs uses an AI agent (planned capability, depends on P10 tooling spec) playing the prospect role. Mocks are recorded; AI grades the seller's performance against a structured rubric (discovery completeness, value-clarity, objection handling, competitive positioning) and produces feedback. Pass criteria: rubric threshold per mock. Failed mocks can be retried.",
+      "senior_reviewer_credential_pitch": "After all 3 AI-graded mocks pass, the seller delivers a final end-to-end credential pitch — recorded asynchronously or live to a senior reviewer (sales coach, senior seller, PSM). Reviewer scores against a structured rubric and attests pass/fail. This is the official Stage 3 credential.",
+      "ai_agent_fallback": "If the AI mock-pitch agent is not available at launch, fallback is human-panel-graded mocks. Op Cmte / P10 will lock the launch-readiness call."
+    },
+    "boundary_with_stage_4": "End of Stage 3: seller has demonstrated discovery, value pitch, objection handling, and competitive positioning fluency in a controlled mock environment, and has been exposed to the field's most common selling patterns for {{PRODUCT_NAME}}. They have NOT yet faced a real customer. Stage 4 is the progressive 3-level real-engagement model (shadow → co-lead → solo with post-engagement review).",
+    "open_items_parked_for_later": [
+      "AI mock-pitch agent — whether to build per-product agents or one general agent with product-specific scenarios. P10 tooling spec.",
+      "Mock pitch rubric design — per-mock rubrics need to be authored, not just per-product scenarios. Op Cmte deliverable.",
+      "Senior reviewer pool — sourcing, training, and scheduling for the credential pitch reviewers. Operational policy.",
+      "Failed-mock retry policy — unlimited retries vs cooldown vs escalation after N failures. Operational policy.",
+      "Async vs live credential pitch — default async (recording reviewed by senior); live is alternative. Operational policy.",
+      "Per-product Top-10-Field-Selling-Patterns Academy course — must be authored per product."
+    ]
+  },
+
+  "_fixed": false,
+  "_note": "Stage 3 task structure is FIXED across all product journeys within the Sales persona. Mock scenarios, prospect personas, customer scenarios, and rubric specifics are VARIABLE per product.",
+  "stage_number": 3,
+  "name": "Credentialized",
+  "phase": "learning",
+  "description": "Seller demonstrates {{PRODUCT_NAME}} selling fluency by completing three AI-graded mock pitches (discovery, value pitch + objection handling, competitive positioning) and a senior-reviewer-graded credential pitch. Closes with the Top 10 Field Selling Patterns Academy course covering the most common field selling situations for {{PRODUCT_NAME}}.",
+
+  "tasks": [
+    {
+      "_fixed": "task definition fixed; mock scenario and rubric specifics variable per product",
+      "task_id": "{{PRODUCT_ID}}-mock-discovery-qualification",
+      "title": "{{PRODUCT_NAME}} mock pitch — discovery & qualification",
+      "description": "AI-graded mock pitch focused on discovery and qualification. The AI agent plays a prospect at initial-interest stage; the seller runs a discovery conversation, surfaces business pain, qualifies the opportunity using the framework from Stage 2, and proposes a logical next step. AI grades against a structured rubric and provides feedback.",
+      "asset": "{{PRODUCT_NAME}} Mock Pitch — Discovery & Qualification (AI scenario + rubric)",
+      "source_system": "AI mock-pitch agent",
+      "estimated_effort": "45-60 min (mock + feedback review; allow time for retry if needed)",
+      "completion_mechanism": "ai_lab_verification",
+      "pass_criteria": "rubric_threshold",
+      "_completion_mechanism_note": "AI evaluates against a structured rubric (e.g., discovery breadth, qualification framework correctness, business-pain articulation). Seller passes when rubric threshold is met.",
+      "required": true,
+      "sequence": 1
+    },
+    {
+      "_fixed": "task definition fixed; mock scenario and rubric specifics variable per product",
+      "task_id": "{{PRODUCT_ID}}-mock-value-pitch-objection",
+      "title": "{{PRODUCT_NAME}} mock pitch — value pitch & objection handling",
+      "description": "AI-graded mock pitch focused on delivering a tailored value pitch and handling objections. The AI agent plays a prospect with stated needs (pre-discovered scenario); the seller delivers a value pitch keyed to those needs, weaves in proof points and client references, and responds to a series of escalating objections. AI grades against a structured rubric and provides feedback.",
+      "asset": "{{PRODUCT_NAME}} Mock Pitch — Value Pitch & Objection Handling (AI scenario + rubric)",
+      "source_system": "AI mock-pitch agent",
+      "estimated_effort": "45-60 min (mock + feedback review; allow time for retry if needed)",
+      "completion_mechanism": "ai_lab_verification",
+      "pass_criteria": "rubric_threshold",
+      "required": true,
+      "sequence": 2,
+      "prerequisite": "{{PRODUCT_ID}}-mock-discovery-qualification"
+    },
+    {
+      "_fixed": "task definition fixed; mock scenario and rubric specifics variable per product",
+      "task_id": "{{PRODUCT_ID}}-mock-competitive-positioning",
+      "title": "{{PRODUCT_NAME}} mock pitch — competitive positioning",
+      "description": "AI-graded mock pitch focused on competitive positioning. The AI agent plays a prospect actively evaluating Anaplan against a named competitor (drawn from the Stage 2 battlecards); the seller defends Anaplan's positioning, surfaces differentiators, and counters competitor talking points. AI grades against a structured rubric and provides feedback.",
+      "asset": "{{PRODUCT_NAME}} Mock Pitch — Competitive Positioning (AI scenario + rubric)",
+      "source_system": "AI mock-pitch agent",
+      "estimated_effort": "45-60 min (mock + feedback review; allow time for retry if needed)",
+      "completion_mechanism": "ai_lab_verification",
+      "pass_criteria": "rubric_threshold",
+      "required": true,
+      "sequence": 3,
+      "prerequisite": "{{PRODUCT_ID}}-mock-value-pitch-objection"
+    },
+    {
+      "_fixed": "task definition fixed; credential scenario and rubric specifics variable per product",
+      "task_id": "{{PRODUCT_ID}}-credential-pitch",
+      "title": "{{PRODUCT_NAME}} credential pitch — senior-reviewer-graded end-to-end",
+      "description": "End-to-end credential pitch covering discovery, value pitch, objection handling, competitive positioning, and proposed next steps — delivered against a holistic prospect scenario. Default mode is asynchronous recorded pitch reviewed by a senior reviewer (sales coach / senior seller / PSM); live mode is also acceptable. Reviewer scores against a structured rubric and attests pass/fail. This is the official Stage 3 credential gate.",
+      "asset": "{{PRODUCT_NAME}} Credential Pitch — scenario + rubric + reviewer attestation form",
+      "source_system": "Senior reviewer pool (PSM-coordinated)",
+      "estimated_effort": "60-90 min (delivery + reviewer turnaround time)",
+      "completion_mechanism": "senior_reviewer_attestation",
+      "pass_criteria": "rubric_threshold",
+      "_completion_mechanism_note": "Senior reviewer attestation against rubric. PSM coordinates reviewer assignment.",
+      "required": true,
+      "sequence": 4,
+      "prerequisite": "{{PRODUCT_ID}}-mock-competitive-positioning"
+    },
+    {
+      "_fixed": "task definition fixed; course content variable per product",
+      "task_id": "{{PRODUCT_ID}}-top-10-field-selling-patterns",
+      "title": "{{PRODUCT_NAME}} Top 10 Field Selling Patterns Academy course",
+      "description": "Mandatory Academy course authored by the {{PRODUCT_NAME}} CoE / sales enablement team covering the 10 selling patterns most commonly seen in the field for {{PRODUCT_NAME}} — common deal-stage transitions, late-stage objections, ROI-conversation patterns, multi-stakeholder selling, and recurring tactical situations. Field-experience content the participant cannot get from mocks. Includes a completion quiz.",
+      "asset": "{{PRODUCT_NAME}} Top 10 Field Selling Patterns",
+      "source_system": "Academy",
+      "estimated_effort": "45-60 min",
+      "completion_mechanism": "academy_xls",
+      "required": true,
+      "prerequisite": "{{PRODUCT_ID}}-credential-pitch",
+      "_placement_note": "Required to be completed AFTER the credential pitch (credential-pitch pass unlocks the course)."
+    }
+  ],
+
+  "stage_entry_gates": [
+    { "_fixed": true, "gate_id": "ai-mock-pitch-agent-available", "description": "AI mock-pitch agent infrastructure available for {{PRODUCT_NAME}} scenarios (program-level dependency on P10 tooling spec)", "verification_source": "external_system" }
+  ],
+  "_stage_entry_gates_note": "Stage 3 has a stage-entry verification gate confirming AI mock-pitch agent infrastructure exists. If unavailable at launch, fallback is human-panel-graded mocks (Op Cmte launch-readiness call).",
+
+  "gates": [
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-mock-discovery-qualification-passed", "description": "{{PRODUCT_NAME}} Mock Pitch 1 (Discovery & Qualification) passed",       "verification_source": "ai_lab_verification" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-mock-value-pitch-objection-passed",   "description": "{{PRODUCT_NAME}} Mock Pitch 2 (Value Pitch & Objection Handling) passed",  "verification_source": "ai_lab_verification" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-mock-competitive-positioning-passed", "description": "{{PRODUCT_NAME}} Mock Pitch 3 (Competitive Positioning) passed",          "verification_source": "ai_lab_verification" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-credential-pitch-passed",              "description": "{{PRODUCT_NAME}} Credential Pitch passed — senior reviewer attestation",   "verification_source": "senior_reviewer_attestation" },
+    { "_variable": true, "gate_id": "{{PRODUCT_ID}}-top-10-field-selling-patterns-complete", "description": "{{PRODUCT_NAME}} Top 10 Field Selling Patterns Academy course completion confirmed (quiz passed)", "verification_source": "academy_xls" }
+  ],
+
+  "estimated_effort_total": "4h 0min - 5h 30min",
+  "_estimated_effort_total_note": "Computed from task estimates. Lighter than Delivery Stage 3 (~10 hrs) — sellers' time is at a premium and the Stage 3 work is mock-conversation-based rather than instructor-led + sandbox-based. Range accounts for retry on failed mocks.",
+
+  "_per_product_authoring_obligations": {
+    "description": "For every product Sales journey instantiation, the following must be authored. The template specifies; the product team produces.",
+    "assets": [
+      { "asset": "Mock Pitch 1 — Discovery & Qualification (AI scenario + rubric)",   "duration": "~45-60 min seller-time", "owner": "Sales enablement + AI tooling team", "note": "AI scenario script + grading rubric." },
+      { "asset": "Mock Pitch 2 — Value Pitch & Objection Handling (AI scenario + rubric)", "duration": "~45-60 min seller-time", "owner": "Sales enablement + AI tooling team", "note": "AI scenario script + grading rubric." },
+      { "asset": "Mock Pitch 3 — Competitive Positioning (AI scenario + rubric)",     "duration": "~45-60 min seller-time", "owner": "Sales enablement + AI tooling team", "note": "AI scenario script + grading rubric." },
+      { "asset": "Credential Pitch — scenario + rubric + reviewer attestation form", "duration": "~60-90 min seller-time", "owner": "Sales enablement",                  "note": "Holistic scenario combining all elements; rubric and reviewer attestation form." },
+      { "asset": "Top 10 Field Selling Patterns Academy course (with quiz)",          "duration": "~45-60 min",             "owner": "CoE / sales enablement",             "note": "Field-experience content covering recurring selling situations." }
+    ],
+    "infrastructure": [
+      { "item": "AI mock-pitch agent",   "scope": "Per P10 tooling spec — agent that plays prospect role per scenario script and grades against rubric. Depends on whether per-product or general+product-scenarios architecture." },
+      { "item": "Senior reviewer pool",  "scope": "Sourcing, training, scheduling, and reviewer-attestation tooling for the credential pitch." }
+    ]
+  }
+}

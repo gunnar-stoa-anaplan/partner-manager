@@ -1,0 +1,205 @@
+{
+  "_meta": {
+    "description": "Stage 4 (Delivering) for the universal Anaplan product Sales journey template. Three-engagement progression of increasing seller responsibility (shadow → co-lead → solo with post-engagement review) keyed to real partner pipeline opportunities. Slots into the larger Sales template at stages[3].",
+    "iteration_date": "2026-04-30",
+    "persona": "sales",
+    "structural_alignment_with_delivery": [
+      "Same shape as Delivery Stage 4: three real-customer engagements with progressively increasing partner ownership, plus per-engagement artifacts reviewed advisorily",
+      "Replaces Delivery's PS-primed → Partner-primed → Partner-led model with explicit Sales 3-level model per user direction: Shadow → Co-lead → Solo with post-engagement review",
+      "Replaces Delivery's 12 methodology-keyed artifacts with 5 sales-keyed artifacts (post-engagement debrief, co-lead pre-plan, co-lead review, solo pre-plan, solo review-and-next-steps)",
+      "Engagement trigger: real partner pipeline opportunity per user direction. Long-tail partners with thin pipeline may stall here — same Stage 4 stall risk as Delivery",
+      "Pass criteria: rubric-passing (NOT count-passing) per user direction — at least one engagement at each level that meets rubric; senior reviewer + PSM jointly approve. Additional engagements may be needed if rubric is not met.",
+      "Phase = 'doing' — first real-customer stage; same phase boundary as Delivery"
+    ],
+    "engagement_definition": "An 'engagement' here is a customer-facing meeting or short meeting sequence (1-3 meetings) within a real partner pipeline opportunity, where the participant has a defined role at one of the three progression levels. Customer-progression outcomes (qualified opportunity, demo delivered, deal-stage advanced) are tracked separately as engagement-completion signals.",
+    "reviewer_model": "Two reviewers per engagement: (1) the senior seller in the shadow/co-lead role for L1 and L2, or the senior seller reviewing the recording/silent-attendance for L3 — provides rubric-scored engagement-level assessment; (2) the PSM as program coordinator and advisory reviewer of artifacts. Both attest gates.",
+    "open_items_parked_for_later": [
+      "Per-artifact review rubrics — what the senior seller and PSM are evaluating each artifact against. Per-product authoring obligation.",
+      "Senior seller pool sourcing — Anaplan senior sellers, senior partner sellers, and/or Sales coaches. Operational policy.",
+      "Engagement-availability backstop — what happens when partner pipeline doesn't generate enough real opportunities. Possible 'approved practice scenario with internal pseudo-customer' fallback. Op Cmte / operational policy decision.",
+      "Rubric-not-met retry policy — additional engagements at the same level vs cooldown. Default: PSM + senior seller discretion.",
+      "Engagement completion criteria — what specifically defines 'engagement complete' (customer meeting happened + next step logged + recording captured for L3)."
+    ],
+    "boundary_with_stage_5": "End of Stage 4: seller has completed at least three real partner-pipeline engagements with progressively increasing ownership (shadow → co-lead → solo), produced and had reviewed five engagement artifacts, and demonstrated rubric-meeting selling competency on real customer work. Stage 5 (Expert) covers ongoing independent selling, mentorship to junior sellers, contribution to value-messaging libraries / case studies, and strategic-deal advisory."
+  },
+
+  "_fixed": true,
+  "_note": "Stage 4 task structure is FIXED across all product journeys within the Sales persona. Engagement content varies by real customer (real prospect data and scenarios), but the engagement progression, artifact types, and review process are universal.",
+  "stage_number": 4,
+  "name": "Delivering",
+  "phase": "doing",
+  "description": "Seller completes at least three real partner-pipeline engagements with progressively increasing ownership — Shadow, Co-lead, Solo with post-engagement review. Within each engagement, seller produces structured artifacts at progression checkpoints. Senior seller and PSM jointly review artifacts and attest engagement rubric pass.",
+
+  "engagements": [
+    {
+      "engagement_id": "engagement-1",
+      "engagement_number": 1,
+      "level": "L1",
+      "ownership_model": "Shadow",
+      "ownership_description": "Senior seller leads a real customer engagement (discovery, pitch, demo introduction). Participant observes the entire engagement, then submits a structured post-engagement debrief. Pass criteria: rubric on observation depth, question quality, and learning extraction.",
+      "estimated_effort": "1-3 customer meetings + prep + debrief; ~3-6 participant hours per engagement",
+      "required_artifacts": [
+        "engagement-1-shadow-debrief"
+      ]
+    },
+    {
+      "engagement_id": "engagement-2",
+      "engagement_number": 2,
+      "level": "L2",
+      "ownership_model": "Co-lead",
+      "ownership_description": "Senior seller is on the call; participant leads assigned sections of the engagement (e.g., value framing, industry context, client references) while senior covers harder sections (discovery deep dive, complex objections, late-stage close). Pass criteria: rubric on section ownership, recoverability, and partnership-with-co-lead.",
+      "estimated_effort": "1-3 customer meetings + prep + debrief; ~4-8 participant hours per engagement",
+      "required_artifacts": [
+        "engagement-2-co-lead-pre-plan",
+        "engagement-2-co-lead-review"
+      ]
+    },
+    {
+      "engagement_id": "engagement-3",
+      "engagement_number": 3,
+      "level": "L3",
+      "ownership_model": "Solo with post-engagement review",
+      "ownership_description": "Participant solo-runs the customer engagement end-to-end. Senior seller is on standby — typical mode is recording-reviewed afterward, with silent-attendance as alternative. Participant submits a comprehensive post-engagement review and next steps. Pass criteria: rubric on end-to-end command, customer-progression result, recovery from surprises.",
+      "estimated_effort": "1-3 customer meetings + prep + review write-up; ~4-8 participant hours per engagement",
+      "required_artifacts": [
+        "engagement-3-solo-pre-plan",
+        "engagement-3-solo-review-and-next-steps"
+      ]
+    }
+  ],
+
+  "_artifact_type_catalog": {
+    "description": "Five artifact types map to the three engagements, with progressive artifact density that mirrors increasing participant ownership. Each artifact is a real customer engagement work product reviewed by the senior seller and the PSM as advisory checkpoints.",
+    "types": [
+      { "artifact_type": "shadow-debrief",                "level": "L1", "title": "Post-engagement shadow debrief",          "description": "Structured write-up of what was observed during the senior seller's engagement: key seller moves, question quality, customer-progression signals, the participant's articulation of what they learned and what they would do differently in the seller's seat." },
+      { "artifact_type": "co-lead-pre-plan",              "level": "L2", "title": "Co-lead pre-engagement plan",              "description": "Pre-engagement plan: which sections the participant will own, value-pitch construction, references to be used, expected objections and prepared responses." },
+      { "artifact_type": "co-lead-review",                "level": "L2", "title": "Co-lead post-engagement review",          "description": "Reflection on owned sections + senior seller's structured assessment (what worked, what to address) + agreed development areas before progressing to L3." },
+      { "artifact_type": "solo-pre-plan",                 "level": "L3", "title": "Solo pre-engagement plan",                 "description": "Full engagement plan the participant will execute solo: discovery questions, value pitch, expected objections, planned competitive positioning, target next step." },
+      { "artifact_type": "solo-review-and-next-steps",   "level": "L3", "title": "Solo post-engagement review and next steps","description": "Comprehensive structured account of what happened end-to-end: customer signals captured, deal-stage advancement, agreed next steps + senior seller's rubric evaluation. Replaces the recording-or-silent-attendance review with the participant's narrative." }
+    ]
+  },
+
+  "tasks": [
+    {
+      "_fixed": true,
+      "task_id": "engagement-1",
+      "engagement": "engagement-1",
+      "level": "L1",
+      "title": "Engagement 1 — Shadow (senior seller leads, participant observes)",
+      "description": "First real partner-pipeline engagement at the Shadow level. Senior seller leads; participant observes and submits the post-engagement debrief artifact. Engagement completion is gated on the customer interaction happening AND the senior seller + PSM attesting rubric pass on the debrief.",
+      "estimated_effort": "1-3 customer meetings + ~3-6 participant hours; elapsed time pipeline-cadence dependent",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "Senior seller + PSM jointly sign off on engagement completion when the customer interaction is delivered AND the shadow debrief artifact passes rubric.",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-1-shadow-debrief",
+      "engagement": "engagement-1",
+      "artifact_type": "shadow-debrief",
+      "title": "Engagement 1 — Submit post-engagement shadow debrief",
+      "description": "Submit the structured post-engagement debrief for advisory review by senior seller + PSM. Reviewers attest rubric pass on observation depth, question quality, and learning extraction.",
+      "completion_mechanism": "admin_signoff",
+      "_completion_mechanism_note": "Senior seller + PSM jointly attest after rubric review (revise-and-resubmit allowed).",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-2",
+      "engagement": "engagement-2",
+      "level": "L2",
+      "title": "Engagement 2 — Co-lead (participant leads sections, senior co-presents)",
+      "description": "Second real partner-pipeline engagement at the Co-lead level. Participant leads assigned sections; senior seller covers harder sections. Engagement completion is gated on the customer interaction happening AND the senior seller + PSM attesting rubric pass on the pre-plan and the co-lead review.",
+      "estimated_effort": "1-3 customer meetings + ~4-8 participant hours; elapsed time pipeline-cadence dependent",
+      "completion_mechanism": "admin_signoff",
+      "required": true,
+      "prerequisite": "engagement-1"
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-2-co-lead-pre-plan",
+      "engagement": "engagement-2",
+      "artifact_type": "co-lead-pre-plan",
+      "title": "Engagement 2 — Submit co-lead pre-engagement plan",
+      "description": "Submit the pre-engagement plan (section ownership, value-pitch construction, references, prepared objections) for advisory review by senior seller + PSM prior to the customer interaction.",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-2-co-lead-review",
+      "engagement": "engagement-2",
+      "artifact_type": "co-lead-review",
+      "title": "Engagement 2 — Submit co-lead post-engagement review",
+      "description": "Submit reflection on owned sections + senior seller's structured assessment + agreed development areas before progressing to L3.",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-3",
+      "engagement": "engagement-3",
+      "level": "L3",
+      "title": "Engagement 3 — Solo with post-engagement review (participant runs solo, senior reviews)",
+      "description": "Third real partner-pipeline engagement at the Solo level. Participant solo-runs the engagement end-to-end; senior seller reviews the recording (default) or silently attends. Engagement completion is gated on the customer interaction happening AND the senior seller + PSM attesting rubric pass on the pre-plan and the review-and-next-steps artifact.",
+      "estimated_effort": "1-3 customer meetings + ~4-8 participant hours; elapsed time pipeline-cadence dependent",
+      "completion_mechanism": "admin_signoff",
+      "required": true,
+      "prerequisite": "engagement-2"
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-3-solo-pre-plan",
+      "engagement": "engagement-3",
+      "artifact_type": "solo-pre-plan",
+      "title": "Engagement 3 — Submit solo pre-engagement plan",
+      "description": "Submit the full pre-engagement plan (discovery questions, value pitch, expected objections, competitive positioning, target next step) for advisory review by senior seller + PSM prior to the customer interaction.",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    },
+    {
+      "_fixed": true,
+      "task_id": "engagement-3-solo-review-and-next-steps",
+      "engagement": "engagement-3",
+      "artifact_type": "solo-review-and-next-steps",
+      "title": "Engagement 3 — Submit solo post-engagement review and next steps",
+      "description": "Submit the comprehensive post-engagement review and next-steps artifact. Senior seller (recording-reviewed or silent-attendance) and PSM jointly attest rubric pass on end-to-end command, customer-progression result, and recovery from surprises.",
+      "completion_mechanism": "admin_signoff",
+      "required": true
+    }
+  ],
+
+  "gates": [
+    { "_fixed": true, "gate_id": "engagement-1-complete",                              "description": "Engagement 1 (Shadow) complete — customer interaction happened; shadow debrief approved; senior seller + PSM sign-off",                "verification_source": "admin_signoff" },
+    { "_fixed": true, "gate_id": "engagement-1-shadow-debrief-approved",               "description": "Engagement 1 shadow debrief reviewed and approved by senior seller + PSM",                                                            "verification_source": "admin_signoff" },
+
+    { "_fixed": true, "gate_id": "engagement-2-complete",                              "description": "Engagement 2 (Co-lead) complete — customer interaction happened; pre-plan + co-lead review approved; senior seller + PSM sign-off",  "verification_source": "admin_signoff" },
+    { "_fixed": true, "gate_id": "engagement-2-co-lead-pre-plan-approved",             "description": "Engagement 2 co-lead pre-engagement plan reviewed and approved by senior seller + PSM",                                              "verification_source": "admin_signoff" },
+    { "_fixed": true, "gate_id": "engagement-2-co-lead-review-approved",               "description": "Engagement 2 co-lead post-engagement review reviewed and approved by senior seller + PSM",                                            "verification_source": "admin_signoff" },
+
+    { "_fixed": true, "gate_id": "engagement-3-complete",                              "description": "Engagement 3 (Solo) complete — customer interaction happened; pre-plan + review-and-next-steps approved; senior seller + PSM sign-off", "verification_source": "admin_signoff" },
+    { "_fixed": true, "gate_id": "engagement-3-solo-pre-plan-approved",                "description": "Engagement 3 solo pre-engagement plan reviewed and approved by senior seller + PSM",                                                  "verification_source": "admin_signoff" },
+    { "_fixed": true, "gate_id": "engagement-3-solo-review-and-next-steps-approved",   "description": "Engagement 3 solo post-engagement review and next steps reviewed and approved by senior seller + PSM",                                  "verification_source": "admin_signoff" }
+  ],
+
+  "estimated_effort_total": "~12-30 participant hours focused work across 3 engagements; elapsed Stage 4 duration is bound by real partner pipeline cadence — realistic range 6-18 months",
+  "_estimated_effort_total_note": "Per user direction, pass criteria is rubric-passing not count-passing: a single engagement per level can suffice if rubric is met. If rubric not met, additional same-level engagements may be needed at senior seller + PSM discretion — focused hours scale accordingly. Pipeline cadence is the dominant driver of elapsed time.",
+
+  "_per_product_authoring_obligations": {
+    "description": "Stage 4 has no per-product asset authoring (no courses, recordings, or labs). Per-product authoring is review rubric definition.",
+    "items": [
+      { "item": "Per-artifact review rubrics", "scope": "For each of the five artifact types, define what senior seller + PSM are evaluating against — required content, quality bar, common issues. Same rubrics apply across all engagements within a product journey." },
+      { "item": "Per-level engagement rubric",  "scope": "For each of the three levels (Shadow, Co-lead, Solo), define what 'rubric pass' means in terms of customer-progression outcome and seller-skill demonstration. Used by senior seller + PSM to attest engagement completion." }
+    ]
+  },
+
+  "_operational_considerations": {
+    "items": [
+      "Senior seller pool: Stage 4 throughput depends on senior seller availability for shadow/co-lead engagements. Operational ratio of senior sellers to active Stage 4 participants needs to be sustainable.",
+      "Engagement availability: a participant cannot progress through Stage 4 without three pipeline opportunities at appropriate levels. Partners with thin pipeline may stall here. Possible mitigation: 'approved practice scenario with internal pseudo-customer' fallback (Op Cmte decision).",
+      "Rubric-not-met retry policy: default v0 is senior seller + PSM discretion to require additional same-level engagements. Adjustable post-launch.",
+      "Stage assumption: Stage 4 is white-glove. Long-tail partners with no PSM relationship may not progress beyond Stage 3.",
+      "PSM advisory load: ~5 artifact reviews + 3 engagement-completion attestations per participant — lighter than Delivery's ~12 artifacts. Sustainable PSM ratio is more permissive."
+    ]
+  }
+}
