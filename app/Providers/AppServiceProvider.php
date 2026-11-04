@@ -49,6 +49,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // In production the app can sit behind an SSM tunnel / proxy where the
+        // request root loses its port or scheme, breaking generated URLs (form
+        // actions, redirects, assets). Pin them to APP_URL.
+        if ($this->app->environment('production') && ($root = config('app.url'))) {
+            \Illuminate\Support\Facades\URL::forceRootUrl($root);
+            if (str_starts_with($root, 'https://')) {
+                \Illuminate\Support\Facades\URL::forceScheme('https');
+            }
+        }
+
         Gate::define('viewPulse', function ($user) {
             return $user->isAdmin();
         });
