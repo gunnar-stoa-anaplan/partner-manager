@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\EnablementController;
 use App\Http\Controllers\Api\FilterDataController;
 use App\Http\Controllers\Api\PartnerEventController;
 use App\Http\Controllers\ApiTokenController;
+use App\Http\Controllers\AssetCatalogController;
 use App\Http\Controllers\BenchmarkController;
 use App\Http\Controllers\BlockerController;
 use App\Http\Controllers\BlueprintAssignmentController;
@@ -913,6 +914,18 @@ Route::middleware(['auth'])->group(function () {
     | Journeys
     |--------------------------------------------------------------------------
     */
+    /*
+    |--------------------------------------------------------------------------
+    | My Journeys (owner dashboard) + Asset Catalog
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('module:journeys.my_journeys')->group(function () {
+        Route::get('/my-journeys', [MyJourneysController::class, 'index'])->name('journeys.my');
+    });
+    Route::middleware('module:journeys.catalog')->group(function () {
+        Route::get('/assets', [AssetCatalogController::class, 'index'])->name('assets.index');
+    });
+
     Route::prefix('journeys')->name('journeys.')->group(function () {
         Route::get('/', [JourneyController::class, 'index'])->name('index');
         Route::get('/{journey}', [JourneyController::class, 'show'])->name('show');
@@ -936,9 +949,6 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/{journey}/blockers/{blocker}', [BlockerController::class, 'update'])->name('blockers.update');
         Route::delete('/{journey}/blockers/{blocker}', [BlockerController::class, 'destroy'])->name('blockers.destroy');
     });
-
-    // My Journeys — owner dashboard
-    Route::get('/my-journeys', [MyJourneysController::class, 'index'])->name('my-journeys.index');
 
     /*
     |--------------------------------------------------------------------------
