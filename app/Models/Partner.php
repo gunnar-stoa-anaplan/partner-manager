@@ -18,7 +18,6 @@ class Partner extends Model
         return 'id';
     }
 
-
     protected $fillable = [
         'salesforce_id',
         'name',
@@ -118,6 +117,11 @@ class Partner extends Model
     public function resources()
     {
         return $this->hasMany(Resource::class);
+    }
+
+    public function courseCompletions(): HasMany
+    {
+        return $this->hasMany(CourseCompletion::class);
     }
 
     public function events()
