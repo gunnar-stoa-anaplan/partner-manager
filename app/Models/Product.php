@@ -12,7 +12,9 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
+        'salesforce_id',
         'name',
+        'description',
         'slug',
         'product_line',
         'code',
@@ -20,12 +22,19 @@ class Product extends Model
         'status',
     ];
 
+    /**
+     * Salesforce Product Family values, which are loaded into product_line.
+     */
     const PRODUCT_LINES = [
-        'Finance' => 'Finance',
-        'Supply Chain' => 'Supply Chain',
-        'Sales' => 'Sales',
-        'Workforce' => 'Workforce',
-        'Platform' => 'Platform',
+        'Finance - (non-FCR) Apps' => 'Finance - (non-FCR) Apps',
+        'Consolidation (FCR) Apps' => 'Consolidation (FCR) Apps',
+        'SCM Apps' => 'SCM Apps',
+        'SPM Apps' => 'SPM Apps',
+        'WFP Apps' => 'WFP Apps',
+        'CIO Apps' => 'CIO Apps',
+        'AXL' => 'AXL',
+        'AI' => 'AI',
+        'Other/Platform' => 'Other/Platform',
     ];
 
     public function opportunities(): HasMany

@@ -15,7 +15,9 @@ class ProductFactory extends Factory
         $name = $this->faker->unique()->words(2, true);
 
         return [
+            'salesforce_id' => '01t'.$this->faker->unique()->regexify('[A-Za-z0-9]{12}'),
             'name' => $name,
+            'description' => $this->faker->sentence(),
             'slug' => Str::slug($name),
             'product_line' => $this->faker->randomElement(array_keys(Product::PRODUCT_LINES)),
             'code' => strtoupper($this->faker->lexify('???')),
